@@ -3,6 +3,7 @@
 namespace Kirameki\Database;
 
 use Closure;
+use Kirameki\Collections\Map;
 use Kirameki\Core\Config;
 use Kirameki\Database\Adapters\Adapter;
 use Kirameki\Database\Adapters\MySqlAdapter;
@@ -107,11 +108,11 @@ class DatabaseManager
     }
 
     /**
-     * @return Collection<string, Connection>
+     * @return Map<string, Connection>
      */
-    public function resolvedConnections(): Collection
+    public function resolvedConnections(): Map
     {
-        return new Collection($this->connections);
+        return new Map($this->connections);
     }
 
     /**

@@ -5,6 +5,14 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" packagePrefix="Kirameki\Database\" />
       <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/tests/src" isTestSource="true" packagePrefix="Tests\Kirameki\Database\" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/kirameki/cli" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/kirameki/collections" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/kirameki/container" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/kirameki/event" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/kirameki/process" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/kirameki/stream" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/psr/container" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/psr/log" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

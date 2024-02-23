@@ -43,7 +43,14 @@
       <path value="$PROJECT_DIR$/vendor/myclabs/deep-copy" />
       <path value="$PROJECT_DIR$/vendor/kirameki/dumper" />
       <path value="$PROJECT_DIR$/vendor/kirameki/core" />
-      <path value="$PROJECT_DIR$/vendor/psr/clock" />
+      <path value="$PROJECT_DIR$/vendor/kirameki/process" />
+      <path value="$PROJECT_DIR$/vendor/kirameki/stream" />
+      <path value="$PROJECT_DIR$/vendor/kirameki/collections" />
+      <path value="$PROJECT_DIR$/vendor/kirameki/event" />
+      <path value="$PROJECT_DIR$/vendor/psr/container" />
+      <path value="$PROJECT_DIR$/vendor/kirameki/container" />
+      <path value="$PROJECT_DIR$/vendor/kirameki/cli" />
+      <path value="$PROJECT_DIR$/vendor/psr/log" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.2" />
