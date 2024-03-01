@@ -7,10 +7,7 @@ use Kirameki\Database\Adapters\Adapter;
 use Kirameki\Database\Events\TransactionBegan;
 use Kirameki\Database\Events\TransactionCommitted;
 use Kirameki\Database\Events\TransactionRolledBack;
-use Kirameki\Database\Events\TransactionRolledBackToSavepoint;
-use Kirameki\Database\Events\TransactionSaved;
 use Kirameki\Event\EventManager;
-use RuntimeException;
 use Throwable;
 
 class TransactionHandler
@@ -30,26 +27,17 @@ class TransactionHandler
 
     /**
      * @param Closure(Transaction): mixed $callback
-     * @param bool $useSavepoint
      * @return mixed
      */
-    public function run(Closure $callback, bool $useSavepoint = false): mixed
+    public function run(Closure $callback): mixed
     {
         try {
             // Actual transaction
             if (!$this->inTransaction()) {
                 return $this->runInTransaction($callback);
             }
-            // Savepoint if already in transaction and flag is set
-            if ($useSavepoint) {
-                return $this->runInSavepoint($callback);
-            }
             // Already in transaction so just execute callback
             return $callback($this->txStack[-1]);
-        }
-        // This is thrown when user calls rollback() on Savepoint instance.
-        catch (SavepointRollback $rollback) {
-            $this->rollbackToSavepoint($rollback);
         }
         // This is thrown when user calls rollback() on Transaction instances.
         // We will propagate up to the first transaction block and do a rollback there.
@@ -81,7 +69,7 @@ class TransactionHandler
 
         $this->adapter->beginTransaction();
 
-        $this->events->dispatchClass(TransactionBegan::class, $tx);
+        $this->events->emit(new TransactionBegan($tx));
 
         $result = $callback($tx);
 
@@ -90,41 +78,6 @@ class TransactionHandler
         $this->events->dispatchClass(TransactionCommitted::class);
 
         return $result;
-    }
-
-    /**
-     * @param Closure(Transaction): mixed $callback
-     * @return mixed
-     */
-    protected function runInSavepoint(Closure $callback): mixed
-    {
-        $savepointId = (string)(count($this->txStack) + 1);
-
-        $tx = $this->txStack[] = new Savepoint($savepointId);
-
-        $this->adapter->setSavepoint($savepointId);
-
-        $this->events->dispatchClass(TransactionSaved::class, $tx);
-
-        return $callback($tx);
-    }
-
-    /**
-     * @param SavepointRollback $rollback
-     */
-    protected function rollbackToSavepoint(SavepointRollback $rollback): void
-    {
-        $this->adapter->rollbackSavepoint($rollback->id);
-
-        $this->events->dispatchClass(TransactionRolledBackToSavepoint::class, $rollback);
-
-        while($tx = array_pop($this->txStack)) {
-            if ($tx instanceof Savepoint && $tx->id === $rollback->id) {
-                return;
-            }
-        }
-
-        throw new RuntimeException("Invalid Savepoint: $rollback->id");
     }
 
     /**

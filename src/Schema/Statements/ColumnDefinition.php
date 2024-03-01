@@ -28,7 +28,12 @@ class ColumnDefinition
      * @param int|null $size
      * @param int|null $scale
      */
-    public function __construct(string $name, string $type = null, ?int $size = null, ?int $scale = null)
+    public function __construct(
+        string $name,
+        string $type = null,
+        ?int $size = null,
+        ?int $scale = null,
+    )
     {
         $this->name = $name;
         $this->type = $type;

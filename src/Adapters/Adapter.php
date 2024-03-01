@@ -68,18 +68,6 @@ interface Adapter
     public function commit(): void;
 
     /**
-     * @param string $id
-     * @return void
-     */
-    public function setSavepoint(string $id): void;
-
-    /**
-     * @param string $id
-     * @return void
-     */
-    public function rollbackSavepoint(string $id): void;
-
-    /**
      * @return bool
      */
     public function inTransaction(): bool;

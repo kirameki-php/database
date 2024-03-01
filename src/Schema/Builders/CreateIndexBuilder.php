@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Schema\Builders;
 
-use Kirameki\Collections\Arr;
+use Kirameki\Collections\Utils\Arr;
 use Kirameki\Database\Connection;
 use Kirameki\Database\Schema\Statements\CreateIndexStatement;
 use RuntimeException;
@@ -34,12 +34,12 @@ class CreateIndexBuilder extends StatementBuilder
     }
 
     /**
-     * @param string|string[] $columns
+     * @param iterable<array-key, string> $columns
      * @return $this
      */
-    public function columns(string|array $columns): static
+    public function columns(iterable $columns): static
     {
-        foreach (Arr::wrap($columns) as $column => $order) {
+        foreach ($columns as $column => $order) {
             is_string($column)
                 ? $this->column($column, $order)
                 : $this->column($order);

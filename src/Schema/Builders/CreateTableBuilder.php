@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Schema\Builders;
 
-use Kirameki\Collections\Arr;
+use Kirameki\Collections\Utils\Arr;
 use Kirameki\Database\Connection;
 use Kirameki\Database\Schema\Statements\ColumnDefinition;
 use Kirameki\Database\Schema\Statements\CreateIndexStatement;
@@ -160,13 +160,13 @@ class CreateTableBuilder extends StatementBuilder
     }
 
     /**
-     * @param array<string> $columns
+     * @param iterable<array-key, string> $columns
      * @return void
      */
-    public function primaryKey(array $columns): void
+    public function primaryKey(iterable $columns): void
     {
         $this->statement->primaryKey ??= new PrimaryKeyConstraint();
-        foreach (Arr::wrap($columns) as $column => $order) {
+        foreach ($columns as $column => $order) {
             is_string($column)
                 ? $this->statement->primaryKey->columns[$column] = $order
                 : $this->statement->primaryKey->columns[$order] = 'ASC';
@@ -174,10 +174,10 @@ class CreateTableBuilder extends StatementBuilder
     }
 
     /**
-     * @param string|array<string> $columns
+     * @param iterable<array-key, string> $columns
      * @return CreateIndexBuilder
      */
-    public function index(string|array $columns): CreateIndexBuilder
+    public function index(iterable $columns): CreateIndexBuilder
     {
         $statement = new CreateIndexStatement($this->statement->table);
         $this->statement->indexes[] = $statement;
@@ -231,7 +231,7 @@ class CreateTableBuilder extends StatementBuilder
         }
 
         foreach($statement->columns as $column) {
-            if ($column->type === 'int' && Arr::notContains([null, 1, 2, 4, 8], $column->size)) {
+            if ($column->type === 'int' && Arr::doesNotContain([null, 1, 2, 4, 8], $column->size)) {
                 throw new RuntimeException('Size for integer must be 1, 2, 4, or 8 (bytes). '.$column->size.' given.');
             }
         }

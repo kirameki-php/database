@@ -2,7 +2,10 @@
 
 namespace Kirameki\Database\Schema\Formatters;
 
-use Kirameki\Collections\Arr;
+use Kirameki\Collections\Utils\Arr;
+use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Core\Exceptions\RuntimeException;
+use Kirameki\Core\Value;
 use Kirameki\Database\Schema\Expressions\CurrentTimestamp;
 use Kirameki\Database\Schema\Expressions\Expr;
 use Kirameki\Database\Schema\Statements\AlterColumnAction;
@@ -13,8 +16,6 @@ use Kirameki\Database\Schema\Statements\ColumnDefinition;
 use Kirameki\Database\Schema\Statements\CreateIndexStatement;
 use Kirameki\Database\Schema\Statements\CreateTableStatement;
 use Kirameki\Database\Schema\Statements\DropIndexStatement;
-use Kirameki\Support\Str;
-use RuntimeException;
 use function array_filter;
 use function array_keys;
 use function array_merge;
@@ -182,11 +183,14 @@ class Formatter
                 2 => 'SMALLINT',
                 4 => 'INT',
                 8, null => 'BIGINT',
-                default => throw new RuntimeException('Invalid int size: '.$def->size.' for '.$def->name),
+                default => throw new LogicException("Invalid int size: {$def->size} for {$def->name}", [
+                    'column' => $def->name,
+                    'size' => $def->size,
+                ]),
             };
         }
         if ($def->type === 'decimal') {
-            $args = Arr::compact([$def->size, $def->scale]);
+            $args = Arr::without([$def->size, $def->scale], null);
             return 'DECIMAL' . (!empty($args) ? '(' . implode(',', $args) . ')' : '');
         }
         if ($def->type === 'datetime') {
@@ -204,7 +208,7 @@ class Formatter
             throw new RuntimeException('Definition type cannot be set to null');
         }
 
-        $args = Arr::compact([$def->size, $def->scale]);
+        $args = Arr::without([$def->size, $def->scale], null);
         return strtoupper($def->type) . (!empty($args) ? '(' . implode(',', $args) . ')' : '');
     }
 
@@ -246,7 +250,10 @@ class Formatter
             return 'CURRENT_TIMESTAMP' . ($def->size ? '(' . $def->size . ')' : '');
         }
 
-        throw new RuntimeException('Unknown default value type: '.Str::valueOf($value));
+        throw new LogicException('Unknown default value type: ' . Value::getType($value), [
+            'value' => $value,
+            'column' => $def->name,
+        ]);
     }
 
     /**

@@ -4,7 +4,6 @@ namespace Kirameki\Database\Schema\Builders;
 
 use Kirameki\Database\Connection;
 use Kirameki\Database\Schema\Statements\BaseStatement;
-use Kirameki\Support\Concerns\Tappable;
 
 abstract class StatementBuilder implements Builder
 {
@@ -49,4 +48,3 @@ abstract class StatementBuilder implements Builder
         return implode(PHP_EOL, $this->build());
     }
 }
-

@@ -9,7 +9,6 @@ use Kirameki\Database\Adapters\Adapter;
 use Kirameki\Database\Adapters\MySqlAdapter;
 use Kirameki\Database\Adapters\SqliteAdapter;
 use Kirameki\Event\EventManager;
-use Kirameki\Support\Collection;
 use LogicException;
 
 class DatabaseManager

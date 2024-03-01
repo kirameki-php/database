@@ -148,22 +148,6 @@ abstract class PdoAdapter implements Adapter
     }
 
     /**
-     * @param string $id
-     */
-    public function setSavepoint(string $id): void
-    {
-        $this->getPdo()->exec('SAVEPOINT '.$this->alphanumeric($id));
-    }
-
-    /**
-     * @param string $id
-     */
-    public function rollbackSavepoint(string $id): void
-    {
-        $this->getPdo()->exec('ROLLBACK TO SAVEPOINT '.$this->alphanumeric($id));
-    }
-
-    /**
      * @return bool
      */
     public function inTransaction(): bool

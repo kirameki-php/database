@@ -2,7 +2,6 @@
 
 namespace Kirameki\Database\Schema\Builders;
 
-use Kirameki\Collections\Arr;
 use Kirameki\Database\Connection;
 use Kirameki\Database\Schema\Statements\DropIndexStatement;
 use RuntimeException;
@@ -43,12 +42,12 @@ class DropIndexBuilder extends StatementBuilder
     }
 
     /**
-     * @param string|string[] $columns
+     * @param iterable<int, string> $columns
      * @return $this
      */
-    public function columns(string|array $columns): static
+    public function columns(iterable $columns): static
     {
-        foreach (Arr::wrap($columns) as $column) {
+        foreach ($columns as $column) {
             $this->column($column);
         }
         return $this;

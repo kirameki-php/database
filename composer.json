@@ -5,6 +5,7 @@
   "license": "MIT",
   "require": {
     "php": ">=8.2",
+    "ext-pdo": "*",
     "kirameki/cli": "dev-main",
     "kirameki/collections": "dev-main",
     "kirameki/core": "dev-main",

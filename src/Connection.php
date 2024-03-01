@@ -203,12 +203,11 @@ class Connection
 
     /**
      * @param Closure(Transaction): mixed $callback
-     * @param bool $useSavepoint
      * @return mixed
      */
-    public function transaction(Closure $callback, bool $useSavepoint = false): mixed
+    public function transaction(Closure $callback): mixed
     {
-        return $this->getTransactionHandler()->run($callback, $useSavepoint);
+        return $this->getTransactionHandler()->run($callback);
     }
 
     /**
