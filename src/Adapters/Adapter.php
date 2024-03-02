@@ -2,20 +2,20 @@
 
 namespace Kirameki\Database\Adapters;
 
-use Generator;
-use Kirameki\Core\Config;
+use Kirameki\Database\Configs\DatabaseConfig;
 use Kirameki\Database\Query\Execution;
 use Kirameki\Database\Query\Formatters\Formatter as QueryFormatter;
-use Kirameki\Database\Query\Result;
-use Kirameki\Database\Query\ResultLazy;
 use Kirameki\Database\Schema\Formatters\Formatter as SchemaFormatter;
 
+/**
+ * @template TConfig of DatabaseConfig
+ */
 interface Adapter
 {
     /**
-     * @return Config
+     * @return TConfig
      */
-    public function getConfig(): Config;
+    public function getConfig(): DatabaseConfig;
 
     /**
      * @return $this

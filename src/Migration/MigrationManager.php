@@ -3,7 +3,8 @@
 namespace Kirameki\Database\Migration;
 
 use DateTime;
-use Kirameki\Collections\Arr;
+use Kirameki\Collections\Utils\Arr;
+use function basename;
 
 class MigrationManager
 {
@@ -70,7 +71,7 @@ class MigrationManager
         $ddls = [];
         foreach ($this->readMigrations($since) as $migration) {
             $migration->$direction();
-            $ddls[] = $migration->toDdls();
+            $ddls[] = $migration->toStatements();
         }
         return Arr::flatten($ddls);
     }
@@ -84,8 +85,8 @@ class MigrationManager
         $start = $startAt ? $startAt->format('YmdHis') : '00000000000000';
         $migrations = [];
         foreach ($this->getMigrationFiles() as $file) {
-            $datetime = strstr(class_basename($file), '_', true);
-            if ($datetime === null || $datetime >= $start) {
+            $datetime = strstr(basename($file), '_', true);
+            if ($datetime !== false || $datetime >= $start) {
                 $className = rtrim(ltrim(strstr($file, '_'), '_'), '.php');
                 require_once $file;
                 $migrations[] = new $className($datetime);
@@ -95,10 +96,10 @@ class MigrationManager
     }
 
     /**
-     * @return array
+     * @return list<string>
      */
     protected function getMigrationFiles(): array
     {
-        return glob($this->filePath.'/*.php');
+        return glob($this->filePath.'/*.php') ?: [];
     }
 }

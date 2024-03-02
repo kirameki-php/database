@@ -3,11 +3,15 @@
 namespace Kirameki\Database\Adapters;
 
 use Closure;
+use Kirameki\Database\Configs\MySqlConfig;
 use Kirameki\Database\Query\Formatters\MySqlFormatter as MySqlQueryFormatter;
 use PDO;
 use function array_filter;
 use function implode;
 
+/**
+ * @extends PdoAdapter<MySqlConfig>
+ */
 class MySqlAdapter extends PdoAdapter
 {
     /**
@@ -18,26 +22,22 @@ class MySqlAdapter extends PdoAdapter
         $config = $this->getConfig();
         $parts = [];
 
-        if ($config->isNotNull('socket')) {
-            $parts[] = "unix_socket={$config->getString('socket')}";
+        if ($config->socket !== null) {
+            $parts[] = "unix_socket={$config->socket}";
         } else {
-            $host = "host={$config->getString('host')}";
-            $host.= isset($config['port']) ? "port={$config->getString('port')}" : '';
+            $host = "host={$config->host}";
+            $host.= $config->port !== null ? "port={$config->port}" : '';
             $parts[] = $host;
         }
 
-        if ($config->isNotNull('database')) {
-            $parts[] = "dbname={$config->getString('database')}";
-        }
-
-        if ($config->isNotNull('charset')) {
-            $parts[] = "charset={$config->getString('charset')}";
+        if ($config->database !== null) {
+            $parts[] = "dbname={$config->database}";
         }
 
         $dsn = 'mysql:'.implode(';', $parts);
-        $username = $config->getStringOrNull('username') ?? 'root';
-        $password = $config->getStringOrNull('password');
-        $options = (array) ($config->getStringOrNull('options') ?? []);
+        $username = $config->username ?? 'root';
+        $password = $config->password ?? null;
+        $options = (array) ($config->options ?? []);
         $options+= [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -57,6 +57,7 @@ class MySqlAdapter extends PdoAdapter
     }
 
     /**
+     * @inheritDoc
      * @return MySqlQueryFormatter
      */
     public function getQueryFormatter(): MySqlQueryFormatter
@@ -65,46 +66,46 @@ class MySqlAdapter extends PdoAdapter
     }
 
     /**
-     * @param bool $ifNotExist
+     * @inheritDoc
      */
     public function createDatabase(bool $ifNotExist = true): void
     {
         $copy = (clone $this);
-        $copy->config->set('database', null);
+        $copy->config->database = null;
         $copy->execute(implode(' ', array_filter([
             'CREATE DATABASE',
             $ifNotExist ? 'IF NOT EXISTS' : null,
-            $this->config->getString('database'),
+            $this->config->database,
         ])));
     }
 
     /**
-     * @param bool $ifNotExist
+     * @inheritDoc
      */
     public function dropDatabase(bool $ifNotExist = true): void
     {
         $copy = (clone $this);
-        $copy->config->set('database', null);
+        $copy->config->database = null;
         $copy->execute(implode(' ', array_filter([
             'DROP DATABASE',
             $ifNotExist ? 'IF EXISTS' : null,
-            $this->config->getString('database'),
+            $this->config->database,
         ])));
     }
 
     /**
-     * @return bool
+     * @inheritDoc
      */
     public function databaseExists(): bool
     {
-        $execution = $this->query("SHOW DATABASES LIKE '{$this->config['database']}'");
+        $execution = $this->query("SHOW DATABASES LIKE '{$this->config->database}'");
         $rowCount = $execution->affectedRowCount;
         $trueRowCount = ($rowCount instanceof Closure) ? $rowCount() : $rowCount;
         return $trueRowCount > 0;
     }
 
     /**
-     * @param string $table
+     * @inheritDoc
      */
     public function truncate(string $table): void
     {
@@ -112,7 +113,7 @@ class MySqlAdapter extends PdoAdapter
     }
 
     /**
-     * @return bool
+     * @inheritDoc
      */
     public function supportsDdlTransaction(): bool
     {

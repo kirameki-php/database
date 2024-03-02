@@ -4,45 +4,34 @@ namespace Kirameki\Database;
 
 use Closure;
 use Kirameki\Collections\Map;
-use Kirameki\Core\Config;
 use Kirameki\Database\Adapters\Adapter;
 use Kirameki\Database\Adapters\MySqlAdapter;
 use Kirameki\Database\Adapters\SqliteAdapter;
+use Kirameki\Database\Configs\DatabaseConfig;
 use Kirameki\Event\EventManager;
 use LogicException;
 
 class DatabaseManager
 {
     /**
-     * @var Config
-     */
-    protected Config $config;
-
-    /**
-     * @var EventManager
-     */
-    protected EventManager $events;
-
-    /**
      * @var array<Connection>
      */
-    protected array $connections;
+    protected array $connections = [];
 
     /**
      * @var array<string, Closure>
      */
-    protected array $adapters;
+    protected array $adapters = [];
 
     /**
-     * @param Config $config
      * @param EventManager $events
+     * @param iterable<string, DatabaseConfig> $configs
      */
-    public function __construct(Config $config, EventManager $events)
+    public function __construct(
+        protected EventManager $events,
+        protected iterable $configs,
+    )
     {
-        $this->config = $config;
-        $this->connections = [];
-        $this->adapters = [];
-        $this->events = $events;
     }
 
     /**
@@ -85,7 +74,7 @@ class DatabaseManager
 
     /**
      * @param string $name
-     * @param Closure(Config): Adapter $deferred
+     * @param Closure(DatabaseConfig): Adapter $deferred
      * @return $this
      */
     public function addAdapter(string $name, Closure $deferred): static
@@ -96,12 +85,12 @@ class DatabaseManager
 
     /**
      * @param string $name
-     * @param Config $config
+     * @param DatabaseConfig $config
      * @return Connection
      */
-    protected function createConnection(string $name, Config $config): Connection
+    protected function createConnection(string $name, DatabaseConfig $config): Connection
     {
-        $adapterResolver = $this->getAdapterResolver($config->getString('adapter'));
+        $adapterResolver = $this->getAdapterResolver($config->adapter);
         $adapter = $adapterResolver($config);
         return new Connection($name, $adapter, $this->events);
     }
@@ -116,18 +105,16 @@ class DatabaseManager
 
     /**
      * @param string $name
-     * @return Config
+     * @return DatabaseConfig
      */
-    public function getConfig(string $name): Config
+    public function getConfig(string $name): DatabaseConfig
     {
-        $config = config()->for('connections.'.$name);
-        $config['database'] ??= $name;
-        return $config;
+        return $this->configs[$name] ?? throw new LogicException("Database config: $name does not exist");
     }
 
     /**
      * @param string $name
-     * @return Closure(Config): Adapter
+     * @return Closure(DatabaseConfig): Adapter
      */
     protected function getAdapterResolver(string $name): Closure
     {
@@ -139,13 +126,13 @@ class DatabaseManager
 
     /**
      * @param string $adapter
-     * @return Closure(Config): Adapter
+     * @return Closure(DatabaseConfig): Adapter
      */
     protected function getDefaultAdapterResolver(string $adapter): Closure
     {
         return match ($adapter) {
-            'mysql' => static fn(Config $config) => new MySqlAdapter($config),
-            'sqlite' => static fn(Config $config) => new SqliteAdapter($config),
+            'mysql' => static fn(DatabaseConfig $config) => new MySqlAdapter($config),
+            'sqlite' => static fn(DatabaseConfig $config) => new SqliteAdapter($config),
             default => throw new LogicException("Adapter: $adapter does not exist"),
         };
     }

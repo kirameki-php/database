@@ -2,11 +2,15 @@
 
 namespace Kirameki\Database\Adapters;
 
+use Kirameki\Database\Configs\SqliteConfig;
 use Kirameki\Database\Query\Formatters\SqliteFormatter as SqliteQueryFormatter;
 use PDO;
 use function file_exists;
 use function unlink;
 
+/**
+ * @extends PdoAdapter<SqliteConfig>
+ */
 class SqliteAdapter extends PdoAdapter
 {
     /**
@@ -16,7 +20,7 @@ class SqliteAdapter extends PdoAdapter
     {
         $config = $this->getConfig();
 
-        $dsn = "sqlite:{$config->getString('path')}";
+        $dsn = "sqlite:{$config->path}";
         $options = (array) ($config['options'] ?? []);
         $options+= [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,

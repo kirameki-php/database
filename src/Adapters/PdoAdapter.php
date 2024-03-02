@@ -3,7 +3,7 @@
 namespace Kirameki\Database\Adapters;
 
 use Iterator;
-use Kirameki\Core\Config;
+use Kirameki\Database\Configs\DatabaseConfig;
 use Kirameki\Database\Query\Execution;
 use Kirameki\Database\Query\Formatters\Formatter as QueryFormatter;
 use Kirameki\Database\Schema\Formatters\Formatter as SchemaFormatter;
@@ -14,24 +14,21 @@ use RuntimeException;
 use Throwable;
 use function preg_match;
 
+/**
+ * @template TConfig of DatabaseConfig
+ * @implements Adapter<TConfig>
+ */
 abstract class PdoAdapter implements Adapter
 {
     /**
-     * @var PDO|null
+     * @param TConfig $config
+     * @param PDO|null $pdo
      */
-    protected ?PDO $pdo = null;
-
-    /**
-     * @var Config
-     */
-    protected Config $config;
-
-    /**
-     * @param Config $config
-     */
-    public function __construct(Config $config)
+    public function __construct(
+        protected DatabaseConfig $config,
+        protected ?PDO $pdo = null,
+    )
     {
-        $this->config = $config;
     }
 
     /**
@@ -43,15 +40,15 @@ abstract class PdoAdapter implements Adapter
     }
 
     /**
-     * @return Config
+     * @inheritDoc
      */
-    public function getConfig(): Config
+    public function getConfig(): DatabaseConfig
     {
         return $this->config;
     }
 
     /**
-     * @return $this
+     * @inheritDoc
      */
     public function connect(): static
     {
@@ -60,7 +57,7 @@ abstract class PdoAdapter implements Adapter
     }
 
     /**
-     * @return bool
+     * @inheritDoc
      */
     public function isConnected(): bool
     {
@@ -68,8 +65,7 @@ abstract class PdoAdapter implements Adapter
     }
 
     /**
-     * @param string $statement
-     * @return Execution
+     * @inheritDoc
      */
     public function execute(string $statement): Execution
     {
@@ -81,9 +77,7 @@ abstract class PdoAdapter implements Adapter
     }
 
     /**
-     * @param string $statement
-     * @param array<mixed> $bindings
-     * @return Execution
+     * @inheritDoc
      */
     public function query(string $statement, array $bindings = []): Execution
     {
@@ -98,9 +92,7 @@ abstract class PdoAdapter implements Adapter
     }
 
     /**
-     * @param string $statement
-     * @param array<mixed> $bindings
-     * @return Execution
+     * @inheritDoc
      */
     public function cursor(string $statement, array $bindings = []): Execution
     {
@@ -140,7 +132,7 @@ abstract class PdoAdapter implements Adapter
     }
 
     /**
-     * @return void
+     * @inheritDoc
      */
     public function rollback(): void
     {
@@ -148,7 +140,7 @@ abstract class PdoAdapter implements Adapter
     }
 
     /**
-     * @return bool
+     * @inheritDoc
      */
     public function inTransaction(): bool
     {
@@ -156,8 +148,7 @@ abstract class PdoAdapter implements Adapter
     }
 
     /**
-     * @param string $table
-     * @return bool
+     * @inheritDoc
      */
     public function tableExists(string $table): bool
     {
@@ -171,12 +162,12 @@ abstract class PdoAdapter implements Adapter
     }
 
     /**
-     * @return QueryFormatter
+     * @inheritDoc
      */
     abstract public function getQueryFormatter(): QueryFormatter;
 
     /**
-     * @return SchemaFormatter
+     * @inheritDoc
      */
     public function getSchemaFormatter(): SchemaFormatter
     {
