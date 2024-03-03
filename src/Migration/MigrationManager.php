@@ -13,14 +13,14 @@ class MigrationManager
     /**
      * @var string
      */
-    protected string $filePath;
+    protected string $directory;
 
     /**
-     * @param string $path
+     * @param string $directory
      */
-    public function __construct(string $path)
+    public function __construct(string $directory)
     {
-        $this->filePath = $path;
+        $this->directory = $directory;
     }
 
     /**
@@ -104,6 +104,6 @@ class MigrationManager
      */
     protected function getMigrationFiles(): array
     {
-        return glob($this->filePath.'/*.php') ?: [];
+        return glob($this->directory . '/*.php') ?: [];
     }
 }
