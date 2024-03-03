@@ -8,17 +8,14 @@ use Kirameki\Database\Query\Result;
 class QueryExecuted extends DatabaseEvent
 {
     /**
-     * @var Result
-     */
-    public readonly Result $result;
-
-    /**
      * @param Connection $connection
      * @param Result $result
      */
-    public function __construct(Connection $connection, Result $result)
+    public function __construct(
+        Connection $connection,
+        public readonly Result $result,
+    )
     {
         parent::__construct($connection);
-        $this->result = $result;
     }
 }

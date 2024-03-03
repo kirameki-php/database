@@ -2,6 +2,7 @@
 
 namespace Kirameki\Database\Events;
 
+use Kirameki\Database\Adapters\Adapter;
 use Kirameki\Database\Connection;
 use Kirameki\Database\Query\Execution;
 
@@ -13,7 +14,7 @@ class SchemaExecuted extends DatabaseEvent
      */
     public function __construct(
         Connection $connection,
-        protected Execution $execution,
+        public Execution $execution,
     )
     {
         parent::__construct($connection);

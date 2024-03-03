@@ -8,17 +8,12 @@ use Kirameki\Database\Transaction\Transaction;
 class TransactionBegan extends DatabaseEvent
 {
     /**
-     * @var Transaction
-     */
-    public readonly Transaction $transaction;
-
-    /**
      * @param Connection $connection
-     * @param Transaction $transaction
      */
-    public function __construct(Connection $connection, Transaction $transaction)
+    public function __construct(
+        Connection $connection,
+    )
     {
         parent::__construct($connection);
-        $this->transaction = $transaction;
     }
 }

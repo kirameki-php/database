@@ -4,6 +4,7 @@ namespace Kirameki\Database;
 
 use Closure;
 use Kirameki\Database\Adapters\Adapter;
+use Kirameki\Database\Configs\DatabaseConfig;
 use Kirameki\Database\Events\QueryExecuted;
 use Kirameki\Database\Events\SchemaExecuted;
 use Kirameki\Database\Query\Builders\DeleteBuilder;
@@ -15,27 +16,11 @@ use Kirameki\Database\Query\Expressions\Expr;
 use Kirameki\Database\Query\Formatters\Formatter as QueryFormatter;
 use Kirameki\Database\Query\Result;
 use Kirameki\Database\Schema\Formatters\Formatter as SchemaFormatter;
-use Kirameki\Database\Transaction\Transaction;
 use Kirameki\Database\Transaction\TransactionHandler;
 use Kirameki\Event\EventManager;
 
 class Connection
 {
-    /**
-     * @var string
-     */
-    protected readonly string $name;
-
-    /**
-     * @var Adapter
-     */
-    protected readonly Adapter $adapter;
-
-    /**
-     * @var EventManager
-     */
-    protected readonly EventManager $events;
-
     /**
      * @var QueryFormatter|null
      */
@@ -53,15 +38,15 @@ class Connection
 
     /**
      * @param string $name
-     * @param Adapter $adapter
+     * @param Adapter<DatabaseConfig> $adapter
      * @param EventManager $events
      */
-    public function __construct(string $name, Adapter $adapter, EventManager $events)
+    public function __construct(
+        protected readonly string $name,
+        protected readonly Adapter $adapter,
+        protected readonly EventManager $events,
+    )
     {
-        $this->name = $name;
-        $this->adapter = $adapter;
-        $this->events = $events;
-        $this->transactionHandler = new TransactionHandler($adapter, $events);
     }
 
     /**
@@ -73,7 +58,7 @@ class Connection
     }
 
     /**
-     * @return Adapter
+     * @return Adapter<DatabaseConfig>
      */
     public function getAdapter(): Adapter
     {
@@ -101,7 +86,7 @@ class Connection
      */
     public function getTransactionHandler(): TransactionHandler
     {
-        return $this->transactionHandler ??= new TransactionHandler($this->adapter, $this->events);
+        return $this->transactionHandler ??= new TransactionHandler($this, $this->events);
     }
 
     /**
@@ -153,10 +138,10 @@ class Connection
 
     /**
      * @param string $statement
-     * @param array<mixed> $bindings
+     * @param iterable<array-key, mixed> $bindings
      * @return Result
      */
-    public function cursor(string $statement, array $bindings = []): Result
+    public function cursor(string $statement, iterable $bindings = []): Result
     {
         $execution = $this->adapter->cursor($statement, $bindings);
         $result = new Result($this, $execution);
@@ -201,8 +186,9 @@ class Connection
     }
 
     /**
-     * @param Closure(Transaction): mixed $callback
-     * @return mixed
+     * @template TReturn
+     * @param Closure(): TReturn $callback
+     * @return TReturn
      */
     public function transaction(Closure $callback): mixed
     {
@@ -214,7 +200,7 @@ class Connection
      */
     public function inTransaction(): bool
     {
-        return $this->getTransactionHandler()->inTransaction();
+        return $this->getTransactionHandler()->isActive();
     }
 
     /**

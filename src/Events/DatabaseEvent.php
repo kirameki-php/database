@@ -8,15 +8,11 @@ use Kirameki\Event\Event;
 abstract class DatabaseEvent extends Event
 {
     /**
-     * @var Connection
-     */
-    public readonly Connection $connection;
-
-    /**
      * @param Connection $connection
      */
-    public function __construct(Connection $connection)
+    public function __construct(
+        public readonly Connection $connection,
+    )
     {
-        $this->connection = $connection;
     }
 }

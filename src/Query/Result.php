@@ -14,7 +14,7 @@ class Result extends Vec
     /**
      * @var int|null
      */
-    protected ?int $affectedRowsCountLazy = null;
+    protected ?int $resolvedAffectedRowsCount = null;
 
     /**
      * @param Connection $connection
@@ -33,29 +33,13 @@ class Result extends Vec
      */
     public function getAffectedRowCount(): int
     {
-        if ($this->affectedRowsCountLazy === null) {
+        if ($this->resolvedAffectedRowsCount === null) {
             $rowCount = $this->execution->affectedRowCount;
-            $this->affectedRowsCountLazy = ($rowCount instanceof Closure)
+            $this->resolvedAffectedRowsCount = ($rowCount instanceof Closure)
                 ? $rowCount()
                 : $rowCount;
         }
-        return $this->affectedRowsCountLazy;
-    }
-
-    /**
-     * @return float
-     */
-    public function getExecTimeInMilliSeconds(): float
-    {
-        return $this->execution->execTimeMs;
-    }
-
-    /**
-     * @return float|null
-     */
-    public function getFetchTimeInMilliSeconds(): ?float
-    {
-        return $this->execution->fetchTimeMs;
+        return $this->resolvedAffectedRowsCount;
     }
 
     /**
@@ -63,8 +47,11 @@ class Result extends Vec
      */
     public function getTotalTimeInMilliSeconds(): float
     {
-        $execTime = $this->getExecTimeInMilliSeconds();
-        $fetchTime = $this->getFetchTimeInMilliSeconds() ?? 0.0;
+        $execution = $this->execution;
+
+        $execTime = $execution->execTimeMs;
+        $fetchTime = $execution->fetchTimeMs ?? 0.0;
+
         return $execTime + $fetchTime;
     }
 

@@ -4,6 +4,8 @@ namespace Kirameki\Database\Transaction;
 
 use Closure;
 use Kirameki\Database\Adapters\Adapter;
+use Kirameki\Database\Configs\DatabaseConfig;
+use Kirameki\Database\Connection;
 use Kirameki\Database\Events\TransactionBegan;
 use Kirameki\Database\Events\TransactionCommitted;
 use Kirameki\Database\Events\TransactionRolledBack;
@@ -13,101 +15,82 @@ use Throwable;
 class TransactionHandler
 {
     /**
-     * @param Adapter $adapter
+     * @var bool
+     */
+    protected bool $active = false;
+
+    /**
+     * @param Connection $connection
      * @param EventManager $events
-     * @param array<Transaction> $txStack
      */
     public function __construct(
-        protected Adapter $adapter,
+        protected Connection $connection,
         protected EventManager $events,
-        protected array $txStack = [],
     )
     {
     }
 
     /**
-     * @param Closure(Transaction): mixed $callback
-     * @return mixed
+     * @template TReturn
+     * @param Closure(): TReturn $callback
+     * @return TReturn
      */
     public function run(Closure $callback): mixed
     {
-        try {
-            // Actual transaction
-            if (!$this->inTransaction()) {
-                return $this->runInTransaction($callback);
-            }
-            // Already in transaction so just execute callback
-            return $callback($this->txStack[-1]);
+        // Already in transaction so just execute callback
+        if ($this->isActive()) {
+            return $callback();
         }
-        // This is thrown when user calls rollback() on Transaction instances.
-        // We will propagate up to the first transaction block and do a rollback there.
-        catch (Rollback $rollback) {
-            $this->rollback($rollback);
+
+        try {
+            $this->handleBegin();
+            $result = $callback();
+            $this->handleCommit();
+            return $result;
         }
         // We will propagate up to the first transaction block, rollback and then rethrow.
         catch (Throwable $throwable) {
             $this->rollbackAndThrow($throwable);
         }
-        return null;
+        finally {
+            $this->active = false;
+        }
     }
 
     /**
      * @return bool
      */
-    public function inTransaction(): bool
+    public function isActive(): bool
     {
-        return count($this->txStack) > 0;
+        return $this->active;
     }
 
     /**
-     * @param Closure(Transaction): mixed $callback
-     * @return mixed
+     * @return void
      */
-    protected function runInTransaction(Closure $callback): mixed
+    protected function handleBegin(): void
     {
-        $tx = $this->txStack[] = new Transaction();
-
-        $this->adapter->beginTransaction();
-
-        $this->events->emit(new TransactionBegan($tx));
-
-        $result = $callback($tx);
-
-        $this->adapter->commit();
-
-        $this->events->dispatchClass(TransactionCommitted::class);
-
-        return $result;
+        $this->connection->getAdapter()->beginTransaction();
+        $this->events->emit(new TransactionBegan($this->connection));
     }
 
     /**
-     * @param Rollback $rollback
+     * @return void
      */
-    protected function rollback(Rollback $rollback): void
+    protected function handleCommit(): void
     {
-        array_pop($this->txStack);
-
-        if (empty($this->txStack)) {
-            $this->adapter->rollback();
-            $this->events->dispatchClass(TransactionRolledBack::class, $rollback);
-            return;
-        }
-
-        throw $rollback;
+        $this->connection->getAdapter()->commit();
+        $this->events->emit(new TransactionCommitted($this->connection));
     }
 
     /**
      * @param Throwable $throwable
+     * @return never
      */
-    protected function rollbackAndThrow(Throwable $throwable): void
+    protected function rollbackAndThrow(Throwable $throwable): never
     {
-        array_pop($this->txStack);
-
-        if (empty($this->txStack)) {
-            $this->adapter->rollback();
-            $this->events->dispatchClass(TransactionRolledBack::class, $throwable);
-        }
-
+        $this->connection->getAdapter()->rollback();
+        $this->events->emit(new TransactionRolledBack($this->connection, $throwable));
         throw $throwable;
     }
 }

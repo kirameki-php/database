@@ -8,7 +8,7 @@ use Kirameki\Database\Query\Formatters\Formatter as QueryFormatter;
 use Kirameki\Database\Schema\Formatters\Formatter as SchemaFormatter;
 
 /**
- * @template TConfig of DatabaseConfig
+ * @template-covariant TConfig of DatabaseConfig
  */
 interface Adapter
 {
@@ -40,17 +40,17 @@ interface Adapter
 
     /**
      * @param string $statement
-     * @param array<mixed> $bindings
+     * @param iterable<array-key, mixed> $bindings
      * @return Execution
      */
-    public function query(string $statement, array $bindings = []): Execution;
+    public function query(string $statement, iterable $bindings = []): Execution;
 
     /**
      * @param string $statement
-     * @param array<mixed> $bindings
+     * @param iterable<array-key, mixed> $bindings
      * @return Execution
      */
-    public function cursor(string $statement, array $bindings = []): Execution;
+    public function cursor(string $statement, iterable $bindings = []): Execution;
 
     /**
      * @return void

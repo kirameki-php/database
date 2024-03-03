@@ -8,17 +8,14 @@ use Throwable;
 class TransactionRolledBack extends DatabaseEvent
 {
     /**
-     * @var Throwable
-     */
-    public readonly Throwable $throwable;
-
-    /**
      * @param Connection $connection
-     * @param Throwable $throwable
+     * @param Throwable $cause
      */
-    public function __construct(Connection $connection, Throwable $throwable)
+    public function __construct(
+        Connection $connection,
+        public readonly Throwable $cause,
+    )
     {
         parent::__construct($connection);
-        $this->throwable = $throwable;
     }
 }

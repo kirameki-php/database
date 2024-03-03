@@ -109,7 +109,7 @@ class MySqlAdapter extends PdoAdapter
      */
     public function truncate(string $table): void
     {
-        $this->execute("TRUNCATE TABLE $table");
+        $this->execute("TRUNCATE TABLE {$table}");
     }
 
     /**

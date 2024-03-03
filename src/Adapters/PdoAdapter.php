@@ -79,7 +79,7 @@ abstract class PdoAdapter implements Adapter
     /**
      * @inheritDoc
      */
-    public function query(string $statement, array $bindings = []): Execution
+    public function query(string $statement, iterable $bindings = []): Execution
     {
         $startTime = hrtime(true);
         $prepared = $this->execQuery($statement, $bindings);
@@ -94,7 +94,7 @@ abstract class PdoAdapter implements Adapter
     /**
      * @inheritDoc
      */
-    public function cursor(string $statement, array $bindings = []): Execution
+    public function cursor(string $statement, iterable $bindings = []): Execution
     {
         $startTime = hrtime(true);
         $prepared = $this->execQuery($statement, $bindings);
@@ -176,13 +176,13 @@ abstract class PdoAdapter implements Adapter
 
     /**
      * @param string $statement
-     * @param array<mixed> $bindings
+     * @param iterable<array-key, mixed> $bindings
      * @return PDOStatement
      */
-    protected function execQuery(string $statement, array $bindings): PDOStatement
+    protected function execQuery(string $statement, iterable $bindings): PDOStatement
     {
         $prepared = $this->getPdo()->prepare($statement);
-        $prepared->execute($bindings);
+        $prepared->execute(iterator_to_array($bindings));
         return $prepared;
     }
 

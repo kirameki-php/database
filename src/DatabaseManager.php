@@ -14,7 +14,7 @@ use LogicException;
 class DatabaseManager
 {
     /**
-     * @var array<Connection>
+     * @var array<string, Connection>
      */
     protected array $connections = [];
 
@@ -73,8 +73,9 @@ class DatabaseManager
     }
 
     /**
+     * @template TConfig of DatabaseConfig
      * @param string $name
-     * @param Closure(DatabaseConfig): Adapter $deferred
+     * @param Closure(TConfig): Adapter<TConfig> $deferred
      * @return $this
      */
     public function addAdapter(string $name, Closure $deferred): static
