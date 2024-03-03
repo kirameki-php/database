@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Adapters;
 
 use Kirameki\Database\Configs\SqliteConfig;
+use Kirameki\Database\Exceptions\DatabaseNotFoundException;
 use Kirameki\Database\Query\Formatters\SqliteFormatter as SqliteQueryFormatter;
 use PDO;
 use function file_exists;
@@ -57,14 +58,20 @@ class SqliteAdapter extends PdoAdapter
     }
 
     /**
-     * @param bool $ifNotExist
+     * @param bool $ifExist
+     * @return void
      */
-    public function dropDatabase(bool $ifNotExist = true): void
+    public function dropDatabase(bool $ifExist = true): void
     {
-        if ($ifNotExist && !$this->databaseExists()) {
-            return;
+        if ($this->databaseExists()) {
+            if ($this->isPersistentDatabase()) {
+                unlink($this->config->filename);
+            }
+        } elseif (!$ifExist) {
+            throw new DatabaseNotFoundException($this->config->filename, $this->config);
         }
-        unlink($this->config->filename);
+
+        $this->disconnect();
     }
 
     /**
@@ -72,7 +79,19 @@ class SqliteAdapter extends PdoAdapter
      */
     public function databaseExists(): bool
     {
-        return file_exists($this->config->filename);
+        // Databases are always considered to exist if connected.
+        if ($this->isConnected()) {
+            return true;
+        }
+
+        $filename = $this->config->filename;
+
+        // In-memory or temporary databases only exist when connected.
+        if (!$this->isPersistentDatabase()) {
+            return false;
+        }
+
+        return file_exists($filename);
     }
 
     /**
@@ -89,5 +108,14 @@ class SqliteAdapter extends PdoAdapter
     public function supportsDdlTransaction(): bool
     {
         return true;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPersistentDatabase(): bool
+    {
+        $filename = $this->config->filename;
+        return $filename !== ':memory:' && $filename !== '';
     }
 }

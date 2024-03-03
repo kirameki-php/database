@@ -79,10 +79,10 @@ interface Adapter
     public function createDatabase(bool $ifNotExist = true): void;
 
     /**
-     * @param bool $ifNotExist
+     * @param bool $ifExist
      * @return void
      */
-    public function dropDatabase(bool $ifNotExist = true): void;
+    public function dropDatabase(bool $ifExist = true): void;
 
     /**
      * @return bool

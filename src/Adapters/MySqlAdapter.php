@@ -82,13 +82,13 @@ class MySqlAdapter extends PdoAdapter
     /**
      * @inheritDoc
      */
-    public function dropDatabase(bool $ifNotExist = true): void
+    public function dropDatabase(bool $ifExist = true): void
     {
         $copy = (clone $this);
         $copy->config->database = null;
         $copy->execute(implode(' ', array_filter([
             'DROP DATABASE',
-            $ifNotExist ? 'IF EXISTS' : null,
+            $ifExist ? 'IF EXISTS' : null,
             $this->config->database,
         ])));
     }
