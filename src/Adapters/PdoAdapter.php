@@ -3,7 +3,6 @@
 namespace Kirameki\Database\Adapters;
 
 use Iterator;
-use Kirameki\Database\Configs\DatabaseConfig;
 use Kirameki\Database\Query\Execution;
 use Kirameki\Database\Query\Formatters\Formatter as QueryFormatter;
 use Kirameki\Database\Schema\Formatters\Formatter as SchemaFormatter;
@@ -17,7 +16,7 @@ use function preg_match;
 /**
  * @template TConfig of DatabaseConfig
  */
-abstract class PdoAdapter implements Adapter
+abstract class PdoAdapter implements DatabaseAdapter
 {
     /**
      * @param TConfig $config

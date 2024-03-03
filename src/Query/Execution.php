@@ -3,13 +3,12 @@
 namespace Kirameki\Database\Query;
 
 use Closure;
-use Kirameki\Database\Adapters\Adapter;
-use Kirameki\Database\Configs\DatabaseConfig;
+use Kirameki\Database\Adapters\DatabaseAdapter;
 
 class Execution
 {
     /**
-     * @param Adapter $adapter
+     * @param DatabaseAdapter $adapter
      * @param string $statement
      * @param iterable<array-key, mixed> $bindings
      * @param iterable<int, mixed> $rowIterator
@@ -18,7 +17,7 @@ class Execution
      * @param ?float $fetchTimeMs
      */
     public function __construct(
-        public readonly Adapter $adapter,
+        public readonly DatabaseAdapter $adapter,
         public readonly string $statement,
         public readonly iterable $bindings,
         public readonly iterable $rowIterator,

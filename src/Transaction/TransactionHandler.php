@@ -3,8 +3,6 @@
 namespace Kirameki\Database\Transaction;
 
 use Closure;
-use Kirameki\Database\Adapters\Adapter;
-use Kirameki\Database\Configs\DatabaseConfig;
 use Kirameki\Database\Connection;
 use Kirameki\Database\Events\TransactionBegan;
 use Kirameki\Database\Events\TransactionCommitted;

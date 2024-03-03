@@ -3,8 +3,7 @@
 namespace Kirameki\Database;
 
 use Closure;
-use Kirameki\Database\Adapters\Adapter;
-use Kirameki\Database\Configs\DatabaseConfig;
+use Kirameki\Database\Adapters\DatabaseAdapter;
 use Kirameki\Database\Events\QueryExecuted;
 use Kirameki\Database\Events\SchemaExecuted;
 use Kirameki\Database\Query\Builders\DeleteBuilder;
@@ -38,12 +37,12 @@ class Connection
 
     /**
      * @param string $name
-     * @param Adapter $adapter
+     * @param DatabaseAdapter $adapter
      * @param EventManager $events
      */
     public function __construct(
         protected readonly string $name,
-        protected readonly Adapter $adapter,
+        protected readonly DatabaseAdapter $adapter,
         protected readonly EventManager $events,
     )
     {
@@ -58,9 +57,9 @@ class Connection
     }
 
     /**
-     * @return Adapter
+     * @return DatabaseAdapter
      */
-    public function getAdapter(): Adapter
+    public function getAdapter(): DatabaseAdapter
     {
         return $this->adapter;
     }

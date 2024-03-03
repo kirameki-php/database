@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Events;
 
-use Kirameki\Database\Adapters\Adapter;
+use Kirameki\Database\Adapters\DatabaseAdapter;
 use Kirameki\Database\Connection;
 use Kirameki\Database\Query\Execution;
 

@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Configs;
+namespace Kirameki\Database\Adapters;
 
 class MySqlConfig implements DatabaseConfig
 {

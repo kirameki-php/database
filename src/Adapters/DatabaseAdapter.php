@@ -2,12 +2,11 @@
 
 namespace Kirameki\Database\Adapters;
 
-use Kirameki\Database\Configs\DatabaseConfig;
 use Kirameki\Database\Query\Execution;
 use Kirameki\Database\Query\Formatters\Formatter as QueryFormatter;
 use Kirameki\Database\Schema\Formatters\Formatter as SchemaFormatter;
 
-interface Adapter
+interface DatabaseAdapter
 {
     /**
      * @return DatabaseConfig

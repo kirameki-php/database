@@ -3,8 +3,6 @@
 namespace Kirameki\Database\Adapters;
 
 use Closure;
-use Kirameki\Database\Configs\DatabaseConfig;
-use Kirameki\Database\Configs\MySqlConfig;
 use Kirameki\Database\Query\Formatters\MySqlFormatter as MySqlQueryFormatter;
 use PDO;
 use function array_filter;

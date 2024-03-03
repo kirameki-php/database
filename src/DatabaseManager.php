@@ -4,12 +4,12 @@ namespace Kirameki\Database;
 
 use Closure;
 use Kirameki\Collections\Map;
-use Kirameki\Database\Adapters\Adapter;
+use Kirameki\Database\Adapters\DatabaseAdapter;
+use Kirameki\Database\Adapters\DatabaseConfig;
 use Kirameki\Database\Adapters\MySqlAdapter;
+use Kirameki\Database\Adapters\MySqlConfig;
 use Kirameki\Database\Adapters\SqliteAdapter;
-use Kirameki\Database\Configs\DatabaseConfig;
-use Kirameki\Database\Configs\MySqlConfig;
-use Kirameki\Database\Configs\SqliteConfig;
+use Kirameki\Database\Adapters\SqliteConfig;
 use Kirameki\Event\EventManager;
 use LogicException;
 use function array_key_exists;
@@ -77,7 +77,7 @@ class DatabaseManager
 
     /**
      * @param string $name
-     * @param Closure(DatabaseConfig): Adapter $deferred
+     * @param Closure(DatabaseConfig): DatabaseAdapter $deferred
      * @return $this
      */
     public function addAdapter(string $name, Closure $deferred): static
@@ -116,7 +116,7 @@ class DatabaseManager
 
     /**
      * @param DatabaseConfig $config
-     * @return Closure(DatabaseConfig): Adapter
+     * @return Closure(DatabaseConfig): DatabaseAdapter
      */
     protected function getAdapterResolver(DatabaseConfig $config): Closure
     {
@@ -129,7 +129,7 @@ class DatabaseManager
 
     /**
      * @param string $adapter
-     * @return Closure(DatabaseConfig): Adapter
+     * @return Closure(DatabaseConfig): DatabaseAdapter
      */
     protected function getDefaultAdapterResolver(string $adapter): Closure
     {

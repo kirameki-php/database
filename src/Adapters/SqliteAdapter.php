@@ -2,7 +2,6 @@
 
 namespace Kirameki\Database\Adapters;
 
-use Kirameki\Database\Configs\SqliteConfig;
 use Kirameki\Database\Exceptions\DatabaseNotFoundException;
 use Kirameki\Database\Query\Formatters\SqliteFormatter as SqliteQueryFormatter;
 use PDO;
