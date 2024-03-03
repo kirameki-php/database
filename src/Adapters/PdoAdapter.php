@@ -16,7 +16,6 @@ use function preg_match;
 
 /**
  * @template TConfig of DatabaseConfig
- * @implements Adapter<TConfig>
  */
 abstract class PdoAdapter implements Adapter
 {
@@ -41,6 +40,7 @@ abstract class PdoAdapter implements Adapter
 
     /**
      * @inheritDoc
+     * @return TConfig
      */
     public function getConfig(): DatabaseConfig
     {

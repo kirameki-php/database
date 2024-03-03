@@ -9,7 +9,6 @@ use Kirameki\Database\Query\Support\Operator;
 use Kirameki\Database\Query\Support\Range;
 use Kirameki\Database\Query\Expressions\Expr;
 use Kirameki\Database\Query\Expressions\Raw;
-use Kirameki\Support\Concerns\Tappable;
 use LogicException;
 use RuntimeException;
 use Traversable;
@@ -19,6 +18,9 @@ use function is_string;
 use function iterator_to_array;
 use function strtoupper;
 
+/**
+ * @consistent-constructor
+ */
 class ConditionBuilder
 {
     /**

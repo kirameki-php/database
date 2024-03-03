@@ -6,7 +6,9 @@ use Kirameki\Database\Query\Expressions\Column;
 use Kirameki\Database\Query\Statements\JoinDefinition;
 use Kirameki\Database\Query\Support\JoinType;
 use LogicException;
-use Webmozart\Assert\Assert;
+use function assert;
+use function count;
+use function func_num_args;
 
 class JoinBuilder
 {
@@ -100,7 +102,7 @@ class JoinBuilder
      */
     protected function buildOnColumnCondition(mixed ...$args): ConditionBuilder
     {
-        Assert::countBetween($args, 2, 3);
+        assert(func_num_args() >= 2 && func_num_args() <= 3);
 
         array_splice($args, -1, 1, [new Column(end($args))]);
 
@@ -113,7 +115,7 @@ class JoinBuilder
      */
     protected function buildCondition(mixed ...$args): ConditionBuilder
     {
-        Assert::countBetween($args, 1, 3);
+        assert(func_num_args() >= 1 && func_num_args() <= 3);
 
         return ConditionBuilder::fromArgs(...$args);
     }

@@ -2,17 +2,21 @@
 
 namespace Kirameki\Database\Configs;
 
-class SqliteConfig extends DatabaseConfig
+class SqliteConfig implements DatabaseConfig
 {
     /**
-     * @param string $adapter
      * @param string $filename
+     * @param iterable<string, mixed>|null $options
      */
     public function __construct(
-        string $adapter,
         public string $filename,
+        public ?iterable $options = null,
     )
     {
-        parent::__construct($adapter);
+    }
+
+    public function getAdapterName(): string
+    {
+        return 'sqlite';
     }
 }

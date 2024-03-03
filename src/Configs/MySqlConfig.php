@@ -2,10 +2,9 @@
 
 namespace Kirameki\Database\Configs;
 
-class MySqlConfig extends DatabaseConfig
+class MySqlConfig implements DatabaseConfig
 {
     /**
-     * @param string $adapter
      * @param string|null $host
      * @param int|null $port
      * @param string|null $socket
@@ -15,7 +14,6 @@ class MySqlConfig extends DatabaseConfig
      * @param iterable<string, mixed>|null $options
      */
     public function __construct(
-        string $adapter,
         public ?string $host,
         public ?int $port,
         public ?string $socket,
@@ -25,6 +23,10 @@ class MySqlConfig extends DatabaseConfig
         public ?iterable $options = null,
     )
     {
-        parent::__construct($adapter);
+    }
+
+    public function getAdapterName(): string
+    {
+        return 'mysql';
     }
 }

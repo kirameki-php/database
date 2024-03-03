@@ -144,7 +144,7 @@ class Formatter
     public function formatDropIndexStatement(DropIndexStatement $statement): string
     {
         $name = $statement->name ?? implode('_', array_merge([$statement->table], $statement->columns));
-        return 'DROP INDEX '.$name.' ON '.$statement->table.';';
+        return "DROP INDEX {$name} ON {$statement->table};";
     }
 
     /**

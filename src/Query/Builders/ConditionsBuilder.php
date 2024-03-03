@@ -8,7 +8,8 @@ use Kirameki\Database\Query\Statements\ConditionDefinition;
 use Kirameki\Database\Query\Statements\ConditionsStatement;
 use Kirameki\Database\Query\Support\SortOrder;
 use LogicException;
-use Webmozart\Assert\Assert;
+use function assert;
+use function func_num_args;
 
 /**
  * @property ConditionsStatement $statement
@@ -26,7 +27,8 @@ abstract class ConditionsBuilder extends StatementBuilder
      */
     public function where(mixed ...$args): static
     {
-        Assert::countBetween($args, 1, 3);
+        assert(func_num_args() >= 1 && func_num_args() <= 3);
+
         $this->lastCondition = $this->buildCondition(...$args);
         return $this->addWhereCondition($this->lastCondition->getDefinition());
     }
@@ -38,7 +40,8 @@ abstract class ConditionsBuilder extends StatementBuilder
     public function whereNot(mixed ...$args): static
     {
         // only 2 because operators are not supported for NOT's
-        Assert::countBetween($args, 1, 2);
+        assert(func_num_args() >= 1 && func_num_args() <= 2);
+
         $this->lastCondition = $this->buildCondition(...$args)->negate();
         return $this->addWhereCondition($this->lastCondition->getDefinition());
     }
@@ -49,7 +52,7 @@ abstract class ConditionsBuilder extends StatementBuilder
      */
     public function whereColumn(string ...$args): static
     {
-        Assert::countBetween($args, 2, 3);
+        assert(func_num_args() >= 2 && func_num_args() <= 3);
 
         $num = count($args);
 
@@ -86,10 +89,12 @@ abstract class ConditionsBuilder extends StatementBuilder
      */
     public function and(mixed ...$args): static
     {
-        Assert::countBetween($args, 1, 3);
+        assert(func_num_args() >= 1 && func_num_args() <= 3);
+
         if ($this->lastCondition?->and()->apply($this->buildCondition(...$args)) !== null) {
             return $this;
         }
+
         throw new LogicException('and called without a previous condition. Define a where before declaring and');
     }
 
@@ -99,10 +104,12 @@ abstract class ConditionsBuilder extends StatementBuilder
      */
     public function or(mixed ...$args): static
     {
-        Assert::countBetween($args, 1, 3);
+        assert(func_num_args() >= 1 && func_num_args() <= 3);
+
         if ($this->lastCondition?->or()->apply($this->buildCondition(...$args)) !== null) {
             return $this;
         }
+
         throw new LogicException('or called without a previous condition. Define a where before declaring or');
     }
 

@@ -7,13 +7,10 @@ use Kirameki\Database\Query\Execution;
 use Kirameki\Database\Query\Formatters\Formatter as QueryFormatter;
 use Kirameki\Database\Schema\Formatters\Formatter as SchemaFormatter;
 
-/**
- * @template-covariant TConfig of DatabaseConfig
- */
 interface Adapter
 {
     /**
-     * @return TConfig
+     * @return DatabaseConfig
      */
     public function getConfig(): DatabaseConfig;
 

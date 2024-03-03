@@ -5,17 +5,21 @@ namespace Kirameki\Database\Schema\Builders;
 use Kirameki\Database\Connection;
 use Kirameki\Database\Schema\Statements\BaseStatement;
 
+/**
+ * @template-covariant TStatement of BaseStatement
+ */
 abstract class StatementBuilder implements Builder
 {
     /**
-     * @var Connection
+     * @param Connection $connection
+     * @param TStatement $statement
      */
-    protected Connection $connection;
-
-    /**
-     * @var BaseStatement
-     */
-    protected BaseStatement $statement;
+    public function __construct(
+        protected Connection $connection,
+        protected BaseStatement $statement
+    )
+    {
+    }
 
     /**
      * Do a deep clone of object types

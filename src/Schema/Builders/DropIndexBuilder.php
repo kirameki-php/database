@@ -3,22 +3,25 @@
 namespace Kirameki\Database\Schema\Builders;
 
 use Kirameki\Database\Connection;
+use Kirameki\Database\Schema\Statements\CreateTableStatement;
 use Kirameki\Database\Schema\Statements\DropIndexStatement;
 use RuntimeException;
 
 /**
- * @property DropIndexStatement $statement
+ * @extends StatementBuilder<DropIndexStatement>
  */
 class DropIndexBuilder extends StatementBuilder
 {
     /**
      * @param Connection $connection
-     * @param DropIndexStatement $statement
+     * @param string $table
      */
-    public function __construct(Connection $connection, DropIndexStatement $statement)
+    public function __construct(
+        Connection $connection,
+        string $table,
+    )
     {
-        $this->connection = $connection;
-        $this->statement = $statement;
+        parent::__construct($connection, new DropIndexStatement($table));
     }
 
     /**
@@ -74,7 +77,7 @@ class DropIndexBuilder extends StatementBuilder
         $columns = $this->statement->columns;
 
         if($name === null && empty($columns)) {
-            throw new RuntimeException('No name or columns required to drop an index.');
+            throw new RuntimeException('Name or column(s) are required to drop an index.');
         }
     }
 }

@@ -3,7 +3,9 @@
 namespace Kirameki\Database\Migration;
 
 use DateTime;
+use DateTimeInterface;
 use Kirameki\Collections\Utils\Arr;
+use function assert;
 use function basename;
 
 class MigrationManager
@@ -44,43 +46,43 @@ class MigrationManager
     }
 
     /**
-     * @param DateTime|null $since
-     * @return Migration[]
+     * @param DateTimeInterface|null $since
+     * @return list<string>
      */
-    public function inspectUp(?DateTime $since = null): array
+    public function inspectUp(?DateTimeInterface $since = null): array
     {
         return $this->inspect('up', $since);
     }
 
     /**
-     * @param DateTime|null $since
-     * @return Migration[]
+     * @param DateTimeInterface|null $since
+     * @return list<string>
      */
-    public function inspectDown(?DateTime $since = null): array
+    public function inspectDown(?DateTimeInterface $since = null): array
     {
         return $this->inspect('down', $since);
     }
 
     /**
      * @param string $direction
-     * @param DateTime|null $since
-     * @return array
+     * @param DateTimeInterface|null $since
+     * @return list<string>
      */
-    protected function inspect(string $direction, ?DateTime $since = null): array
+    protected function inspect(string $direction, ?DateTimeInterface $since = null): array
     {
-        $ddls = [];
+        $statements = [];
         foreach ($this->readMigrations($since) as $migration) {
             $migration->$direction();
-            $ddls[] = $migration->toStatements();
+            $statements[] = $migration->toStatements();
         }
-        return Arr::flatten($ddls);
+        return Arr::flatten($statements);
     }
 
     /**
-     * @param DateTime|null $startAt
+     * @param DateTimeInterface|null $startAt
      * @return Migration[]
      */
-    protected function readMigrations(?DateTime $startAt = null): array
+    protected function readMigrations(?DateTimeInterface $startAt = null): array
     {
         $start = $startAt ? $startAt->format('YmdHis') : '00000000000000';
         $migrations = [];
@@ -89,7 +91,9 @@ class MigrationManager
             if ($datetime !== false || $datetime >= $start) {
                 $className = rtrim(ltrim(strstr($file, '_'), '_'), '.php');
                 require_once $file;
-                $migrations[] = new $className($datetime);
+                $migration = new $className($datetime);
+                assert($migration instanceof Migration);
+                $migrations[] = $migration;
             }
         }
         return $migrations;

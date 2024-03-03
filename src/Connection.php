@@ -38,7 +38,7 @@ class Connection
 
     /**
      * @param string $name
-     * @param Adapter<DatabaseConfig> $adapter
+     * @param Adapter $adapter
      * @param EventManager $events
      */
     public function __construct(
@@ -58,7 +58,7 @@ class Connection
     }
 
     /**
-     * @return Adapter<DatabaseConfig>
+     * @return Adapter
      */
     public function getAdapter(): Adapter
     {

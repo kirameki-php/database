@@ -4,6 +4,7 @@ namespace Kirameki\Database\Schema\Builders;
 
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Database\Connection;
+use Kirameki\Database\Schema\Statements\AlterTableStatement;
 use Kirameki\Database\Schema\Statements\ColumnDefinition;
 use Kirameki\Database\Schema\Statements\CreateIndexStatement;
 use Kirameki\Database\Schema\Statements\CreateTableStatement;
@@ -11,7 +12,7 @@ use Kirameki\Database\Schema\Statements\PrimaryKeyConstraint;
 use RuntimeException;
 
 /**
- * @property CreateTableStatement $statement
+ * @extends StatementBuilder<CreateTableStatement>
  */
 class CreateTableBuilder extends StatementBuilder
 {
@@ -19,10 +20,12 @@ class CreateTableBuilder extends StatementBuilder
      * @param Connection $connection
      * @param string $table
      */
-    public function __construct(Connection $connection, string $table)
+    public function __construct(
+        Connection $connection,
+        string $table,
+    )
     {
-        $this->connection = $connection;
-        $this->statement = new CreateTableStatement($table);
+        parent::__construct($connection, new CreateTableStatement($table));
     }
 
     /**
@@ -179,9 +182,9 @@ class CreateTableBuilder extends StatementBuilder
      */
     public function index(iterable $columns): CreateIndexBuilder
     {
-        $statement = new CreateIndexStatement($this->statement->table);
-        $this->statement->indexes[] = $statement;
-        return (new CreateIndexBuilder($this->connection, $statement))->columns($columns);
+        $builder = new CreateIndexBuilder($this->connection, $this->statement->table);
+        $this->statement->indexes[] = $builder->statement;
+        return $builder->columns($columns);
     }
 
     /**

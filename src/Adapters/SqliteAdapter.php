@@ -7,6 +7,7 @@ use Kirameki\Database\Exceptions\DatabaseNotFoundException;
 use Kirameki\Database\Query\Formatters\SqliteFormatter as SqliteQueryFormatter;
 use PDO;
 use function file_exists;
+use function iterator_to_array;
 use function unlink;
 
 /**
@@ -22,7 +23,7 @@ class SqliteAdapter extends PdoAdapter
         $config = $this->getConfig();
 
         $dsn = "sqlite:{$config->filename}";
-        $options = (array) ($config['options'] ?? []);
+        $options = iterator_to_array($config->options ?? []);
         $options+= [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,

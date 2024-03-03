@@ -13,7 +13,7 @@ use Kirameki\Database\Schema\Statements\DropIndexStatement;
 use Kirameki\Database\Schema\Support\AlterType;
 
 /**
- * @property AlterTableStatement $statement
+ * @extends StatementBuilder<AlterTableStatement>
  */
 class AlterTableBuilder extends StatementBuilder
 {
@@ -23,8 +23,7 @@ class AlterTableBuilder extends StatementBuilder
      */
     public function __construct(Connection $connection, string $table)
     {
-        $this->connection = $connection;
-        $this->statement = new AlterTableStatement($table);
+        parent::__construct($connection, new AlterTableStatement($table));
     }
 
     /**
@@ -67,28 +66,26 @@ class AlterTableBuilder extends StatementBuilder
     }
 
     /**
-     * @param string|array<string> $columns
+     * @param iterable<int, string> $columns
      * @return CreateIndexBuilder
      */
-    public function createIndex(string|array $columns = []): CreateIndexBuilder
+    public function createIndex(iterable $columns): CreateIndexBuilder
     {
-        $statement = new CreateIndexStatement($this->statement->table);
-        $builder = new CreateIndexBuilder($this->connection, $statement);
+        $builder = new CreateIndexBuilder($this->connection, $this->statement->table);
         $builder->columns($columns);
-        $this->statement->addAction($statement);
+        $this->statement->addAction($builder->statement);
         return $builder;
     }
 
     /**
-     * @param string|array<string> $columns
+     * @param iterable<int, string> $columns
      * @return DropIndexBuilder
      */
-    public function dropIndex(string|array $columns = []): DropIndexBuilder
+    public function dropIndex(iterable $columns): DropIndexBuilder
     {
-        $statement = new DropIndexStatement($this->statement->table);
-        $builder = new DropIndexBuilder($this->connection, $statement);
+        $builder = new DropIndexBuilder($this->connection, $this->statement->table);
         $builder->columns($columns);
-        $this->statement->addAction($builder);
+        $this->statement->addAction($builder->statement);
         return $builder;
     }
 

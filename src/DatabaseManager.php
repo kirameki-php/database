@@ -8,8 +8,11 @@ use Kirameki\Database\Adapters\Adapter;
 use Kirameki\Database\Adapters\MySqlAdapter;
 use Kirameki\Database\Adapters\SqliteAdapter;
 use Kirameki\Database\Configs\DatabaseConfig;
+use Kirameki\Database\Configs\MySqlConfig;
+use Kirameki\Database\Configs\SqliteConfig;
 use Kirameki\Event\EventManager;
 use LogicException;
+use function array_key_exists;
 
 class DatabaseManager
 {
@@ -73,9 +76,8 @@ class DatabaseManager
     }
 
     /**
-     * @template TConfig of DatabaseConfig
      * @param string $name
-     * @param Closure(TConfig): Adapter<TConfig> $deferred
+     * @param Closure(DatabaseConfig): Adapter $deferred
      * @return $this
      */
     public function addAdapter(string $name, Closure $deferred): static
@@ -91,8 +93,7 @@ class DatabaseManager
      */
     protected function createConnection(string $name, DatabaseConfig $config): Connection
     {
-        $adapterResolver = $this->getAdapterResolver($config->adapter);
-        $adapter = $adapterResolver($config);
+        $adapter = ($this->getAdapterResolver($config))($config);
         return new Connection($name, $adapter, $this->events);
     }
 
@@ -114,12 +115,13 @@ class DatabaseManager
     }
 
     /**
-     * @param string $name
+     * @param DatabaseConfig $config
      * @return Closure(DatabaseConfig): Adapter
      */
-    protected function getAdapterResolver(string $name): Closure
+    protected function getAdapterResolver(DatabaseConfig $config): Closure
     {
-        if (!isset($this->adapters[$name])) {
+        $name = $config->getAdapterName();
+        if (!array_key_exists($name, $this->adapters)) {
             $this->addAdapter($name, $this->getDefaultAdapterResolver($name));
         }
         return $this->adapters[$name];
@@ -132,9 +134,9 @@ class DatabaseManager
     protected function getDefaultAdapterResolver(string $adapter): Closure
     {
         return match ($adapter) {
-            'mysql' => static fn(DatabaseConfig $config) => new MySqlAdapter($config),
-            'sqlite' => static fn(DatabaseConfig $config) => new SqliteAdapter($config),
-            default => throw new LogicException("Adapter: $adapter does not exist"),
+            'mysql' => static fn(MySqlConfig $cfg) => new MySqlAdapter($cfg),
+            'sqlite' => static fn(SqliteConfig $cfg) => new SqliteAdapter($cfg),
+            default => throw new LogicException("No adapter resolver exists for: {$adapter}"),
         };
     }
 }

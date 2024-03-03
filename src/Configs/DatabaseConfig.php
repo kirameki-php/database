@@ -2,14 +2,7 @@
 
 namespace Kirameki\Database\Configs;
 
-class DatabaseConfig
+interface DatabaseConfig
 {
-    /**
-     * @param string $adapter
-     */
-    public function __construct(
-        public string $adapter,
-    )
-    {
-    }
+    public function getAdapterName(): string;
 }

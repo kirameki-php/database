@@ -3,11 +3,13 @@
 namespace Kirameki\Database\Adapters;
 
 use Closure;
+use Kirameki\Database\Configs\DatabaseConfig;
 use Kirameki\Database\Configs\MySqlConfig;
 use Kirameki\Database\Query\Formatters\MySqlFormatter as MySqlQueryFormatter;
 use PDO;
 use function array_filter;
 use function implode;
+use function iterator_to_array;
 
 /**
  * @extends PdoAdapter<MySqlConfig>
@@ -37,7 +39,7 @@ class MySqlAdapter extends PdoAdapter
         $dsn = 'mysql:'.implode(';', $parts);
         $username = $config->username ?? 'root';
         $password = $config->password ?? null;
-        $options = (array) ($config->options ?? []);
+        $options = iterator_to_array($config->options ?? []);
         $options+= [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
@@ -68,7 +70,7 @@ class MySqlAdapter extends PdoAdapter
     /**
      * @inheritDoc
      */
-    public function createDatabase(bool $ifNotExist = true): void
+    public function createDatabase(bool $ifNotExist = false): void
     {
         $copy = (clone $this);
         $copy->config->database = null;
@@ -82,7 +84,7 @@ class MySqlAdapter extends PdoAdapter
     /**
      * @inheritDoc
      */
-    public function dropDatabase(bool $ifExist = true): void
+    public function dropDatabase(bool $ifExist = false): void
     {
         $copy = (clone $this);
         $copy->config->database = null;

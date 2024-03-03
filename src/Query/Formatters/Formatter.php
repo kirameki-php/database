@@ -4,6 +4,8 @@ namespace Kirameki\Database\Query\Formatters;
 
 use BackedEnum;
 use DateTimeInterface;
+use Kirameki\Core\Json;
+use Kirameki\Core\Value;
 use Kirameki\Database\Query\Builders\SelectBuilder;
 use Kirameki\Database\Query\Expressions\Column;
 use Kirameki\Database\Query\Expressions\Expr;
@@ -18,8 +20,6 @@ use Kirameki\Database\Query\Support\LockOption;
 use Kirameki\Database\Query\Support\LockType;
 use Kirameki\Database\Query\Support\Operator;
 use Kirameki\Database\Query\Support\Range;
-use Kirameki\Support\Json;
-use Kirameki\Support\Str;
 use RuntimeException;
 use function array_filter;
 use function array_keys;
@@ -33,6 +33,7 @@ use function is_bool;
 use function is_iterable;
 use function is_null;
 use function is_string;
+use function iterator_to_array;
 use function next;
 use function preg_match;
 use function preg_quote;
@@ -93,7 +94,7 @@ abstract class Formatter
         $bindings = [];
         foreach ($statement->dataset as $data) {
             if (!is_array($data)) {
-                throw new RuntimeException('Data should be an array but ' . Str::typeOf($data) . ' given.');
+                throw new RuntimeException('Data should be an array but ' . Value::getType($data) . ' given.');
             }
             foreach ($columns as $column) {
                 $bindings[] = $data[$column] ?? null;
@@ -168,11 +169,12 @@ abstract class Formatter
      * FOR DEBUGGING ONLY
      *
      * @param string $statement
-     * @param array<mixed> $bindings
+     * @param iterable<array-key, mixed> $bindings
      * @return string
      */
-    public function interpolate(string $statement, array $bindings): string
+    public function interpolate(string $statement, iterable $bindings): string
     {
+        $bindings = iterator_to_array($bindings);
         $remains = count($bindings);
         return (string) preg_replace_callback('/\?\??/', function ($matches) use (&$bindings, &$remains) {
             if ($matches[0] === '?' && $remains > 0) {
@@ -389,7 +391,7 @@ abstract class Formatter
             Operator::Exists => $this->formatConditionForExists($def),
             Operator::Like => $this->formatConditionForLike($def),
             Operator::Range => $this->formatConditionForRange($def),
-            default => throw new RuntimeException('Unknown Operator: '.Str::valueOf($def->operator?->value)),
+            default => throw new RuntimeException('Unknown Operator: ' . Value::getType($def->operator?->value)),
         };
     }
 
@@ -403,7 +405,7 @@ abstract class Formatter
             return $def->value->prepare($this);
         }
 
-        throw new RuntimeException('Unknown condition:' . Str::valueOf($def->value));
+        throw new RuntimeException('Unknown condition:' . Value::getType($def->value));
     }
 
     /**
@@ -678,9 +680,9 @@ abstract class Formatter
     {
         $as = null;
         if (preg_match('/( as | AS )/', $name)) {
-            $delim = preg_quote($this->getIdentifierDelimiter(), null);
-            $tablePatternPart = $delim . '?(?<table>[^ ' . $delim . ']+)' . $delim . '?';
-            $asPatternPart = '( (AS|as) ' . $delim . '?(?<as>[^' . $delim . ']+)' . $delim . '?)?';
+            $dlm = preg_quote($this->getIdentifierDelimiter());
+            $tablePatternPart = $dlm . '?(?<table>[^ ' . $dlm . ']+)' . $dlm . '?';
+            $asPatternPart = '( (AS|as) ' . $dlm . '?(?<as>[^' . $dlm . ']+)' . $dlm . '?)?';
             $pattern = '/^' . $tablePatternPart . $asPatternPart . '$/';
             $match = null;
             if (preg_match($pattern, $name, $match)) {
@@ -705,12 +707,12 @@ abstract class Formatter
         $table = null;
         $as = null;
         if (preg_match('/(\.| as | AS )/', $name)) {
-            $delim = preg_quote($this->getIdentifierDelimiter(), null);
+            $dlm = preg_quote($this->getIdentifierDelimiter());
             $patterns = [];
-            $patterns[] = '(' . $delim . '?(?<table>[^\.'. $delim . ']+)' . $delim . '?\.)?';
-            $patterns[] = $delim . '?(?<column>[^ ' . $delim . ']+)' . $delim . '?';
+            $patterns[] = '(' . $dlm . '?(?<table>[^\.'. $dlm . ']+)' . $dlm . '?\.)?';
+            $patterns[] = $dlm . '?(?<column>[^ ' . $dlm . ']+)' . $dlm . '?';
             if ($withAlias) {
-                $patterns[] = '( (AS|as) ' . $delim . '?(?<as>[^'.$delim.']+)' . $delim . '?)?';
+                $patterns[] = '( (AS|as) ' . $dlm . '?(?<as>[^'.$dlm.']+)' . $dlm . '?)?';
             }
             $pattern = '/^' . implode('', $patterns) . '$/';
             $match = null;
@@ -850,8 +852,7 @@ abstract class Formatter
     protected function parameterize(mixed $value): mixed
     {
         if (is_iterable($value)) {
-            /** @var iterable<array-key, mixed> $value */
-            return Json::encode(Arr::from($value));
+            return Json::encode(iterator_to_array($value));
         }
 
         if ($value instanceof DateTimeInterface) {

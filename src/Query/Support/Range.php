@@ -6,6 +6,7 @@ use IteratorAggregate;
 use Traversable;
 
 /**
+ * @consistent-constructor
  * @implements IteratorAggregate<int, mixed>
  */
 class Range implements IteratorAggregate

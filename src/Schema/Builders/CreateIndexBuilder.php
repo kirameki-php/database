@@ -5,21 +5,24 @@ namespace Kirameki\Database\Schema\Builders;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Database\Connection;
 use Kirameki\Database\Schema\Statements\CreateIndexStatement;
+use Kirameki\Database\Schema\Statements\CreateTableStatement;
 use RuntimeException;
 
 /**
- * @property CreateIndexStatement $statement
+ * @extends StatementBuilder<CreateIndexStatement>
  */
 class CreateIndexBuilder extends StatementBuilder
 {
     /**
      * @param Connection $connection
-     * @param CreateIndexStatement $statement
+     * @param string $table
      */
-    public function __construct(Connection $connection, CreateIndexStatement $statement)
+    public function __construct(
+        Connection $connection,
+        string $table,
+    )
     {
-        $this->connection = $connection;
-        $this->statement = $statement;
+        parent::__construct($connection, new CreateIndexStatement($table));
     }
 
     /**

@@ -6,7 +6,9 @@ use DateTime;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Database\Connection;
 use Kirameki\Database\DatabaseManager;
+use Kirameki\Database\Query\Statements\BaseStatement;
 use Kirameki\Database\Schema\Builders\AlterTableBuilder;
+use Kirameki\Database\Schema\Builders\Builder;
 use Kirameki\Database\Schema\Builders\CreateIndexBuilder;
 use Kirameki\Database\Schema\Builders\CreateTableBuilder;
 use Kirameki\Database\Schema\Builders\DropIndexBuilder;
@@ -15,35 +17,24 @@ use Kirameki\Database\Schema\Builders\RenameTableBuilder;
 use Kirameki\Database\Schema\Builders\StatementBuilder;
 use Kirameki\Database\Schema\Statements\CreateIndexStatement;
 use Kirameki\Database\Schema\Statements\DropIndexStatement;
+use Kirameki\Time\Time;
 
 abstract class Migration
 {
     /**
-     * @var string|null
+     * @var list<Builder>
      */
-    protected ?string $time;
-
-    /**
-     * @var StatementBuilder[]
-     */
-    protected array $builders;
-
-    /**
-     * @var Connection
-     */
-    protected Connection $using;
+    protected array $builders = [];
 
     /**
      * @param DatabaseManager $db
-     * @param string|null $time
+     * @param Connection $using
      */
     public function __construct(
         protected DatabaseManager $db,
-        ?string $time = null,
+        protected Connection $using,
     )
     {
-        $this->time = $time;
-        $this->builders = [];
     }
 
     /**
@@ -67,15 +58,7 @@ abstract class Migration
     }
 
     /**
-     * @return DateTime
-     */
-    public function getCreatedTime(): DateTime
-    {
-        return DateTime::createFromFormat('YmdHis', $this->time);
-    }
-
-    /**
-     * @return StatementBuilder[]
+     * @return list<Builder>
      */
     public function getBuilders(): array
     {
@@ -83,11 +66,11 @@ abstract class Migration
     }
 
     /**
-     * @return string[]
+     * @return list<string>
      */
     public function toStatements(): array
     {
-        return Arr::flatMap($this->builders, fn(StatementBuilder $b) => $b->build());
+        return Arr::flatMap($this->builders, fn(Builder $b) => $b->build());
     }
 
     /**
@@ -143,8 +126,7 @@ abstract class Migration
      */
     public function createIndex(string $table): CreateIndexBuilder
     {
-        $statement = new CreateIndexStatement($table);
-        return $this->builders[] = new CreateIndexBuilder($this->using, $statement);
+        return $this->builders[] = new CreateIndexBuilder($this->using, $table);
     }
 
     /**
@@ -153,7 +135,6 @@ abstract class Migration
      */
     public function dropIndex(string $table): DropIndexBuilder
     {
-        $statement = new DropIndexStatement($table);
-        return $this->builders[] = new DropIndexBuilder($this->using, $statement);
+        return $this->builders[] = new DropIndexBuilder($this->using, $table);
     }
 }

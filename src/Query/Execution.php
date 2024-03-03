@@ -9,7 +9,7 @@ use Kirameki\Database\Configs\DatabaseConfig;
 class Execution
 {
     /**
-     * @param Adapter<DatabaseConfig> $adapter
+     * @param Adapter $adapter
      * @param string $statement
      * @param iterable<array-key, mixed> $bindings
      * @param iterable<int, mixed> $rowIterator
