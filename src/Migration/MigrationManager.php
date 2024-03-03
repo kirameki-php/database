@@ -2,31 +2,30 @@
 
 namespace Kirameki\Database\Migration;
 
-use DateTime;
 use DateTimeInterface;
 use Kirameki\Collections\Utils\Arr;
 use function assert;
 use function basename;
+use function glob;
+use function is_a;
+use function ltrim;
+use function strstr;
 
 class MigrationManager
 {
     /**
-     * @var string
-     */
-    protected string $directory;
-
-    /**
      * @param string $directory
      */
-    public function __construct(string $directory)
+    public function __construct(
+        protected string $directory,
+    )
     {
-        $this->directory = $directory;
     }
 
     /**
-     * @param DateTime|null $since
+     * @param DateTimeInterface|null $since
      */
-    public function up(?DateTime $since = null): void
+    public function up(?DateTimeInterface $since = null): void
     {
         foreach ($this->readMigrations($since) as $migration) {
             $migration->up();
@@ -35,9 +34,9 @@ class MigrationManager
     }
 
     /**
-     * @param DateTime|null $since
+     * @param DateTimeInterface|null $since
      */
-    public function down(?DateTime $since = null): void
+    public function down(?DateTimeInterface $since = null): void
     {
         foreach ($this->readMigrations($since) as $migration) {
             $migration->down();
@@ -89,8 +88,8 @@ class MigrationManager
         foreach ($this->getMigrationFiles() as $file) {
             $datetime = strstr(basename($file), '_', true);
             if ($datetime !== false || $datetime >= $start) {
-                $className = rtrim(ltrim(strstr($file, '_'), '_'), '.php');
                 require_once $file;
+                $className = $this->extractClassName($file);
                 $migration = new $className($datetime);
                 assert($migration instanceof Migration);
                 $migrations[] = $migration;
@@ -105,5 +104,16 @@ class MigrationManager
     protected function getMigrationFiles(): array
     {
         return glob($this->directory . '/*.php') ?: [];
+    }
+
+    /**
+     * @param string $file
+     * @return class-string<Migration>
+     */
+    protected function extractClassName(string $file): string
+    {
+        $className = basename(ltrim((string) strstr($file, '_'), '_'), '.php');
+        assert(is_a($className, Migration::class, true));
+        return $className;
     }
 }
