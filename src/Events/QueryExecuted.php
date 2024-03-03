@@ -4,20 +4,19 @@ namespace Kirameki\Database\Events;
 
 use Kirameki\Database\Connection;
 use Kirameki\Database\Query\Result;
-use Kirameki\Database\Query\ResultLazy;
 
 class QueryExecuted extends DatabaseEvent
 {
     /**
-     * @var Result|ResultLazy
+     * @var Result
      */
-    public readonly Result|ResultLazy $result;
+    public readonly Result $result;
 
     /**
      * @param Connection $connection
-     * @param Result|ResultLazy $result
+     * @param Result $result
      */
-    public function __construct(Connection $connection, Result|ResultLazy $result)
+    public function __construct(Connection $connection, Result $result)
     {
         parent::__construct($connection);
         $this->result = $result;

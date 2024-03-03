@@ -14,7 +14,6 @@ use Kirameki\Database\Query\Execution;
 use Kirameki\Database\Query\Expressions\Expr;
 use Kirameki\Database\Query\Formatters\Formatter as QueryFormatter;
 use Kirameki\Database\Query\Result;
-use Kirameki\Database\Query\ResultLazy;
 use Kirameki\Database\Schema\Formatters\Formatter as SchemaFormatter;
 use Kirameki\Database\Transaction\Transaction;
 use Kirameki\Database\Transaction\TransactionHandler;
@@ -148,20 +147,20 @@ class Connection
     {
         $execution = $this->adapter->query($statement, $bindings);
         $result = new Result($this, $execution);
-        $this->events->dispatchClass(QueryExecuted::class, $this, $result);
+        $this->events->emit(new QueryExecuted($this, $result));
         return $result;
     }
 
     /**
      * @param string $statement
      * @param array<mixed> $bindings
-     * @return ResultLazy
+     * @return Result
      */
-    public function cursor(string $statement, array $bindings = []): ResultLazy
+    public function cursor(string $statement, array $bindings = []): Result
     {
         $execution = $this->adapter->cursor($statement, $bindings);
-        $result = new ResultLazy($this, $execution);
-        $this->events->dispatchClass(QueryExecuted::class, $this, $result);
+        $result = new Result($this, $execution);
+        $this->events->emit(new QueryExecuted($this, $result));
         return $result;
     }
 
@@ -242,7 +241,7 @@ class Connection
     public function applySchema(string $statement): Execution
     {
         $execution = $this->adapter->execute($statement);
-        $this->events->dispatchClass(SchemaExecuted::class, $this, $execution);
+        $this->events->emit(new SchemaExecuted($this, $execution));
         return $execution;
     }
 }

@@ -3,28 +3,19 @@
 namespace Kirameki\Database\Events;
 
 use Kirameki\Database\Connection;
+use Kirameki\Database\Query\Execution;
 
 class SchemaExecuted extends DatabaseEvent
 {
     /**
-     * @var string
-     */
-    public readonly string $statement;
-
-    /**
-     * @var float
-     */
-    public readonly float $elapsedMs;
-
-    /**
      * @param Connection $connection
-     * @param string $statement
-     * @param float $elapsedMs
+     * @param Execution $execution
      */
-    public function __construct(Connection $connection, string $statement, float $elapsedMs)
+    public function __construct(
+        Connection $connection,
+        protected Execution $execution,
+    )
     {
         parent::__construct($connection);
-        $this->statement = $statement;
-        $this->elapsedMs = $elapsedMs;
     }
 }

@@ -20,11 +20,11 @@ class SqliteAdapter extends PdoAdapter
     {
         $config = $this->getConfig();
 
-        $dsn = "sqlite:{$config->path}";
+        $dsn = "sqlite:{$config->filename}";
         $options = (array) ($config['options'] ?? []);
         $options+= [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
         ];
 
         return new PDO($dsn, null, null, $options);
@@ -64,7 +64,7 @@ class SqliteAdapter extends PdoAdapter
         if ($ifNotExist && !$this->databaseExists()) {
             return;
         }
-        unlink($this->config->getString('path'));
+        unlink($this->config->filename);
     }
 
     /**
@@ -72,7 +72,7 @@ class SqliteAdapter extends PdoAdapter
      */
     public function databaseExists(): bool
     {
-        return file_exists($this->config->getString('path'));
+        return file_exists($this->config->filename);
     }
 
     /**

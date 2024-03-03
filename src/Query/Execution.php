@@ -4,11 +4,15 @@ namespace Kirameki\Database\Query;
 
 use Closure;
 use Kirameki\Database\Adapters\Adapter;
+use Kirameki\Database\Configs\DatabaseConfig;
 
+/**
+ * @template TAdapter of Adapter
+ */
 class Execution
 {
     /**
-     * @param Adapter $adapter
+     * @param TAdapter $adapter
      * @param string $statement
      * @param array<mixed> $bindings
      * @param iterable<int, mixed> $rowIterator

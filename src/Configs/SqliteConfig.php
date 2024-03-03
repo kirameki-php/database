@@ -6,11 +6,11 @@ class SqliteConfig extends DatabaseConfig
 {
     /**
      * @param string $adapter
-     * @param string $path
+     * @param string $filename
      */
     public function __construct(
         string $adapter,
-        public string $path,
+        public string $filename,
     )
     {
         parent::__construct($adapter);
