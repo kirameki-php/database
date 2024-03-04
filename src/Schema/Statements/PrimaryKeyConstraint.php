@@ -5,14 +5,7 @@ namespace Kirameki\Database\Schema\Statements;
 class PrimaryKeyConstraint
 {
     /**
-     * @var string[]
+     * @var list<string>
      */
-    public array $columns;
-
-    /**
-     */
-    public function __construct()
-    {
-        $this->columns = [];
-    }
+    public array $columns = [];
 }

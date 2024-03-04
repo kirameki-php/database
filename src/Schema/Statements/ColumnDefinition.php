@@ -4,23 +4,15 @@ namespace Kirameki\Database\Schema\Statements;
 
 class ColumnDefinition
 {
-    public string $name;
+    public ?bool $primaryKey = null;
 
-    public ?string $type;
+    public ?bool $nullable = true;
 
-    public ?int $size;
+    public ?bool $autoIncrement = null;
 
-    public ?int $scale;
+    public ?string $comment = null;
 
-    public ?bool $primaryKey;
-
-    public ?bool $nullable;
-
-    public ?bool $autoIncrement;
-
-    public ?string $comment;
-
-    public mixed $default;
+    public mixed $default = null;
 
     /**
      * @param string $name
@@ -29,20 +21,11 @@ class ColumnDefinition
      * @param int|null $scale
      */
     public function __construct(
-        string $name,
-        string $type = null,
-        ?int $size = null,
-        ?int $scale = null,
+        public string $name,
+        public ?string $type = null,
+        public ?int $size = null,
+        public ?int $scale = null,
     )
     {
-        $this->name = $name;
-        $this->type = $type;
-        $this->size = $size;
-        $this->scale = $scale;
-        $this->primaryKey = null;
-        $this->nullable = true;
-        $this->autoIncrement = null;
-        $this->comment = null;
-        $this->default = null;
     }
 }

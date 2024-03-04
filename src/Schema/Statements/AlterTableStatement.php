@@ -5,7 +5,7 @@ namespace Kirameki\Database\Schema\Statements;
 class AlterTableStatement extends BaseStatement
 {
     /**
-     * @var array<mixed>
+     * @var list<mixed>
      */
     public array $actions;
 

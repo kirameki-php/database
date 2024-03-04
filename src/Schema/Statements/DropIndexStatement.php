@@ -12,14 +12,5 @@ class DropIndexStatement extends BaseStatement
     /**
      * @var string[]
      */
-    public array $columns;
-
-    /**
-     * @param string $table
-     */
-    public function __construct(string $table)
-    {
-        parent::__construct($table);
-        $this->columns = [];
-    }
+    public array $columns = [];
 }

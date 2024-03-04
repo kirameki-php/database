@@ -7,26 +7,15 @@ class CreateTableStatement extends BaseStatement
     /**
      * @var ColumnDefinition[]
      */
-    public array $columns;
+    public array $columns = [];
 
     /**
      * @var PrimaryKeyConstraint|null
      */
-    public ?PrimaryKeyConstraint $primaryKey;
+    public ?PrimaryKeyConstraint $primaryKey = null;
 
     /**
      * @var CreateIndexStatement[]
      */
-    public array $indexes;
-
-    /**
-     * @param string $table
-     */
-    public function __construct(string $table)
-    {
-        parent::__construct($table);
-        $this->columns = [];
-        $this->primaryKey = null;
-        $this->indexes = [];
-    }
+    public array $indexes = [];
 }

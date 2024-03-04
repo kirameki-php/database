@@ -5,15 +5,11 @@ namespace Kirameki\Database\Schema\Statements;
 abstract class BaseStatement
 {
     /**
-     * @var string
-     */
-    public string $table;
-
-    /**
      * @param string $table
      */
-    public function __construct(string $table)
+    public function __construct(
+        public readonly string $table,
+    )
     {
-        $this->table = $table;
     }
 }

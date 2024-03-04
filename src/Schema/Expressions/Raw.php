@@ -7,16 +7,12 @@ use Kirameki\Database\Schema\Formatters\Formatter;
 class Raw extends Expr
 {
     /**
-     * @var string
-     */
-    public readonly string $value;
-
-    /**
      * @param string $value
      */
-    public function __construct(string $value)
+    public function __construct(
+        public readonly string $value,
+    )
     {
-        $this->value = $value;
     }
 
     /**

@@ -6,19 +6,15 @@ use Kirameki\Database\Schema\Support\AlterType;
 
 class AlterColumnAction
 {
-    public AlterType $type;
+    public ?string $positionType = null;
 
-    public ColumnDefinition $definition;
+    public ?string $positionColumn = null;
 
-    public string $positionType;
-
-    public ?string $positionColumn;
-
-    public function __construct(AlterType $type, ColumnDefinition $definition)
+    public function __construct(
+        public readonly AlterType $type,
+        public readonly ColumnDefinition $definition,
+    )
     {
-        $this->type = $type;
-        $this->definition = $definition;
-        $this->positionColumn = null;
     }
 
     public function isAdd(): bool

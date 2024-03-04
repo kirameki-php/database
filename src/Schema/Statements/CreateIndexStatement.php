@@ -10,7 +10,7 @@ class CreateIndexStatement extends BaseStatement
     public ?string $name;
 
     /**
-     * @var string[]
+     * @var array<array-key, string>
      */
     public array $columns;
 
