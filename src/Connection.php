@@ -41,19 +41,11 @@ class Connection
      * @param EventManager $events
      */
     public function __construct(
-        protected readonly string $name,
+        public readonly string $name,
         protected readonly DatabaseAdapter $adapter,
         protected readonly EventManager $events,
     )
     {
-    }
-
-    /**
-     * @return string
-     */
-    public function getName(): string
-    {
-        return $this->name;
     }
 
     /**
@@ -129,10 +121,7 @@ class Connection
      */
     public function query(string $statement, array $bindings = []): Result
     {
-        $execution = $this->adapter->query($statement, $bindings);
-        $result = new Result($this, $execution);
-        $this->events->emit(new QueryExecuted($this, $result));
-        return $result;
+        return $this->handleExecution($this->adapter->query($statement, $bindings));
     }
 
     /**
@@ -142,10 +131,7 @@ class Connection
      */
     public function cursor(string $statement, iterable $bindings = []): Result
     {
-        $execution = $this->adapter->cursor($statement, $bindings);
-        $result = new Result($this, $execution);
-        $this->events->emit(new QueryExecuted($this, $result));
-        return $result;
+        return $this->handleExecution($this->adapter->cursor($statement, $bindings));
     }
 
     /**
@@ -228,5 +214,12 @@ class Connection
         $execution = $this->adapter->execute($statement);
         $this->events->emit(new SchemaExecuted($this, $execution));
         return $execution;
+    }
+
+    protected function handleExecution(Execution $execution): Result
+    {
+        $result = new Result($this, $execution);
+        $this->events->emit(new QueryExecuted($this, $result));
+        return $result;
     }
 }

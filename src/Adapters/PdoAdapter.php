@@ -2,16 +2,18 @@
 
 namespace Kirameki\Database\Adapters;
 
+use Closure;
 use Iterator;
 use Kirameki\Database\Query\Execution;
 use Kirameki\Database\Query\Formatters\Formatter as QueryFormatter;
 use Kirameki\Database\Schema\Formatters\Formatter as SchemaFormatter;
-use LogicException;
 use PDO;
+use PDOException;
 use PDOStatement;
 use RuntimeException;
-use Throwable;
-use function preg_match;
+use function hrtime;
+use function implode;
+use function iterator_to_array;
 
 /**
  * @template TConfig of DatabaseConfig
@@ -69,10 +71,9 @@ abstract class PdoAdapter implements DatabaseAdapter
     public function execute(string $statement): Execution
     {
         $startTime = hrtime(true);
-        $affected = $this->getPdo()->exec($statement) ?: 0;
-        $count = static fn () => $affected;
+        $count = $this->getPdo()->exec($statement) ?: 0;
         $execTimeMs = (hrtime(true) - $startTime) / 1_000_000;
-        return new Execution($this, $statement, [], [], $count, $execTimeMs, null);
+        return $this->instantiateExecution($statement, [], [], $execTimeMs, $count);
     }
 
     /**
@@ -81,13 +82,12 @@ abstract class PdoAdapter implements DatabaseAdapter
     public function query(string $statement, iterable $bindings = []): Execution
     {
         $startTime = hrtime(true);
+        $bindings = iterator_to_array($bindings);
         $prepared = $this->execQuery($statement, $bindings);
-        $afterExecTime = hrtime(true);
-        $execTimeMs = ($afterExecTime - $startTime) / 1_000_000;
-        $rows = $prepared->fetchAll(PDO::FETCH_ASSOC);
+        $rows = $prepared->fetchAll(PDO::FETCH_OBJ);
         $fetchTimeMs = (hrtime(true) - $startTime) / 1_000_000;
         $count = $prepared->rowCount(...);
-        return new Execution($this, $statement, $bindings, $rows, $count, $execTimeMs, $fetchTimeMs);
+        return $this->instantiateExecution($statement, $bindings, $rows, $fetchTimeMs, $count);
     }
 
     /**
@@ -96,10 +96,11 @@ abstract class PdoAdapter implements DatabaseAdapter
     public function cursor(string $statement, iterable $bindings = []): Execution
     {
         $startTime = hrtime(true);
+        $bindings = iterator_to_array($bindings);
         $prepared = $this->execQuery($statement, $bindings);
         $iterator = (function() use ($prepared): Iterator {
             while (true) {
-                $data = $prepared->fetch();
+                $data = $prepared->fetch(PDO::FETCH_OBJ);
                 if ($data === false) {
                     if ($prepared->errorCode() === '00000') {
                         break;
@@ -111,7 +112,7 @@ abstract class PdoAdapter implements DatabaseAdapter
         })();
         $execTimeMs = (hrtime(true) - $startTime) / 1_000_000;
         $count = $prepared->rowCount(...);
-        return new Execution($this, $statement, $bindings, $iterator, $count, $execTimeMs, null);
+        return $this->instantiateExecution($statement, $bindings, $iterator, $execTimeMs, $count);
     }
 
     /**
@@ -155,7 +156,7 @@ abstract class PdoAdapter implements DatabaseAdapter
             $this->query("SELECT 1 FROM $table LIMIT 1");
             return true;
         }
-        catch (Throwable) {
+        catch (PDOException) {
             return false;
         }
     }
@@ -175,13 +176,13 @@ abstract class PdoAdapter implements DatabaseAdapter
 
     /**
      * @param string $statement
-     * @param iterable<array-key, mixed> $bindings
+     * @param array<array-key, mixed> $bindings
      * @return PDOStatement
      */
-    protected function execQuery(string $statement, iterable $bindings): PDOStatement
+    protected function execQuery(string $statement, array $bindings): PDOStatement
     {
         $prepared = $this->getPdo()->prepare($statement);
-        $prepared->execute(iterator_to_array($bindings));
+        $prepared->execute($bindings);
         return $prepared;
     }
 
@@ -199,15 +200,22 @@ abstract class PdoAdapter implements DatabaseAdapter
     abstract protected function createPdo(): PDO;
 
     /**
-     * @param string $str
-     * @return string
+     * @param string $statement
+     * @param array<array-key, mixed> $bindings
+     * @param iterable<int, mixed> $rowIterator
+     * @param float $elapsedMs
+     * @param int|Closure(): int $affectedRowCount
+     * @return Execution
      */
-    protected function alphanumeric(string $str): string
+    protected function instantiateExecution(
+        string $statement,
+        array $bindings,
+        iterable $rowIterator,
+        float $elapsedMs,
+        int|Closure $affectedRowCount,
+    ): Execution
     {
-        if (!preg_match('/^[a-zA-Z0-9_-]+$/', $str)) {
-            throw new LogicException("Invalid string: '$str' Only alphanumeric characters, '_', and '-' are allowed.");
-        }
-        return $str;
+        return new Execution($this->config, $statement, $bindings, $rowIterator, $elapsedMs, $affectedRowCount);
     }
 
     /**

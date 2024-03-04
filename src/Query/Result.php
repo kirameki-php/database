@@ -12,11 +12,6 @@ use Kirameki\Database\Connection;
 class Result extends Vec
 {
     /**
-     * @var int|null
-     */
-    protected ?int $resolvedAffectedRowsCount = null;
-
-    /**
      * @param Connection $connection
      * @param Execution $execution
      */
@@ -26,33 +21,6 @@ class Result extends Vec
     )
     {
         parent::__construct($execution->rowIterator);
-    }
-
-    /**
-     * @return int
-     */
-    public function getAffectedRowCount(): int
-    {
-        if ($this->resolvedAffectedRowsCount === null) {
-            $rowCount = $this->execution->affectedRowCount;
-            $this->resolvedAffectedRowsCount = ($rowCount instanceof Closure)
-                ? $rowCount()
-                : $rowCount;
-        }
-        return $this->resolvedAffectedRowsCount;
-    }
-
-    /**
-     * @return float
-     */
-    public function getTotalTimeInMilliSeconds(): float
-    {
-        $execution = $this->execution;
-
-        $execTime = $execution->execTimeMs;
-        $fetchTime = $execution->fetchTimeMs ?? 0.0;
-
-        return $execTime + $fetchTime;
     }
 
     /**

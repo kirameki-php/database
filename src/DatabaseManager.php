@@ -71,7 +71,7 @@ class DatabaseManager
      */
     public function addConnection(Connection $connection): static
     {
-        $this->connections[$connection->getName()] = $connection;
+        $this->connections[$connection->name] = $connection;
         return $this;
     }
 
