@@ -8,16 +8,12 @@ use Kirameki\Database\Schema\Expressions\CurrentTimestamp;
 class ColumnBuilder
 {
     /**
-     * @var ColumnDefinition
-     */
-    protected ColumnDefinition $definition;
-
-    /**
      * @param ColumnDefinition $definition
      */
-    public function __construct(ColumnDefinition $definition)
+    public function __construct(
+        protected ColumnDefinition $definition,
+    )
     {
-        $this->definition = $definition;
     }
 
     /**

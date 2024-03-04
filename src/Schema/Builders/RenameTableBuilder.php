@@ -7,30 +7,16 @@ use Kirameki\Database\Connection;
 class RenameTableBuilder implements Builder
 {
     /**
-     * @var Connection
-     */
-    protected Connection $connection;
-
-    /**
-     * @var string
-     */
-    protected string $from;
-
-    /**
-     * @var string
-     */
-    protected string $to;
-
-    /**
      * @param Connection $connection
      * @param string $from
      * @param string $to
      */
-    public function __construct(Connection $connection, string $from, string $to)
+    public function __construct(
+        protected Connection $connection,
+        protected string $from,
+        protected string $to,
+    )
     {
-        $this->connection = $connection;
-        $this->from = $from;
-        $this->to = $to;
     }
 
     /**

@@ -22,7 +22,7 @@ class DatabaseManager
     protected array $connections = [];
 
     /**
-     * @var array<string, Closure>
+     * @var array<string, Closure(DatabaseConfig): DatabaseAdapter>
      */
     protected array $adapters = [];
 

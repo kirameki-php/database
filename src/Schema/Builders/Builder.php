@@ -5,7 +5,7 @@ namespace Kirameki\Database\Schema\Builders;
 interface Builder
 {
     /**
-     * @return string[]
+     * @return list<string>
      */
     public function build(): array;
 }

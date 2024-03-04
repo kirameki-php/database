@@ -21,16 +21,6 @@ use Kirameki\Event\EventManager;
 class Connection
 {
     /**
-     * @var QueryFormatter|null
-     */
-    protected ?QueryFormatter $queryFormatter;
-
-    /**
-     * @var SchemaFormatter|null
-     */
-    protected ?SchemaFormatter $schemaFormatter;
-
-    /**
      * @var TransactionHandler|null
      */
     protected ?TransactionHandler $transactionHandler;
@@ -61,7 +51,7 @@ class Connection
      */
     public function getQueryFormatter(): QueryFormatter
     {
-        return $this->queryFormatter ??= $this->adapter->getQueryFormatter();
+        return $this->adapter->getQueryFormatter();
     }
 
     /**
@@ -69,15 +59,7 @@ class Connection
      */
     public function getSchemaFormatter(): SchemaFormatter
     {
-        return $this->schemaFormatter ??= $this->adapter->getSchemaFormatter();
-    }
-
-    /**
-     * @return TransactionHandler
-     */
-    public function getTransactionHandler(): TransactionHandler
-    {
-        return $this->transactionHandler ??= new TransactionHandler($this, $this->events);
+        return $this->adapter->getSchemaFormatter();
     }
 
     /**
@@ -214,6 +196,14 @@ class Connection
         $execution = $this->adapter->execute($statement);
         $this->events->emit(new SchemaExecuted($this, $execution));
         return $execution;
+    }
+
+    /**
+     * @return TransactionHandler
+     */
+    protected function getTransactionHandler(): TransactionHandler
+    {
+        return $this->transactionHandler ??= new TransactionHandler($this, $this->events);
     }
 
     protected function handleExecution(Execution $execution): Result

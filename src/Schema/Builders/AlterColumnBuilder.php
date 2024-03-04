@@ -7,17 +7,11 @@ use Kirameki\Database\Schema\Statements\AlterColumnAction;
 class AlterColumnBuilder extends ColumnBuilder
 {
     /**
-     * @var AlterColumnAction
-     */
-    protected AlterColumnAction $action;
-
-    /**
      * @param AlterColumnAction $action
      */
-    public function __construct(AlterColumnAction $action)
+    public function __construct(protected AlterColumnAction $action)
     {
         parent::__construct($action->definition);
-        $this->action = $action;
     }
 
     /**

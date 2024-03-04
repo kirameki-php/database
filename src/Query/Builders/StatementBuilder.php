@@ -9,24 +9,18 @@ use Kirameki\Database\Query\Statements\BaseStatement;
 
 abstract class StatementBuilder
 {
-    /**
-     * @var Connection
-     */
-    protected Connection $connection;
-
-    /**
-     * @var BaseStatement
-     */
-    protected BaseStatement $statement;
+    protected Formatter $formatter;
 
     /**
      * @param Connection $connection
      * @param BaseStatement $statement
      */
-    public function __construct(Connection $connection, BaseStatement $statement)
+    public function __construct(
+        protected Connection $connection,
+        protected BaseStatement $statement,
+    )
     {
-        $this->connection = $connection;
-        $this->statement = $statement;
+        $this->formatter = $connection->getQueryFormatter();
     }
 
     /**
@@ -81,18 +75,10 @@ abstract class StatementBuilder
     }
 
     /**
-     * @return Formatter
-     */
-    protected function getQueryFormatter(): Formatter
-    {
-        return $this->connection->getQueryFormatter();
-    }
-
-    /**
      * @return string
      */
     public function toSql(): string
     {
-        return $this->getQueryFormatter()->interpolate($this->prepare(), $this->getBindings());
+        return $this->formatter->interpolate($this->prepare(), $this->getBindings());
     }
 }

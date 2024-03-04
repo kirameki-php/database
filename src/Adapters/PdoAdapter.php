@@ -23,10 +23,14 @@ abstract class PdoAdapter implements DatabaseAdapter
     /**
      * @param TConfig $config
      * @param PDO|null $pdo
+     * @param QueryFormatter|null $queryFormatter
+     * @param SchemaFormatter|null $schemaFormatter
      */
     public function __construct(
         protected DatabaseConfig $config,
         protected ?PDO $pdo = null,
+        protected ?QueryFormatter $queryFormatter = null,
+        protected ?SchemaFormatter $schemaFormatter = null,
     )
     {
     }
@@ -155,8 +159,7 @@ abstract class PdoAdapter implements DatabaseAdapter
         try {
             $this->query("SELECT 1 FROM $table LIMIT 1");
             return true;
-        }
-        catch (PDOException) {
+        } catch (PDOException) {
             return false;
         }
     }
@@ -164,12 +167,28 @@ abstract class PdoAdapter implements DatabaseAdapter
     /**
      * @inheritDoc
      */
-    abstract public function getQueryFormatter(): QueryFormatter;
+    public function getQueryFormatter(): QueryFormatter
+    {
+        return $this->queryFormatter ??= $this->instantiateQueryFormatter();
+    }
+
+    /**
+     * @return QueryFormatter
+     */
+    abstract protected function instantiateQueryFormatter(): QueryFormatter;
 
     /**
      * @inheritDoc
      */
     public function getSchemaFormatter(): SchemaFormatter
+    {
+        return $this->schemaFormatter ??= $this->instantiateSchemaFormatter();
+    }
+
+    /**
+     * @return SchemaFormatter
+     */
+    protected function instantiateSchemaFormatter(): SchemaFormatter
     {
         return new SchemaFormatter();
     }

@@ -41,9 +41,9 @@ class SqliteAdapter extends PdoAdapter
     }
 
     /**
-     * @return SqliteQueryFormatter
+     * @inheritDoc
      */
-    public function getQueryFormatter(): SqliteQueryFormatter
+    protected function instantiateQueryFormatter(): SqliteQueryFormatter
     {
         return new SqliteQueryFormatter();
     }

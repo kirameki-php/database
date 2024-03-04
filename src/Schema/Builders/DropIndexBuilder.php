@@ -18,7 +18,7 @@ class DropIndexBuilder extends StatementBuilder
      */
     public function __construct(
         Connection $connection,
-        string $table,
+        public readonly string $table,
     )
     {
         parent::__construct($connection, new DropIndexStatement($table));

@@ -80,7 +80,7 @@ class InsertBuilder extends StatementBuilder
      */
     public function prepare(): string
     {
-        return $this->getQueryFormatter()->formatInsertStatement($this->statement);
+        return $this->formatter->formatInsertStatement($this->statement);
     }
 
     /**
@@ -88,6 +88,6 @@ class InsertBuilder extends StatementBuilder
      */
     public function getBindings(): array
     {
-        return $this->getQueryFormatter()->formatBindingsForInsert($this->statement);
+        return $this->formatter->formatBindingsForInsert($this->statement);
     }
 }

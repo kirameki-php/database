@@ -5,16 +5,12 @@ namespace Kirameki\Database\Schema\Builders;
 class ColumnBuilderAggregate
 {
     /**
-     * @var array<ColumnBuilder>
+     * @param list<ColumnBuilder> $columns
      */
-    public array $columns;
-
-    /**
-     * @param array<ColumnBuilder> $columns
-     */
-    public function __construct(array $columns)
+    public function __construct(
+        public readonly array $columns,
+    )
     {
-        $this->columns = $columns;
     }
 
     /**

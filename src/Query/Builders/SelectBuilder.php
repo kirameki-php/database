@@ -273,7 +273,7 @@ class SelectBuilder extends ConditionsBuilder
      */
     public function prepare(): string
     {
-        return $this->getQueryFormatter()->formatSelectStatement($this->statement);
+        return $this->formatter->formatSelectStatement($this->statement);
     }
 
     /**
@@ -281,7 +281,7 @@ class SelectBuilder extends ConditionsBuilder
      */
     public function getBindings(): array
     {
-        return $this->getQueryFormatter()->formatBindingsForSelect($this->statement);
+        return $this->formatter->formatBindingsForSelect($this->statement);
     }
 
     /**

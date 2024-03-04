@@ -53,7 +53,7 @@ class UpdateBuilder extends ConditionsBuilder
      */
     public function prepare(): string
     {
-        return $this->getQueryFormatter()->formatUpdateStatement($this->statement);
+        return $this->formatter->formatUpdateStatement($this->statement);
     }
 
     /**
@@ -61,6 +61,6 @@ class UpdateBuilder extends ConditionsBuilder
      */
     public function getBindings(): array
     {
-        return $this->getQueryFormatter()->formatBindingsForUpdate($this->statement);
+        return $this->formatter->formatBindingsForUpdate($this->statement);
     }
 }

@@ -58,9 +58,8 @@ class MySqlAdapter extends PdoAdapter
 
     /**
      * @inheritDoc
-     * @return MySqlQueryFormatter
      */
-    public function getQueryFormatter(): MySqlQueryFormatter
+    protected function instantiateQueryFormatter(): MySqlQueryFormatter
     {
         return new MySqlQueryFormatter();
     }
@@ -99,9 +98,7 @@ class MySqlAdapter extends PdoAdapter
     public function databaseExists(): bool
     {
         $execution = $this->query("SHOW DATABASES LIKE '{$this->config->database}'");
-        $rowCount = $execution->affectedRowCount;
-        $trueRowCount = ($rowCount instanceof Closure) ? $rowCount() : $rowCount;
-        return $trueRowCount > 0;
+        return $execution->getAffectedRowCount() > 0;
     }
 
     /**
