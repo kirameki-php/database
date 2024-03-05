@@ -7,13 +7,16 @@ use Kirameki\Database\Query\Formatters\Formatter;
 use Kirameki\Database\Query\Result;
 use Kirameki\Database\Query\Statements\BaseStatement;
 
+/**
+ * @template TStatement of BaseStatement
+ */
 abstract class StatementBuilder
 {
     protected Formatter $formatter;
 
     /**
      * @param Connection $connection
-     * @param BaseStatement $statement
+     * @param TStatement $statement
      */
     public function __construct(
         protected Connection $connection,
@@ -41,7 +44,7 @@ abstract class StatementBuilder
     }
 
     /**
-     * @return BaseStatement
+     * @return TStatement
      */
     public function getStatement(): BaseStatement
     {

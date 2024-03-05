@@ -9,10 +9,11 @@ use Kirameki\Database\Query\Statements\ConditionsStatement;
 use Kirameki\Database\Query\Support\SortOrder;
 use LogicException;
 use function assert;
-use function func_num_args;
+use function count;
 
 /**
- * @property ConditionsStatement $statement
+ * @template TStatement of ConditionsStatement
+ * @extends StatementBuilder<TStatement>
  */
 abstract class ConditionsBuilder extends StatementBuilder
 {
@@ -23,44 +24,44 @@ abstract class ConditionsBuilder extends StatementBuilder
 
     /**
      * @param mixed ...$args
+     * Can have two different signatures:
+     * 1. Has one argument. First argument is a ConditionBuilder instance.
+     * 2. First argument is the column name, and the second argument is the value.
+     * The second argument can also be a named parameter. The following are valid:
+     * - where('column', eq: $value)
+     * - where('column', not: $value)
+     * - where('column', gt: $value)
+     * - where('column', gte: $value)
+     * - where('column', lt: $value)
+     * - where('column', lte: $value)
+     * - where('column', in: [$value, ...])
+     * - where('column', notIn: [$value, ...])
+     * - where('column', between: [$value1, $value2])
+     * - where('column', notBetween: [$value1, $value2])
+     * - where('column', like: "___")
+     * - where('column', notLike: "%hi%")
      * @return $this
      */
     public function where(mixed ...$args): static
     {
-        assert(func_num_args() >= 1 && func_num_args() <= 3);
-
         $this->lastCondition = $this->buildCondition(...$args);
         return $this->addWhereCondition($this->lastCondition->getDefinition());
     }
 
     /**
-     * @param mixed ...$args
-     * @return $this
-     */
-    public function whereNot(mixed ...$args): static
-    {
-        // only 2 because operators are not supported for NOT's
-        assert(func_num_args() >= 1 && func_num_args() <= 2);
-
-        $this->lastCondition = $this->buildCondition(...$args)->negate();
-        return $this->addWhereCondition($this->lastCondition->getDefinition());
-    }
-
-    /**
+     * @param string $column
+     * The column name to be used in the condition
      * @param string ...$args
+     * This is defined as a variadic function so that the second argument can define
+     * a named parameter, which will be passed down to where(...) method.
      * @return $this
      */
-    public function whereColumn(string ...$args): static
+    public function whereColumn(string $column, string ...$args): static
     {
-        assert(func_num_args() >= 2 && func_num_args() <= 3);
-
-        $num = count($args);
-
-        // the last column will be converted to Column class since there is no way to distinguish between
-        // a column identifier and a string literal after this point.
-        return $num === 3
-            ? $this->where($args[0], $args[1], new Column($args[2]))
-            : $this->where($args[0], new Column($args[1]));
+        assert(count($args) === 1);
+        $key = key($args);
+        $args[$key] = new Column($args[$key]);
+        return $this->where($column, ...$args);
     }
 
     /**
@@ -73,24 +74,11 @@ abstract class ConditionsBuilder extends StatementBuilder
     }
 
     /**
-     * @param string $column
-     * @param iterable<mixed>|Closure(SelectBuilder): SelectBuilder|SelectBuilder $values
-     * @return $this
-     */
-    public function whereIn(string $column, iterable|Closure|SelectBuilder $values): static
-    {
-        $this->lastCondition = $this->buildCondition($column, 'IN' , $values);
-        return $this->addWhereCondition($this->lastCondition->getDefinition());
-    }
-
-    /**
      * @param mixed ...$args
      * @return $this
      */
     public function and(mixed ...$args): static
     {
-        assert(func_num_args() >= 1 && func_num_args() <= 3);
-
         if ($this->lastCondition?->and()->apply($this->buildCondition(...$args)) !== null) {
             return $this;
         }
@@ -104,8 +92,6 @@ abstract class ConditionsBuilder extends StatementBuilder
      */
     public function or(mixed ...$args): static
     {
-        assert(func_num_args() >= 1 && func_num_args() <= 3);
-
         if ($this->lastCondition?->or()->apply($this->buildCondition(...$args)) !== null) {
             return $this;
         }

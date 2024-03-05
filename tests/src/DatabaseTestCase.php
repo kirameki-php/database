@@ -2,16 +2,12 @@
 
 namespace Tests\Kirameki\Database;
 
-use Kirameki\Collections\Arr;
+use Kirameki\Core\Testing\TestCase;
 use Kirameki\Database\Connection;
 use Kirameki\Database\Schema\Builders\CreateTableBuilder;
-use Kirameki\Testing\Concerns\UsesDatabases;
-use Tests\Kirameki\TestCase;
 
 class DatabaseTestCase extends TestCase
 {
-    use UsesDatabases;
-
     /**
      * @var array<Connection>
      */

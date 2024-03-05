@@ -11,7 +11,7 @@ use function count;
 use function iterator_to_array;
 
 /**
- * @property InsertStatement $statement
+ * @extends StatementBuilder<InsertStatement>
  */
 class InsertBuilder extends StatementBuilder
 {

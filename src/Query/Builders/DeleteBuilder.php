@@ -6,7 +6,7 @@ use Kirameki\Database\Connection;
 use Kirameki\Database\Query\Statements\DeleteStatement;
 
 /**
- * @property DeleteStatement $statement;
+ * @extends ConditionsBuilder<DeleteStatement>
  */
 class DeleteBuilder extends ConditionsBuilder
 {

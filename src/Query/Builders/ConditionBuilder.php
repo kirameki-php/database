@@ -3,18 +3,21 @@
 namespace Kirameki\Database\Query\Builders;
 
 use Closure;
+use Kirameki\Core\Exceptions\InvalidArgumentException;
+use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Core\Value;
 use Kirameki\Database\Query\Expressions\Column;
 use Kirameki\Database\Query\Statements\ConditionDefinition;
 use Kirameki\Database\Query\Support\Operator;
 use Kirameki\Database\Query\Support\Range;
 use Kirameki\Database\Query\Expressions\Expr;
 use Kirameki\Database\Query\Expressions\Raw;
-use LogicException;
 use RuntimeException;
 use Traversable;
+use function array_key_exists;
+use function assert;
 use function count;
 use function is_iterable;
-use function is_string;
 use function iterator_to_array;
 use function strtoupper;
 
@@ -46,37 +49,71 @@ class ConditionBuilder
     {
         $num = count($args);
 
-        if (($num === 1)) {
-            $condition = $args[0];
-            if ($condition instanceof static) {
-                return $condition;
+        if ($num === 1) {
+            if ($args[0] instanceof static) {
+                return $args[0];
             }
+            throw new InvalidArgumentException('Expected: ' . static::class . 'Got: ' . Value::getType($args[0]) . '.', [
+                'args' => $args,
+            ]);
         }
 
         if ($num === 2) {
-            [$column, $value] = $args;
-
-            if (is_string($column) || $column instanceof Expr) {
-                if ($value instanceof Range) {
-                    return self::for($column)->inRange($value);
-                }
-
-                if (is_iterable($value)) {
-                    return self::for($column)->in($value);
-                }
-
-                return self::for($column)->equals($value);
-            }
+            return self::fromNamedArgs($args);
         }
 
-        if ($num === 3) {
-            [$column, $operator, $value] = $args;
-            if (is_string($column)) {
-                return self::for($column)->match($operator, $value);
-            }
+        throw new LogicException("Invalid number of arguments. Expected: <= 2. Got: {$num}.", [
+            'args' => $args,
+        ]);
+    }
+
+    /**
+     * @param array<mixed> $args
+     * @return static
+     */
+    protected static function fromNamedArgs(array $args): static
+    {
+        assert(count($args) <= 2, 'Missing column parameter');
+
+        if (array_key_exists(0, $args)) {
+            $column = $args[0];
+            unset($args[0]);
+        } elseif (array_key_exists('column', $args)) {
+            $column = $args['column'];
+            unset($args['column']);
+        } else {
+            throw new InvalidArgumentException('Missing column parameter', [
+                'args' => $args,
+            ]);
         }
 
-        throw new LogicException('Invalid number of arguments. expected: 1~3. '.$num.' given.');
+        $self = self::for($column);
+        $key = key($args);
+        $value = $args[$key];
+
+        return match ($key) {
+            1, 'eq' => match (true) {
+                $value instanceof Range => $self->inRange($value),
+                is_iterable($value) => $self->in($value),
+                default => $self->equals($value),
+            },
+            'not' => match (true) {
+                $value instanceof Range => $self->notInRange($value),
+                is_iterable($value) => $self->notIn($value),
+                default => $self->equals($value),
+            },
+            'gt' => $self->greaterThan($value),
+            'gte' => $self->greaterThanOrEqualTo($value),
+            'lt' => $self->lessThan($value),
+            'lte' => $self->lessThanOrEqualTo($value),
+            'in' => $self->in($value),
+            'notIn' => $self->notIn($value),
+            'between' => $self->between($value[0], $value[1]),
+            'notBetween' => $self->notBetween($value[0], $value[1]),
+            'like' => $self->like($value),
+            'notLike' => $self->notLike($value),
+            default => throw new InvalidArgumentException('Unknown operator: ' . $key),
+        };
     }
 
     /**
@@ -341,34 +378,6 @@ class ConditionBuilder
         $this->current->negated = $builder->current->negated;
         $this->defined = true;
         return $this;
-    }
-
-    /**
-     * @param string $operator
-     * @param mixed $value
-     * @return $this
-     */
-    public function match(string|Operator $operator, mixed $value): static
-    {
-        if ($operator instanceof Operator) {
-            $operator = $operator->value;
-        }
-
-        return match (strtoupper($operator)) {
-            '=' => $this->equals($value),
-            '!=', '<>' => $this->notEquals($value),
-            '>' => $this->greaterThan($value),
-            '>=' => $this->greaterThanOrEqualTo($value),
-            '<' => $this->lessThan($value),
-            '<=' => $this->lessThanOrEqualTo($value),
-            'IN' => $this->in($value),
-            'NOT IN' => $this->notIn($value),
-            'BETWEEN' => $this->between($value[0], $value[1]),
-            'NOT BETWEEN' => $this->notBetween($value[0], $value[1]),
-            'LIKE' => $this->like($value),
-            'NOT LIKE' => $this->notLike($value),
-            default => throw new RuntimeException('Unknown operator:' . $operator),
-        };
     }
 
     /**

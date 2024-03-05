@@ -6,7 +6,7 @@ use Kirameki\Database\Connection;
 use Kirameki\Database\Query\Statements\UpdateStatement;
 
 /**
- * @property UpdateStatement $statement
+ * @extends ConditionsBuilder<UpdateStatement>
  */
 class UpdateBuilder extends ConditionsBuilder
 {

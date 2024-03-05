@@ -14,7 +14,7 @@ use Kirameki\Database\Query\Expressions\Expr;
 use function is_array;
 
 /**
- * @property SelectStatement $statement
+ * @extends ConditionsBuilder<SelectStatement>
  */
 class SelectBuilder extends ConditionsBuilder
 {
