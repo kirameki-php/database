@@ -17,10 +17,14 @@ class InsertBuilder extends StatementBuilder
 {
     /**
      * @param Connection $connection
+     * @param string $table
      */
-    public function __construct(Connection $connection)
+    public function __construct(
+        Connection $connection,
+        string $table,
+    )
     {
-        parent::__construct($connection, new InsertStatement());
+        parent::__construct($connection, new InsertStatement($table));
     }
 
     /**

@@ -7,16 +7,12 @@ use Kirameki\Database\Query\Formatters\Formatter;
 class Column extends Expr
 {
     /**
-     * @var string
-     */
-    public readonly string $column;
-
-    /**
      * @param string $column
      */
-    public function __construct(string $column)
+    public function __construct(
+        public readonly string $column,
+    )
     {
-        $this->column = $column;
     }
 
     /**

@@ -7,11 +7,6 @@ use function array_keys;
 class InsertStatement extends BaseStatement
 {
     /**
-     * @var string
-     */
-    public string $table;
-
-    /**
      * @var array<int, array<string, mixed>>
      */
     public array $dataset;
@@ -25,6 +20,15 @@ class InsertStatement extends BaseStatement
      * @var array<string>|null
      */
     protected ?array $cachedColumns = null;
+
+    /**
+     * @param string $table
+     */
+    public function __construct(
+        public readonly string $table,
+    )
+    {
+    }
 
     /**
      * @return array<string>

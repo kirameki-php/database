@@ -131,7 +131,7 @@ class Connection
      */
     public function insertInto(string $table): InsertBuilder
     {
-        return (new InsertBuilder($this))->table($table);
+        return new InsertBuilder($this, $table);
     }
 
     /**
@@ -140,7 +140,7 @@ class Connection
      */
     public function update(string $table): UpdateBuilder
     {
-        return (new UpdateBuilder($this))->table($table);
+        return new UpdateBuilder($this, $table);
     }
 
     /**
@@ -149,7 +149,7 @@ class Connection
      */
     public function delete(string $table): DeleteBuilder
     {
-        return (new DeleteBuilder($this))->table($table);
+        return new DeleteBuilder($this, $table);
     }
 
     /**

@@ -12,20 +12,14 @@ class UpdateBuilder extends ConditionsBuilder
 {
     /**
      * @param Connection $connection
+     * @param string $table
      */
-    public function __construct(Connection $connection)
+    public function __construct(
+        Connection $connection,
+        string $table,
+    )
     {
-        parent::__construct($connection, new UpdateStatement());
-    }
-
-    /**
-     * @param string $name
-     * @return $this
-     */
-    public function table(string $name): static
-    {
-        $this->statement->table = $name;
-        return $this;
+        parent::__construct($connection, new UpdateStatement($table));
     }
 
     /**

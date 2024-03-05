@@ -8,46 +8,37 @@ use Kirameki\Database\Query\Support\Operator;
 class ConditionDefinition
 {
     /**
-     * @var string|Column|null
-     */
-    public string|Column|null $column;
-
-    /**
      * @var Operator|null
      */
-    public ?Operator $operator;
+    public ?Operator $operator = null;
 
     /**
      * @var bool
      */
-    public bool $negated;
+    public bool $negated = false;
 
     /**
      * @var mixed
      */
-    public mixed $value;
+    public mixed $value = null;
 
     /**
      * @var string|null
      */
-    public ?string $nextLogic;
+    public ?string $nextLogic = null;
 
     /**
      * @var static|null
      */
-    public ?self $next;
+    public ?self $next = null;
 
     /**
      * @param string|Column|null $column
      */
-    public function __construct(string|Column $column = null)
+    public function __construct(
+        public string|Column|null $column = null,
+    )
     {
-        $this->column = $column;
-        $this->negated = false;
-        $this->operator = null;
-        $this->value = null;
-        $this->nextLogic = null;
-        $this->next = null;
     }
 
     public function __clone()
