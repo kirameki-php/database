@@ -11,6 +11,7 @@ use Kirameki\Database\Query\Support\JoinType;
 use Kirameki\Database\Query\Support\LockOption;
 use Kirameki\Database\Query\Support\LockType;
 use Kirameki\Database\Query\Expressions\Expr;
+use Kirameki\Database\Query\Support\SortOrder;
 use function is_array;
 
 /**
@@ -252,6 +253,49 @@ class SelectBuilder extends ConditionsBuilder
 
     #endregion grouping ------------------------------------------------------------------------------------------------
 
+    #region sorting ----------------------------------------------------------------------------------------------------
+
+    /**
+     * @param string $column
+     * @param SortOrder $sort
+     * @return $this
+     */
+    public function orderBy(string $column, SortOrder $sort = SortOrder::Ascending): static
+    {
+        $this->statement->orderBy ??= [];
+        $this->statement->orderBy[$column] = $sort;
+        return $this;
+    }
+
+    /**
+     * @param string $column
+     * @return $this
+     */
+    public function orderByAsc(string $column): static
+    {
+        return $this->orderBy($column);
+    }
+
+    /**
+     * @param string $column
+     * @return $this
+     */
+    public function orderByDesc(string $column): static
+    {
+        return $this->orderBy($column, SortOrder::Descending);
+    }
+
+    /**
+     * @return $this
+     */
+    public function reorder(): static
+    {
+        $this->statement->orderBy = null;
+        return $this;
+    }
+
+    #endregion sorting -------------------------------------------------------------------------------------------------
+
     #region limiting ---------------------------------------------------------------------------------------------------
 
     /**
@@ -261,6 +305,16 @@ class SelectBuilder extends ConditionsBuilder
     public function offset(int $skipRows): static
     {
         $this->statement->offset = $skipRows;
+        return $this;
+    }
+
+    /**
+     * @param int $count
+     * @return $this
+     */
+    public function limit(int $count): static
+    {
+        $this->statement->limit = $count;
         return $this;
     }
 

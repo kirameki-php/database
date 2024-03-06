@@ -4,9 +4,7 @@ namespace Kirameki\Database\Query\Builders;
 
 use Closure;
 use Kirameki\Database\Query\Expressions\Column;
-use Kirameki\Database\Query\Statements\ConditionDefinition;
 use Kirameki\Database\Query\Statements\ConditionsStatement;
-use Kirameki\Database\Query\Support\SortOrder;
 use LogicException;
 use function assert;
 use function count;
@@ -44,8 +42,9 @@ abstract class ConditionsBuilder extends StatementBuilder
      */
     public function where(mixed ...$args): static
     {
-        $this->lastCondition = $this->buildCondition(...$args);
-        return $this->addWhereCondition($this->lastCondition->getDefinition());
+        $condition = $this->buildCondition(...$args);
+        $this->appendConditionToStatement($condition);
+        return $this->setLastCondition($condition);
     }
 
     /**
@@ -70,7 +69,7 @@ abstract class ConditionsBuilder extends StatementBuilder
      */
     public function whereRaw(string $raw): static
     {
-        return $this->addWhereCondition(ConditionBuilder::raw($raw)->getDefinition());
+        return $this->where(ConditionBuilder::raw($raw));
     }
 
     /**
@@ -100,55 +99,6 @@ abstract class ConditionsBuilder extends StatementBuilder
     }
 
     /**
-     * @param string $column
-     * @param SortOrder $sort
-     * @return $this
-     */
-    public function orderBy(string $column, SortOrder $sort = SortOrder::Ascending): static
-    {
-        $this->statement->orderBy ??= [];
-        $this->statement->orderBy[$column] = $sort;
-        return $this;
-    }
-
-    /**
-     * @param string $column
-     * @return $this
-     */
-    public function orderByAsc(string $column): static
-    {
-        return $this->orderBy($column);
-    }
-
-    /**
-     * @param string $column
-     * @return $this
-     */
-    public function orderByDesc(string $column): static
-    {
-        return $this->orderBy($column, SortOrder::Descending);
-    }
-
-    /**
-     * @return $this
-     */
-    public function reorder(): static
-    {
-        $this->statement->orderBy = null;
-        return $this;
-    }
-
-    /**
-     * @param int $count
-     * @return $this
-     */
-    public function limit(int $count): static
-    {
-        $this->statement->limit = $count;
-        return $this;
-    }
-
-    /**
      * @param mixed ...$args
      * @return ConditionBuilder
      */
@@ -158,13 +108,23 @@ abstract class ConditionsBuilder extends StatementBuilder
     }
 
     /**
-     * @param ConditionDefinition $definition
+     * @param ConditionBuilder $condition
      * @return $this
      */
-    protected function addWhereCondition(ConditionDefinition $definition): static
+    protected function appendConditionToStatement(ConditionBuilder $condition): static
     {
         $this->statement->where ??= [];
-        $this->statement->where[] = $definition;
+        $this->statement->where[] = $condition->getDefinition();
+        return $this;
+    }
+
+    /**
+     * @param ConditionBuilder $condition
+     * @return $this
+     */
+    protected function setLastCondition(ConditionBuilder $condition): static
+    {
+        $this->lastCondition = $condition;
         return $this;
     }
 }
