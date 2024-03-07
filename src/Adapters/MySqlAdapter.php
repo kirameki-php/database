@@ -36,7 +36,7 @@ class MySqlAdapter extends PdoAdapter
 
         $dsn = 'mysql:'.implode(';', $parts);
         $username = $config->username ?? 'root';
-        $password = $config->password ?? null;
+        $password = $config->password;
         $options = iterator_to_array($config->options ?? []);
         $options+= [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
