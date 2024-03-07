@@ -28,16 +28,6 @@ class InsertBuilder extends StatementBuilder
     }
 
     /**
-     * @param string $name
-     * @return $this
-     */
-    public function table(string $name): static
-    {
-        $this->statement->table = $name;
-        return $this;
-    }
-
-    /**
      * @param array<string, mixed> $data
      * @return $this
      */
