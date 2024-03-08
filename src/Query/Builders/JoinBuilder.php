@@ -3,11 +3,9 @@
 namespace Kirameki\Database\Query\Builders;
 
 use Kirameki\Database\Query\Expressions\Column;
-use Kirameki\Database\Query\Statements\JoinDefinition;
 use Kirameki\Database\Query\Support\JoinType;
 use LogicException;
 use function assert;
-use function count;
 use function func_num_args;
 
 class JoinBuilder

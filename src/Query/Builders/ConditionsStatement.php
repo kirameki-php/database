@@ -1,10 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Query\Statements;
+namespace Kirameki\Database\Query\Builders;
 
 use Kirameki\Database\Query\Support\SortOrder;
 
-abstract class ConditionsStatement extends BaseStatement
+abstract class ConditionsStatement extends Statement
 {
     /**
      * @var array<ConditionDefinition>|null

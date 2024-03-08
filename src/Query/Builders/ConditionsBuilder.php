@@ -2,9 +2,7 @@
 
 namespace Kirameki\Database\Query\Builders;
 
-use Closure;
 use Kirameki\Database\Query\Expressions\Column;
-use Kirameki\Database\Query\Statements\ConditionsStatement;
 use LogicException;
 use function assert;
 use function count;

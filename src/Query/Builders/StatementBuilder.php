@@ -5,13 +5,15 @@ namespace Kirameki\Database\Query\Builders;
 use Kirameki\Database\Connection;
 use Kirameki\Database\Query\Formatters\Formatter;
 use Kirameki\Database\Query\Result;
-use Kirameki\Database\Query\Statements\BaseStatement;
 
 /**
- * @template TStatement of BaseStatement
+ * @template TStatement of Statement
  */
 abstract class StatementBuilder
 {
+    /**
+     * @var Formatter
+     */
     protected Formatter $formatter;
 
     /**
@@ -20,7 +22,7 @@ abstract class StatementBuilder
      */
     public function __construct(
         protected Connection $connection,
-        protected BaseStatement $statement,
+        protected Statement $statement,
     )
     {
         $this->formatter = $connection->getQueryFormatter();
@@ -46,7 +48,7 @@ abstract class StatementBuilder
     /**
      * @return TStatement
      */
-    public function getStatement(): BaseStatement
+    public function getStatement(): Statement
     {
         return $this->statement;
     }

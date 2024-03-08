@@ -1,10 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Query\Statements;
+namespace Kirameki\Database\Query\Builders;
 
 use function array_keys;
 
-class InsertStatement extends BaseStatement
+class InsertStatement extends Statement
 {
     /**
      * @var array<int, array<string, mixed>>

@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Query\Formatters;
 
-use Kirameki\Database\Query\Statements\SelectStatement;
+use Kirameki\Database\Query\Builders\SelectStatement;
 use RuntimeException;
 
 class SqliteFormatter extends Formatter

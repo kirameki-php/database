@@ -2,11 +2,9 @@
 
 namespace Kirameki\Database\Migration;
 
-use DateTime;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Database\Connection;
 use Kirameki\Database\DatabaseManager;
-use Kirameki\Database\Query\Statements\BaseStatement;
 use Kirameki\Database\Schema\Builders\AlterTableBuilder;
 use Kirameki\Database\Schema\Builders\Builder;
 use Kirameki\Database\Schema\Builders\CreateIndexBuilder;
@@ -14,10 +12,6 @@ use Kirameki\Database\Schema\Builders\CreateTableBuilder;
 use Kirameki\Database\Schema\Builders\DropIndexBuilder;
 use Kirameki\Database\Schema\Builders\DropTableBuilder;
 use Kirameki\Database\Schema\Builders\RenameTableBuilder;
-use Kirameki\Database\Schema\Builders\StatementBuilder;
-use Kirameki\Database\Schema\Statements\CreateIndexStatement;
-use Kirameki\Database\Schema\Statements\DropIndexStatement;
-use Kirameki\Time\Time;
 
 abstract class Migration
 {

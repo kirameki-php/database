@@ -5,12 +5,10 @@ namespace Kirameki\Database\Query\Builders;
 use Closure;
 use Kirameki\Database\Connection;
 use Kirameki\Database\Query\Expressions\Aggregate;
-use Kirameki\Database\Query\Statements\ConditionDefinition;
-use Kirameki\Database\Query\Statements\SelectStatement;
+use Kirameki\Database\Query\Expressions\Expr;
 use Kirameki\Database\Query\Support\JoinType;
 use Kirameki\Database\Query\Support\LockOption;
 use Kirameki\Database\Query\Support\LockType;
-use Kirameki\Database\Query\Expressions\Expr;
 use Kirameki\Database\Query\Support\SortOrder;
 use function is_array;
 
@@ -24,7 +22,15 @@ class SelectBuilder extends ConditionsBuilder
      */
     public function __construct(Connection $connection)
     {
-        parent::__construct($connection, new SelectStatement());
+        parent::__construct($connection, $this->createStatement());
+    }
+
+    /**
+     * @return SelectStatement
+     */
+    protected function createStatement(): SelectStatement
+    {
+        return new SelectStatement();
     }
 
     #region selecting --------------------------------------------------------------------------------------------------

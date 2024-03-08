@@ -3,7 +3,6 @@
 namespace Kirameki\Database\Query\Builders;
 
 use Kirameki\Database\Connection;
-use Kirameki\Database\Query\Statements\UpdateStatement;
 
 /**
  * @extends ConditionsBuilder<UpdateStatement>
@@ -19,7 +18,16 @@ class UpdateBuilder extends ConditionsBuilder
         string $table,
     )
     {
-        parent::__construct($connection, new UpdateStatement($table));
+        parent::__construct($connection, $this->createStatement($table));
+    }
+
+    /**
+     * @param string $table
+     * @return UpdateStatement
+     */
+    protected function createStatement(string $table): UpdateStatement
+    {
+        return new UpdateStatement($table);
     }
 
     /**

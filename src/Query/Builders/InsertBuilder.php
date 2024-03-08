@@ -4,7 +4,6 @@ namespace Kirameki\Database\Query\Builders;
 
 use Kirameki\Database\Connection;
 use Kirameki\Database\Query\Result;
-use Kirameki\Database\Query\Statements\InsertStatement;
 use LogicException;
 use Traversable;
 use function count;
@@ -24,7 +23,16 @@ class InsertBuilder extends StatementBuilder
         string $table,
     )
     {
-        parent::__construct($connection, new InsertStatement($table));
+        parent::__construct($connection, $this->createStatement($table));
+    }
+
+    /**
+     * @param string $table
+     * @return InsertStatement
+     */
+    protected function createStatement(string $table): InsertStatement
+    {
+        return new InsertStatement($table);
     }
 
     /**

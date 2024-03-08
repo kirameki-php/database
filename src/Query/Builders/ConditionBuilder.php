@@ -7,11 +7,10 @@ use Kirameki\Core\Exceptions\InvalidArgumentException;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Value;
 use Kirameki\Database\Query\Expressions\Column;
-use Kirameki\Database\Query\Statements\ConditionDefinition;
-use Kirameki\Database\Query\Support\Operator;
-use Kirameki\Database\Query\Support\Range;
 use Kirameki\Database\Query\Expressions\Expr;
 use Kirameki\Database\Query\Expressions\Raw;
+use Kirameki\Database\Query\Support\Operator;
+use Kirameki\Database\Query\Support\Range;
 use RuntimeException;
 use Traversable;
 use function array_key_exists;
@@ -19,7 +18,6 @@ use function assert;
 use function count;
 use function is_iterable;
 use function iterator_to_array;
-use function strtoupper;
 
 /**
  * @consistent-constructor
