@@ -3,10 +3,9 @@
 namespace Kirameki\Database\Schema\Builders;
 
 use Kirameki\Database\Connection;
-use Kirameki\Database\Schema\Statements\BaseStatement;
 
 /**
- * @template-covariant TStatement of BaseStatement
+ * @template-covariant TStatement of Statement
  */
 abstract class StatementBuilder implements Builder
 {
@@ -16,7 +15,7 @@ abstract class StatementBuilder implements Builder
      */
     public function __construct(
         protected Connection $connection,
-        protected BaseStatement $statement
+        protected Statement $statement
     )
     {
     }

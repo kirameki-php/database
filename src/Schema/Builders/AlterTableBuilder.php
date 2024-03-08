@@ -3,13 +3,6 @@
 namespace Kirameki\Database\Schema\Builders;
 
 use Kirameki\Database\Connection;
-use Kirameki\Database\Schema\Statements\AlterDropColumnAction;
-use Kirameki\Database\Schema\Statements\AlterColumnAction;
-use Kirameki\Database\Schema\Statements\AlterRenameColumnAction;
-use Kirameki\Database\Schema\Statements\AlterTableStatement;
-use Kirameki\Database\Schema\Statements\ColumnDefinition;
-use Kirameki\Database\Schema\Statements\CreateIndexStatement;
-use Kirameki\Database\Schema\Statements\DropIndexStatement;
 use Kirameki\Database\Schema\Support\AlterType;
 
 /**

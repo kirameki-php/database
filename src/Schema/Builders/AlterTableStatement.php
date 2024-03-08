@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Schema\Statements;
+namespace Kirameki\Database\Schema\Builders;
 
-class AlterTableStatement extends BaseStatement
+class AlterTableStatement extends Statement
 {
     /**
      * @var list<mixed>

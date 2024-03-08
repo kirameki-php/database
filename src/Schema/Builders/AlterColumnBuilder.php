@@ -2,8 +2,6 @@
 
 namespace Kirameki\Database\Schema\Builders;
 
-use Kirameki\Database\Schema\Statements\AlterColumnAction;
-
 class AlterColumnBuilder extends ColumnBuilder
 {
     /**

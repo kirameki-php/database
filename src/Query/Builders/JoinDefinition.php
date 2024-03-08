@@ -7,16 +7,6 @@ use Kirameki\Database\Query\Support\JoinType;
 class JoinDefinition
 {
     /**
-     * @var JoinType
-     */
-    public JoinType $type;
-
-    /**
-     * @var string
-     */
-    public string $table;
-
-    /**
      * @var ConditionDefinition
      */
     public ConditionDefinition $condition;
@@ -25,9 +15,10 @@ class JoinDefinition
      * @param JoinType $type
      * @param string $table
      */
-    public function __construct(JoinType $type, string $table)
+    public function __construct(
+        public readonly JoinType $type,
+        public readonly string $table,
+    )
     {
-        $this->type = $type;
-        $this->table = $table;
     }
 }

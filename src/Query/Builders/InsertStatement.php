@@ -36,15 +36,15 @@ class InsertStatement extends Statement
     public function columns(): array
     {
         if ($this->cachedColumns === null) {
-            $columnsAssoc = [];
+            $columnsMap = [];
             foreach ($this->dataset as $data) {
                 foreach($data as $name => $value) {
                     if ($value !== null) {
-                        $columnsAssoc[$name] = null;
+                        $columnsMap[$name] = null;
                     }
                 }
             }
-            $this->cachedColumns = array_keys($columnsAssoc);
+            $this->cachedColumns = array_keys($columnsMap);
         }
         return $this->cachedColumns;
     }

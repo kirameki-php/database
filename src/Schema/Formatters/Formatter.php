@@ -6,16 +6,16 @@ use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Exceptions\RuntimeException;
 use Kirameki\Core\Value;
+use Kirameki\Database\Schema\Builders\AlterColumnAction;
+use Kirameki\Database\Schema\Builders\AlterDropColumnAction;
+use Kirameki\Database\Schema\Builders\AlterRenameColumnAction;
+use Kirameki\Database\Schema\Builders\Statement;
+use Kirameki\Database\Schema\Builders\ColumnDefinition;
+use Kirameki\Database\Schema\Builders\CreateIndexStatement;
+use Kirameki\Database\Schema\Builders\CreateTableStatement;
+use Kirameki\Database\Schema\Builders\DropIndexStatement;
 use Kirameki\Database\Schema\Expressions\CurrentTimestamp;
 use Kirameki\Database\Schema\Expressions\Expr;
-use Kirameki\Database\Schema\Statements\AlterColumnAction;
-use Kirameki\Database\Schema\Statements\AlterDropColumnAction;
-use Kirameki\Database\Schema\Statements\AlterRenameColumnAction;
-use Kirameki\Database\Schema\Statements\BaseStatement;
-use Kirameki\Database\Schema\Statements\ColumnDefinition;
-use Kirameki\Database\Schema\Statements\CreateIndexStatement;
-use Kirameki\Database\Schema\Statements\CreateTableStatement;
-use Kirameki\Database\Schema\Statements\DropIndexStatement;
 use function array_filter;
 use function array_keys;
 use function array_merge;
@@ -103,10 +103,10 @@ class Formatter
     }
 
     /**
-     * @param BaseStatement $statement
+     * @param Statement $statement
      * @return string
      */
-    public function formatDropTableStatement(BaseStatement $statement): string
+    public function formatDropTableStatement(Statement $statement): string
     {
         return 'DROP TABLE '.$statement->table.';';
     }

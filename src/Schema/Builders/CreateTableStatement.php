@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Schema\Statements;
+namespace Kirameki\Database\Schema\Builders;
 
-class CreateTableStatement extends BaseStatement
+class CreateTableStatement extends Statement
 {
     /**
      * @var ColumnDefinition[]

@@ -24,7 +24,10 @@ class JoinBuilder
      * @param JoinType $type
      * @param string $table
      */
-    public function __construct(JoinType $type, string $table)
+    public function __construct(
+        JoinType $type,
+        string $table,
+    )
     {
         $this->definition = new JoinDefinition($type, $table);
     }
