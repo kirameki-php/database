@@ -45,7 +45,11 @@ class SqliteAdapter extends PdoAdapter
      */
     protected function instantiateQueryFormatter(): SqliteQueryFormatter
     {
-        return new SqliteQueryFormatter();
+        return new SqliteQueryFormatter(
+            $this->identifierDelimiter,
+            $this->literalDelimiter,
+            $this->dateTimeFormat,
+        );
     }
 
     /**
