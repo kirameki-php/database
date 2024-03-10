@@ -5,18 +5,18 @@ namespace Kirameki\Database\Migration;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Database\Connection;
 use Kirameki\Database\DatabaseManager;
-use Kirameki\Database\Schema\Builders\AlterTableBuilder;
-use Kirameki\Database\Schema\Builders\Builder;
-use Kirameki\Database\Schema\Builders\CreateIndexBuilder;
-use Kirameki\Database\Schema\Builders\CreateTableBuilder;
-use Kirameki\Database\Schema\Builders\DropIndexBuilder;
-use Kirameki\Database\Schema\Builders\DropTableBuilder;
-use Kirameki\Database\Schema\Builders\RenameTableBuilder;
+use Kirameki\Database\Statements\OldStatementBuilder;
+use Kirameki\Database\Statements\Schema\AlterTableBuilder;
+use Kirameki\Database\Statements\Schema\CreateIndexBuilder;
+use Kirameki\Database\Statements\Schema\CreateTableBuilder;
+use Kirameki\Database\Statements\Schema\DropIndexBuilder;
+use Kirameki\Database\Statements\Schema\DropTableBuilder;
+use Kirameki\Database\Statements\Schema\RenameTableBuilder;
 
 abstract class Migration
 {
     /**
-     * @var list<Builder>
+     * @var list<OldStatementBuilder>
      */
     protected array $builders = [];
 
@@ -52,7 +52,7 @@ abstract class Migration
     }
 
     /**
-     * @return list<Builder>
+     * @return list<OldStatementBuilder>
      */
     public function getBuilders(): array
     {
@@ -64,7 +64,7 @@ abstract class Migration
      */
     public function toStatements(): array
     {
-        return Arr::flatMap($this->builders, fn(Builder $b) => $b->build());
+        return Arr::flatMap($this->builders, fn(OldStatementBuilder $b) => $b->build());
     }
 
     /**

@@ -3,23 +3,31 @@
 namespace Kirameki\Database\Adapters;
 
 use Closure;
+use DateTimeInterface;
 use Iterator;
-use Kirameki\Database\Query\Execution;
-use Kirameki\Database\Query\Formatters\Formatter as QueryFormatter;
-use Kirameki\Database\Schema\Formatters\Formatter as SchemaFormatter;
+use Kirameki\Database\Statements\Execution;
+use Kirameki\Database\Statements\Query\Formatters\QueryFormatter;
+use Kirameki\Database\Statements\RawStatement;
+use Kirameki\Database\Statements\Schema\Formatters\Formatter as SchemaFormatter;
+use Kirameki\Database\Statements\Statement;
 use PDO;
 use PDOException;
 use PDOStatement;
 use RuntimeException;
 use function hrtime;
 use function implode;
-use function iterator_to_array;
 
 /**
  * @template TConfig of DatabaseConfig
  */
 abstract class PdoAdapter implements DatabaseAdapter
 {
+    protected string $identifierDelimiter = '"';
+
+    protected string $literalDelimiter = "'";
+
+    protected string $dateTimeFormat = DateTimeInterface::RFC3339_EXTENDED;
+
     /**
      * @param TConfig $config
      * @param PDO|null $pdo
@@ -72,36 +80,34 @@ abstract class PdoAdapter implements DatabaseAdapter
     /**
      * @inheritDoc
      */
-    public function execute(string $statement): Execution
+    public function execute(Statement $statement): Execution
     {
         $startTime = hrtime(true);
-        $count = $this->getPdo()->exec($statement) ?: 0;
+        $count = $this->getPdo()->exec($statement->prepare()) ?: 0;
         $execTimeMs = (hrtime(true) - $startTime) / 1_000_000;
-        return $this->instantiateExecution($statement, [], [], $execTimeMs, $count);
+        return $this->instantiateExecution($statement, [], $execTimeMs, $count);
     }
 
     /**
      * @inheritDoc
      */
-    public function query(string $statement, iterable $bindings = []): Execution
+    public function query(Statement $statement): Execution
     {
         $startTime = hrtime(true);
-        $bindings = iterator_to_array($bindings);
-        $prepared = $this->execQuery($statement, $bindings);
+        $prepared = $this->execQuery($statement);
         $rows = $prepared->fetchAll(PDO::FETCH_OBJ);
         $fetchTimeMs = (hrtime(true) - $startTime) / 1_000_000;
         $count = $prepared->rowCount(...);
-        return $this->instantiateExecution($statement, $bindings, $rows, $fetchTimeMs, $count);
+        return $this->instantiateExecution($statement, $rows, $fetchTimeMs, $count);
     }
 
     /**
      * @inheritDoc
      */
-    public function cursor(string $statement, iterable $bindings = []): Execution
+    public function cursor(Statement $statement): Execution
     {
         $startTime = hrtime(true);
-        $bindings = iterator_to_array($bindings);
-        $prepared = $this->execQuery($statement, $bindings);
+        $prepared = $this->execQuery($statement);
         $iterator = (function() use ($prepared): Iterator {
             while (true) {
                 $data = $prepared->fetch(PDO::FETCH_OBJ);
@@ -116,7 +122,7 @@ abstract class PdoAdapter implements DatabaseAdapter
         })();
         $execTimeMs = (hrtime(true) - $startTime) / 1_000_000;
         $count = $prepared->rowCount(...);
-        return $this->instantiateExecution($statement, $bindings, $iterator, $execTimeMs, $count);
+        return $this->instantiateExecution($statement, $iterator, $execTimeMs, $count);
     }
 
     /**
@@ -157,7 +163,10 @@ abstract class PdoAdapter implements DatabaseAdapter
     public function tableExists(string $table): bool
     {
         try {
-            $this->query("SELECT 1 FROM $table LIMIT 1");
+            $formatter = $this->getQueryFormatter();
+            $table = $formatter->asIdentifier($table);
+            $statement = new RawStatement($formatter, "SELECT 1 FROM {$table} LIMIT 1");
+            $this->query($statement);
             return true;
         } catch (PDOException) {
             return false;
@@ -190,18 +199,21 @@ abstract class PdoAdapter implements DatabaseAdapter
      */
     protected function instantiateSchemaFormatter(): SchemaFormatter
     {
-        return new SchemaFormatter();
+        return new SchemaFormatter(
+            $this->identifierDelimiter,
+            $this->literalDelimiter,
+            $this->dateTimeFormat
+        );
     }
 
     /**
-     * @param string $statement
-     * @param array<array-key, mixed> $bindings
+     * @param Statement $statement
      * @return PDOStatement
      */
-    protected function execQuery(string $statement, array $bindings): PDOStatement
+    protected function execQuery(Statement $statement): PDOStatement
     {
-        $prepared = $this->getPdo()->prepare($statement);
-        $prepared->execute($bindings);
+        $prepared = $this->getPdo()->prepare($statement->prepare());
+        $prepared->execute($statement->getParameters());
         return $prepared;
     }
 
@@ -219,22 +231,20 @@ abstract class PdoAdapter implements DatabaseAdapter
     abstract protected function createPdo(): PDO;
 
     /**
-     * @param string $statement
-     * @param array<array-key, mixed> $bindings
+     * @param Statement $statement
      * @param iterable<int, mixed> $rowIterator
      * @param float $elapsedMs
      * @param int|Closure(): int $affectedRowCount
      * @return Execution
      */
     protected function instantiateExecution(
-        string $statement,
-        array $bindings,
+        Statement $statement,
         iterable $rowIterator,
         float $elapsedMs,
         int|Closure $affectedRowCount,
     ): Execution
     {
-        return new Execution($this->config, $statement, $bindings, $rowIterator, $elapsedMs, $affectedRowCount);
+        return new Execution($this->config, $statement, $rowIterator, $elapsedMs, $affectedRowCount);
     }
 
     /**

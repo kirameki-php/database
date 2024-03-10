@@ -2,9 +2,10 @@
 
 namespace Kirameki\Database\Adapters;
 
-use Kirameki\Database\Query\Execution;
-use Kirameki\Database\Query\Formatters\Formatter as QueryFormatter;
-use Kirameki\Database\Schema\Formatters\Formatter as SchemaFormatter;
+use Kirameki\Database\Statements\Execution;
+use Kirameki\Database\Statements\Query\Formatters\QueryFormatter as QueryFormatter;
+use Kirameki\Database\Statements\Schema\Formatters\Formatter as SchemaFormatter;
+use Kirameki\Database\Statements\Statement;
 
 interface DatabaseAdapter
 {
@@ -29,24 +30,22 @@ interface DatabaseAdapter
     public function isConnected(): bool;
 
     /**
-     * @param string $statement
+     * @param Statement $statement
      * @return Execution
      */
-    public function execute(string $statement): Execution;
+    public function execute(Statement $statement): Execution;
 
     /**
-     * @param string $statement
-     * @param iterable<array-key, mixed> $bindings
+     * @param Statement $statement
      * @return Execution
      */
-    public function query(string $statement, iterable $bindings = []): Execution;
+    public function query(Statement $statement): Execution;
 
     /**
-     * @param string $statement
-     * @param iterable<array-key, mixed> $bindings
+     * @param Statement $statement
      * @return Execution
      */
-    public function cursor(string $statement, iterable $bindings = []): Execution;
+    public function cursor(Statement $statement): Execution;
 
     /**
      * @return void

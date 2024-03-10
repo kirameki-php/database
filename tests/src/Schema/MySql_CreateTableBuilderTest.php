@@ -2,7 +2,7 @@
 
 namespace Tests\Kirameki\Database\Schema;
 
-use Kirameki\Database\Schema\Expressions\Raw;
+use Kirameki\Database\Statements\Schema\Expressions\Raw;
 use RuntimeException;
 
 class MySql_CreateTableBuilderTest extends SchemaTestCase

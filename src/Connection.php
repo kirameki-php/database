@@ -6,15 +6,20 @@ use Closure;
 use Kirameki\Database\Adapters\DatabaseAdapter;
 use Kirameki\Database\Events\QueryExecuted;
 use Kirameki\Database\Events\SchemaExecuted;
-use Kirameki\Database\Query\Builders\DeleteBuilder;
-use Kirameki\Database\Query\Builders\InsertBuilder;
-use Kirameki\Database\Query\Builders\SelectBuilder;
-use Kirameki\Database\Query\Builders\UpdateBuilder;
-use Kirameki\Database\Query\Execution;
-use Kirameki\Database\Query\Expressions\Expr;
-use Kirameki\Database\Query\Formatters\Formatter as QueryFormatter;
-use Kirameki\Database\Query\Result;
-use Kirameki\Database\Schema\Formatters\Formatter as SchemaFormatter;
+use Kirameki\Database\Statements\Execution;
+use Kirameki\Database\Statements\Expression;
+use Kirameki\Database\Statements\Query\DeleteBuilder;
+use Kirameki\Database\Statements\Query\DeleteStatement;
+use Kirameki\Database\Statements\Query\Formatters\QueryFormatter as QueryFormatter;
+use Kirameki\Database\Statements\Query\InsertBuilder;
+use Kirameki\Database\Statements\Query\InsertStatement;
+use Kirameki\Database\Statements\Query\SelectBuilder;
+use Kirameki\Database\Statements\Query\SelectStatement;
+use Kirameki\Database\Statements\Query\UpdateBuilder;
+use Kirameki\Database\Statements\Query\UpdateStatement;
+use Kirameki\Database\Statements\Result;
+use Kirameki\Database\Statements\Schema\Formatters\Formatter as SchemaFormatter;
+use Kirameki\Database\Statements\Statement;
 use Kirameki\Database\Transaction\TransactionHandler;
 use Kirameki\Event\EventManager;
 
@@ -97,32 +102,32 @@ class Connection
     }
 
     /**
-     * @param string $statement
-     * @param array<mixed> $bindings
+     * @param Statement $statement
      * @return Result
      */
-    public function query(string $statement, array $bindings = []): Result
+    public function query(Statement $statement): Result
     {
-        return $this->handleExecution($this->adapter->query($statement, $bindings));
+        return $this->handleExecution($this->adapter->query($statement));
     }
 
     /**
-     * @param string $statement
-     * @param iterable<array-key, mixed> $bindings
+     * @param Statement $statement
      * @return Result
      */
-    public function cursor(string $statement, iterable $bindings = []): Result
+    public function cursor(Statement $statement): Result
     {
-        return $this->handleExecution($this->adapter->cursor($statement, $bindings));
+        return $this->handleExecution($this->adapter->cursor($statement));
     }
 
     /**
-     * @param string|Expr ...$columns
+     * @param string|Expression ...$columns
      * @return SelectBuilder
      */
-    public function select(string|Expr ...$columns): SelectBuilder
+    public function select(string|Expression ...$columns): SelectBuilder
     {
-        return (new SelectBuilder($this))->columns(...$columns);
+        $statement = new SelectStatement($this->getQueryFormatter());
+        $builder = new SelectBuilder($this, $statement);
+        return $builder->columns(...$columns);
     }
 
     /**
@@ -131,7 +136,8 @@ class Connection
      */
     public function insertInto(string $table): InsertBuilder
     {
-        return new InsertBuilder($this, $table);
+        $statement = new InsertStatement($this->getQueryFormatter(), $table);
+        return new InsertBuilder($this, $statement);
     }
 
     /**
@@ -140,7 +146,8 @@ class Connection
      */
     public function update(string $table): UpdateBuilder
     {
-        return new UpdateBuilder($this, $table);
+        $statement = new UpdateStatement($this->getQueryFormatter(), $table);
+        return new UpdateBuilder($this, $statement);
     }
 
     /**
@@ -149,7 +156,8 @@ class Connection
      */
     public function delete(string $table): DeleteBuilder
     {
-        return new DeleteBuilder($this, $table);
+        $statement = new DeleteStatement($this->getQueryFormatter(), $table);
+        return new DeleteBuilder($this, $statement);
     }
 
     /**
@@ -206,6 +214,10 @@ class Connection
         return $this->transactionHandler ??= new TransactionHandler($this, $this->events);
     }
 
+    /**
+     * @param Execution $execution
+     * @return Result
+     */
     protected function handleExecution(Execution $execution): Result
     {
         $result = new Result($this, $execution);

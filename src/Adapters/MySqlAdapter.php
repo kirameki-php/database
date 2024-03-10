@@ -2,8 +2,7 @@
 
 namespace Kirameki\Database\Adapters;
 
-use Closure;
-use Kirameki\Database\Query\Formatters\MySqlFormatter as MySqlQueryFormatter;
+use Kirameki\Database\Statements\Query\Formatters\MySqlQueryFormatter;
 use PDO;
 use function array_filter;
 use function implode;
@@ -14,6 +13,12 @@ use function iterator_to_array;
  */
 class MySqlAdapter extends PdoAdapter
 {
+    protected string $identifierDelimiter = '`';
+
+    protected string $literalDelimiter = '"';
+
+    protected string $dateTimeFormat = 'Y-m-d H:i:s.u';
+
     /**
      * @return PDO
      */
@@ -61,7 +66,7 @@ class MySqlAdapter extends PdoAdapter
      */
     protected function instantiateQueryFormatter(): MySqlQueryFormatter
     {
-        return new MySqlQueryFormatter();
+        return new MySqlQueryFormatter($this->identifierDelimiter, $this->literalDelimiter, $this->dateTimeFormat);
     }
 
     /**

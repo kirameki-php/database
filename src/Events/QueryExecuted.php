@@ -3,7 +3,7 @@
 namespace Kirameki\Database\Events;
 
 use Kirameki\Database\Connection;
-use Kirameki\Database\Query\Result;
+use Kirameki\Database\Statements\Result;
 
 class QueryExecuted extends DatabaseEvent
 {

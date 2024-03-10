@@ -2,9 +2,8 @@
 
 namespace Kirameki\Database\Events;
 
-use Kirameki\Database\Adapters\DatabaseAdapter;
 use Kirameki\Database\Connection;
-use Kirameki\Database\Query\Execution;
+use Kirameki\Database\Statements\Execution;
 
 class SchemaExecuted extends DatabaseEvent
 {

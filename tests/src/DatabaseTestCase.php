@@ -4,7 +4,7 @@ namespace Tests\Kirameki\Database;
 
 use Kirameki\Core\Testing\TestCase;
 use Kirameki\Database\Connection;
-use Kirameki\Database\Schema\Builders\CreateTableBuilder;
+use Kirameki\Database\Statements\Schema\CreateTableBuilder;
 
 class DatabaseTestCase extends TestCase
 {
