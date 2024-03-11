@@ -58,7 +58,7 @@ class InsertStatement extends QueryStatement
      */
     public function prepare(): string
     {
-        return $this->syntax->formatInsertStatement($this);
+        return $this->syntax->compileInsertStatement($this);
     }
 
     /**
@@ -66,6 +66,6 @@ class InsertStatement extends QueryStatement
      */
     public function getParameters(): array
     {
-        return $this->syntax->formatBindingsForInsert($this);
+        return $this->syntax->prepareParametersForInsert($this);
     }
 }

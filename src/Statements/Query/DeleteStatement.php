@@ -28,7 +28,7 @@ class DeleteStatement extends ConditionsStatement
      */
     public function prepare(): string
     {
-        return $this->syntax->formatDeleteStatement($this);
+        return $this->syntax->compileDeleteStatement($this);
     }
 
     /**
@@ -36,6 +36,6 @@ class DeleteStatement extends ConditionsStatement
      */
     public function getParameters(): array
     {
-        return $this->syntax->formatBindingsForDelete($this);
+        return $this->syntax->prepareParametersForDelete($this);
     }
 }

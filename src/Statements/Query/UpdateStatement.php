@@ -33,7 +33,7 @@ class UpdateStatement extends ConditionsStatement
      */
     public function prepare(): string
     {
-        return $this->syntax->formatUpdateStatement($this);
+        return $this->syntax->compileUpdateStatement($this);
     }
 
     /**
@@ -41,6 +41,6 @@ class UpdateStatement extends ConditionsStatement
      */
     public function getParameters(): array
     {
-        return $this->syntax->formatBindingsForUpdate($this);
+        return $this->syntax->prepareParametersForUpdate($this);
     }
 }

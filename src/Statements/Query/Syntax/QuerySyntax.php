@@ -38,7 +38,7 @@ abstract class QuerySyntax extends Syntax
      * @param SelectStatement $statement
      * @return string
      */
-    public function formatSelectStatement(SelectStatement $statement): string
+    public function compileSelectStatement(SelectStatement $statement): string
     {
         return implode(' ', array_filter([
             $this->formatSelectPart($statement),
@@ -56,16 +56,16 @@ abstract class QuerySyntax extends Syntax
      * @param SelectStatement $statement
      * @return array<mixed>
      */
-    public function formatBindingsForSelect(SelectStatement $statement): array
+    public function prepareParametersForSelect(SelectStatement $statement): array
     {
-        return $this->stringifyParameters($this->getBindingsForConditions($statement));
+        return $this->stringifyParameters($this->getParametersForConditions($statement));
     }
 
     /**
      * @param InsertStatement $statement
      * @return string
      */
-    public function formatInsertStatement(InsertStatement $statement): string
+    public function compileInsertStatement(InsertStatement $statement): string
     {
         return implode(' ', array_filter([
             'INSERT INTO',
@@ -81,27 +81,27 @@ abstract class QuerySyntax extends Syntax
      * @param InsertStatement $statement
      * @return array<mixed>
      */
-    public function formatBindingsForInsert(InsertStatement $statement): array
+    public function prepareParametersForInsert(InsertStatement $statement): array
     {
         $columns = $statement->columns();
-        $bindings = [];
+        $parameters = [];
         foreach ($statement->dataset as $data) {
             if (!is_array($data)) {
                 throw new RuntimeException('Data should be an array but ' . Value::getType($data) . ' given.');
             }
             foreach ($columns as $column) {
-                $bindings[] = $data[$column] ?? null;
+                $parameters[] = $data[$column] ?? null;
             }
         }
 
-        return $this->stringifyParameters($bindings);
+        return $this->stringifyParameters($parameters);
     }
 
     /**
      * @param UpdateStatement $statement
      * @return string
      */
-    public function formatUpdateStatement(UpdateStatement $statement): string
+    public function compileUpdateStatement(UpdateStatement $statement): string
     {
         return implode(' ', array_filter([
             'UPDATE',
@@ -128,17 +128,17 @@ abstract class QuerySyntax extends Syntax
      * @param UpdateStatement $statement
      * @return array<mixed>
      */
-    public function formatBindingsForUpdate(UpdateStatement $statement): array
+    public function prepareParametersForUpdate(UpdateStatement $statement): array
     {
-        $bindings = array_merge($statement->data, $this->getBindingsForConditions($statement));
-        return $this->stringifyParameters($bindings);
+        $parameters = array_merge($statement->data, $this->getParametersForConditions($statement));
+        return $this->stringifyParameters($parameters);
     }
 
     /**
      * @param DeleteStatement $statement
      * @return string
      */
-    public function formatDeleteStatement(DeleteStatement $statement): string
+    public function compileDeleteStatement(DeleteStatement $statement): string
     {
         return implode(' ', array_filter([
             'DELETE FROM',
@@ -152,9 +152,9 @@ abstract class QuerySyntax extends Syntax
      * @param DeleteStatement $statement
      * @return array<mixed>
      */
-    public function formatBindingsForDelete(DeleteStatement $statement): array
+    public function prepareParametersForDelete(DeleteStatement $statement): array
     {
-        return $this->stringifyParameters($this->getBindingsForConditions($statement));
+        return $this->stringifyParameters($this->getParametersForConditions($statement));
     }
 
     /**
@@ -721,23 +721,23 @@ abstract class QuerySyntax extends Syntax
      * @param ConditionsStatement $statement
      * @return array<mixed>
      */
-    protected function getBindingsForConditions(ConditionsStatement $statement): array
+    protected function getParametersForConditions(ConditionsStatement $statement): array
     {
-        $bindings = [];
+        $parameters = [];
         if ($statement->where !== null) {
             foreach ($statement->where as $cond) {
-                $this->addBindingsForCondition($bindings, $cond);
+                $this->addParametersForCondition($parameters, $cond);
             }
         }
-        return $bindings;
+        return $parameters;
     }
 
     /**
-     * @param array<int, mixed> $bindings
+     * @param array<int, mixed> $parameters
      * @param ConditionDefinition $def
      * @return void
      */
-    protected function addBindingsForCondition(array &$bindings, ConditionDefinition $def): void
+    protected function addParametersForCondition(array &$parameters, ConditionDefinition $def): void
     {
         while ($def !== null) {
             $value = $def->value;
@@ -746,17 +746,17 @@ abstract class QuerySyntax extends Syntax
             }
 
             if (is_iterable($value)) {
-                foreach ($value as $binding) {
-                    $bindings[] = $binding;
+                foreach ($value as $parameter) {
+                    $parameters[] = $parameter;
                 }
             }
             elseif ($value instanceof Expression || $value instanceof Statement) {
-                foreach ($value->getParameters() as $binding) {
-                    $bindings[] = $binding;
+                foreach ($value->getParameters() as $parameter) {
+                    $parameters[] = $parameter;
                 }
             }
             else {
-                $bindings[] = $value;
+                $parameters[] = $value;
             }
             $def = $def->next;
         }
