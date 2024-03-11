@@ -26,9 +26,9 @@ class DropTableBuilder extends SchemaBuilder
      */
     public function build(): array
     {
-        $formatter = $this->connection->getSchemaFormatter();
+        $syntax = $this->connection->getSchemaSyntax();
         return [
-            $formatter->formatDropTableStatement($this->statement)
+            $syntax->formatDropTableStatement($this->statement)
         ];
     }
 }

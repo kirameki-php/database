@@ -3,7 +3,7 @@
 namespace Kirameki\Database\Adapters;
 
 use Kirameki\Database\Exceptions\DatabaseNotFoundException;
-use Kirameki\Database\Statements\Query\Formatters\SqliteQueryFormatter;
+use Kirameki\Database\Statements\Query\Syntax\SqliteQuerySyntax;
 use PDO;
 use function file_exists;
 use function iterator_to_array;
@@ -43,9 +43,9 @@ class SqliteAdapter extends PdoAdapter
     /**
      * @inheritDoc
      */
-    protected function instantiateQueryFormatter(): SqliteQueryFormatter
+    protected function instantiateQuerySyntax(): SqliteQuerySyntax
     {
-        return new SqliteQueryFormatter(
+        return new SqliteQuerySyntax(
             $this->identifierDelimiter,
             $this->literalDelimiter,
             $this->dateTimeFormat,

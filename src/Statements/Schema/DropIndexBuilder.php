@@ -60,9 +60,9 @@ class DropIndexBuilder extends SchemaBuilder
     public function build(): array
     {
         $this->preprocess();
-        $formatter = $this->connection->getSchemaFormatter();
+        $syntax = $this->connection->getSchemaSyntax();
         return [
-            $formatter->formatDropIndexStatement($this->statement)
+            $syntax->formatDropIndexStatement($this->statement)
         ];
     }
 

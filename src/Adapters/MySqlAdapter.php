@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Adapters;
 
-use Kirameki\Database\Statements\Query\Formatters\MySqlQueryFormatter;
+use Kirameki\Database\Statements\Query\Syntax\MySqlQuerySyntax;
 use PDO;
 use function array_filter;
 use function implode;
@@ -64,9 +64,9 @@ class MySqlAdapter extends PdoAdapter
     /**
      * @inheritDoc
      */
-    protected function instantiateQueryFormatter(): MySqlQueryFormatter
+    protected function instantiateQuerySyntax(): MySqlQuerySyntax
     {
-        return new MySqlQueryFormatter($this->identifierDelimiter, $this->literalDelimiter, $this->dateTimeFormat);
+        return new MySqlQuerySyntax($this->identifierDelimiter, $this->literalDelimiter, $this->dateTimeFormat);
     }
 
     /**

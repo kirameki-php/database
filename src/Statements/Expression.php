@@ -5,10 +5,10 @@ namespace Kirameki\Database\Statements;
 abstract class Expression
 {
     /**
-     * @param StatementFormatter $formatter
+     * @param Syntax $syntax
      * @return string
      */
-    abstract public function prepare(StatementFormatter $formatter): string;
+    abstract public function prepare(Syntax $syntax): string;
 
     /**
      * @return array<int, mixed>

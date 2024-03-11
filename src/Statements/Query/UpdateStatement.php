@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Statements\Query;
 
-use Kirameki\Database\Statements\Query\Formatters\QueryFormatter;
+use Kirameki\Database\Statements\Query\Syntax\QuerySyntax;
 
 class UpdateStatement extends ConditionsStatement
 {
@@ -17,15 +17,15 @@ class UpdateStatement extends ConditionsStatement
     public ?array $returning = null;
 
     /**
-     * @param QueryFormatter $formatter
+     * @param QuerySyntax $syntax
      * @param string $table
      */
     public function __construct(
-        QueryFormatter $formatter,
+        QuerySyntax $syntax,
         public readonly string $table,
     )
     {
-        parent::__construct($formatter);
+        parent::__construct($syntax);
     }
 
     /**
@@ -33,7 +33,7 @@ class UpdateStatement extends ConditionsStatement
      */
     public function prepare(): string
     {
-        return $this->formatter->formatUpdateStatement($this);
+        return $this->syntax->formatUpdateStatement($this);
     }
 
     /**
@@ -41,6 +41,6 @@ class UpdateStatement extends ConditionsStatement
      */
     public function getParameters(): array
     {
-        return $this->formatter->formatBindingsForUpdate($this);
+        return $this->syntax->formatBindingsForUpdate($this);
     }
 }

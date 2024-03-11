@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Statements\Schema\Formatters;
+namespace Kirameki\Database\Statements\Schema\Syntax;
 
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\LogicException;
@@ -16,16 +16,18 @@ use Kirameki\Database\Statements\Schema\DropIndexStatement;
 use Kirameki\Database\Statements\Schema\Expressions\CurrentTimestamp;
 use Kirameki\Database\Statements\Schema\Expressions\Expr;
 use Kirameki\Database\Statements\Schema\Statement;
+use Kirameki\Database\Statements\Syntax;
 use function array_filter;
 use function array_keys;
 use function array_merge;
 use function implode;
 use function is_bool;
+use function is_float;
+use function is_int;
 use function is_string;
-use function str_replace;
 use function strtoupper;
 
-class Formatter
+class SchemaSyntax extends Syntax
 {
     /**
      * @param CreateTableStatement $statement
@@ -74,7 +76,7 @@ class Formatter
     {
         $parts = [];
         $parts[] = 'DROP COLUMN';
-        $parts[] = $this->quote($action->column);
+        $parts[] = $this->asIdentifier($action->column);
         return implode(' ', $parts);
     }
 
@@ -86,9 +88,9 @@ class Formatter
     {
         $parts = [];
         $parts[] = 'RENAME COLUMN';
-        $parts[] = $this->quote($action->from);
+        $parts[] = $this->asIdentifier($action->from);
         $parts[] = 'TO';
-        $parts[] = $this->quote($action->to);
+        $parts[] = $this->asIdentifier($action->to);
         return implode(' ', $parts);
     }
 
@@ -99,7 +101,7 @@ class Formatter
      */
     public function formatRenameTableStatement(string $from, string $to): string
     {
-        return 'ALTER TABLE '.$this->quote($from).' RENAME TO '.$this->quote($to).';';
+        return 'ALTER TABLE '.$this->asIdentifier($from).' RENAME TO '.$this->asIdentifier($to).';';
     }
 
     /**
@@ -132,7 +134,7 @@ class Formatter
         }
         $parts[] = '(' . implode(', ', $columnParts) . ')';
         if ($statement->comment !== null) {
-            $parts[] = $this->literalize($statement->comment);
+            $parts[] = $this->asLiteral($statement->comment);
         }
         return implode(' ', $parts) . ';';
     }
@@ -166,7 +168,7 @@ class Formatter
             $parts[] = 'AUTO_INCREMENT';
         }
         if ($def->comment !== null) {
-            $parts[] = 'COMMENT '.$this->literalize($def->comment);
+            $parts[] = 'COMMENT '.$this->asLiteral($def->comment);
         }
         return implode(' ', $parts);
     }
@@ -213,16 +215,6 @@ class Formatter
     }
 
     /**
-     * @param string $str
-     * @return string
-     */
-    public function quote(string $str): string
-    {
-        $char = '`';
-        return $char . str_replace($char, $char . $char, $str) . $char;
-    }
-
-    /**
      * @param ColumnDefinition $def
      * @return string
      */
@@ -239,7 +231,7 @@ class Formatter
         }
 
         if (is_string($value)) {
-            return $this->literalize($value);
+            return $this->asLiteral($value);
         }
 
         if ($value instanceof Expr) {
@@ -254,14 +246,5 @@ class Formatter
             'value' => $value,
             'column' => $def->name,
         ]);
-    }
-
-    /**
-     * @param string $str
-     * @return string
-     */
-    public function literalize(string $str): string
-    {
-        return "'".str_replace("'", "''", $str)."'";
     }
 }

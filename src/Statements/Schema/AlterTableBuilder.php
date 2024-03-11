@@ -90,23 +90,23 @@ class AlterTableBuilder extends SchemaBuilder
      */
     public function build(): array
     {
-        $formatter = $this->connection->getSchemaFormatter();
+        $syntax = $this->connection->getSchemaSyntax();
         $statements = [];
         foreach ($this->statement->actions as $action) {
             if ($action instanceof AlterColumnAction) {
-                $statements[] = $formatter->formatAlterColumnAction($action);
+                $statements[] = $syntax->formatAlterColumnAction($action);
             }
             elseif ($action instanceof AlterDropColumnAction) {
-                $statements[] = $formatter->formatDropColumnAction($action);
+                $statements[] = $syntax->formatDropColumnAction($action);
             }
             elseif ($action instanceof AlterRenameColumnAction) {
-                $statements[] = $formatter->formatRenameColumnAction($action);
+                $statements[] = $syntax->formatRenameColumnAction($action);
             }
             elseif ($action instanceof CreateIndexStatement) {
-                $statements[] = $formatter->formatCreateIndexStatement($action);
+                $statements[] = $syntax->formatCreateIndexStatement($action);
             }
             elseif ($action instanceof DropIndexStatement) {
-                $statements[] = $formatter->formatDropIndexStatement($action);
+                $statements[] = $syntax->formatDropIndexStatement($action);
             }
         }
         return $statements;

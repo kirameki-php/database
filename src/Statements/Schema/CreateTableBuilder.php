@@ -202,11 +202,11 @@ class CreateTableBuilder extends SchemaBuilder
     public function build(): array
     {
         $this->preprocess();
-        $formatter = $this->connection->getSchemaFormatter();
+        $syntax = $this->connection->getSchemaSyntax();
         $ddls = [];
-        $ddls[] = $formatter->formatCreateTableStatement($this->statement);
+        $ddls[] = $syntax->formatCreateTableStatement($this->statement);
         foreach ($this->statement->indexes as $indexStatement) {
-            $ddls[] = $formatter->formatCreateIndexStatement($indexStatement);
+            $ddls[] = $syntax->formatCreateIndexStatement($indexStatement);
         }
         return $ddls;
     }

@@ -3,7 +3,7 @@
 namespace Kirameki\Database\Statements\Query\Expressions;
 
 use Kirameki\Database\Statements\Expression;
-use Kirameki\Database\Statements\Query\Formatters\QueryFormatter;
+use Kirameki\Database\Statements\Query\Syntax\QuerySyntax;
 
 class Column extends Expression
 {
@@ -17,11 +17,11 @@ class Column extends Expression
     }
 
     /**
-     * @param QueryFormatter $formatter
+     * @param QuerySyntax $syntax
      * @return string
      */
-    public function prepare(QueryFormatter $formatter): string
+    public function prepare(QuerySyntax $syntax): string
     {
-        return $formatter->asColumn($this->column);
+        return $syntax->asColumn($this->column);
     }
 }

@@ -25,9 +25,9 @@ class RenameTableBuilder implements OldStatementBuilder
      */
     public function build(): array
     {
-        $formatter = $this->connection->getSchemaFormatter();
+        $syntax = $this->connection->getSchemaSyntax();
         return [
-            $formatter->formatRenameTableStatement($this->from, $this->to),
+            $syntax->formatRenameTableStatement($this->from, $this->to),
         ];
     }
 }

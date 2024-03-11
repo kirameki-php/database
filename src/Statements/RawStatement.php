@@ -6,12 +6,12 @@ class RawStatement implements Statement
 {
 
     /**
-     * @param StatementFormatter $formatter
+     * @param Syntax $syntax
      * @param string $raw
      * @param array<mixed> $parameters
      */
     public function __construct(
-        protected readonly StatementFormatter $formatter,
+        protected readonly Syntax $syntax,
         protected readonly string $raw,
         protected readonly array $parameters = [],
     )
@@ -39,6 +39,6 @@ class RawStatement implements Statement
      */
     public function toString(): string
     {
-        return $this->formatter->interpolate($this);
+        return $this->syntax->interpolate($this);
     }
 }

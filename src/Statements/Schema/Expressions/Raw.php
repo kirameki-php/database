@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Statements\Schema\Expressions;
 
-use Kirameki\Database\Statements\Schema\Formatters\Formatter;
+use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
 
 class Raw extends Expr
 {
@@ -16,10 +16,10 @@ class Raw extends Expr
     }
 
     /**
-     * @param Formatter $formatter
+     * @param SchemaSyntax $syntax
      * @return string
      */
-    public function toSql(Formatter $formatter): string
+    public function toSql(SchemaSyntax $syntax): string
     {
         return $this->value;
     }

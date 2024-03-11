@@ -16,7 +16,7 @@ use function next;
 use function preg_replace_callback;
 use function str_replace;
 
-abstract class StatementFormatter
+abstract class Syntax
 {
     public function __construct(
         protected readonly string $identifierDelimiter,

@@ -2,13 +2,13 @@
 
 namespace Kirameki\Database\Statements\Query;
 
-use Kirameki\Database\Statements\Query\Formatters\QueryFormatter;
+use Kirameki\Database\Statements\Query\Syntax\QuerySyntax;
 use Kirameki\Database\Statements\Statement;
 
 abstract class QueryStatement implements Statement
 {
     public function __construct(
-        protected readonly QueryFormatter $formatter,
+        protected readonly QuerySyntax $syntax,
     )
     {
     }
@@ -28,6 +28,6 @@ abstract class QueryStatement implements Statement
      */
     public function toString(): string
     {
-        return $this->formatter->interpolate($this);
+        return $this->syntax->interpolate($this);
     }
 }

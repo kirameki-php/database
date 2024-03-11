@@ -1,11 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Statements\Query\Formatters;
+namespace Kirameki\Database\Statements\Query\Syntax;
 
 use Kirameki\Core\Exceptions\RuntimeException;
 use Kirameki\Database\Statements\Query\SelectStatement;
 
-class SqliteQueryFormatter extends QueryFormatter
+class SqliteQuerySyntax extends QuerySyntax
 {
     protected function formatSelectLockOptionPart(SelectStatement $statement): string
     {

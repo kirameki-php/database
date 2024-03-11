@@ -72,9 +72,9 @@ class CreateIndexBuilder extends SchemaBuilder
     public function build(): array
     {
         $this->preprocess();
-        $formatter = $this->connection->getSchemaFormatter();
+        $syntax = $this->connection->getSchemaSyntax();
         return [
-            $formatter->formatCreateIndexStatement($this->statement),
+            $syntax->formatCreateIndexStatement($this->statement),
         ];
     }
 

@@ -10,15 +10,15 @@ use Kirameki\Database\Statements\Execution;
 use Kirameki\Database\Statements\Expression;
 use Kirameki\Database\Statements\Query\DeleteBuilder;
 use Kirameki\Database\Statements\Query\DeleteStatement;
-use Kirameki\Database\Statements\Query\Formatters\QueryFormatter as QueryFormatter;
 use Kirameki\Database\Statements\Query\InsertBuilder;
 use Kirameki\Database\Statements\Query\InsertStatement;
 use Kirameki\Database\Statements\Query\SelectBuilder;
 use Kirameki\Database\Statements\Query\SelectStatement;
+use Kirameki\Database\Statements\Query\Syntax\QuerySyntax;
 use Kirameki\Database\Statements\Query\UpdateBuilder;
 use Kirameki\Database\Statements\Query\UpdateStatement;
 use Kirameki\Database\Statements\Result;
-use Kirameki\Database\Statements\Schema\Formatters\Formatter as SchemaFormatter;
+use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
 use Kirameki\Database\Statements\Statement;
 use Kirameki\Database\Transaction\TransactionHandler;
 use Kirameki\Event\EventManager;
@@ -52,19 +52,19 @@ class Connection
     }
 
     /**
-     * @return QueryFormatter
+     * @return QuerySyntax
      */
-    public function getQueryFormatter(): QueryFormatter
+    public function getQuerySyntax(): QuerySyntax
     {
-        return $this->adapter->getQueryFormatter();
+        return $this->adapter->getQuerySyntax();
     }
 
     /**
-     * @return SchemaFormatter
+     * @return SchemaSyntax
      */
-    public function getSchemaFormatter(): SchemaFormatter
+    public function getSchemaSyntax(): SchemaSyntax
     {
-        return $this->adapter->getSchemaFormatter();
+        return $this->adapter->getSchemaSyntax();
     }
 
     /**
@@ -125,7 +125,7 @@ class Connection
      */
     public function select(string|Expression ...$columns): SelectBuilder
     {
-        $statement = new SelectStatement($this->getQueryFormatter());
+        $statement = new SelectStatement($this->getQuerySyntax());
         $builder = new SelectBuilder($this, $statement);
         return $builder->columns(...$columns);
     }
@@ -136,7 +136,7 @@ class Connection
      */
     public function insertInto(string $table): InsertBuilder
     {
-        $statement = new InsertStatement($this->getQueryFormatter(), $table);
+        $statement = new InsertStatement($this->getQuerySyntax(), $table);
         return new InsertBuilder($this, $statement);
     }
 
@@ -146,7 +146,7 @@ class Connection
      */
     public function update(string $table): UpdateBuilder
     {
-        $statement = new UpdateStatement($this->getQueryFormatter(), $table);
+        $statement = new UpdateStatement($this->getQuerySyntax(), $table);
         return new UpdateBuilder($this, $statement);
     }
 
@@ -156,7 +156,7 @@ class Connection
      */
     public function delete(string $table): DeleteBuilder
     {
-        $statement = new DeleteStatement($this->getQueryFormatter(), $table);
+        $statement = new DeleteStatement($this->getQuerySyntax(), $table);
         return new DeleteBuilder($this, $statement);
     }
 

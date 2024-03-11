@@ -3,8 +3,8 @@
 namespace Kirameki\Database\Adapters;
 
 use Kirameki\Database\Statements\Execution;
-use Kirameki\Database\Statements\Query\Formatters\QueryFormatter as QueryFormatter;
-use Kirameki\Database\Statements\Schema\Formatters\Formatter as SchemaFormatter;
+use Kirameki\Database\Statements\Query\Syntax\QuerySyntax;
+use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
 use Kirameki\Database\Statements\Statement;
 
 interface DatabaseAdapter
@@ -97,14 +97,14 @@ interface DatabaseAdapter
     public function truncate(string $table): void;
 
     /**
-     * @return QueryFormatter
+     * @return QuerySyntax
      */
-    public function getQueryFormatter(): QueryFormatter;
+    public function getQuerySyntax(): QuerySyntax;
 
     /**
-     * @return SchemaFormatter
+     * @return SchemaSyntax
      */
-    public function getSchemaFormatter(): SchemaFormatter;
+    public function getSchemaSyntax(): SchemaSyntax;
 
     /**
      * @return bool

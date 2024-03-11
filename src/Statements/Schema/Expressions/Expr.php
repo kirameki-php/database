@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Statements\Schema\Expressions;
 
-use Kirameki\Database\Statements\Schema\Formatters\Formatter;
+use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
 
 abstract class Expr
 {
@@ -16,8 +16,8 @@ abstract class Expr
     }
 
     /**
-     * @param Formatter $formatter
+     * @param SchemaSyntax $syntax
      * @return string
      */
-    abstract public function toSql(Formatter $formatter): string;
+    abstract public function toSql(SchemaSyntax $syntax): string;
 }

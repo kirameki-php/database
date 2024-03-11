@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Statements\Query\Formatters;
+namespace Kirameki\Database\Statements\Query\Syntax;
 
 use Kirameki\Core\Value;
 use Kirameki\Database\Statements\Expression;
@@ -18,7 +18,7 @@ use Kirameki\Database\Statements\Query\Support\Operator;
 use Kirameki\Database\Statements\Query\Support\Range;
 use Kirameki\Database\Statements\Query\UpdateStatement;
 use Kirameki\Database\Statements\Statement;
-use Kirameki\Database\Statements\StatementFormatter;
+use Kirameki\Database\Statements\Syntax;
 use RuntimeException;
 use function array_filter;
 use function array_keys;
@@ -32,7 +32,7 @@ use function is_string;
 use function preg_match;
 use function preg_quote;
 
-abstract class QueryFormatter extends StatementFormatter
+abstract class QuerySyntax extends Syntax
 {
     /**
      * @param SelectStatement $statement

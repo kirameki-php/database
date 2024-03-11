@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Statements\Query;
 
-use Kirameki\Database\Statements\Query\Formatters\QueryFormatter;
+use Kirameki\Database\Statements\Query\Syntax\QuerySyntax;
 
 class DeleteStatement extends ConditionsStatement
 {
@@ -12,15 +12,15 @@ class DeleteStatement extends ConditionsStatement
     public ?array $returning = null;
 
     /**
-     * @param QueryFormatter $formatter
+     * @param QuerySyntax $syntax
      * @param string $table
      */
     public function __construct(
-        QueryFormatter $formatter,
+        QuerySyntax $syntax,
         public readonly string $table,
     )
     {
-        parent::__construct($formatter);
+        parent::__construct($syntax);
     }
 
     /**
@@ -28,7 +28,7 @@ class DeleteStatement extends ConditionsStatement
      */
     public function prepare(): string
     {
-        return $this->formatter->formatDeleteStatement($this);
+        return $this->syntax->formatDeleteStatement($this);
     }
 
     /**
@@ -36,6 +36,6 @@ class DeleteStatement extends ConditionsStatement
      */
     public function getParameters(): array
     {
-        return $this->formatter->formatBindingsForDelete($this);
+        return $this->syntax->formatBindingsForDelete($this);
     }
 }

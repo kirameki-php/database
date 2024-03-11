@@ -3,7 +3,7 @@
 namespace Kirameki\Database\Statements\Query\Expressions;
 
 use Kirameki\Database\Statements\Expression;
-use Kirameki\Database\Statements\Query\Formatters\QueryFormatter;
+use Kirameki\Database\Statements\Query\Syntax\QuerySyntax;
 
 class Aggregate extends Expression
 {
@@ -21,17 +21,17 @@ class Aggregate extends Expression
     }
 
     /**
-     * @param QueryFormatter $formatter
+     * @param QuerySyntax $syntax
      * @return string
      */
-    public function prepare(QueryFormatter $formatter): string
+    public function prepare(QuerySyntax $syntax): string
     {
         $expr = $this->function;
         $expr.= '(';
-        $expr.= $formatter->asColumn($this->column);
+        $expr.= $syntax->asColumn($this->column);
         $expr.= ')';
         if ($this->as !== null) {
-            $expr.= ' AS ' . $formatter->asIdentifier($this->as);
+            $expr.= ' AS ' . $syntax->asIdentifier($this->as);
         }
         return $expr;
     }

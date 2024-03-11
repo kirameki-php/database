@@ -6,9 +6,9 @@ use Closure;
 use DateTimeInterface;
 use Iterator;
 use Kirameki\Database\Statements\Execution;
-use Kirameki\Database\Statements\Query\Formatters\QueryFormatter;
+use Kirameki\Database\Statements\Query\Syntax\QuerySyntax;
 use Kirameki\Database\Statements\RawStatement;
-use Kirameki\Database\Statements\Schema\Formatters\Formatter as SchemaFormatter;
+use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
 use Kirameki\Database\Statements\Statement;
 use PDO;
 use PDOException;
@@ -31,14 +31,14 @@ abstract class PdoAdapter implements DatabaseAdapter
     /**
      * @param TConfig $config
      * @param PDO|null $pdo
-     * @param QueryFormatter|null $queryFormatter
-     * @param SchemaFormatter|null $schemaFormatter
+     * @param QuerySyntax|null $querySyntax
+     * @param SchemaSyntax|null $schemaSyntax
      */
     public function __construct(
         protected DatabaseConfig $config,
         protected ?PDO $pdo = null,
-        protected ?QueryFormatter $queryFormatter = null,
-        protected ?SchemaFormatter $schemaFormatter = null,
+        protected ?QuerySyntax $querySyntax = null,
+        protected ?SchemaSyntax $schemaSyntax = null,
     )
     {
     }
@@ -163,9 +163,9 @@ abstract class PdoAdapter implements DatabaseAdapter
     public function tableExists(string $table): bool
     {
         try {
-            $formatter = $this->getQueryFormatter();
-            $table = $formatter->asIdentifier($table);
-            $statement = new RawStatement($formatter, "SELECT 1 FROM {$table} LIMIT 1");
+            $syntax = $this->getQuerySyntax();
+            $table = $syntax->asIdentifier($table);
+            $statement = new RawStatement($syntax, "SELECT 1 FROM {$table} LIMIT 1");
             $this->query($statement);
             return true;
         } catch (PDOException) {
@@ -176,30 +176,30 @@ abstract class PdoAdapter implements DatabaseAdapter
     /**
      * @inheritDoc
      */
-    public function getQueryFormatter(): QueryFormatter
+    public function getQuerySyntax(): QuerySyntax
     {
-        return $this->queryFormatter ??= $this->instantiateQueryFormatter();
+        return $this->querySyntax ??= $this->instantiateQuerySyntax();
     }
 
     /**
-     * @return QueryFormatter
+     * @return QuerySyntax
      */
-    abstract protected function instantiateQueryFormatter(): QueryFormatter;
+    abstract protected function instantiateQuerySyntax(): QuerySyntax;
 
     /**
      * @inheritDoc
      */
-    public function getSchemaFormatter(): SchemaFormatter
+    public function getSchemaSyntax(): SchemaSyntax
     {
-        return $this->schemaFormatter ??= $this->instantiateSchemaFormatter();
+        return $this->schemaSyntax ??= $this->instantiateSchemaSyntax();
     }
 
     /**
-     * @return SchemaFormatter
+     * @return SchemaSyntax
      */
-    protected function instantiateSchemaFormatter(): SchemaFormatter
+    protected function instantiateSchemaSyntax(): SchemaSyntax
     {
-        return new SchemaFormatter(
+        return new SchemaSyntax(
             $this->identifierDelimiter,
             $this->literalDelimiter,
             $this->dateTimeFormat

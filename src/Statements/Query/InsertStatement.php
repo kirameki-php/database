@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Statements\Query;
 
-use Kirameki\Database\Statements\Query\Formatters\QueryFormatter;
+use Kirameki\Database\Statements\Query\Syntax\QuerySyntax;
 use function array_keys;
 
 class InsertStatement extends QueryStatement
@@ -23,15 +23,15 @@ class InsertStatement extends QueryStatement
     protected ?array $cachedColumns = null;
 
     /**
-     * @param QueryFormatter $formatter
+     * @param QuerySyntax $syntax
      * @param string $table
      */
     public function __construct(
-        QueryFormatter $formatter,
+        QuerySyntax $syntax,
         public readonly string $table,
     )
     {
-        parent::__construct($formatter);
+        parent::__construct($syntax);
     }
 
     /**
@@ -58,7 +58,7 @@ class InsertStatement extends QueryStatement
      */
     public function prepare(): string
     {
-        return $this->formatter->formatInsertStatement($this);
+        return $this->syntax->formatInsertStatement($this);
     }
 
     /**
@@ -66,6 +66,6 @@ class InsertStatement extends QueryStatement
      */
     public function getParameters(): array
     {
-        return $this->formatter->formatBindingsForInsert($this);
+        return $this->syntax->formatBindingsForInsert($this);
     }
 }
