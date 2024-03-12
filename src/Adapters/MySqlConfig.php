@@ -14,10 +14,10 @@ class MySqlConfig implements DatabaseConfig
      * @param iterable<string, mixed>|null $options
      */
     public function __construct(
-        public ?string $host,
-        public ?int $port,
-        public ?string $socket,
-        public ?string $database,
+        public ?string $host = null,
+        public ?int $port = null,
+        public ?string $socket = null,
+        public ?string $database = null,
         public ?string $username = 'root',
         public ?string $password = null,
         public ?iterable $options = null,

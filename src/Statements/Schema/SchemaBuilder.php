@@ -12,7 +12,7 @@ abstract class SchemaBuilder implements OldStatementBuilder
 {
     /**
      * @param Connection $connection
-     * @param Statement $statement
+     * @param TStatement $statement
      */
     public function __construct(
         protected Connection $connection,
@@ -38,11 +38,6 @@ abstract class SchemaBuilder implements OldStatementBuilder
     {
         return clone $this;
     }
-
-    /**
-     * @return string[]
-     */
-    abstract public function build(): array;
 
     /**
      * @return string

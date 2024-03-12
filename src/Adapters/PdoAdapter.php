@@ -44,14 +44,6 @@ abstract class PdoAdapter implements DatabaseAdapter
     }
 
     /**
-     * @return void
-     */
-    public function __clone(): void
-    {
-        $this->config = clone $this->config;
-    }
-
-    /**
      * @inheritDoc
      * @return TConfig
      */
@@ -157,9 +149,6 @@ abstract class PdoAdapter implements DatabaseAdapter
         return $this->getPdo()->inTransaction();
     }
 
-    /**
-     * @inheritDoc
-     */
     public function tableExists(string $table): bool
     {
         try {

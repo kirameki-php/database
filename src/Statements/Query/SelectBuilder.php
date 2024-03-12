@@ -4,6 +4,7 @@ namespace Kirameki\Database\Statements\Query;
 
 use Closure;
 use Kirameki\Database\Connection;
+use Kirameki\Database\QueryHandler;
 use Kirameki\Database\Statements\Expression;
 use Kirameki\Database\Statements\Query\Expressions\Aggregate;
 use Kirameki\Database\Statements\Query\Support\JoinType;
@@ -18,15 +19,15 @@ use function is_array;
 class SelectBuilder extends ConditionsBuilder
 {
     /**
-     * @param Connection $connection
+     * @param QueryHandler $handler
      * @param SelectStatement $statement
      */
     public function __construct(
-        Connection $connection,
+        QueryHandler $handler,
         SelectStatement $statement,
     )
     {
-        parent::__construct($connection, $statement);
+        parent::__construct($handler, $statement);
     }
 
     #region selecting --------------------------------------------------------------------------------------------------

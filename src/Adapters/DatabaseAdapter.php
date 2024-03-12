@@ -85,18 +85,6 @@ interface DatabaseAdapter
     public function databaseExists(): bool;
 
     /**
-     * @param string $table
-     * @return bool
-     */
-    public function tableExists(string $table): bool;
-
-    /**
-     * @param string $table
-     * @return void
-     */
-    public function truncate(string $table): void;
-
-    /**
      * @return QuerySyntax
      */
     public function getQuerySyntax(): QuerySyntax;

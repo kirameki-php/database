@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Statements\Query;
 
-use Kirameki\Database\Connection;
+use Kirameki\Database\QueryHandler;
 
 /**
  * @extends ConditionsBuilder<DeleteStatement>
@@ -10,15 +10,15 @@ use Kirameki\Database\Connection;
 class DeleteBuilder extends ConditionsBuilder
 {
     /**
-     * @param Connection $connection
+     * @param QueryHandler $handler
      * @param DeleteStatement $statement
      */
     public function __construct(
-        Connection $connection,
+        QueryHandler $handler,
         DeleteStatement $statement,
     )
     {
-        parent::__construct($connection, $statement);
+        parent::__construct($handler, $statement);
     }
 
     /**

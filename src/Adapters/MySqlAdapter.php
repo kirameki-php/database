@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Adapters;
 
 use Kirameki\Database\Statements\Query\Syntax\MySqlQuerySyntax;
+use Kirameki\Database\Statements\RawStatement;
 use PDO;
 use function array_filter;
 use function implode;
@@ -76,11 +77,11 @@ class MySqlAdapter extends PdoAdapter
     {
         $copy = (clone $this);
         $copy->config->database = null;
-        $copy->execute(implode(' ', array_filter([
+        $copy->execute(new RawStatement($this->getSchemaSyntax(), implode(' ', array_filter([
             'CREATE DATABASE',
             $ifNotExist ? 'IF NOT EXISTS' : null,
             $this->config->database,
-        ])));
+        ]))));
     }
 
     /**
@@ -90,11 +91,11 @@ class MySqlAdapter extends PdoAdapter
     {
         $copy = (clone $this);
         $copy->config->database = null;
-        $copy->execute(implode(' ', array_filter([
+        $copy->execute(new RawStatement($this->getSchemaSyntax(), implode(' ', array_filter([
             'DROP DATABASE',
             $ifExist ? 'IF EXISTS' : null,
             $this->config->database,
-        ])));
+        ]))));
     }
 
     /**

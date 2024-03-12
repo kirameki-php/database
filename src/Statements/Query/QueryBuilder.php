@@ -2,10 +2,9 @@
 
 namespace Kirameki\Database\Statements\Query;
 
-use Kirameki\Database\Connection;
+use Kirameki\Database\QueryHandler;
 use Kirameki\Database\Statements\Result;
 use Kirameki\Database\Statements\StatementBuilder;
-
 
 /**
  * @template TStatement of QueryStatement
@@ -13,11 +12,11 @@ use Kirameki\Database\Statements\StatementBuilder;
 abstract class QueryBuilder implements StatementBuilder
 {
     /**
-     * @param Connection $connection
-     * @param QueryStatement $statement
+     * @param QueryHandler $handler
+     * @param TStatement $statement
      */
     public function __construct(
-        protected readonly Connection $connection,
+        protected readonly QueryHandler $handler,
         protected QueryStatement $statement,
     )
     {
@@ -30,14 +29,6 @@ abstract class QueryBuilder implements StatementBuilder
     public function __clone()
     {
         $this->statement = clone $this->statement;
-    }
-
-    /**
-     * @return Connection
-     */
-    public function getConnection(): Connection
-    {
-        return $this->connection;
     }
 
     /**
@@ -61,6 +52,6 @@ abstract class QueryBuilder implements StatementBuilder
      */
     public function execute(): Result
     {
-        return $this->connection->query($this->statement);
+        return $this->handler->execute($this->statement);
     }
 }

@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Statements\Query;
 
 use Kirameki\Database\Connection;
+use Kirameki\Database\QueryHandler;
 use Kirameki\Database\Statements\Result;
 use LogicException;
 use Traversable;
@@ -15,15 +16,15 @@ use function iterator_to_array;
 class InsertBuilder extends QueryBuilder
 {
     /**
-     * @param Connection $connection
+     * @param QueryHandler $handler
      * @param InsertStatement $statement
      */
     public function __construct(
-        Connection $connection,
+        QueryHandler $handler,
         InsertStatement $statement,
     )
     {
-        parent::__construct($connection, $statement);
+        parent::__construct($handler, $statement);
     }
 
     /**
