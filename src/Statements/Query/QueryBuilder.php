@@ -32,7 +32,7 @@ abstract class QueryBuilder implements StatementBuilder
     }
 
     /**
-     * @return QueryStatement
+     * @return TStatement
      */
     public function getStatement(): QueryStatement
     {
@@ -53,5 +53,13 @@ abstract class QueryBuilder implements StatementBuilder
     public function execute(): Result
     {
         return $this->handler->execute($this->statement);
+    }
+
+    /**
+     * @return Result
+     */
+    public function cursor(): Result
+    {
+        return $this->handler->cursor($this->statement);
     }
 }
