@@ -27,7 +27,7 @@ class Result extends Vec
      */
     public function getExecutedQuery(): string
     {
-        $syntax = $this->connection->getQuerySyntax();
+        $syntax = $this->connection->getAdapter()->getQuerySyntax();
         return $syntax->interpolate($this->execution->statement);
     }
 }

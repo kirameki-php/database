@@ -2,12 +2,12 @@
 
 namespace Kirameki\Database\Adapters;
 
-use Kirameki\Database\Statements\Execution;
+use Kirameki\Database\Statements\Query\QueryExecution;
 use Kirameki\Database\Statements\Query\QueryStatement;
 use Kirameki\Database\Statements\Query\Syntax\QuerySyntax;
+use Kirameki\Database\Statements\Schema\SchemaExecution;
 use Kirameki\Database\Statements\Schema\SchemaStatement;
 use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
-use Kirameki\Database\Statements\Statement;
 
 interface DatabaseAdapter
 {
@@ -32,22 +32,25 @@ interface DatabaseAdapter
     public function isConnected(): bool;
 
     /**
-     * @param SchemaStatement $statement
-     * @return Execution
+     * @template TStatement of SchemaStatement
+     * @param TStatement $statement
+     * @return SchemaExecution<TStatement>
      */
-    public function runSchema(SchemaStatement $statement): Execution;
+    public function runSchema(SchemaStatement $statement): SchemaExecution;
 
     /**
-     * @param QueryStatement $statement
-     * @return Execution
+     * @template TStatement of QueryStatement
+     * @param TStatement $statement
+     * @return QueryExecution<TStatement>
      */
-    public function query(QueryStatement $statement): Execution;
+    public function query(QueryStatement $statement): QueryExecution;
 
     /**
-     * @param QueryStatement $statement
-     * @return Execution
+     * @template TStatement of QueryStatement
+     * @param TStatement $statement
+     * @return QueryExecution<TStatement>
      */
-    public function cursor(QueryStatement $statement): Execution;
+    public function cursor(QueryStatement $statement): QueryExecution;
 
     /**
      * @return void

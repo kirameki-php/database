@@ -6,9 +6,11 @@ use Closure;
 use DateTimeInterface;
 use Iterator;
 use Kirameki\Database\Statements\Execution;
+use Kirameki\Database\Statements\Query\QueryExecution;
 use Kirameki\Database\Statements\Query\QueryStatement;
 use Kirameki\Database\Statements\Query\RawStatement;
 use Kirameki\Database\Statements\Query\Syntax\QuerySyntax;
+use Kirameki\Database\Statements\Schema\SchemaExecution;
 use Kirameki\Database\Statements\Schema\SchemaStatement;
 use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
 use Kirameki\Database\Statements\Statement;
@@ -83,34 +85,33 @@ abstract class PdoAdapter implements DatabaseAdapter
     /**
      * @inheritDoc
      */
-    public function runSchema(SchemaStatement $statement): Execution
+    public function runSchema(SchemaStatement $statement): SchemaExecution
     {
         $startTime = hrtime(true);
-        $count = 0;
         foreach ($statement->prepare() as $schema) {
-            $count += $this->getPdo()->exec($schema) ?: 0;
+            $this->getPdo()->exec($schema);
         }
         $execTimeMs = (hrtime(true) - $startTime) / 1_000_000;
-        return $this->instantiateExecution($statement, [], $execTimeMs, $count);
+        return $this->instantiateSchemaExecution($statement, $execTimeMs);
     }
 
     /**
      * @inheritDoc
      */
-    public function query(QueryStatement $statement): Execution
+    public function query(QueryStatement $statement): QueryExecution
     {
         $startTime = hrtime(true);
         $prepared = $this->execQuery($statement);
         $rows = $prepared->fetchAll(PDO::FETCH_OBJ);
         $fetchTimeMs = (hrtime(true) - $startTime) / 1_000_000;
         $count = $prepared->rowCount(...);
-        return $this->instantiateExecution($statement, $rows, $fetchTimeMs, $count);
+        return $this->instantiateQueryExecution($statement, $fetchTimeMs, $rows, $count);
     }
 
     /**
      * @inheritDoc
      */
-    public function cursor(QueryStatement $statement): Execution
+    public function cursor(QueryStatement $statement): QueryExecution
     {
         $startTime = hrtime(true);
         $prepared = $this->execQuery($statement);
@@ -128,7 +129,7 @@ abstract class PdoAdapter implements DatabaseAdapter
         })();
         $execTimeMs = (hrtime(true) - $startTime) / 1_000_000;
         $count = $prepared->rowCount(...);
-        return $this->instantiateExecution($statement, $iterator, $execTimeMs, $count);
+        return $this->instantiateQueryExecution($statement, $execTimeMs, $iterator, $count);
     }
 
     /**
@@ -234,20 +235,35 @@ abstract class PdoAdapter implements DatabaseAdapter
     abstract protected function createPdo(): PDO;
 
     /**
-     * @param Statement $statement
-     * @param iterable<int, mixed> $rowIterator
+     * @template TStatement of SchemaStatement
+     * @param TStatement $statement
      * @param float $elapsedMs
-     * @param int|Closure(): int $affectedRowCount
-     * @return Execution
+     * @return SchemaExecution<TStatement>
      */
-    protected function instantiateExecution(
-        Statement $statement,
-        iterable $rowIterator,
+    protected function instantiateSchemaExecution(
+        SchemaStatement $statement,
         float $elapsedMs,
-        int|Closure $affectedRowCount,
-    ): Execution
+    ): SchemaExecution
     {
-        return new Execution($this->config, $statement, $rowIterator, $elapsedMs, $affectedRowCount);
+        return new SchemaExecution($statement, $elapsedMs);
+    }
+
+    /**
+     * @template TStatement of QueryStatement
+     * @param TStatement $statement
+     * @param float $elapsedMs
+     * @param iterable<int, mixed> $rowIterator
+     * @param int|Closure(): int $affectedRowCount
+     * @return QueryExecution<TStatement>
+     */
+    protected function instantiateQueryExecution(
+        QueryStatement $statement,
+        float $elapsedMs,
+        iterable $rowIterator,
+        int|Closure $affectedRowCount,
+    ): QueryExecution
+    {
+        return new QueryExecution($statement, $elapsedMs, $rowIterator, $affectedRowCount);
     }
 
     /**
