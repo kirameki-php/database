@@ -199,14 +199,7 @@ abstract class PdoAdapter implements DatabaseAdapter
     /**
      * @return SchemaSyntax
      */
-    protected function instantiateSchemaSyntax(): SchemaSyntax
-    {
-        return new SchemaSyntax(
-            $this->identifierDelimiter,
-            $this->literalDelimiter,
-            $this->dateTimeFormat
-        );
-    }
+    abstract protected function instantiateSchemaSyntax(): SchemaSyntax;
 
     /**
      * @param QueryStatement $statement

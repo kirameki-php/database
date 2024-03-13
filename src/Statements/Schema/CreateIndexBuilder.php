@@ -19,7 +19,8 @@ class CreateIndexBuilder extends SchemaBuilder
         public readonly string $table,
     )
     {
-        parent::__construct($connection, new CreateIndexStatement($table));
+        $syntax = $connection->getAdapter()->getSchemaSyntax();
+        parent::__construct($connection, new CreateIndexStatement($syntax, $table));
     }
 
     /**
@@ -64,29 +65,5 @@ class CreateIndexBuilder extends SchemaBuilder
     {
         $this->statement->comment = $comment;
         return $this;
-    }
-
-    /**
-     * @return string[]
-     */
-    public function build(): array
-    {
-        $this->preprocess();
-        $syntax = $this->connection->getSchemaSyntax();
-        return [
-            $syntax->formatCreateIndexStatement($this->statement),
-        ];
-    }
-
-    /**
-     * @return void
-     */
-    public function preprocess(): void
-    {
-        $columns = $this->statement->columns;
-
-        if(empty($columns)) {
-            throw new RuntimeException('At least 1 column needs to be defined to create an index.');
-        }
     }
 }

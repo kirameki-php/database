@@ -19,7 +19,8 @@ class DropIndexBuilder extends SchemaBuilder
         public readonly string $table,
     )
     {
-        parent::__construct($connection, new DropIndexStatement($table));
+        $syntax = $connection->getAdapter()->getSchemaSyntax();
+        parent::__construct($connection, new DropIndexStatement($syntax, $table));
     }
 
     /**
@@ -52,30 +53,5 @@ class DropIndexBuilder extends SchemaBuilder
             $this->column($column);
         }
         return $this;
-    }
-
-    /**
-     * @return string[]
-     */
-    public function build(): array
-    {
-        $this->preprocess();
-        $syntax = $this->connection->getSchemaSyntax();
-        return [
-            $syntax->formatDropIndexStatement($this->statement)
-        ];
-    }
-
-    /**
-     * @return void
-     */
-    public function preprocess(): void
-    {
-        $name = $this->statement->name;
-        $columns = $this->statement->columns;
-
-        if($name === null && empty($columns)) {
-            throw new RuntimeException('Name or column(s) are required to drop an index.');
-        }
     }
 }

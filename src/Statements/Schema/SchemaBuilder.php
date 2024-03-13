@@ -2,19 +2,19 @@
 
 namespace Kirameki\Database\Statements\Schema;
 
-use Kirameki\Database\Connection;
+use Kirameki\Database\SchemaHandler;
 
 /**
- * @template-covariant TStatement of SchemaStatement
+ * @template TStatement of SchemaStatement
  */
 abstract class SchemaBuilder
 {
     /**
-     * @param Connection $connection
+     * @param SchemaHandler $handler
      * @param TStatement $statement
      */
     public function __construct(
-        protected Connection $connection,
+        protected readonly SchemaHandler $handler,
         protected SchemaStatement $statement,
     )
     {
@@ -44,5 +44,13 @@ abstract class SchemaBuilder
     protected function copy(): static
     {
         return clone $this;
+    }
+
+    /**
+     * @return SchemaExecution<TStatement>
+     */
+    public function execute(): SchemaExecution
+    {
+        return $this->handler->execute($this->statement);
     }
 }

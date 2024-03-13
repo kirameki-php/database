@@ -19,7 +19,8 @@ class AlterTableBuilder extends SchemaBuilder
         string $table,
     )
     {
-        parent::__construct($connection, new AlterTableStatement($table));
+        $syntax = $connection->getAdapter()->getSchemaSyntax();
+        parent::__construct($connection, new AlterTableStatement($syntax, $table));
     }
 
     /**
@@ -83,32 +84,5 @@ class AlterTableBuilder extends SchemaBuilder
         $builder->columns($columns);
         $this->statement->addAction($builder->statement);
         return $builder;
-    }
-
-    /**
-     * @return string[]
-     */
-    public function build(): array
-    {
-        $syntax = $this->connection->getSchemaSyntax();
-        $statements = [];
-        foreach ($this->statement->actions as $action) {
-            if ($action instanceof AlterColumnAction) {
-                $statements[] = $syntax->formatAlterColumnAction($action);
-            }
-            elseif ($action instanceof AlterDropColumnAction) {
-                $statements[] = $syntax->formatDropColumnAction($action);
-            }
-            elseif ($action instanceof AlterRenameColumnAction) {
-                $statements[] = $syntax->formatRenameColumnAction($action);
-            }
-            elseif ($action instanceof CreateIndexStatement) {
-                $statements[] = $syntax->formatCreateIndexStatement($action);
-            }
-            elseif ($action instanceof DropIndexStatement) {
-                $statements[] = $syntax->formatDropIndexStatement($action);
-            }
-        }
-        return $statements;
     }
 }

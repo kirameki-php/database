@@ -4,7 +4,7 @@ namespace Kirameki\Database\Statements\Schema\Expressions;
 
 use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
 
-abstract class Expr
+abstract class Expression
 {
     /**
      * @param string $value
@@ -19,5 +19,5 @@ abstract class Expr
      * @param SchemaSyntax $syntax
      * @return string
      */
-    abstract public function toSql(SchemaSyntax $syntax): string;
+    abstract public function prepare(SchemaSyntax $syntax): string;
 }

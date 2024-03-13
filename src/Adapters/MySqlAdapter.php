@@ -4,6 +4,8 @@ namespace Kirameki\Database\Adapters;
 
 use Kirameki\Database\Statements\Schema\RawStatement;
 use Kirameki\Database\Statements\Query\Syntax\MySqlQuerySyntax;
+use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
+use Kirameki\Database\Statements\Schema\Syntax\SqliteSchemaSyntax;
 use PDO;
 use function array_filter;
 use function implode;
@@ -73,6 +75,14 @@ class MySqlAdapter extends PdoAdapter
     /**
      * @inheritDoc
      */
+    protected function instantiateSchemaSyntax(): SchemaSyntax
+    {
+        return new SchemaSyntax($this->identifierDelimiter, $this->literalDelimiter, $this->dateTimeFormat);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function createDatabase(bool $ifNotExist = false): void
     {
         $copy = (clone $this);
@@ -105,14 +115,6 @@ class MySqlAdapter extends PdoAdapter
     {
         $execution = $this->query("SHOW DATABASES LIKE '{$this->config->database}'");
         return $execution->getAffectedRowCount() > 0;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function truncate(string $table): void
-    {
-        $this->runSchema("TRUNCATE TABLE {$table}");
     }
 
     /**

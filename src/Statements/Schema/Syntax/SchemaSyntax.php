@@ -13,9 +13,11 @@ use Kirameki\Database\Statements\Schema\ColumnDefinition;
 use Kirameki\Database\Statements\Schema\CreateIndexStatement;
 use Kirameki\Database\Statements\Schema\CreateTableStatement;
 use Kirameki\Database\Statements\Schema\DropIndexStatement;
+use Kirameki\Database\Statements\Schema\DropTableStatement;
 use Kirameki\Database\Statements\Schema\Expressions\CurrentTimestamp;
-use Kirameki\Database\Statements\Schema\Expressions\Expr;
-use Kirameki\Database\Statements\Schema\SchemaStatement;
+use Kirameki\Database\Statements\Schema\Expressions\Expression;
+use Kirameki\Database\Statements\Schema\RenameTableStatement;
+use Kirameki\Database\Statements\Schema\TruncateTableStatement;
 use Kirameki\Database\Statements\Syntax;
 use function array_filter;
 use function array_keys;
@@ -95,22 +97,29 @@ class SchemaSyntax extends Syntax
     }
 
     /**
-     * @param string $from
-     * @param string $to
+     * @param RenameTableStatement $statement
      * @return string
      */
-    public function formatRenameTableStatement(string $from, string $to): string
+    public function formatRenameTableStatement(RenameTableStatement $statement): string
     {
-        return 'ALTER TABLE '.$this->asIdentifier($from).' RENAME TO '.$this->asIdentifier($to).';';
+        return implode(' ', [
+            'ALTER TABLE',
+            $this->asIdentifier($statement->from),
+            'RENAME TO',
+            $this->asIdentifier($statement->to),
+        ]);
     }
 
     /**
-     * @param SchemaStatement $statement
+     * @param DropTableStatement $statement
      * @return string
      */
-    public function formatDropTableStatement(SchemaStatement $statement): string
+    public function formatDropTableStatement(DropTableStatement $statement): string
     {
-        return 'DROP TABLE '.$statement->table.';';
+        return implode(' ', [
+            'DROP TABLE',
+            $this->asIdentifier($statement->table),
+        ]);
     }
 
     /**
@@ -136,7 +145,7 @@ class SchemaSyntax extends Syntax
         if ($statement->comment !== null) {
             $parts[] = $this->asLiteral($statement->comment);
         }
-        return implode(' ', $parts) . ';';
+        return implode(' ', $parts);
     }
 
     /**
@@ -146,7 +155,12 @@ class SchemaSyntax extends Syntax
     public function formatDropIndexStatement(DropIndexStatement $statement): string
     {
         $name = $statement->name ?? implode('_', array_merge([$statement->table], $statement->columns));
-        return "DROP INDEX {$name} ON {$statement->table};";
+        return implode(' ', [
+            'DROP INDEX',
+            $this->asIdentifier($name),
+            'ON',
+            $this->asIdentifier($statement->table),
+        ]);
     }
 
     /**
@@ -234,17 +248,34 @@ class SchemaSyntax extends Syntax
             return $this->asLiteral($value);
         }
 
-        if ($value instanceof Expr) {
-            return $value->toSql($this);
-        }
-
-        if ($value instanceof CurrentTimestamp) {
-            return 'CURRENT_TIMESTAMP' . ($def->size ? '(' . $def->size . ')' : '');
+        if ($value instanceof Expression) {
+            return $value->prepare($this);
         }
 
         throw new LogicException('Unknown default value type: ' . Value::getType($value), [
             'value' => $value,
             'column' => $def->name,
+        ]);
+    }
+
+    /**
+     * @param int|null $size
+     * @return string
+     */
+    public function formatCurrentTimestamp(?int $size = null): string
+    {
+        return 'CURRENT_TIMESTAMP' . ($size ? '(' . $size . ')' : '');
+    }
+
+    /**
+     * @param TruncateTableStatement $statement
+     * @return string
+     */
+    public function formatTruncateTableStatement(TruncateTableStatement $statement): string
+    {
+        return implode(' ', [
+            'TRUNCATE TABLE',
+            $this->asIdentifier($statement->table),
         ]);
     }
 }

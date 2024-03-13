@@ -3,19 +3,19 @@
 namespace Kirameki\Database\Statements\Schema;
 
 use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
+use Kirameki\Database\Statements\Statement;
 
-class DropTableStatement extends SchemaStatement
+class TruncateTableStatement implements Statement
 {
     /**
      * @param SchemaSyntax $syntax
      * @param string $table
      */
     public function __construct(
-        SchemaSyntax $syntax,
+        protected SchemaSyntax $syntax,
         public readonly string $table,
     )
     {
-        parent::__construct($syntax);
     }
 
     /**
@@ -24,7 +24,7 @@ class DropTableStatement extends SchemaStatement
     public function prepare(): array
     {
         return [
-            $this->syntax->formatDropTableStatement($this),
+            $this->syntax->formatTruncateTableStatement($this),
         ];
     }
 }

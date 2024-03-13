@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Statements\Schema;
 
 use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
+use RuntimeException;
 
 class CreateIndexStatement extends SchemaStatement
 {
@@ -40,5 +41,28 @@ class CreateIndexStatement extends SchemaStatement
         $this->columns = [];
         $this->unique = null;
         $this->comment = null;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function prepare(): array
+    {
+        $this->preprocess();
+        return [
+            $this->syntax->formatCreateIndexStatement($this),
+        ];
+    }
+
+    /**
+     * @return void
+     */
+    public function preprocess(): void
+    {
+        $columns = $this->columns;
+
+        if(empty($columns)) {
+            throw new RuntimeException('At least 1 column needs to be defined to create an index.');
+        }
     }
 }

@@ -22,7 +22,6 @@ use Kirameki\Database\Statements\Query\Support\LockType;
 use Kirameki\Database\Statements\Query\Support\Operator;
 use Kirameki\Database\Statements\Query\Support\Range;
 use Kirameki\Database\Statements\Query\UpdateStatement;
-use Kirameki\Database\Statements\Statement;
 use Kirameki\Database\Statements\Syntax;
 use RuntimeException;
 use function array_filter;

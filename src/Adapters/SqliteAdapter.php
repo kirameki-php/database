@@ -4,6 +4,7 @@ namespace Kirameki\Database\Adapters;
 
 use Kirameki\Database\Exceptions\DatabaseNotFoundException;
 use Kirameki\Database\Statements\Query\Syntax\SqliteQuerySyntax;
+use Kirameki\Database\Statements\Schema\Syntax\SqliteSchemaSyntax;
 use PDO;
 use function file_exists;
 use function iterator_to_array;
@@ -45,11 +46,15 @@ class SqliteAdapter extends PdoAdapter
      */
     protected function instantiateQuerySyntax(): SqliteQuerySyntax
     {
-        return new SqliteQuerySyntax(
-            $this->identifierDelimiter,
-            $this->literalDelimiter,
-            $this->dateTimeFormat,
-        );
+        return new SqliteQuerySyntax($this->identifierDelimiter, $this->literalDelimiter, $this->dateTimeFormat);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function instantiateSchemaSyntax(): SqliteSchemaSyntax
+    {
+        return new SqliteSchemaSyntax($this->identifierDelimiter, $this->literalDelimiter, $this->dateTimeFormat);
     }
 
     /**
@@ -96,14 +101,6 @@ class SqliteAdapter extends PdoAdapter
         }
 
         return file_exists($filename);
-    }
-
-    /**
-     * @param string $table
-     */
-    public function truncate(string $table): void
-    {
-        $this->runSchema("DELETE FROM $table");
     }
 
     /**

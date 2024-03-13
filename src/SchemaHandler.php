@@ -5,6 +5,7 @@ namespace Kirameki\Database;
 use Kirameki\Database\Adapters\DatabaseAdapter;
 use Kirameki\Database\Events\SchemaExecuted;
 use Kirameki\Database\Statements\Execution;
+use Kirameki\Database\Statements\Schema\SchemaExecution;
 use Kirameki\Database\Statements\Schema\SchemaStatement;
 use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
 use Kirameki\Event\EventManager;
@@ -60,8 +61,9 @@ readonly class SchemaHandler
     }
 
     /**
-     * @param SchemaStatement $statement
-     * @return Execution
+     * @template TStatement of SchemaStatement
+     * @param TStatement $statement
+     * @return SchemaExecution<TStatement>
      */
     public function execute(SchemaStatement $statement): Execution
     {

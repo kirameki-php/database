@@ -2,9 +2,7 @@
 
 namespace Kirameki\Database\Statements\Schema;
 
-use Kirameki\Collections\Utils\Arr;
 use Kirameki\Database\Connection;
-use RuntimeException;
 
 /**
  * @extends SchemaBuilder<CreateTableStatement>

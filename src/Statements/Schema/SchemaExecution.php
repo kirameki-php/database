@@ -3,7 +3,6 @@
 namespace Kirameki\Database\Statements\Schema;
 
 use Kirameki\Database\Statements\Execution;
-use Kirameki\Database\Statements\Statement;
 
 /**
  * @template TStatement of SchemaStatement
@@ -16,7 +15,7 @@ class SchemaExecution extends Execution
      * @param float $elapsedMs
      */
     public function __construct(
-        Statement $statement,
+        SchemaStatement $statement,
         float $elapsedMs,
     )
     {

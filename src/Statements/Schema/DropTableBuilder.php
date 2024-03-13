@@ -18,17 +18,7 @@ class DropTableBuilder extends SchemaBuilder
         public readonly string $table,
     )
     {
-        parent::__construct($connection, new DropTableStatement($table));
-    }
-
-    /**
-     * @return string[]
-     */
-    public function build(): array
-    {
-        $syntax = $this->connection->getSchemaSyntax();
-        return [
-            $syntax->formatDropTableStatement($this->statement)
-        ];
+        $syntax = $connection->getAdapter()->getSchemaSyntax();
+        parent::__construct($connection, new DropTableStatement($syntax, $table));
     }
 }

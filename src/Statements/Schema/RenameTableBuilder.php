@@ -3,9 +3,8 @@
 namespace Kirameki\Database\Statements\Schema;
 
 use Kirameki\Database\Connection;
-use Kirameki\Database\Statements\OldStatementBuilder;
 
-class RenameTableBuilder implements OldStatementBuilder
+class RenameTableBuilder extends SchemaBuilder
 {
     /**
      * @param Connection $connection
@@ -18,6 +17,7 @@ class RenameTableBuilder implements OldStatementBuilder
         protected string $to,
     )
     {
+        parent::__construct($connection);
     }
 
     /**

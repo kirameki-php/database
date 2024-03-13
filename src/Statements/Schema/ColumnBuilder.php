@@ -67,6 +67,6 @@ class ColumnBuilder
      */
     public function currentAsDefault(): static
     {
-        return $this->default(new CurrentTimestamp());
+        return $this->default(new CurrentTimestamp($this->definition));
     }
 }

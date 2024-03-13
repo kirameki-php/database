@@ -2,18 +2,26 @@
 
 namespace Kirameki\Database\Statements\Schema\Expressions;
 
-class CurrentTimestamp
+use Kirameki\Database\Statements\Schema\ColumnDefinition;
+use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
+
+class CurrentTimestamp extends Expression
 {
     /**
-     * @var self
+     * @param ColumnDefinition $definition
      */
-    protected static self $instance;
+    public function __construct(
+        protected ColumnDefinition $definition,
+    )
+    {
+    }
 
     /**
-     * @return self
+     * @param SchemaSyntax $syntax
+     * @return string
      */
-    public static function instance(): self
+    public function prepare(SchemaSyntax $syntax): string
     {
-        return self::$instance ??= new self();
+        return $syntax->formatCurrentTimestamp($this->definition->size);
     }
 }

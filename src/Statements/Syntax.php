@@ -15,32 +15,32 @@ abstract class Syntax
     }
 
     /**
-     * @param string $str
+     * @param string $string
      * @return string
      */
-    public function asIdentifier(string $str): string
+    public function asIdentifier(string $string): string
     {
         $delimiter = $this->identifierDelimiter;
-        return $delimiter . $this->escape($str, $delimiter) . $delimiter;
+        return $delimiter . $this->escape($string, $delimiter) . $delimiter;
     }
 
     /**
-     * @param string $str
+     * @param string $string
      * @return string
      */
-    protected function asLiteral(string $str): string
+    public function asLiteral(string $string): string
     {
         $delimiter = $this->literalDelimiter;
-        return $delimiter . $this->escape($str, $delimiter) . $delimiter;
+        return $delimiter . $this->escape($string, $delimiter) . $delimiter;
     }
 
     /**
-     * @param string $str
+     * @param string $string
      * @param string $escaping
      * @return string
      */
-    protected function escape(string $str, string $escaping): string
+    protected function escape(string $string, string $escaping): string
     {
-        return str_replace($escaping, $escaping . $escaping, $str);
+        return str_replace($escaping, $escaping . $escaping, $string);
     }
 }
