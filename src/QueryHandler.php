@@ -10,13 +10,14 @@ use Kirameki\Database\Statements\Query\DeleteBuilder;
 use Kirameki\Database\Statements\Query\DeleteStatement;
 use Kirameki\Database\Statements\Query\InsertBuilder;
 use Kirameki\Database\Statements\Query\InsertStatement;
+use Kirameki\Database\Statements\Query\QueryExecution;
 use Kirameki\Database\Statements\Query\QueryStatement;
+use Kirameki\Database\Statements\Query\QueryResult;
 use Kirameki\Database\Statements\Query\SelectBuilder;
 use Kirameki\Database\Statements\Query\SelectStatement;
 use Kirameki\Database\Statements\Query\Syntax\QuerySyntax;
 use Kirameki\Database\Statements\Query\UpdateBuilder;
 use Kirameki\Database\Statements\Query\UpdateStatement;
-use Kirameki\Database\Statements\Result;
 use Kirameki\Event\EventManager;
 
 readonly class QueryHandler
@@ -94,30 +95,33 @@ readonly class QueryHandler
     }
 
     /**
-     * @param QueryStatement $statement
-     * @return Result
+     * @template TStatement of QueryStatement
+     * @param TStatement $statement
+     * @return QueryResult<TStatement>
      */
-    public function execute(QueryStatement $statement): Result
+    public function execute(QueryStatement $statement): QueryResult
     {
         return $this->handleExecution($this->adapter->query($statement));
     }
 
     /**
-     * @param QueryStatement $statement
-     * @return Result
+     * @template TStatement of QueryStatement
+     * @param TStatement $statement
+     * @return QueryResult<TStatement>
      */
-    public function cursor(QueryStatement $statement): Result
+    public function cursor(QueryStatement $statement): QueryResult
     {
         return $this->handleExecution($this->adapter->cursor($statement));
     }
 
     /**
-     * @param Execution $execution
-     * @return Result
+     * @template TStatement of QueryStatement
+     * @param QueryExecution<TStatement> $execution
+     * @return QueryResult<TStatement>
      */
-    protected function handleExecution(Execution $execution): Result
+    protected function handleExecution(Execution $execution): QueryResult
     {
-        $result = new Result($this->connection, $execution);
+        $result = new QueryResult($this->connection, $execution);
         $this->events->emit(new QueryExecuted($this->connection, $result));
         return $result;
     }

@@ -3,17 +3,17 @@
 namespace Kirameki\Database\Events;
 
 use Kirameki\Database\Connection;
-use Kirameki\Database\Statements\Result;
+use Kirameki\Database\Statements\Query\QueryResult;
 
 class QueryExecuted extends DatabaseEvent
 {
     /**
      * @param Connection $connection
-     * @param Result $result
+     * @param QueryResult $result
      */
     public function __construct(
         Connection $connection,
-        public readonly Result $result,
+        public readonly QueryResult $result,
     )
     {
         parent::__construct($connection);

@@ -3,7 +3,6 @@
 namespace Kirameki\Database\Statements\Query;
 
 use Kirameki\Database\QueryHandler;
-use Kirameki\Database\Statements\Result;
 
 /**
  * @template TStatement of QueryStatement
@@ -47,17 +46,17 @@ abstract class QueryBuilder
     }
 
     /**
-     * @return Result
+     * @return QueryResult<TStatement>
      */
-    public function execute(): Result
+    public function execute(): QueryResult
     {
         return $this->handler->execute($this->statement);
     }
 
     /**
-     * @return Result
+     * @return QueryResult<TStatement>
      */
-    public function cursor(): Result
+    public function cursor(): QueryResult
     {
         return $this->handler->cursor($this->statement);
     }
