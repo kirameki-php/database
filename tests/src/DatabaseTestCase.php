@@ -2,7 +2,6 @@
 
 namespace Tests\Kirameki\Database;
 
-use Kirameki\Core\Config;
 use Kirameki\Core\Testing\TestCase;
 use Kirameki\Database\Adapters\MySqlAdapter;
 use Kirameki\Database\Adapters\MySqlConfig;
@@ -29,7 +28,7 @@ class DatabaseTestCase extends TestCase
         $connection = $this->mysqlConnection();
         $builder = new CreateTableBuilder($connection, $table);
         $callback($builder);
-        Arr::map($builder->build(), fn($ddl) => $connection->applySchema($ddl));
+        $connection->schema()->execute($builder->getStatement());
     }
 
     public function createTempConnection(string $driver): Connection

@@ -2,7 +2,11 @@
 
 namespace Kirameki\Database\Statements\Schema;
 
-class CreateTableStatement extends Statement
+use Kirameki\Collections\Utils\Arr;
+use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
+use RuntimeException;
+
+class CreateTableStatement extends SchemaStatement
 {
     /**
      * @var ColumnDefinition[]
@@ -18,4 +22,56 @@ class CreateTableStatement extends Statement
      * @var CreateIndexStatement[]
      */
     public array $indexes = [];
+
+    public function __construct(
+        SchemaSyntax $syntax,
+        public readonly string $table,
+    )
+    {
+        parent::__construct($syntax);
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function prepare(): array
+    {
+        $this->preprocess();
+        $statements = [];
+        $statements[] = $this->syntax->formatCreateTableStatement($this);
+        foreach ($this->indexes as $index) {
+            $statements[] = $this->syntax->formatCreateIndexStatement($index);
+        }
+        return $statements;
+    }
+
+    /**
+     * @return void
+     */
+    public function preprocess(): void
+    {
+        foreach ($this->columns as $column) {
+            if ($column->primaryKey) {
+                if ($this->primaryKey !== null) {
+                    throw new RuntimeException('Multiple primaryKey defined when only one is allowed.');
+                }
+                $this->primaryKey = new PrimaryKeyConstraint();
+                $this->primaryKey->columns[$column->name] = 'ASC';
+            }
+        }
+
+        foreach($this->columns as $column) {
+            if ($column->type === 'int' && Arr::doesNotContain([null, 1, 2, 4, 8], $column->size)) {
+                throw new RuntimeException('Size for integer must be 1, 2, 4, or 8 (bytes). '.$column->size.' given.');
+            }
+        }
+
+        if(empty($this->columns)) {
+            throw new RuntimeException('Table requires at least one column to be defined.');
+        }
+
+        if ($this->primaryKey === null) {
+            throw new RuntimeException('Table must have at least one column as primary key.');
+        }
+    }
 }

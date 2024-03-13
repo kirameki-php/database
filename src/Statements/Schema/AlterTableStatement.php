@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Statements\Schema;
 
-class AlterTableStatement extends Statement
+class AlterTableStatement extends SchemaStatement
 {
     /**
      * @var list<mixed>

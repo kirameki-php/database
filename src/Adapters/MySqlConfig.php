@@ -19,7 +19,7 @@ class MySqlConfig implements DatabaseConfig
         public ?string $socket = null,
         public ?string $database = null,
         public ?string $username = 'root',
-        public ?string $password = null,
+        public ?string $password = 'root',
         public ?iterable $options = null,
     )
     {

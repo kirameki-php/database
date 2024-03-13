@@ -5,6 +5,7 @@ namespace Kirameki\Database;
 use Kirameki\Database\Adapters\DatabaseAdapter;
 use Kirameki\Database\Events\SchemaExecuted;
 use Kirameki\Database\Statements\Execution;
+use Kirameki\Database\Statements\Schema\SchemaStatement;
 use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
 use Kirameki\Event\EventManager;
 
@@ -59,12 +60,12 @@ readonly class SchemaHandler
     }
 
     /**
-     * @param string $statement
+     * @param SchemaStatement $statement
      * @return Execution
      */
-    public function applySchema(string $statement): Execution
+    public function execute(SchemaStatement $statement): Execution
     {
-        $execution = $this->connection->getAdapter()->execute($statement);
+        $execution = $this->connection->getAdapter()->runSchema($statement);
         $this->events->emit(new SchemaExecuted($this->connection, $execution));
         return $execution;
     }

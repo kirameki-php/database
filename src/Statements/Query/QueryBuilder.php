@@ -4,12 +4,11 @@ namespace Kirameki\Database\Statements\Query;
 
 use Kirameki\Database\QueryHandler;
 use Kirameki\Database\Statements\Result;
-use Kirameki\Database\Statements\StatementBuilder;
 
 /**
  * @template TStatement of QueryStatement
  */
-abstract class QueryBuilder implements StatementBuilder
+abstract class QueryBuilder
 {
     /**
      * @param QueryHandler $handler

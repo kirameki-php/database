@@ -3,7 +3,9 @@
 namespace Kirameki\Database\Adapters;
 
 use Kirameki\Database\Statements\Execution;
+use Kirameki\Database\Statements\Query\QueryStatement;
 use Kirameki\Database\Statements\Query\Syntax\QuerySyntax;
+use Kirameki\Database\Statements\Schema\SchemaStatement;
 use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
 use Kirameki\Database\Statements\Statement;
 
@@ -30,22 +32,22 @@ interface DatabaseAdapter
     public function isConnected(): bool;
 
     /**
-     * @param Statement $statement
+     * @param SchemaStatement $statement
      * @return Execution
      */
-    public function execute(Statement $statement): Execution;
+    public function runSchema(SchemaStatement $statement): Execution;
 
     /**
-     * @param Statement $statement
+     * @param QueryStatement $statement
      * @return Execution
      */
-    public function query(Statement $statement): Execution;
+    public function query(QueryStatement $statement): Execution;
 
     /**
-     * @param Statement $statement
+     * @param QueryStatement $statement
      * @return Execution
      */
-    public function cursor(Statement $statement): Execution;
+    public function cursor(QueryStatement $statement): Execution;
 
     /**
      * @return void

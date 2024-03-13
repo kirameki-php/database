@@ -20,7 +20,8 @@ class CreateTableBuilder extends SchemaBuilder
         public readonly string $table,
     )
     {
-        parent::__construct($connection, new CreateTableStatement($table));
+        $syntax = $connection->getAdapter()->getSchemaSyntax();
+        parent::__construct($connection, new CreateTableStatement($syntax, $table));
     }
 
     /**
@@ -194,52 +195,5 @@ class CreateTableBuilder extends SchemaBuilder
         $definition = new ColumnDefinition($name, $type, $size, $scale);
         $this->statement->columns[] = $definition;
         return new ColumnBuilder($definition);
-    }
-
-    /**
-     * @return string[]
-     */
-    public function build(): array
-    {
-        $this->preprocess();
-        $syntax = $this->connection->getSchemaSyntax();
-        $ddls = [];
-        $ddls[] = $syntax->formatCreateTableStatement($this->statement);
-        foreach ($this->statement->indexes as $indexStatement) {
-            $ddls[] = $syntax->formatCreateIndexStatement($indexStatement);
-        }
-        return $ddls;
-    }
-
-    /**
-     * @return void
-     */
-    public function preprocess(): void
-    {
-        $statement = $this->statement;
-
-        foreach ($statement->columns as $column) {
-            if ($column->primaryKey) {
-                if ($statement->primaryKey !== null) {
-                    throw new RuntimeException('Multiple primaryKey defined when only one is allowed.');
-                }
-                $statement->primaryKey = new PrimaryKeyConstraint();
-                $statement->primaryKey->columns[$column->name] = 'ASC';
-            }
-        }
-
-        foreach($statement->columns as $column) {
-            if ($column->type === 'int' && Arr::doesNotContain([null, 1, 2, 4, 8], $column->size)) {
-                throw new RuntimeException('Size for integer must be 1, 2, 4, or 8 (bytes). '.$column->size.' given.');
-            }
-        }
-
-        if(empty($statement->columns)) {
-            throw new RuntimeException('Table requires at least one column to be defined.');
-        }
-
-        if ($statement->primaryKey === null) {
-            throw new RuntimeException('Table must have at least one column as primary key.');
-        }
     }
 }

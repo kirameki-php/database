@@ -7,6 +7,9 @@ use Kirameki\Database\Statements\Statement;
 
 abstract class QueryStatement implements Statement
 {
+    /**
+     * @param QuerySyntax $syntax
+     */
     public function __construct(
         protected readonly QuerySyntax $syntax,
     )

@@ -15,7 +15,7 @@ use Kirameki\Database\Statements\Schema\CreateTableStatement;
 use Kirameki\Database\Statements\Schema\DropIndexStatement;
 use Kirameki\Database\Statements\Schema\Expressions\CurrentTimestamp;
 use Kirameki\Database\Statements\Schema\Expressions\Expr;
-use Kirameki\Database\Statements\Schema\Statement;
+use Kirameki\Database\Statements\Schema\SchemaStatement;
 use Kirameki\Database\Statements\Syntax;
 use function array_filter;
 use function array_keys;
@@ -105,10 +105,10 @@ class SchemaSyntax extends Syntax
     }
 
     /**
-     * @param Statement $statement
+     * @param SchemaStatement $statement
      * @return string
      */
-    public function formatDropTableStatement(Statement $statement): string
+    public function formatDropTableStatement(SchemaStatement $statement): string
     {
         return 'DROP TABLE '.$statement->table.';';
     }

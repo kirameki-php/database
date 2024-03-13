@@ -103,7 +103,7 @@ class SqliteAdapter extends PdoAdapter
      */
     public function truncate(string $table): void
     {
-        $this->execute("DELETE FROM $table");
+        $this->runSchema("DELETE FROM $table");
     }
 
     /**

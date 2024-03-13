@@ -3,12 +3,11 @@
 namespace Kirameki\Database\Statements\Schema;
 
 use Kirameki\Database\Connection;
-use Kirameki\Database\Statements\OldStatementBuilder;
 
 /**
- * @template-covariant TStatement of Statement
+ * @template-covariant TStatement of SchemaStatement
  */
-abstract class SchemaBuilder implements OldStatementBuilder
+abstract class SchemaBuilder
 {
     /**
      * @param Connection $connection
@@ -16,9 +15,17 @@ abstract class SchemaBuilder implements OldStatementBuilder
      */
     public function __construct(
         protected Connection $connection,
-        protected Statement $statement
+        protected SchemaStatement $statement,
     )
     {
+    }
+
+    /**
+     * @return TStatement
+     */
+    public function getStatement(): SchemaStatement
+    {
+        return $this->statement;
     }
 
     /**
@@ -37,13 +44,5 @@ abstract class SchemaBuilder implements OldStatementBuilder
     protected function copy(): static
     {
         return clone $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function toString(): string
-    {
-        return implode(PHP_EOL, $this->build());
     }
 }

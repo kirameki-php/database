@@ -6,14 +6,17 @@ use Closure;
 use DateTimeInterface;
 use Iterator;
 use Kirameki\Database\Statements\Execution;
+use Kirameki\Database\Statements\Query\QueryStatement;
+use Kirameki\Database\Statements\Query\RawStatement;
 use Kirameki\Database\Statements\Query\Syntax\QuerySyntax;
-use Kirameki\Database\Statements\RawStatement;
+use Kirameki\Database\Statements\Schema\SchemaStatement;
 use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
 use Kirameki\Database\Statements\Statement;
 use PDO;
 use PDOException;
 use PDOStatement;
 use RuntimeException;
+use function dump;
 use function hrtime;
 use function implode;
 
@@ -41,6 +44,14 @@ abstract class PdoAdapter implements DatabaseAdapter
         protected ?SchemaSyntax $schemaSyntax = null,
     )
     {
+    }
+
+    /**
+     * @return void
+     */
+    public function __clone(): void
+    {
+        $this->config = clone $this->config;
     }
 
     /**
@@ -72,10 +83,13 @@ abstract class PdoAdapter implements DatabaseAdapter
     /**
      * @inheritDoc
      */
-    public function execute(Statement $statement): Execution
+    public function runSchema(SchemaStatement $statement): Execution
     {
         $startTime = hrtime(true);
-        $count = $this->getPdo()->exec($statement->prepare()) ?: 0;
+        $count = 0;
+        foreach ($statement->prepare() as $schema) {
+            $count += $this->getPdo()->exec($schema) ?: 0;
+        }
         $execTimeMs = (hrtime(true) - $startTime) / 1_000_000;
         return $this->instantiateExecution($statement, [], $execTimeMs, $count);
     }
@@ -83,7 +97,7 @@ abstract class PdoAdapter implements DatabaseAdapter
     /**
      * @inheritDoc
      */
-    public function query(Statement $statement): Execution
+    public function query(QueryStatement $statement): Execution
     {
         $startTime = hrtime(true);
         $prepared = $this->execQuery($statement);
@@ -96,7 +110,7 @@ abstract class PdoAdapter implements DatabaseAdapter
     /**
      * @inheritDoc
      */
-    public function cursor(Statement $statement): Execution
+    public function cursor(QueryStatement $statement): Execution
     {
         $startTime = hrtime(true);
         $prepared = $this->execQuery($statement);
@@ -196,10 +210,10 @@ abstract class PdoAdapter implements DatabaseAdapter
     }
 
     /**
-     * @param Statement $statement
+     * @param QueryStatement $statement
      * @return PDOStatement
      */
-    protected function execQuery(Statement $statement): PDOStatement
+    protected function execQuery(QueryStatement $statement): PDOStatement
     {
         $prepared = $this->getPdo()->prepare($statement->prepare());
         $prepared->execute($statement->getParameters());

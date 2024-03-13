@@ -2,7 +2,9 @@
 
 namespace Kirameki\Database\Statements\Schema;
 
-class CreateIndexStatement extends Statement
+use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
+
+class CreateIndexStatement extends SchemaStatement
 {
     /**
      * @var string|null
@@ -25,11 +27,15 @@ class CreateIndexStatement extends Statement
     public ?string $comment;
 
     /**
+     * @param SchemaSyntax $syntax
      * @param string $table
      */
-    public function __construct(string $table)
+    public function __construct(
+        SchemaSyntax $syntax,
+        public readonly string $table,
+    )
     {
-        parent::__construct($table);
+        parent::__construct($syntax);
         $this->name = null;
         $this->columns = [];
         $this->unique = null;

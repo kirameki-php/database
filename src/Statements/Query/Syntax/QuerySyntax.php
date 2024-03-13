@@ -2,6 +2,10 @@
 
 namespace Kirameki\Database\Statements\Query\Syntax;
 
+use BackedEnum;
+use DateTimeInterface;
+use Kirameki\Core\Exceptions\UnreachableException;
+use Kirameki\Core\Json;
 use Kirameki\Core\Value;
 use Kirameki\Database\Statements\Expression;
 use Kirameki\Database\Statements\Query\ConditionDefinition;
@@ -10,6 +14,7 @@ use Kirameki\Database\Statements\Query\DeleteStatement;
 use Kirameki\Database\Statements\Query\Expressions\Column;
 use Kirameki\Database\Statements\Query\InsertStatement;
 use Kirameki\Database\Statements\Query\JoinDefinition;
+use Kirameki\Database\Statements\Query\QueryStatement;
 use Kirameki\Database\Statements\Query\SelectBuilder;
 use Kirameki\Database\Statements\Query\SelectStatement;
 use Kirameki\Database\Statements\Query\Support\LockOption;
@@ -25,15 +30,51 @@ use function array_keys;
 use function array_map;
 use function array_merge;
 use function count;
+use function current;
 use function implode;
 use function is_array;
+use function is_bool;
 use function is_iterable;
 use function is_string;
+use function iterator_to_array;
+use function next;
 use function preg_match;
 use function preg_quote;
+use function preg_replace_callback;
 
 abstract class QuerySyntax extends Syntax
 {
+    /**
+     * FOR DEBUGGING ONLY
+     *
+     * @param QueryStatement $statement
+     * @return string
+     */
+    public function interpolate(QueryStatement $statement): string
+    {
+        $parameters = $this->stringifyParameters($statement->getParameters());
+        $remains = count($parameters);
+
+        return (string) preg_replace_callback('/\?\??/', function ($matches) use (&$parameters, &$remains) {
+            if ($matches[0] === '??') {
+                return '??';
+            }
+
+            if ($remains > 0) {
+                $current = current($parameters);
+                next($parameters);
+                $remains--;
+                return match (true) {
+                    is_bool($current) => $current ? 'TRUE' : 'FALSE',
+                    is_string($current) => $this->asLiteral($current),
+                    default => (string) $current,
+                };
+            }
+
+            throw new UnreachableException('No more parameters to interpolate');
+        }, $statement->prepare());
+    }
+
     /**
      * @param SelectStatement $statement
      * @return string
@@ -750,7 +791,7 @@ abstract class QuerySyntax extends Syntax
                     $parameters[] = $parameter;
                 }
             }
-            elseif ($value instanceof Expression || $value instanceof Statement) {
+            elseif ($value instanceof Expression || $value instanceof QueryStatement) {
                 foreach ($value->getParameters() as $parameter) {
                     $parameters[] = $parameter;
                 }
@@ -779,4 +820,39 @@ abstract class QuerySyntax extends Syntax
     {
         return implode(', ', $values);
     }
+
+    /**
+     * @param iterable<array-key, mixed> $parameters
+     * @return array<mixed>
+     */
+    protected function stringifyParameters(iterable $parameters): array
+    {
+        $strings = [];
+        foreach($parameters as $name => $parameter) {
+            $strings[$name] = $this->stringifyParameter($parameter);
+        }
+        return $strings;
+    }
+
+    /**
+     * @param mixed $value
+     * @return mixed
+     */
+    protected function stringifyParameter(mixed $value): mixed
+    {
+        if (is_iterable($value)) {
+            return Json::encode(iterator_to_array($value));
+        }
+
+        if ($value instanceof DateTimeInterface) {
+            return $value->format($this->dateTimeFormat);
+        }
+
+        if ($value instanceof BackedEnum) {
+            return $value->value;
+        }
+
+        return $value;
+    }
+
 }

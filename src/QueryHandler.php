@@ -10,13 +10,13 @@ use Kirameki\Database\Statements\Query\DeleteBuilder;
 use Kirameki\Database\Statements\Query\DeleteStatement;
 use Kirameki\Database\Statements\Query\InsertBuilder;
 use Kirameki\Database\Statements\Query\InsertStatement;
+use Kirameki\Database\Statements\Query\QueryStatement;
 use Kirameki\Database\Statements\Query\SelectBuilder;
 use Kirameki\Database\Statements\Query\SelectStatement;
 use Kirameki\Database\Statements\Query\Syntax\QuerySyntax;
 use Kirameki\Database\Statements\Query\UpdateBuilder;
 use Kirameki\Database\Statements\Query\UpdateStatement;
 use Kirameki\Database\Statements\Result;
-use Kirameki\Database\Statements\Statement;
 use Kirameki\Event\EventManager;
 
 readonly class QueryHandler
@@ -94,19 +94,19 @@ readonly class QueryHandler
     }
 
     /**
-     * @param Statement $statement
+     * @param QueryStatement $statement
      * @return Result
      */
-    public function execute(Statement $statement): Result
+    public function execute(QueryStatement $statement): Result
     {
         return $this->handleExecution($this->adapter->query($statement));
     }
 
     /**
-     * @param Statement $statement
+     * @param QueryStatement $statement
      * @return Result
      */
-    public function cursor(Statement $statement): Result
+    public function cursor(QueryStatement $statement): Result
     {
         return $this->handleExecution($this->adapter->cursor($statement));
     }

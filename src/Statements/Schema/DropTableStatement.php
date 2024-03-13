@@ -2,6 +2,6 @@
 
 namespace Kirameki\Database\Statements\Schema;
 
-class DropTableStatement extends Statement
+class DropTableStatement extends SchemaStatement
 {
 }

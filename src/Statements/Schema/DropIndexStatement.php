@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Statements\Schema;
 
-class DropIndexStatement extends Statement
+class DropIndexStatement extends SchemaStatement
 {
     /**
      * @var string|null

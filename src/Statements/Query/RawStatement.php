@@ -1,21 +1,25 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Statements;
+namespace Kirameki\Database\Statements\Query;
 
-class RawStatement implements Statement
+use Kirameki\Database\Statements\Query\Syntax\QuerySyntax;
+use Kirameki\Database\Statements\Syntax;
+
+class RawStatement extends QueryStatement
 {
 
     /**
-     * @param Syntax $syntax
+     * @param QuerySyntax $syntax
      * @param string $raw
      * @param array<mixed> $parameters
      */
     public function __construct(
-        protected readonly Syntax $syntax,
+        QuerySyntax $syntax,
         protected readonly string $raw,
         protected readonly array $parameters = [],
     )
     {
+        parent::__construct($syntax);
     }
 
     /**
