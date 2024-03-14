@@ -5,10 +5,13 @@ namespace Kirameki\Database;
 use Kirameki\Database\Adapters\DatabaseAdapter;
 use Kirameki\Database\Events\SchemaExecuted;
 use Kirameki\Database\Statements\Execution;
+use Kirameki\Database\Statements\Query\RawStatement;
 use Kirameki\Database\Statements\Schema\SchemaExecution;
 use Kirameki\Database\Statements\Schema\SchemaStatement;
 use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
+use Kirameki\Database\Statements\Schema\TruncateTableStatement;
 use Kirameki\Event\EventManager;
+use PDOException;
 
 readonly class SchemaHandler
 {
@@ -49,7 +52,15 @@ readonly class SchemaHandler
      */
     public function tableExists(string $table): bool
     {
-        return $this->connection->getAdapter()->tableExists($table);
+        try {
+            $syntax = $this->adapter->getQuerySyntax();
+            $table = $syntax->asIdentifier($table);
+            $statement = new RawStatement($syntax, "SELECT 1 FROM {$table} LIMIT 1");
+            $this->adapter->query($statement);
+            return true;
+        } catch (PDOException) {
+            return false;
+        }
     }
 
     /**
@@ -57,7 +68,7 @@ readonly class SchemaHandler
      */
     public function truncate(string $table): void
     {
-        $this->connection->getAdapter()->truncate($table);
+        $this->execute(new TruncateTableStatement($this->syntax, $table));
     }
 
     /**

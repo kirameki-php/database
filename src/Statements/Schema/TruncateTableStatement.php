@@ -3,9 +3,8 @@
 namespace Kirameki\Database\Statements\Schema;
 
 use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
-use Kirameki\Database\Statements\Statement;
 
-class TruncateTableStatement implements Statement
+class TruncateTableStatement extends SchemaStatement
 {
     /**
      * @param SchemaSyntax $syntax
@@ -16,6 +15,7 @@ class TruncateTableStatement implements Statement
         public readonly string $table,
     )
     {
+        parent::__construct($syntax);
     }
 
     /**

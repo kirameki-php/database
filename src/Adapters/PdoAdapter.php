@@ -7,16 +7,13 @@ use DateTimeInterface;
 use Iterator;
 use Kirameki\Database\Statements\Query\QueryExecution;
 use Kirameki\Database\Statements\Query\QueryStatement;
-use Kirameki\Database\Statements\Query\RawStatement;
 use Kirameki\Database\Statements\Query\Syntax\QuerySyntax;
 use Kirameki\Database\Statements\Schema\SchemaExecution;
 use Kirameki\Database\Statements\Schema\SchemaStatement;
 use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
 use PDO;
-use PDOException;
 use PDOStatement;
 use RuntimeException;
-use function dump;
 use function hrtime;
 use function implode;
 
@@ -162,19 +159,6 @@ abstract class PdoAdapter implements DatabaseAdapter
         return $this->getPdo()->inTransaction();
     }
 
-    public function tableExists(string $table): bool
-    {
-        try {
-            $syntax = $this->getQuerySyntax();
-            $table = $syntax->asIdentifier($table);
-            $statement = new RawStatement($syntax, "SELECT 1 FROM {$table} LIMIT 1");
-            $this->query($statement);
-            return true;
-        } catch (PDOException) {
-            return false;
-        }
-    }
-
     /**
      * @inheritDoc
      */
@@ -223,6 +207,9 @@ abstract class PdoAdapter implements DatabaseAdapter
         return $this->pdo;
     }
 
+    /**
+     * @return PDO
+     */
     abstract protected function createPdo(): PDO;
 
     /**
