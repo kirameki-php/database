@@ -21,7 +21,7 @@ class RawStatement extends SchemaStatement
     /**
      * @inheritDoc
      */
-    public function prepare(): array
+    public function toExecutables(): array
     {
         return [$this->command];
     }

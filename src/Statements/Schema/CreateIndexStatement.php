@@ -46,7 +46,7 @@ class CreateIndexStatement extends SchemaStatement
     /**
      * @return list<string>
      */
-    public function prepare(): array
+    public function toExecutables(): array
     {
         $this->preprocess();
         return [

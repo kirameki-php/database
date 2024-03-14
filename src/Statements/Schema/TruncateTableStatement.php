@@ -21,7 +21,7 @@ class TruncateTableStatement extends SchemaStatement
     /**
      * @return list<string>
      */
-    public function prepare(): array
+    public function toExecutables(): array
     {
         return [
             $this->syntax->formatTruncateTableStatement($this),

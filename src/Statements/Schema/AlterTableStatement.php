@@ -30,7 +30,7 @@ class AlterTableStatement extends SchemaStatement
     /**
      * @return list<string>
      */
-    public function prepare(): array
+    public function toExecutables(): array
     {
         $syntax = $this->syntax;
         $statements = [];
