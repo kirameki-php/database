@@ -279,6 +279,14 @@ abstract class SchemaSyntax extends Syntax
     }
 
     /**
+     * @return string
+     */
+    public function formatUuid(): string
+    {
+        return 'UUID()';
+    }
+
+    /**
      * @return bool
      */
     abstract public function supportsDdlTransaction(): bool;
