@@ -3,8 +3,10 @@
 namespace Kirameki\Database\Migration;
 
 use Kirameki\Collections\Utils\Arr;
+use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Connection;
 use Kirameki\Database\DatabaseManager;
+use Kirameki\Database\Events\SchemaExecuted;
 use Kirameki\Database\Statements\Schema\AlterTableBuilder;
 use Kirameki\Database\Statements\Schema\CreateIndexBuilder;
 use Kirameki\Database\Statements\Schema\CreateTableBuilder;
@@ -14,9 +16,12 @@ use Kirameki\Database\Statements\Schema\RenameTableBuilder;
 use Kirameki\Database\Statements\Schema\SchemaBuilder;
 use Kirameki\Database\Statements\Schema\SchemaStatement;
 use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
+use Kirameki\Event\EventManager;
 
 abstract class Migration
 {
+    protected ?Connection $connection = null;
+
     /**
      * @var list<SchemaBuilder<covariant SchemaStatement>>
      */
@@ -24,11 +29,11 @@ abstract class Migration
 
     /**
      * @param DatabaseManager $db
-     * @param Connection $using
+     * @param EventManager $events
      */
     public function __construct(
-        protected DatabaseManager $db,
-        protected Connection $using,
+        protected readonly DatabaseManager $db,
+        protected readonly EventManager $events,
     )
     {
     }
@@ -49,7 +54,7 @@ abstract class Migration
      */
     public function use(string $connection): static
     {
-        $this->using = $this->db->use($connection);
+        $this->connection = $this->db->use($connection);
         return $this;
     }
 
@@ -67,7 +72,9 @@ abstract class Migration
     public function apply(): void
     {
         foreach ($this->toStatements() as $statement) {
-            $this->using->adapter->runSchema($statement);
+            $connection = $this->getConnection();
+            $execution = $connection->adapter->runSchema($statement);
+            $this->events->emit(new SchemaExecuted($connection, $execution));
         }
     }
 
@@ -131,6 +138,20 @@ abstract class Migration
      */
     protected function getSyntax(): SchemaSyntax
     {
-        return $this->using->adapter->getSchemaSyntax();
+        return $this->getConnection()->adapter->getSchemaSyntax();
+    }
+
+    /**
+     * @return Connection
+     */
+    protected function getConnection(): Connection
+    {
+        if ($this->connection !== null) {
+            return $this->connection;
+        }
+
+        throw new LogicException('No connection specified for migration.', [
+            'migration' => $this,
+        ]);
     }
 }

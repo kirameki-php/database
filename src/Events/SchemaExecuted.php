@@ -6,7 +6,7 @@ use Kirameki\Database\Connection;
 use Kirameki\Database\Statements\Execution;
 use Kirameki\Database\Statements\Schema\SchemaStatement;
 
-class SchemaExecuted extends DatabaseEvent
+class SchemaExecuted extends StatementExecuted
 {
     /**
      * @template TStatement of SchemaStatement
@@ -18,6 +18,6 @@ class SchemaExecuted extends DatabaseEvent
         public readonly Execution $execution,
     )
     {
-        parent::__construct($connection);
+        parent::__construct($connection, $execution->statement);
     }
 }

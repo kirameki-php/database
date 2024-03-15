@@ -89,7 +89,7 @@ readonly class QueryHandler
     protected function handleExecution(Execution $execution): QueryResult
     {
         $result = new QueryResult($this->connection, $execution);
-        $this->events->emit(new QueryExecuted($this->connection, $result));
+        $this->events->emit(new QueryExecuted($result));
         return $result;
     }
 }

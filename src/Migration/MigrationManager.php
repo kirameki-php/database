@@ -4,6 +4,8 @@ namespace Kirameki\Database\Migration;
 
 use DateTimeInterface;
 use Kirameki\Collections\Utils\Arr;
+use Kirameki\Database\DatabaseManager;
+use Kirameki\Event\EventManager;
 use function assert;
 use function basename;
 use function glob;
@@ -14,10 +16,14 @@ use function strstr;
 class MigrationManager
 {
     /**
+     * @param DatabaseManager $db
+     * @param EventManager $events
      * @param string $directory
      */
     public function __construct(
-        protected string $directory,
+        protected readonly DatabaseManager $db,
+        protected readonly EventManager $events,
+        protected readonly string $directory,
     )
     {
     }
@@ -89,8 +95,9 @@ class MigrationManager
             $datetime = strstr(basename($file), '_', true);
             if ($datetime !== false || $datetime >= $start) {
                 require_once $file;
+                /** @var class-string<Migration> $className */
                 $className = $this->extractClassName($file);
-                $migration = new $className($datetime);
+                $migration = new $className($this->db, $this->events, $datetime);
                 assert($migration instanceof Migration);
                 $migrations[] = $migration;
             }
