@@ -44,6 +44,20 @@ use function preg_replace_callback;
 abstract class QuerySyntax extends Syntax
 {
     /**
+     * @param string $identifierDelimiter
+     * @param string $literalDelimiter
+     * @param string $dateTimeFormat
+     */
+    public function __construct(
+        string $identifierDelimiter,
+        string $literalDelimiter,
+        protected readonly string $dateTimeFormat,
+    )
+    {
+        parent::__construct($identifierDelimiter, $literalDelimiter);
+    }
+
+    /**
      * FOR DEBUGGING ONLY
      *
      * @param QueryStatement $statement

@@ -6,10 +6,14 @@ use function str_replace;
 
 abstract class Syntax
 {
+    /**
+     * @param string $identifierDelimiter
+     * @param string $literalDelimiter
+     * @param string $dateTimeFormat
+     */
     public function __construct(
-        protected readonly string $identifierDelimiter,
-        protected readonly string $literalDelimiter,
-        protected readonly string $dateTimeFormat,
+        protected readonly string $identifierDelimiter = '"',
+        protected readonly string $literalDelimiter = "'",
     )
     {
     }

@@ -45,7 +45,7 @@ class SqliteAdapter extends PdoAdapter
      */
     protected function instantiateSchemaSyntax(): SqliteSchemaSyntax
     {
-        return new SqliteSchemaSyntax($this->identifierDelimiter, $this->literalDelimiter, $this->dateTimeFormat);
+        return new SqliteSchemaSyntax($this->identifierDelimiter, $this->literalDelimiter);
     }
 
     /**
@@ -58,8 +58,7 @@ class SqliteAdapter extends PdoAdapter
     }
 
     /**
-     * @param bool $ifExist
-     * @return void
+     * @inheritDoc
      */
     public function dropDatabase(bool $ifExist = true): void
     {
@@ -75,7 +74,7 @@ class SqliteAdapter extends PdoAdapter
     }
 
     /**
-     * @return bool
+     * @inheritDoc
      */
     public function databaseExists(): bool
     {

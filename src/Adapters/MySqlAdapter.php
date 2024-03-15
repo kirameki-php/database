@@ -69,7 +69,7 @@ class MySqlAdapter extends PdoAdapter
      */
     protected function instantiateSchemaSyntax(): SchemaSyntax
     {
-        return new MySqlSchemaSyntax($this->identifierDelimiter, $this->literalDelimiter, $this->dateTimeFormat);
+        return new MySqlSchemaSyntax($this->identifierDelimiter, $this->literalDelimiter);
     }
 
     /**
