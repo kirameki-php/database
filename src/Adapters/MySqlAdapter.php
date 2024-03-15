@@ -2,8 +2,9 @@
 
 namespace Kirameki\Database\Adapters;
 
-use Kirameki\Database\Statements\Schema\RawStatement;
+use Kirameki\Database\Statements\Query\RawStatement as RawQueryStatement;
 use Kirameki\Database\Statements\Query\Syntax\MySqlQuerySyntax;
+use Kirameki\Database\Statements\Schema\RawStatement;
 use Kirameki\Database\Statements\Schema\Syntax\MySqlSchemaSyntax;
 use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
 use PDO;
@@ -56,15 +57,6 @@ class MySqlAdapter extends PdoAdapter
     }
 
     /**
-     * @return $this
-     */
-    public function disconnect(): static
-    {
-        $this->pdo = null;
-        return $this;
-    }
-
-    /**
      * @inheritDoc
      */
     protected function instantiateQuerySyntax(): MySqlQuerySyntax
@@ -113,7 +105,9 @@ class MySqlAdapter extends PdoAdapter
      */
     public function databaseExists(): bool
     {
-        $execution = $this->query("SHOW DATABASES LIKE '{$this->config->database}'");
-        return $execution->getAffectedRowCount() > 0;
+        $copy = (clone $this);
+        $copy->config->database = null;
+        $statement = new RawQueryStatement($this->getQuerySyntax(), "SHOW DATABASES LIKE '{$this->config->database}'");
+        return $copy->query($statement)->getAffectedRowCount() > 0;
     }
 }

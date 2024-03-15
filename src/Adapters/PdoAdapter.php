@@ -72,6 +72,15 @@ abstract class PdoAdapter implements DatabaseAdapter
     /**
      * @inheritDoc
      */
+    public function disconnect(): static
+    {
+        $this->pdo = null;
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function isConnected(): bool
     {
         return $this->pdo !== null;

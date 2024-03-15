@@ -33,15 +33,6 @@ class SqliteAdapter extends PdoAdapter
     }
 
     /**
-     * @return $this
-     */
-    public function disconnect(): static
-    {
-        $this->pdo = null;
-        return $this;
-    }
-
-    /**
      * @inheritDoc
      */
     protected function instantiateQuerySyntax(): SqliteQuerySyntax
