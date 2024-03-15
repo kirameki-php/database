@@ -9,7 +9,6 @@ abstract class Syntax
     /**
      * @param string $identifierDelimiter
      * @param string $literalDelimiter
-     * @param string $dateTimeFormat
      */
     public function __construct(
         protected readonly string $identifierDelimiter = '"',

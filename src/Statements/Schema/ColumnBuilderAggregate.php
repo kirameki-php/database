@@ -5,7 +5,7 @@ namespace Kirameki\Database\Statements\Schema;
 class ColumnBuilderAggregate
 {
     /**
-     * @param ColumnBuilder $columns
+     * @param list<ColumnBuilder> $columns
      */
     public function __construct(
         public readonly array $columns,

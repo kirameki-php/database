@@ -4,8 +4,3 @@ parameters:
         - src/
     excludePaths:
         - tests/*
-    ignoreErrors:
-        -
-            message: "#^Method Kirameki\\\\Database\\\\DatabaseManager\\:\\:getDefaultAdapterResolver\\(\\) should return Closure\\(Kirameki\\\\Database\\\\Adapters\\\\DatabaseConfig\\)\\: Kirameki\\\\Database\\\\Adapters\\\\DatabaseAdapter but returns \\(Closure\\(Kirameki\\\\Database\\\\Adapters\\\\MySqlConfig\\)\\: Kirameki\\\\Database\\\\Adapters\\\\MySqlAdapter\\)\\|\\(Closure\\(Kirameki\\\\Database\\\\Adapters\\\\SqliteConfig\\)\\: Kirameki\\\\Database\\\\Adapters\\\\SqliteAdapter\\)\\.$#"
-            count: 1
-            path: src/DatabaseManager.php

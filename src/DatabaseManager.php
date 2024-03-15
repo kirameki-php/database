@@ -129,7 +129,7 @@ class DatabaseManager
 
     /**
      * @param string $adapter
-     * @return Closure(DatabaseConfig): DatabaseAdapter
+     * @return Closure(covariant DatabaseConfig): DatabaseAdapter
      */
     protected function getDefaultAdapterResolver(string $adapter): Closure
     {

@@ -3,9 +3,8 @@
 namespace Kirameki\Database\Statements\Schema;
 
 use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
-use Kirameki\Database\Statements\Statement;
 
-class RenameTableStatement implements Statement
+class RenameTableStatement extends SchemaStatement
 {
     /**
      * @param SchemaSyntax $syntax
@@ -18,12 +17,10 @@ class RenameTableStatement implements Statement
         public readonly string $to,
     )
     {
+        parent::__construct($syntax);
     }
 
-    /**
-     * @return list<string>
-     */
-    public function prepare(): array
+    public function toCommands(): array
     {
         return [
             $this->syntax->formatRenameTableStatement($this),

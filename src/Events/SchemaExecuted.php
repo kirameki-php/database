@@ -4,16 +4,18 @@ namespace Kirameki\Database\Events;
 
 use Kirameki\Database\Connection;
 use Kirameki\Database\Statements\Execution;
+use Kirameki\Database\Statements\Schema\SchemaStatement;
 
 class SchemaExecuted extends DatabaseEvent
 {
     /**
+     * @template TStatement of SchemaStatement
      * @param Connection $connection
-     * @param Execution $execution
+     * @param Execution<TStatement> $execution
      */
     public function __construct(
         Connection $connection,
-        public Execution $execution,
+        public readonly Execution $execution,
     )
     {
         parent::__construct($connection);

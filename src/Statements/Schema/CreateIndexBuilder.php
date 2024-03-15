@@ -11,7 +11,6 @@ use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
 class CreateIndexBuilder extends SchemaBuilder
 {
     /**
-     * @param SchemaHandler $handler
      * @param SchemaSyntax $syntax
      * @param string $table
      */
