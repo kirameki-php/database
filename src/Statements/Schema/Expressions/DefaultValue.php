@@ -4,7 +4,7 @@ namespace Kirameki\Database\Statements\Schema\Expressions;
 
 use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
 
-abstract class Expression
+abstract class DefaultValue
 {
     /**
      * @param SchemaSyntax $syntax

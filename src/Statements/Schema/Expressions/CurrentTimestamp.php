@@ -5,7 +5,7 @@ namespace Kirameki\Database\Statements\Schema\Expressions;
 use Kirameki\Database\Statements\Schema\ColumnDefinition;
 use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
 
-class CurrentTimestamp extends Expression
+class CurrentTimestamp extends DefaultValue
 {
     /**
      * @param ColumnDefinition $definition

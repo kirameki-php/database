@@ -14,7 +14,7 @@ use Kirameki\Database\Statements\Schema\CreateIndexStatement;
 use Kirameki\Database\Statements\Schema\CreateTableStatement;
 use Kirameki\Database\Statements\Schema\DropIndexStatement;
 use Kirameki\Database\Statements\Schema\DropTableStatement;
-use Kirameki\Database\Statements\Schema\Expressions\Expression;
+use Kirameki\Database\Statements\Schema\Expressions\DefaultValue;
 use Kirameki\Database\Statements\Schema\RenameTableStatement;
 use Kirameki\Database\Statements\Schema\TruncateTableStatement;
 use Kirameki\Database\Statements\Syntax;
@@ -247,7 +247,7 @@ class SchemaSyntax extends Syntax
             return $this->asLiteral($value);
         }
 
-        if ($value instanceof Expression) {
+        if ($value instanceof DefaultValue) {
             return $value->toString($this);
         }
 
