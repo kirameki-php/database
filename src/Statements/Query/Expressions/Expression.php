@@ -1,14 +1,16 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Statements;
+namespace Kirameki\Database\Statements\Query\Expressions;
+
+use Kirameki\Database\Statements\Query\Syntax\QuerySyntax;
 
 abstract class Expression
 {
     /**
-     * @param Syntax $syntax
+     * @param QuerySyntax $syntax
      * @return string
      */
-    abstract public function prepare(Syntax $syntax): string;
+    abstract public function prepare(QuerySyntax $syntax): string;
 
     /**
      * @return array<int, mixed>

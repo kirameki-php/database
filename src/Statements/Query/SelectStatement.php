@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Statements\Query;
 
-use Kirameki\Database\Statements\Expression;
+use Kirameki\Database\Statements\Query\Expressions\Expression;
 use Kirameki\Database\Statements\Query\Support\LockOption;
 use Kirameki\Database\Statements\Query\Support\LockType;
 

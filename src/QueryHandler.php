@@ -2,15 +2,14 @@
 
 namespace Kirameki\Database;
 
-use Kirameki\Database\Adapters\DatabaseAdapter;
 use Kirameki\Database\Events\QueryExecuted;
 use Kirameki\Database\Statements\Execution;
-use Kirameki\Database\Statements\Expression;
 use Kirameki\Database\Statements\Query\DeleteBuilder;
+use Kirameki\Database\Statements\Query\Expressions\Expression;
 use Kirameki\Database\Statements\Query\InsertBuilder;
 use Kirameki\Database\Statements\Query\QueryExecution;
-use Kirameki\Database\Statements\Query\QueryStatement;
 use Kirameki\Database\Statements\Query\QueryResult;
+use Kirameki\Database\Statements\Query\QueryStatement;
 use Kirameki\Database\Statements\Query\SelectBuilder;
 use Kirameki\Database\Statements\Query\Syntax\QuerySyntax;
 use Kirameki\Database\Statements\Query\UpdateBuilder;

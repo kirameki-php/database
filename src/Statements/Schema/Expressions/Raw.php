@@ -19,7 +19,7 @@ class Raw extends Expression
      * @param SchemaSyntax $syntax
      * @return string
      */
-    public function prepare(SchemaSyntax $syntax): string
+    public function toString(SchemaSyntax $syntax): string
     {
         return $this->value;
     }

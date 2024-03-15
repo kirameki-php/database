@@ -19,5 +19,5 @@ abstract class SchemaStatement implements Statement
     /**
      * @return list<string>
      */
-    abstract public function toExecutables(): array;
+    abstract public function toCommands(): array;
 }

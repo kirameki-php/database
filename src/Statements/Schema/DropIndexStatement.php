@@ -45,7 +45,7 @@ class DropIndexStatement extends SchemaStatement
     /**
      * @return list<string>
      */
-    public function toExecutables(): array
+    public function toCommands(): array
     {
         $this->preprocess();
         return [

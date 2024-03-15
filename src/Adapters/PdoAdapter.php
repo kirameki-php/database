@@ -83,7 +83,7 @@ abstract class PdoAdapter implements DatabaseAdapter
     public function runSchema(SchemaStatement $statement): SchemaExecution
     {
         $startTime = hrtime(true);
-        foreach ($statement->toExecutables() as $schema) {
+        foreach ($statement->toCommands() as $schema) {
             $this->getPdo()->exec($schema);
         }
         $execTimeMs = (hrtime(true) - $startTime) / 1_000_000;

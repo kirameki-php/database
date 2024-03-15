@@ -26,14 +26,6 @@ readonly class SchemaHandler
     }
 
     /**
-     * @return Connection
-     */
-    public function getConnection(): Connection
-    {
-        return $this->connection;
-    }
-
-    /**
      * @param string $table
      */
     public function truncate(string $table): void

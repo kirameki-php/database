@@ -21,7 +21,7 @@ class DropTableStatement extends SchemaStatement
     /**
      * @return list<string>
      */
-    public function toExecutables(): array
+    public function toCommands(): array
     {
         return [
             $this->syntax->formatDropTableStatement($this),

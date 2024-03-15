@@ -248,7 +248,7 @@ class SchemaSyntax extends Syntax
         }
 
         if ($value instanceof Expression) {
-            return $value->prepare($this);
+            return $value->toString($this);
         }
 
         throw new LogicException('Unknown default value type: ' . Value::getType($value), [

@@ -2,7 +2,6 @@
 
 namespace Kirameki\Database\Statements\Query\Expressions;
 
-use Kirameki\Database\Statements\Expression;
 use Kirameki\Database\Statements\Query\Syntax\QuerySyntax;
 
 class Column extends Expression
