@@ -3,6 +3,8 @@
 namespace Kirameki\Database\Statements\Schema;
 
 use Kirameki\Database\Connection;
+use Kirameki\Database\SchemaHandler;
+use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
 
 /**
  * @extends SchemaBuilder<CreateTableStatement>
@@ -10,16 +12,17 @@ use Kirameki\Database\Connection;
 class CreateTableBuilder extends SchemaBuilder
 {
     /**
-     * @param Connection $connection
+     * @param SchemaHandler $handler
+     * @param SchemaSyntax $syntax
      * @param string $table
      */
     public function __construct(
-        Connection $connection,
+        SchemaHandler $handler,
+        protected SchemaSyntax $syntax,
         public readonly string $table,
     )
     {
-        $syntax = $connection->getAdapter()->getSchemaSyntax();
-        parent::__construct($connection, new CreateTableStatement($syntax, $table));
+        parent::__construct($handler, new CreateTableStatement($syntax, $table));
     }
 
     /**
@@ -176,7 +179,7 @@ class CreateTableBuilder extends SchemaBuilder
      */
     public function index(iterable $columns): CreateIndexBuilder
     {
-        $builder = new CreateIndexBuilder($this->connection, $this->statement->table);
+        $builder = new CreateIndexBuilder($this->handler, $this->syntax, $this->statement->table);
         $this->statement->indexes[] = $builder->statement;
         return $builder->columns($columns);
     }

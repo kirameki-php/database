@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Statements\Query;
 
 use Kirameki\Database\QueryHandler;
+use Kirameki\Database\Statements\Query\Syntax\QuerySyntax;
 
 /**
  * @extends ConditionsBuilder<UpdateStatement>
@@ -11,14 +12,16 @@ class UpdateBuilder extends ConditionsBuilder
 {
     /**
      * @param QueryHandler $handler
-     * @param UpdateStatement $statement
+     * @param QuerySyntax $syntax
+     * @param string $table
      */
     public function __construct(
         QueryHandler $handler,
-        UpdateStatement $statement,
+        QuerySyntax $syntax,
+        string $table,
     )
     {
-        parent::__construct($handler, $statement);
+        parent::__construct($handler, new UpdateStatement($syntax, $table));
     }
 
     /**

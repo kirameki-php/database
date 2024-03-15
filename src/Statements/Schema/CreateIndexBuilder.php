@@ -2,8 +2,8 @@
 
 namespace Kirameki\Database\Statements\Schema;
 
-use Kirameki\Database\Connection;
-use RuntimeException;
+use Kirameki\Database\SchemaHandler;
+use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
 
 /**
  * @extends SchemaBuilder<CreateIndexStatement>
@@ -11,16 +11,17 @@ use RuntimeException;
 class CreateIndexBuilder extends SchemaBuilder
 {
     /**
-     * @param Connection $connection
+     * @param SchemaHandler $handler
+     * @param SchemaSyntax $syntax
      * @param string $table
      */
     public function __construct(
-        Connection $connection,
+        SchemaHandler $handler,
+        SchemaSyntax $syntax,
         public readonly string $table,
     )
     {
-        $syntax = $connection->getAdapter()->getSchemaSyntax();
-        parent::__construct($connection, new CreateIndexStatement($syntax, $table));
+        parent::__construct($handler, new CreateIndexStatement($syntax, $table));
     }
 
     /**

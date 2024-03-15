@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Statements\Query;
 
 use Kirameki\Database\QueryHandler;
+use Kirameki\Database\Statements\Query\Syntax\QuerySyntax;
 use LogicException;
 use Traversable;
 use function count;
@@ -15,14 +16,16 @@ class InsertBuilder extends QueryBuilder
 {
     /**
      * @param QueryHandler $handler
-     * @param InsertStatement $statement
+     * @param QuerySyntax $syntax
+     * @param string $table
      */
     public function __construct(
         QueryHandler $handler,
-        InsertStatement $statement,
+        QuerySyntax $syntax,
+        string $table
     )
     {
-        parent::__construct($handler, $statement);
+        parent::__construct($handler, new InsertStatement($syntax, $table));
     }
 
     /**
@@ -57,7 +60,7 @@ class InsertBuilder extends QueryBuilder
     }
 
     /**
-     * @return QueryResult
+     * @return QueryResult<InsertStatement>
      */
     public function execute(): QueryResult
     {

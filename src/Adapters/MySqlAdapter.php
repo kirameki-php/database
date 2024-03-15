@@ -5,7 +5,6 @@ namespace Kirameki\Database\Adapters;
 use Kirameki\Database\Statements\Schema\RawStatement;
 use Kirameki\Database\Statements\Query\Syntax\MySqlQuerySyntax;
 use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
-use Kirameki\Database\Statements\Schema\Syntax\SqliteSchemaSyntax;
 use PDO;
 use function array_filter;
 use function implode;

@@ -2,7 +2,8 @@
 
 namespace Kirameki\Database\Statements\Schema;
 
-use Kirameki\Database\Connection;
+use Kirameki\Database\SchemaHandler;
+use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
 
 /**
  * @extends SchemaBuilder<DropTableStatement>
@@ -10,15 +11,16 @@ use Kirameki\Database\Connection;
 class DropTableBuilder extends SchemaBuilder
 {
     /**
-     * @param Connection $connection
+     * @param SchemaHandler $handler
+     * @param SchemaSyntax $syntax
      * @param string $table
      */
     public function __construct(
-        Connection $connection,
+        SchemaHandler $handler,
+        SchemaSyntax $syntax,
         public readonly string $table,
     )
     {
-        $syntax = $connection->getAdapter()->getSchemaSyntax();
-        parent::__construct($connection, new DropTableStatement($syntax, $table));
+        parent::__construct($handler, new DropTableStatement($syntax, $table));
     }
 }

@@ -19,21 +19,13 @@ class Connection
      */
     public function __construct(
         public readonly string $name,
-        protected readonly DatabaseAdapter $adapter,
+        public readonly DatabaseAdapter $adapter,
         protected readonly EventManager $events,
         protected ?QueryHandler $queryHandler = null,
         protected ?SchemaHandler $schemaHandler = null,
         protected ?TransactionHandler $transactionHandler = null,
     )
     {
-    }
-
-    /**
-     * @return DatabaseAdapter
-     */
-    public function getAdapter(): DatabaseAdapter
-    {
-        return $this->adapter;
     }
 
     /**
@@ -75,7 +67,11 @@ class Connection
      */
     public function query(): QueryHandler
     {
-        return $this->queryHandler ??= new QueryHandler($this, $this->events);
+        return $this->queryHandler ??= new QueryHandler(
+            $this,
+            $this->events,
+            $this->adapter->getQuerySyntax(),
+        );
     }
 
     /**
@@ -83,7 +79,11 @@ class Connection
      */
     public function schema(): SchemaHandler
     {
-        return $this->schemaHandler ??= new SchemaHandler($this, $this->events);
+        return $this->schemaHandler ??= new SchemaHandler(
+            $this,
+            $this->events,
+            $this->adapter->getSchemaSyntax(),
+        );
     }
 
     /**

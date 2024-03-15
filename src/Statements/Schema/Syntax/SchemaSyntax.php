@@ -14,7 +14,6 @@ use Kirameki\Database\Statements\Schema\CreateIndexStatement;
 use Kirameki\Database\Statements\Schema\CreateTableStatement;
 use Kirameki\Database\Statements\Schema\DropIndexStatement;
 use Kirameki\Database\Statements\Schema\DropTableStatement;
-use Kirameki\Database\Statements\Schema\Expressions\CurrentTimestamp;
 use Kirameki\Database\Statements\Schema\Expressions\Expression;
 use Kirameki\Database\Statements\Schema\RenameTableStatement;
 use Kirameki\Database\Statements\Schema\TruncateTableStatement;

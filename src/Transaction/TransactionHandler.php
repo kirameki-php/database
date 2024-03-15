@@ -68,7 +68,7 @@ class TransactionHandler
      */
     protected function handleBegin(): void
     {
-        $this->connection->getAdapter()->beginTransaction();
+        $this->connection->adapter->beginTransaction();
         $this->events->emit(new TransactionBegan($this->connection));
     }
 
@@ -77,7 +77,7 @@ class TransactionHandler
      */
     protected function handleCommit(): void
     {
-        $this->connection->getAdapter()->commit();
+        $this->connection->adapter->commit();
         $this->events->emit(new TransactionCommitted($this->connection));
     }
 
@@ -87,7 +87,7 @@ class TransactionHandler
      */
     protected function rollbackAndThrow(Throwable $throwable): never
     {
-        $this->connection->getAdapter()->rollback();
+        $this->connection->adapter->rollback();
         $this->events->emit(new TransactionRolledBack($this->connection, $throwable));
         throw $throwable;
     }

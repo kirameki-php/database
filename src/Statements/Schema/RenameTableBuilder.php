@@ -2,32 +2,27 @@
 
 namespace Kirameki\Database\Statements\Schema;
 
-use Kirameki\Database\Connection;
+use Kirameki\Database\SchemaHandler;
+use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
 
+/**
+ * @extends SchemaBuilder<RenameTableStatement>
+ */
 class RenameTableBuilder extends SchemaBuilder
 {
     /**
-     * @param Connection $connection
+     * @param SchemaHandler $handler
+     * @param SchemaSyntax $syntax
      * @param string $from
      * @param string $to
      */
     public function __construct(
-        protected Connection $connection,
+        SchemaHandler $handler,
+        SchemaSyntax $syntax,
         protected string $from,
         protected string $to,
     )
     {
-        parent::__construct($connection);
-    }
-
-    /**
-     * @return string[]
-     */
-    public function build(): array
-    {
-        $syntax = $this->connection->getSchemaSyntax();
-        return [
-            $syntax->formatRenameTableStatement($this->from, $this->to),
-        ];
+        parent::__construct($handler, new RenameTableStatement($syntax, $from, $to));
     }
 }

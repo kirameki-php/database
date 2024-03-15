@@ -2,8 +2,9 @@
 
 namespace Kirameki\Database\Statements\Schema;
 
-use Kirameki\Database\Connection;
+use Kirameki\Database\SchemaHandler;
 use Kirameki\Database\Statements\Schema\Support\AlterType;
+use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
 
 /**
  * @extends SchemaBuilder<AlterTableStatement>
@@ -11,16 +12,17 @@ use Kirameki\Database\Statements\Schema\Support\AlterType;
 class AlterTableBuilder extends SchemaBuilder
 {
     /**
-     * @param Connection $connection
+     * @param SchemaHandler $handler
+     * @param SchemaSyntax $syntax
      * @param string $table
      */
     public function __construct(
-        Connection $connection,
+        SchemaHandler $handler,
+        protected SchemaSyntax $syntax,
         string $table,
     )
     {
-        $syntax = $connection->getAdapter()->getSchemaSyntax();
-        parent::__construct($connection, new AlterTableStatement($syntax, $table));
+        parent::__construct($handler, new AlterTableStatement($syntax, $table));
     }
 
     /**
@@ -68,7 +70,7 @@ class AlterTableBuilder extends SchemaBuilder
      */
     public function createIndex(iterable $columns): CreateIndexBuilder
     {
-        $builder = new CreateIndexBuilder($this->connection, $this->statement->table);
+        $builder = new CreateIndexBuilder($this->handler, $this->syntax, $this->statement->table);
         $builder->columns($columns);
         $this->statement->addAction($builder->statement);
         return $builder;
@@ -80,7 +82,7 @@ class AlterTableBuilder extends SchemaBuilder
      */
     public function dropIndex(iterable $columns): DropIndexBuilder
     {
-        $builder = new DropIndexBuilder($this->connection, $this->statement->table);
+        $builder = new DropIndexBuilder($this->handler, $this->syntax, $this->statement->table);
         $builder->columns($columns);
         $this->statement->addAction($builder->statement);
         return $builder;

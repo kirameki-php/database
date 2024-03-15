@@ -7,50 +7,28 @@ use Kirameki\Database\Events\QueryExecuted;
 use Kirameki\Database\Statements\Execution;
 use Kirameki\Database\Statements\Expression;
 use Kirameki\Database\Statements\Query\DeleteBuilder;
-use Kirameki\Database\Statements\Query\DeleteStatement;
 use Kirameki\Database\Statements\Query\InsertBuilder;
-use Kirameki\Database\Statements\Query\InsertStatement;
 use Kirameki\Database\Statements\Query\QueryExecution;
 use Kirameki\Database\Statements\Query\QueryStatement;
 use Kirameki\Database\Statements\Query\QueryResult;
 use Kirameki\Database\Statements\Query\SelectBuilder;
-use Kirameki\Database\Statements\Query\SelectStatement;
 use Kirameki\Database\Statements\Query\Syntax\QuerySyntax;
 use Kirameki\Database\Statements\Query\UpdateBuilder;
-use Kirameki\Database\Statements\Query\UpdateStatement;
 use Kirameki\Event\EventManager;
 
 readonly class QueryHandler
 {
     /**
-     * @var DatabaseAdapter
-     */
-    protected DatabaseAdapter $adapter;
-
-    /**
-     * @var QuerySyntax
-     */
-    protected QuerySyntax $syntax;
-
-    /**
      * @param Connection $connection
      * @param EventManager $events
+     * @param QuerySyntax $syntax
      */
     public function __construct(
-        protected Connection $connection,
+        public Connection $connection,
         protected EventManager $events,
+        protected QuerySyntax $syntax,
     )
     {
-        $this->adapter = $connection->getAdapter();
-        $this->syntax = $this->adapter->getQuerySyntax();
-    }
-
-    /**
-     * @return Connection
-     */
-    public function getConnection(): Connection
-    {
-        return $this->connection;
     }
 
     /**
@@ -59,8 +37,7 @@ readonly class QueryHandler
      */
     public function select(string|Expression ...$columns): SelectBuilder
     {
-        $statement = new SelectStatement($this->syntax);
-        $builder = new SelectBuilder($this, $statement);
+        $builder = new SelectBuilder($this, $this->syntax);
         return $builder->columns(...$columns);
     }
 
@@ -70,8 +47,7 @@ readonly class QueryHandler
      */
     public function insertInto(string $table): InsertBuilder
     {
-        $statement = new InsertStatement($this->syntax, $table);
-        return new InsertBuilder($this, $statement);
+        return new InsertBuilder($this, $this->syntax, $table);
     }
 
     /**
@@ -80,8 +56,7 @@ readonly class QueryHandler
      */
     public function update(string $table): UpdateBuilder
     {
-        $statement = new UpdateStatement($this->syntax, $table);
-        return new UpdateBuilder($this, $statement);
+        return new UpdateBuilder($this, $this->syntax, $table);
     }
 
     /**
@@ -90,8 +65,7 @@ readonly class QueryHandler
      */
     public function delete(string $table): DeleteBuilder
     {
-        $statement = new DeleteStatement($this->syntax, $table);
-        return new DeleteBuilder($this, $statement);
+        return new DeleteBuilder($this, $this->syntax, $table);
     }
 
     /**
@@ -101,7 +75,7 @@ readonly class QueryHandler
      */
     public function execute(QueryStatement $statement): QueryResult
     {
-        return $this->handleExecution($this->adapter->query($statement));
+        return $this->handleExecution($this->connection->adapter->query($statement));
     }
 
     /**
@@ -111,7 +85,7 @@ readonly class QueryHandler
      */
     public function cursor(QueryStatement $statement): QueryResult
     {
-        return $this->handleExecution($this->adapter->cursor($statement));
+        return $this->handleExecution($this->connection->adapter->cursor($statement));
     }
 
     /**

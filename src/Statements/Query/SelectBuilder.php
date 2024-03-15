@@ -11,6 +11,7 @@ use Kirameki\Database\Statements\Query\Support\JoinType;
 use Kirameki\Database\Statements\Query\Support\LockOption;
 use Kirameki\Database\Statements\Query\Support\LockType;
 use Kirameki\Database\Statements\Query\Support\SortOrder;
+use Kirameki\Database\Statements\Query\Syntax\QuerySyntax;
 use function is_array;
 
 /**
@@ -20,14 +21,14 @@ class SelectBuilder extends ConditionsBuilder
 {
     /**
      * @param QueryHandler $handler
-     * @param SelectStatement $statement
+     * @param QuerySyntax $syntax
      */
     public function __construct(
         QueryHandler $handler,
-        SelectStatement $statement,
+        QuerySyntax $syntax,
     )
     {
-        parent::__construct($handler, $statement);
+        parent::__construct($handler, new SelectStatement($syntax));
     }
 
     #region selecting --------------------------------------------------------------------------------------------------
