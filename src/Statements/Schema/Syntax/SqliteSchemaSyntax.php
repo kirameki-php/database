@@ -14,4 +14,12 @@ class SqliteSchemaSyntax extends SchemaSyntax
     {
         return "DELETE FROM {$this->asIdentifier($statement->table)};";
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function supportsDdlTransaction(): bool
+    {
+        return true;
+    }
 }

@@ -28,7 +28,7 @@ use function is_int;
 use function is_string;
 use function strtoupper;
 
-class SchemaSyntax extends Syntax
+abstract class SchemaSyntax extends Syntax
 {
     /**
      * @param CreateTableStatement $statement
@@ -277,4 +277,9 @@ class SchemaSyntax extends Syntax
             $this->asIdentifier($statement->table),
         ]);
     }
+
+    /**
+     * @return bool
+     */
+    abstract public function supportsDdlTransaction(): bool;
 }

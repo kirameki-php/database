@@ -4,6 +4,7 @@ namespace Kirameki\Database\Adapters;
 
 use Kirameki\Database\Statements\Schema\RawStatement;
 use Kirameki\Database\Statements\Query\Syntax\MySqlQuerySyntax;
+use Kirameki\Database\Statements\Schema\Syntax\MySqlSchemaSyntax;
 use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
 use PDO;
 use function array_filter;
@@ -76,7 +77,7 @@ class MySqlAdapter extends PdoAdapter
      */
     protected function instantiateSchemaSyntax(): SchemaSyntax
     {
-        return new SchemaSyntax($this->identifierDelimiter, $this->literalDelimiter, $this->dateTimeFormat);
+        return new MySqlSchemaSyntax($this->identifierDelimiter, $this->literalDelimiter, $this->dateTimeFormat);
     }
 
     /**
@@ -114,13 +115,5 @@ class MySqlAdapter extends PdoAdapter
     {
         $execution = $this->query("SHOW DATABASES LIKE '{$this->config->database}'");
         return $execution->getAffectedRowCount() > 0;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function supportsDdlTransaction(): bool
-    {
-        return false;
     }
 }

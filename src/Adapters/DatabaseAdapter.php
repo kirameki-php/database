@@ -98,9 +98,4 @@ interface DatabaseAdapter
      * @return SchemaSyntax
      */
     public function getSchemaSyntax(): SchemaSyntax;
-
-    /**
-     * @return bool
-     */
-    public function supportsDdlTransaction(): bool;
 }

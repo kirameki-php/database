@@ -106,14 +106,6 @@ class SqliteAdapter extends PdoAdapter
     /**
      * @return bool
      */
-    public function supportsDdlTransaction(): bool
-    {
-        return true;
-    }
-
-    /**
-     * @return bool
-     */
     public function isPersistentDatabase(): bool
     {
         $filename = $this->config->filename;
