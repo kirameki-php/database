@@ -16,12 +16,11 @@ class CreateIndexBuilder extends SchemaBuilder
      * @param string $table
      */
     public function __construct(
-        SchemaHandler $handler,
         SchemaSyntax $syntax,
         public readonly string $table,
     )
     {
-        parent::__construct($handler, new CreateIndexStatement($syntax, $table));
+        parent::__construct(new CreateIndexStatement($syntax, $table));
     }
 
     /**

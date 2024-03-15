@@ -41,7 +41,7 @@ class DatabaseManager
      * @param string $name
      * @return Connection
      */
-    public function using(string $name): Connection
+    public function use(string $name): Connection
     {
         return $this->connections[$name] ??= $this->createConnection($name, $this->getConfig($name));
     }

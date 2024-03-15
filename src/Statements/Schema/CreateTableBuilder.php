@@ -12,17 +12,15 @@ use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
 class CreateTableBuilder extends SchemaBuilder
 {
     /**
-     * @param SchemaHandler $handler
      * @param SchemaSyntax $syntax
      * @param string $table
      */
     public function __construct(
-        SchemaHandler $handler,
         protected SchemaSyntax $syntax,
         public readonly string $table,
     )
     {
-        parent::__construct($handler, new CreateTableStatement($syntax, $table));
+        parent::__construct(new CreateTableStatement($syntax, $table));
     }
 
     /**
@@ -179,7 +177,7 @@ class CreateTableBuilder extends SchemaBuilder
      */
     public function index(iterable $columns): CreateIndexBuilder
     {
-        $builder = new CreateIndexBuilder($this->handler, $this->syntax, $this->statement->table);
+        $builder = new CreateIndexBuilder($this->syntax, $this->statement->table);
         $this->statement->indexes[] = $builder->statement;
         return $builder->columns($columns);
     }

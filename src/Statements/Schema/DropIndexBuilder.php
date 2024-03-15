@@ -11,17 +11,15 @@ use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
 class DropIndexBuilder extends SchemaBuilder
 {
     /**
-     * @param SchemaHandler $handler
      * @param SchemaSyntax $syntax
      * @param string $table
      */
     public function __construct(
-        SchemaHandler $handler,
         SchemaSyntax $syntax,
         public readonly string $table,
     )
     {
-        parent::__construct($handler, new DropIndexStatement($syntax, $table));
+        parent::__construct(new DropIndexStatement($syntax, $table));
     }
 
     /**
