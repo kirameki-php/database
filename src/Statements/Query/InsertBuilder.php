@@ -2,7 +2,6 @@
 
 namespace Kirameki\Database\Statements\Query;
 
-use Kirameki\Database\QueryHandler;
 use Kirameki\Database\Statements\Query\Syntax\QuerySyntax;
 use LogicException;
 use Traversable;

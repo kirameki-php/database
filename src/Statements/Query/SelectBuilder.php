@@ -3,7 +3,6 @@
 namespace Kirameki\Database\Statements\Query;
 
 use Closure;
-use Kirameki\Database\QueryHandler;
 use Kirameki\Database\Statements\Query\Expressions\Aggregate;
 use Kirameki\Database\Statements\Query\Expressions\Expression;
 use Kirameki\Database\Statements\Query\Support\JoinType;

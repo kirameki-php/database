@@ -2,8 +2,6 @@
 
 namespace Kirameki\Database\Statements\Query;
 
-use Kirameki\Database\QueryHandler;
-
 /**
  * @template TStatement of QueryStatement
  */

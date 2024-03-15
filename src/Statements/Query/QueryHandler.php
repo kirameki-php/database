@@ -1,18 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database;
+namespace Kirameki\Database\Statements\Query;
 
+use Kirameki\Database\Connection;
 use Kirameki\Database\Events\QueryExecuted;
 use Kirameki\Database\Statements\Execution;
-use Kirameki\Database\Statements\Query\DeleteBuilder;
 use Kirameki\Database\Statements\Query\Expressions\Expression;
-use Kirameki\Database\Statements\Query\InsertBuilder;
-use Kirameki\Database\Statements\Query\QueryExecution;
-use Kirameki\Database\Statements\Query\QueryResult;
-use Kirameki\Database\Statements\Query\QueryStatement;
-use Kirameki\Database\Statements\Query\SelectBuilder;
 use Kirameki\Database\Statements\Query\Syntax\QuerySyntax;
-use Kirameki\Database\Statements\Query\UpdateBuilder;
 use Kirameki\Event\EventManager;
 
 readonly class QueryHandler
