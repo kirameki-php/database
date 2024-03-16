@@ -28,7 +28,7 @@ readonly class InfoHandler
     }
 
     /**
-     * @return Vec<TableInfo>
+     * @return Vec<string>
      */
     public function getTables(): Vec
     {
@@ -37,6 +37,7 @@ readonly class InfoHandler
         $result = $connection->query()->select('TABLE_NAME')
             ->from('INFORMATION_SCHEMA')
             ->where('TABLE_SCHEMA', $connection->adapter->getConfig()->getDatabase())
+            ->where('TABLE_TYPE', 'BASE TABLE')
             ->execute();
     }
 
