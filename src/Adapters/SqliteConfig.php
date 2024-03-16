@@ -19,4 +19,13 @@ class SqliteConfig implements DatabaseConfig
     {
         return 'sqlite';
     }
+
+
+    /**
+     * @return string|null
+     */
+    public function getDatabase(): string
+    {
+        return 'sqlite';
+    }
 }

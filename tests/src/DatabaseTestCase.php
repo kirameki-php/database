@@ -6,7 +6,7 @@ use Kirameki\Core\Testing\TestCase;
 use Kirameki\Database\Adapters\MySqlAdapter;
 use Kirameki\Database\Adapters\MySqlConfig;
 use Kirameki\Database\Connection;
-use Kirameki\Database\Statements\Schema\CreateTableBuilder;
+use Kirameki\Database\Schema\Statements\CreateTableBuilder;
 use Kirameki\Event\EventManager;
 use RuntimeException;
 use function mt_rand;

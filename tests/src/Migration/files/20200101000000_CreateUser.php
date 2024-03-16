@@ -1,13 +1,13 @@
 <?php declare(strict_types=1);
 
 use Kirameki\Database\Migration\Migration;
-use Kirameki\Database\Statements\Schema\CreateTableBuilder;
+use Kirameki\Database\Schema\Statements\CreateTableBuilder;
 
 class CreateUser extends Migration
 {
     public function up(): void
     {
-        $this->use('migration_test')
+        $this->on('migration_test')
             ->createTable('User')->tap(function(CreateTableBuilder $t) {
                 $t->uuid('id')->primaryKey()->notNull();
                 $t->string('name', 100)->default('Anonymous');
@@ -18,7 +18,7 @@ class CreateUser extends Migration
 
     public function down(): void
     {
-        $this->use('migration_test')
+        $this->on('migration_test')
             ->dropTable('User');
     }
 }

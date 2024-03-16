@@ -2,11 +2,11 @@
 
 namespace Kirameki\Database\Adapters;
 
-use Kirameki\Database\Statements\Query\RawStatement as RawQueryStatement;
-use Kirameki\Database\Statements\Query\Syntax\MySqlQuerySyntax;
-use Kirameki\Database\Statements\Schema\RawStatement;
-use Kirameki\Database\Statements\Schema\Syntax\MySqlSchemaSyntax;
-use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
+use Kirameki\Database\Query\Statements\RawStatement as RawQueryStatement;
+use Kirameki\Database\Query\Syntax\MySqlQuerySyntax;
+use Kirameki\Database\Schema\Statements\RawStatement;
+use Kirameki\Database\Schema\Syntax\MySqlSchemaSyntax;
+use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 use PDO;
 use function array_filter;
 use function implode;

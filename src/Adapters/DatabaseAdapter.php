@@ -2,12 +2,12 @@
 
 namespace Kirameki\Database\Adapters;
 
-use Kirameki\Database\Statements\Query\QueryExecution;
-use Kirameki\Database\Statements\Query\QueryStatement;
-use Kirameki\Database\Statements\Query\Syntax\QuerySyntax;
-use Kirameki\Database\Statements\Schema\SchemaExecution;
-use Kirameki\Database\Statements\Schema\SchemaStatement;
-use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
+use Kirameki\Database\Query\Statements\QueryExecution;
+use Kirameki\Database\Query\Statements\QueryStatement;
+use Kirameki\Database\Query\Syntax\QuerySyntax;
+use Kirameki\Database\Schema\Statements\SchemaExecution;
+use Kirameki\Database\Schema\Statements\SchemaStatement;
+use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 
 interface DatabaseAdapter
 {

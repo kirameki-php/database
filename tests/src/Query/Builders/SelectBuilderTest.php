@@ -2,11 +2,11 @@
 
 namespace Tests\Kirameki\Database\Query\Builders;
 
-use Kirameki\Database\Statements\Query\ConditionBuilder;
-use Kirameki\Database\Statements\Query\Expressions\Raw;
-use Kirameki\Database\Statements\Query\JoinBuilder;
-use Kirameki\Database\Statements\Query\Support\LockOption;
-use Kirameki\Database\Statements\Query\Support\Range;
+use Kirameki\Database\Query\Expressions\Raw;
+use Kirameki\Database\Query\Statements\ConditionBuilder;
+use Kirameki\Database\Query\Statements\JoinBuilder;
+use Kirameki\Database\Query\Support\LockOption;
+use Kirameki\Database\Query\Support\Range;
 use Tests\Kirameki\Database\Query\QueryTestCase;
 
 class SelectBuilderTest extends QueryTestCase

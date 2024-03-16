@@ -2,7 +2,7 @@
 
 namespace Tests\Kirameki\Database;
 
-use Kirameki\Database\Statements\Schema\CreateTableBuilder;
+use Kirameki\Database\Schema\Statements\CreateTableBuilder;
 
 class ConnectionTest extends DatabaseTestCase
 {

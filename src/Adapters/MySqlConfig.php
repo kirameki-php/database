@@ -25,8 +25,19 @@ class MySqlConfig implements DatabaseConfig
     {
     }
 
+    /**
+     * @return string
+     */
     public function getAdapterName(): string
     {
         return 'mysql';
+    }
+
+    /**
+     * @return string
+     */
+    public function getDatabase(): string
+    {
+        return $this->database ?? '';
     }
 }

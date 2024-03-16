@@ -2,8 +2,8 @@
 
 namespace Kirameki\Database\Events;
 
-use Kirameki\Database\Statements\Query\QueryResult;
-use Kirameki\Database\Statements\Query\QueryStatement;
+use Kirameki\Database\Query\Statements\QueryResult;
+use Kirameki\Database\Query\Statements\QueryStatement;
 
 class QueryExecuted extends StatementExecuted
 {

@@ -3,8 +3,8 @@
 namespace Kirameki\Database\Adapters;
 
 use Kirameki\Database\Exceptions\DatabaseNotFoundException;
-use Kirameki\Database\Statements\Query\Syntax\SqliteQuerySyntax;
-use Kirameki\Database\Statements\Schema\Syntax\SqliteSchemaSyntax;
+use Kirameki\Database\Query\Syntax\SqliteQuerySyntax;
+use Kirameki\Database\Schema\Syntax\SqliteSchemaSyntax;
 use PDO;
 use function file_exists;
 use function iterator_to_array;
