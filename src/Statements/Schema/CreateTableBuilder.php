@@ -2,8 +2,6 @@
 
 namespace Kirameki\Database\Statements\Schema;
 
-use Kirameki\Database\Connection;
-use Kirameki\Database\SchemaHandler;
 use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
 
 /**
@@ -83,11 +81,11 @@ class CreateTableBuilder extends SchemaBuilder
     /**
      * @param string $column
      * @param int|null $precision
-     * @return ColumnBuilder
+     * @return TimestampColumnBuilder
      */
     public function datetime(string $column, ?int $precision = null): ColumnBuilder
     {
-        return $this->column($column, __FUNCTION__, $precision);
+        return new TimestampColumnBuilder($this->addDefinition($column, __FUNCTION__, $precision));
     }
 
     /**
@@ -191,8 +189,20 @@ class CreateTableBuilder extends SchemaBuilder
      */
     protected function column(string $name, string $type, ?int $size = null, ?int $scale = null): ColumnBuilder
     {
+        return new ColumnBuilder($this->addDefinition($name, $type, $size, $scale));
+    }
+
+    /**
+     * @param string $name
+     * @param string $type
+     * @param int|null $size
+     * @param int|null $scale
+     * @return ColumnDefinition
+     */
+    protected function addDefinition(string $name, string $type, ?int $size = null, ?int $scale = null): ColumnDefinition
+    {
         $definition = new ColumnDefinition($name, $type, $size, $scale);
         $this->statement->columns[] = $definition;
-        return new ColumnBuilder($definition);
+        return $definition;
     }
 }

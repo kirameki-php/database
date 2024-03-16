@@ -1,13 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database;
+namespace Kirameki\Database\Statements\Schema;
 
+use Kirameki\Database\Connection;
 use Kirameki\Database\Events\SchemaExecuted;
 use Kirameki\Database\Statements\Execution;
-use Kirameki\Database\Statements\Schema\SchemaExecution;
-use Kirameki\Database\Statements\Schema\SchemaStatement;
 use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
-use Kirameki\Database\Statements\Schema\TruncateTableStatement;
 use Kirameki\Event\EventManager;
 
 readonly class SchemaHandler

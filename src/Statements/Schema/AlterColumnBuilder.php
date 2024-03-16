@@ -138,15 +138,6 @@ class AlterColumnBuilder extends ColumnBuilder
     /**
      * @return $this
      */
-    public function null(): static
-    {
-        $this->definition->nullable = true;
-        return $this;
-    }
-
-    /**
-     * @return $this
-     */
     public function first(): static
     {
         $this->action->positionType = 'FIRST';

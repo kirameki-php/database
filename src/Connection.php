@@ -5,6 +5,7 @@ namespace Kirameki\Database;
 use Closure;
 use Kirameki\Database\Adapters\DatabaseAdapter;
 use Kirameki\Database\Statements\Query\QueryHandler;
+use Kirameki\Database\Statements\Schema\SchemaHandler;
 use Kirameki\Database\Transaction\TransactionHandler;
 use Kirameki\Event\EventManager;
 

@@ -2,7 +2,6 @@
 
 namespace Kirameki\Database\Statements\Schema;
 
-use Kirameki\Database\SchemaHandler;
 use Kirameki\Database\Statements\Schema\Syntax\SchemaSyntax;
 
 /**
