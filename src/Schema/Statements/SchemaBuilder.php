@@ -8,7 +8,7 @@ namespace Kirameki\Database\Schema\Statements;
 abstract class SchemaBuilder
 {
     /**
-     * @param SchemaStatement $statement
+     * @param TStatement $statement
      */
     public function __construct(
         protected SchemaStatement $statement,

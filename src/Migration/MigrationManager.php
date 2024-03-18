@@ -5,6 +5,7 @@ namespace Kirameki\Database\Migration;
 use DateTimeInterface;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Database\DatabaseManager;
+use Kirameki\Database\Schema\Statements\SchemaStatement;
 use Kirameki\Event\EventManager;
 use function assert;
 use function basename;
@@ -35,7 +36,10 @@ class MigrationManager
     {
         foreach ($this->readMigrations($since) as $migration) {
             $migration->up();
-            $migration->apply();
+            $migationBuilders = $migration->getBuilders();
+            foreach ($migationBuilders as $builder) {
+                $builder->apply();
+            }
         }
     }
 
@@ -46,7 +50,6 @@ class MigrationManager
     {
         foreach ($this->readMigrations($since) as $migration) {
             $migration->down();
-            $migration->apply();
         }
     }
 
@@ -78,7 +81,11 @@ class MigrationManager
         $statements = [];
         foreach ($this->readMigrations($since) as $migration) {
             $migration->$direction();
-            $statements[] = $migration->toStatements();
+            foreach ($migration->getBuilders() as $builder) {
+                foreach ($builder->toStatements() as $statement) {
+                    $statements[] = $statement->toCommands();
+                }
+            }
         }
         return Arr::flatten($statements);
     }

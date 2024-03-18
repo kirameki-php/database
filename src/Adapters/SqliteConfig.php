@@ -22,7 +22,7 @@ class SqliteConfig implements DatabaseConfig
 
 
     /**
-     * @return string|null
+     * @return string
      */
     public function getDatabase(): string
     {

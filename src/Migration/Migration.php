@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Migration;
 
 use Closure;
+use Kirameki\Collections\Vec;
 use Kirameki\Database\DatabaseManager;
 use Kirameki\Event\EventManager;
 
@@ -11,10 +12,12 @@ abstract class Migration
     /**
      * @param DatabaseManager $db
      * @param EventManager $events
+     * @param list<MigrationBuilder> $builders
      */
     public function __construct(
         protected readonly DatabaseManager $db,
         protected readonly EventManager $events,
+        protected array $builders = [],
     )
     {
     }
@@ -37,7 +40,15 @@ abstract class Migration
     protected function on(string $connection, Closure $callback): void
     {
         $builder = new MigrationBuilder($this->db->use($connection), $this->events);
+        $this->builders[] = $builder;
         $callback($builder);
-        $builder->apply();
+    }
+
+    /**
+     * @return list<MigrationBuilder>
+     */
+    public function getBuilders(): array
+    {
+        return new $this->builders;
     }
 }
