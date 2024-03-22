@@ -2,27 +2,21 @@
 
 namespace Kirameki\Database\Info;
 
+use Kirameki\Collections\Map;
 use Kirameki\Collections\Vec;
 use Kirameki\Database\Connection;
-use Kirameki\Database\Events\QueryExecuted;
-use Kirameki\Database\Execution;
-use Kirameki\Database\Query\Statements\QueryExecution;
-use Kirameki\Database\Query\Statements\QueryResult;
-use Kirameki\Database\Query\Statements\QueryStatement as TStatement;
-use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Kirameki\Event\EventManager;
+use function dump;
 
 readonly class InfoHandler
 {
     /**
      * @param Connection $connection
      * @param EventManager $events
-     * @param QuerySyntax $syntax
      */
     public function __construct(
         public Connection $connection,
         protected EventManager $events,
-        protected QuerySyntax $syntax,
     )
     {
     }
@@ -30,46 +24,48 @@ readonly class InfoHandler
     /**
      * @return Vec<string>
      */
-    public function getTables(): Vec
+    public function getTableNames(): Vec
     {
         $connection = $this->connection;
 
         $result = $connection->query()->select('TABLE_NAME')
-            ->from('INFORMATION_SCHEMA')
+            ->from('INFORMATION_SCHEMA.TABLES')
             ->where('TABLE_SCHEMA', $connection->adapter->getConfig()->getDatabase())
             ->where('TABLE_TYPE', 'BASE TABLE')
             ->execute();
+
+        return new Vec($result);
     }
 
     /**
-     * @template TStatement of TStatement
-     * @param TStatement $statement
-     * @return QueryResult<TStatement>
+     * @param string $name
+     * @return TableInfo
      */
-    public function execute(TStatement $statement): QueryResult
+    public function getTable(string $name): TableInfo
     {
-        return $this->handleExecution($this->connection->adapter->query($statement));
-    }
+        $connection = $this->connection;
 
-    /**
-     * @template TStatement of TStatement
-     * @param TStatement $statement
-     * @return QueryResult<TStatement>
-     */
-    public function cursor(TStatement $statement): QueryResult
-    {
-        return $this->handleExecution($this->connection->adapter->cursor($statement));
-    }
+        $result = $connection->query()->select('*')
+            ->from('INFORMATION_SCHEMA.COLUMNS')
+            ->where('TABLE_SCHEMA', $connection->adapter->getConfig()->getDatabase())
+            ->where('TABLE_NAME', $name)
+            ->orderByAsc('ORDINAL_POSITION')
+            ->execute();
+dump($result);
+        $columns = [];
+        foreach ($result as $row) {
+            $columnName = $row->COLUMN_NAME;
+            $columns[$columnName] = new ColumnInfo(
+                $columnName,
+                $row->DATA_TYPE,
+                $row->IS_NULLABLE === 'YES',
+                $row->COLUMN_DEFAULT,
+                $row->CHARACTER_MAXIMUM_LENGTH,
+                $row->NUMERIC_PRECISION,
+                $row->NUMERIC_SCALE,
+            );
+        }
 
-    /**
-     * @template TStatement of TStatement
-     * @param QueryExecution<TStatement> $execution
-     * @return QueryResult<TStatement>
-     */
-    protected function handleExecution(Execution $execution): QueryResult
-    {
-        $result = new QueryResult($this->connection, $execution);
-        $this->events->emit(new QueryExecuted($result));
-        return $result;
+        return new TableInfo($name, new Map($columns));
     }
 }

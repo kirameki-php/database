@@ -30,6 +30,8 @@ use function array_map;
 use function array_merge;
 use function count;
 use function current;
+use function dump;
+use function explode;
 use function implode;
 use function is_array;
 use function is_bool;
@@ -40,6 +42,7 @@ use function next;
 use function preg_match;
 use function preg_quote;
 use function preg_replace_callback;
+use function str_contains;
 
 abstract class QuerySyntax extends Syntax
 {
@@ -704,7 +707,11 @@ abstract class QuerySyntax extends Syntax
                 $as = $match['as'] ?? null;
             }
         }
-        $name = $this->asIdentifier($name);
+
+        $name = str_contains($name, '.')
+            ? implode('.', array_map($this->asIdentifier(...), explode('.', $name)))
+            : $this->asIdentifier($name);
+
         if ($as !== null) {
             $name .= ' AS ' . $this->asIdentifier($as);
         }

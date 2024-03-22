@@ -4,6 +4,7 @@ namespace Kirameki\Database;
 
 use Closure;
 use Kirameki\Database\Adapters\DatabaseAdapter;
+use Kirameki\Database\Info\InfoHandler;
 use Kirameki\Database\Query\QueryHandler;
 use Kirameki\Database\Schema\SchemaHandler;
 use Kirameki\Database\Transaction\TransactionHandler;
@@ -17,6 +18,7 @@ class Connection
      * @param EventManager $events
      * @param QueryHandler|null $queryHandler
      * @param SchemaHandler|null $schemaHandler
+     * @param InfoHandler|null $infoHandler
      * @param TransactionHandler|null $transactionHandler
      */
     public function __construct(
@@ -25,6 +27,7 @@ class Connection
         protected readonly EventManager $events,
         protected ?QueryHandler $queryHandler = null,
         protected ?SchemaHandler $schemaHandler = null,
+        protected ?InfoHandler $infoHandler = null,
         protected ?TransactionHandler $transactionHandler = null,
     )
     {
@@ -85,6 +88,14 @@ class Connection
             $this,
             $this->events,
             $this->adapter->getSchemaSyntax(),
+        );
+    }
+
+    public function info(): InfoHandler
+    {
+        return $this->infoHandler ??= new InfoHandler(
+            $this,
+            $this->events,
         );
     }
 

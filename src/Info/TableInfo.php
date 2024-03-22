@@ -2,6 +2,18 @@
 
 namespace Kirameki\Database\Info;
 
-class TableInfo
+use Kirameki\Collections\Map;
+
+readonly class TableInfo
 {
+    /**
+     * @param string $table
+     * @param Map<string, ColumnInfo> $columns
+     */
+    public function __construct(
+        public string $table,
+        public Map $columns,
+    )
+    {
+    }
 }

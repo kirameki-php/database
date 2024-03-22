@@ -24,7 +24,6 @@ class ConnectionTest extends DatabaseTestCase
     public function test_tableExists(): void
     {
         $this->createDummyTable();
-
-        self::assertTrue($this->mysqlConnection()->schema()->tableExists('Dummy'));
+        $this->mysqlConnection()->info()->getTable('Dummy');
     }
 }

@@ -26,7 +26,7 @@ class DatabaseTestCase extends TestCase
     public function createTable(string $table, callable $callback): void
     {
         $connection = $this->mysqlConnection();
-        $builder = new CreateTableBuilder($connection, $table);
+        $builder = new CreateTableBuilder($connection->adapter->getSchemaSyntax(), $table);
         $callback($builder);
         $connection->schema()->execute($builder->getStatement());
     }
