@@ -2,6 +2,7 @@
 
 namespace Kirameki\Database\Events;
 
+use Kirameki\Database\Connection;
 use Kirameki\Database\Query\Statements\QueryResult;
 use Kirameki\Database\Query\Statements\QueryStatement;
 
@@ -12,9 +13,10 @@ class QueryExecuted extends StatementExecuted
      * @param QueryResult<TStatement> $result
      */
     public function __construct(
+        Connection $connection,
         public readonly QueryResult $result,
     )
     {
-        parent::__construct($result->connection, $result->execution->statement);
+        parent::__construct($connection, $result->info->statement);
     }
 }

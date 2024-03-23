@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Adapters;
 
 use Kirameki\Database\Query\Statements\QueryExecution;
+use Kirameki\Database\Query\Statements\QueryResult;
 use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Kirameki\Database\Schema\Statements\SchemaExecution;
@@ -41,16 +42,16 @@ interface DatabaseAdapter
     /**
      * @template TStatement of QueryStatement
      * @param TStatement $statement
-     * @return QueryExecution<TStatement>
+     * @return QueryResult<TStatement>
      */
-    public function query(QueryStatement $statement): QueryExecution;
+    public function query(QueryStatement $statement): QueryResult;
 
     /**
      * @template TStatement of QueryStatement
      * @param TStatement $statement
-     * @return QueryExecution<TStatement>
+     * @return QueryResult<TStatement>
      */
-    public function cursor(QueryStatement $statement): QueryExecution;
+    public function cursor(QueryStatement $statement): QueryResult;
 
     /**
      * @return void

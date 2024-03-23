@@ -3,7 +3,6 @@
 namespace Kirameki\Database\Query\Statements;
 
 use Kirameki\Collections\Vec;
-use Kirameki\Database\Connection;
 
 /**
  * @template TStatement of QueryStatement
@@ -12,14 +11,14 @@ use Kirameki\Database\Connection;
 class QueryResult extends Vec
 {
     /**
-     * @param Connection $connection
-     * @param QueryExecution<TStatement> $execution
+     * @param QueryExecution<TStatement> $info
+     * @param iterable<int, mixed> $rows
      */
     public function __construct(
-        public readonly Connection $connection,
-        public readonly QueryExecution $execution,
+        public readonly QueryExecution $info,
+        iterable $rows,
     )
     {
-        parent::__construct($execution->rowIterator);
+        parent::__construct($rows);
     }
 }

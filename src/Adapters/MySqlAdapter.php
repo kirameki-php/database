@@ -108,6 +108,6 @@ class MySqlAdapter extends PdoAdapter
         $copy = (clone $this);
         $copy->config->database = null;
         $statement = new RawQueryStatement($this->getQuerySyntax(), "SHOW DATABASES LIKE '{$this->config->database}'");
-        return $copy->query($statement)->getAffectedRowCount() > 0;
+        return $copy->query($statement)->info->getAffectedRowCount() > 0;
     }
 }

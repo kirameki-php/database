@@ -6,6 +6,7 @@ use Closure;
 use DateTimeInterface;
 use Iterator;
 use Kirameki\Database\Query\Statements\QueryExecution;
+use Kirameki\Database\Query\Statements\QueryResult;
 use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Kirameki\Database\Schema\Statements\SchemaExecution;
@@ -102,20 +103,20 @@ abstract class PdoAdapter implements DatabaseAdapter
     /**
      * @inheritDoc
      */
-    public function query(QueryStatement $statement): QueryExecution
+    public function query(QueryStatement $statement): QueryResult
     {
         $startTime = hrtime(true);
         $prepared = $this->execQuery($statement);
         $rows = $prepared->fetchAll(PDO::FETCH_OBJ);
         $fetchTimeMs = (hrtime(true) - $startTime) / 1_000_000;
         $count = $prepared->rowCount(...);
-        return $this->instantiateQueryExecution($statement, $fetchTimeMs, $rows, $count);
+        return $this->instantiateQueryResult($statement, $fetchTimeMs, $rows, $count);
     }
 
     /**
      * @inheritDoc
      */
-    public function cursor(QueryStatement $statement): QueryExecution
+    public function cursor(QueryStatement $statement): QueryResult
     {
         $startTime = hrtime(true);
         $prepared = $this->execQuery($statement);
@@ -133,7 +134,7 @@ abstract class PdoAdapter implements DatabaseAdapter
         })();
         $execTimeMs = (hrtime(true) - $startTime) / 1_000_000;
         $count = $prepared->rowCount(...);
-        return $this->instantiateQueryExecution($statement, $execTimeMs, $iterator, $count);
+        return $this->instantiateQueryResult($statement, $execTimeMs, $iterator, $count);
     }
 
     /**
@@ -239,18 +240,19 @@ abstract class PdoAdapter implements DatabaseAdapter
      * @template TStatement of QueryStatement
      * @param TStatement $statement
      * @param float $elapsedMs
-     * @param iterable<int, mixed> $rowIterator
+     * @param iterable<int, mixed> $rows
      * @param int|Closure(): int $affectedRowCount
-     * @return QueryExecution<TStatement>
+     * @return QueryResult<TStatement>
      */
-    protected function instantiateQueryExecution(
+    protected function instantiateQueryResult(
         QueryStatement $statement,
         float $elapsedMs,
-        iterable $rowIterator,
+        iterable $rows,
         int|Closure $affectedRowCount,
-    ): QueryExecution
+    ): QueryResult
     {
-        return new QueryExecution($statement, $elapsedMs, $rowIterator, $affectedRowCount);
+        $execution = new QueryExecution($statement, $elapsedMs, $affectedRowCount);
+        return new QueryResult($execution, $rows);
     }
 
     /**

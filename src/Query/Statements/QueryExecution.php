@@ -13,14 +13,12 @@ class QueryExecution extends Execution
 {
     /**
      * @param TStatement $statement
-     * @param iterable<int, mixed> $rowIterator
      * @param float $elapsedMs
      * @param Closure(): int $affectedRowCount
      */
     public function __construct(
         QueryStatement $statement,
         float $elapsedMs,
-        public readonly iterable $rowIterator,
         protected int|Closure $affectedRowCount,
     )
     {

@@ -75,7 +75,7 @@ readonly class QueryHandler
      */
     public function execute(TStatement $statement): QueryResult
     {
-        return $this->handleExecution($this->connection->adapter->query($statement));
+        return $this->processResult($this->connection->adapter->query($statement));
     }
 
     /**
@@ -85,18 +85,17 @@ readonly class QueryHandler
      */
     public function cursor(TStatement $statement): QueryResult
     {
-        return $this->handleExecution($this->connection->adapter->cursor($statement));
+        return $this->processResult($this->connection->adapter->cursor($statement));
     }
 
     /**
      * @template TStatement of TStatement
-     * @param QueryExecution<TStatement> $execution
+     * @param QueryResult<TStatement> $result
      * @return QueryResult<TStatement>
      */
-    protected function handleExecution(Execution $execution): QueryResult
+    protected function processResult(QueryResult $result): QueryResult
     {
-        $result = new QueryResult($this->connection, $execution);
-        $this->events->emit(new QueryExecuted($result));
+        $this->events->emit(new QueryExecuted($this->connection, $result));
         return $result;
     }
 }
