@@ -30,7 +30,6 @@ use function array_map;
 use function array_merge;
 use function count;
 use function current;
-use function dump;
 use function explode;
 use function implode;
 use function is_array;
@@ -254,7 +253,7 @@ abstract class QuerySyntax extends Syntax
     protected function formatSelectLockPart(SelectStatement $statement): string
     {
         return match ($statement->lockType) {
-            LockType::Exclusive => 'FOR UPDATE'.$this->formatSelectLockOptionPart($statement),
+            LockType::Exclusive => 'FOR UPDATE' . $this->formatSelectLockOptionPart($statement),
             LockType::Shared => 'FOR SHARE',
             null => '',
         };

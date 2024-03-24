@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Query\Statements;
 
 use Closure;
+use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Query\Expressions\Aggregate;
 use Kirameki\Database\Query\Expressions\Expression;
 use Kirameki\Database\Query\QueryHandler;
@@ -326,22 +327,75 @@ class SelectBuilder extends ConditionsBuilder
     #region execution --------------------------------------------------------------------------------------------------
 
     /**
+     * @return mixed
+     */
+    public function first(): mixed
+    {
+        return $this->copy()->limit(1)->execute()->first();
+    }
+
+    /**
+     * @return mixed
+     */
+    public function last(): mixed
+    {
+        return $this->copy()->limit(1)->execute()->last();
+    }
+
+    /**
+     * @return mixed
+     */
+    public function single(): mixed
+    {
+        return $this->copy()->limit(2)->execute()->single();
+    }
+
+    /**
      * @return bool
      */
     public function exists(): bool
     {
-        return $this->copy()->columns("1")->limit(1)->execute()->isNotEmpty();
+        return $this->copy()->columns('1')->limit(1)->execute()->isNotEmpty();
     }
 
     /**
-     * @return array<int>|int
+     * @return int
      */
-    public function count(): array|int
+    public function count(): int
+    {
+        // when GROUP BY is defined, return in [columnValue => count] format
+        if (is_array($this->statement->groupBy)) {
+            throw new LogicException('Cannot get count when GROUP BY is defined. Use tally instead.', [
+                'statement' => $this->statement,
+            ]);
+        }
+
+        $results = $this->copy()
+            ->addToSelect(new Aggregate('count', '*', 'total'))
+            ->execute();
+
+        if ($results->isEmpty()) {
+            return 0;
+        }
+
+        return (int) $results->first()['total'];
+    }
+
+    /**
+     * @return array<int>
+     */
+    public function tally(): array
     {
         $statement = $this->statement;
 
+        if ($statement->groupBy === null) {
+            throw new LogicException('Cannot get total count when GROUP BY is not defined', [
+                'statement' => $this->statement,
+            ]);
+        }
+
         // If GROUP BY exists but no SELECT is defined, use the first GROUP BY column that was defined.
-        if ($statement->columns === null && is_array($statement->groupBy)) {
+        if ($statement->columns === null) {
             $this->addToSelect($statement->groupBy[0]);
         }
 
@@ -350,22 +404,14 @@ class SelectBuilder extends ConditionsBuilder
             ->execute();
 
         // when GROUP BY is defined, return in [columnValue => count] format
-        if (is_array($statement->groupBy)) {
-            $keyName = $statement->groupBy[0];
-            $aggregated = [];
-            foreach ($results as $result) {
-                $groupKey = $result[$keyName];
-                $groupTotal = (int) $result['total'];
-                $aggregated[$groupKey] = $groupTotal;
-            }
-            return $aggregated;
+        $keyName = $statement->groupBy[0];
+        $aggregated = [];
+        foreach ($results as $result) {
+            $groupKey = $result[$keyName];
+            $groupTotal = (int) $result['total'];
+            $aggregated[$groupKey] = $groupTotal;
         }
-
-        if ($results->isEmpty()) {
-            return 0;
-        }
-
-        return (int) $results->first()['total'];
+        return $aggregated;
     }
 
     /**
