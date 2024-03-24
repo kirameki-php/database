@@ -15,6 +15,7 @@ use Kirameki\Database\Schema\Statements\CreateIndexStatement;
 use Kirameki\Database\Schema\Statements\CreateTableStatement;
 use Kirameki\Database\Schema\Statements\DropIndexStatement;
 use Kirameki\Database\Schema\Statements\DropTableStatement;
+use Kirameki\Database\Schema\Statements\PrimaryKeyConstraint;
 use Kirameki\Database\Schema\Statements\RenameTableStatement;
 use Kirameki\Database\Schema\Statements\TruncateTableStatement;
 use Kirameki\Database\Syntax;
@@ -43,15 +44,27 @@ abstract class SchemaSyntax extends Syntax
         foreach ($statement->columns as $definition) {
             $columnParts[] = $this->formatColumnDefinition($definition);
         }
-        $pkParts = [];
-        foreach (($statement->primaryKey?->columns ?? []) as $column => $order) {
-            $pkParts[] = "$column $order";
-        }
-        if (!empty($pkParts)) {
-            $columnParts[] = 'PRIMARY KEY (' . implode(', ', $pkParts) . ')';
+        if ($statement->primaryKey !== null) {
+            $columnParts[] = $this->formatCreateTablePrimaryKeyPart($statement->primaryKey);
         }
         $parts[] = '(' . implode(', ', $columnParts) . ')';
-        return implode(' ', $parts).';';
+        return implode(' ', $parts);
+    }
+
+    /**
+     * @param PrimaryKeyConstraint $constraint
+     * @return string
+     */
+    public function formatCreateTablePrimaryKeyPart(PrimaryKeyConstraint $constraint): string
+    {
+        $pkParts = [];
+        foreach ($constraint->columns as $column => $order) {
+            $pkParts[] = "$column $order";
+        }
+        if ($pkParts !== []) {
+            return 'PRIMARY KEY (' . implode(', ', $pkParts) . ')';
+        }
+        return '';
     }
 
     /**
@@ -184,42 +197,7 @@ abstract class SchemaSyntax extends Syntax
      * @param ColumnDefinition $def
      * @return string
      */
-    protected function formatColumnType(ColumnDefinition $def): string
-    {
-        if ($def->type === 'int') {
-            return match ($def->size) {
-                1 => 'TINYINT',
-                2 => 'SMALLINT',
-                4 => 'INT',
-                8, null => 'BIGINT',
-                default => throw new LogicException("Invalid int size: {$def->size} for {$def->name}", [
-                    'column' => $def->name,
-                    'size' => $def->size,
-                ]),
-            };
-        }
-        if ($def->type === 'decimal') {
-            $args = Arr::without([$def->size, $def->scale], null);
-            return 'DECIMAL' . (!empty($args) ? '(' . implode(',', $args) . ')' : '');
-        }
-        if ($def->type === 'datetime') {
-            $def->size ??= 6;
-            return 'DATETIME(' . $def->size . ')';
-        }
-        if ($def->type === 'string') {
-            $def->size ??= 191;
-            return 'VARCHAR(' . $def->size . ')';
-        }
-        if ($def->type === 'uuid') {
-            return 'VARCHAR(36)';
-        }
-        if ($def->type === null) {
-            throw new RuntimeException('Definition type cannot be set to null');
-        }
-
-        $args = Arr::without([$def->size, $def->scale], null);
-        return strtoupper($def->type) . (!empty($args) ? '(' . implode(',', $args) . ')' : '');
-    }
+    abstract protected function formatColumnType(ColumnDefinition $def): string;
 
     /**
      * @param ColumnDefinition $def
