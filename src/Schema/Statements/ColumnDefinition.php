@@ -10,8 +10,6 @@ class ColumnDefinition
 
     public ?bool $autoIncrement = null;
 
-    public ?string $comment = null;
-
     public mixed $default = null;
 
     /**

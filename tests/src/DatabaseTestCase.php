@@ -5,6 +5,8 @@ namespace Tests\Kirameki\Database;
 use Kirameki\Core\Testing\TestCase;
 use Kirameki\Database\Adapters\MySqlAdapter;
 use Kirameki\Database\Adapters\MySqlConfig;
+use Kirameki\Database\Adapters\SqliteAdapter;
+use Kirameki\Database\Adapters\SqliteConfig;
 use Kirameki\Database\Connection;
 use Kirameki\Database\Schema\Statements\CreateTableBuilder;
 use Kirameki\Event\EventManager;
@@ -23,9 +25,14 @@ class DatabaseTestCase extends TestCase
         return $this->connections['mysql'] ??= $this->createTempConnection('mysql');
     }
 
+    public function sqliteConnection(): Connection
+    {
+        return $this->connections['sqlite'] ??= $this->createTempConnection('sqlite');
+    }
+
     public function createTable(string $table, callable $callback): void
     {
-        $connection = $this->mysqlConnection();
+        $connection = $this->sqliteConnection();
         $builder = new CreateTableBuilder($connection->adapter->getSchemaSyntax(), $table);
         $callback($builder);
         $connection->schema()->execute($builder->getStatement());
@@ -36,6 +43,7 @@ class DatabaseTestCase extends TestCase
         $name = 'test_' . mt_rand();
         $adapter = match ($driver) {
             'mysql' => new MySqlAdapter(new MySqlConfig(host: 'mysql', database: $name)),
+            'sqlite' => new SqliteAdapter(new SqliteConfig(':memory:')),
             default => throw new RuntimeException("Unsupported driver: $driver"),
         };
         $adapter->createDatabase();

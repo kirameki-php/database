@@ -41,16 +41,6 @@ class ColumnBuilder
     }
 
     /**
-     * @param string $comment
-     * @return $this
-     */
-    public function comment(string $comment): static
-    {
-        $this->definition->comment = $comment;
-        return $this;
-    }
-
-    /**
      * @param mixed $value
      * @return $this
      */

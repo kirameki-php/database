@@ -62,7 +62,7 @@ class CreateTableStatement extends SchemaStatement
 
         foreach($this->columns as $column) {
             if ($column->type === 'int' && Arr::doesNotContain([null, 1, 2, 4, 8], $column->size)) {
-                throw new RuntimeException('Size for integer must be 1, 2, 4, or 8 (bytes). '.$column->size.' given.');
+                throw new RuntimeException('Size for integer must be 1, 2, 4, or 8 (bytes). ' . $column->size . ' given.');
             }
         }
 

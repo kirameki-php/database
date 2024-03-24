@@ -7,6 +7,7 @@ use DateTimeInterface;
 use Kirameki\Core\Exceptions\UnreachableException;
 use Kirameki\Core\Json;
 use Kirameki\Core\Value;
+use Kirameki\Database\Info\Statements\ListTablesStatement;
 use Kirameki\Database\Query\Expressions\Column;
 use Kirameki\Database\Query\Expressions\Expression;
 use Kirameki\Database\Query\Statements\ConditionDefinition;
@@ -319,8 +320,8 @@ abstract class QuerySyntax extends Syntax
         return $this->asEnclosedCsv(
             array_map(
                 fn(string $column): string => $this->asIdentifier($column),
-                $statement->columns()
-            )
+                $statement->columns(),
+            ),
         );
     }
 
@@ -676,6 +677,20 @@ abstract class QuerySyntax extends Syntax
         $columns = array_map($this->asIdentifier(...), $statement->returning);
 
         return "RETURNING {$this->asCsv($columns)}";
+    }
+
+    /**
+     * @param ListTablesStatement $statement
+     * @return string
+     */
+    public function compileListTablesStatement(ListTablesStatement $statement): string
+    {
+        return "SELECT \"name\" FROM \"sqlite_master\" WHERE type = 'table'";
+    }
+
+    public function compileColumnsInfoStatement(): string
+    {
+
     }
 
     /**

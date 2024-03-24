@@ -93,10 +93,7 @@ class Connection
 
     public function info(): InfoHandler
     {
-        return $this->infoHandler ??= new InfoHandler(
-            $this,
-            $this->events,
-        );
+        return $this->infoHandler ??= new InfoHandler($this);
     }
 
     /**

@@ -12,6 +12,7 @@ use Kirameki\Database\Query\Support\LockOption;
 use Kirameki\Database\Query\Support\LockType;
 use Kirameki\Database\Query\Support\SortOrder;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
+use function func_get_args;
 use function is_array;
 
 /**

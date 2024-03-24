@@ -5,6 +5,7 @@ namespace Kirameki\Database\Adapters;
 use Closure;
 use DateTimeInterface;
 use Iterator;
+use Kirameki\Database\Exceptions\SqlException;
 use Kirameki\Database\Query\Statements\QueryExecution;
 use Kirameki\Database\Query\Statements\QueryResult;
 use Kirameki\Database\Query\Statements\QueryStatement;
@@ -13,8 +14,10 @@ use Kirameki\Database\Schema\Statements\SchemaExecution;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 use PDO;
+use PDOException;
 use PDOStatement;
 use RuntimeException;
+use function dump;
 use function hrtime;
 use function implode;
 
@@ -92,12 +95,17 @@ abstract class PdoAdapter implements DatabaseAdapter
      */
     public function runSchema(SchemaStatement $statement): SchemaExecution
     {
-        $startTime = hrtime(true);
-        foreach ($statement->toCommands() as $schema) {
-            $this->getPdo()->exec($schema);
+        try {
+            $startTime = hrtime(true);
+            foreach ($statement->toCommands() as $schema) {
+                dump($schema);
+                $this->getPdo()->exec($schema);
+            }
+            $execTimeMs = (hrtime(true) - $startTime) / 1_000_000;
+            return $this->instantiateSchemaExecution($statement, $execTimeMs);
+        } catch (PDOException $e) {
+            throw new SqlException($e->getMessage(), $statement, 0, $e);
         }
-        $execTimeMs = (hrtime(true) - $startTime) / 1_000_000;
-        return $this->instantiateSchemaExecution($statement, $execTimeMs);
     }
 
     /**

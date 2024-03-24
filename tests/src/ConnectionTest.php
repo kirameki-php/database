@@ -3,13 +3,14 @@
 namespace Tests\Kirameki\Database;
 
 use Kirameki\Database\Schema\Statements\CreateTableBuilder;
+use function dump;
 
 class ConnectionTest extends DatabaseTestCase
 {
     protected function createDummyTable(): void
     {
         $this->createTable('Dummy', function(CreateTableBuilder $schema) {
-            $schema->uuid('id')->primaryKey()->notNull();
+            $schema->int('id')->primaryKey()->notNull()->autoIncrement();
         });
     }
 
@@ -24,6 +25,6 @@ class ConnectionTest extends DatabaseTestCase
     public function test_tableExists(): void
     {
         $this->createDummyTable();
-        $this->mysqlConnection()->info()->getTable('Dummy');
+        dump($this->sqliteConnection()->info()->getTableNames());
     }
 }

@@ -177,12 +177,6 @@ abstract class SchemaSyntax extends Syntax
         if ($def->default !== null) {
             $parts[] = 'DEFAULT '.$this->formatDefaultValue($def);
         }
-        if ($def->autoIncrement) {
-            $parts[] = 'AUTO_INCREMENT';
-        }
-        if ($def->comment !== null) {
-            $parts[] = 'COMMENT '.$this->asLiteral($def->comment);
-        }
         return implode(' ', $parts);
     }
 
