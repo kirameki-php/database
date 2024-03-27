@@ -11,6 +11,8 @@ use Kirameki\Database\Schema\Statements\PrimaryKeyConstraint;
 use Kirameki\Database\Schema\Statements\TruncateTableStatement;
 use function array_keys;
 use function implode;
+use function in_array;
+use function pow;
 use function strtoupper;
 
 class SqliteSchemaSyntax extends SchemaSyntax
@@ -43,10 +45,26 @@ class SqliteSchemaSyntax extends SchemaSyntax
      */
     protected function formatColumnType(ColumnDefinition $def): string
     {
+        $name = $def->name;
         $type = $def->type;
+        $size = $def->size;
 
         if ($type === 'int') {
-            return 'INT';
+            $ddl = 'INTEGER';
+            $size ??= 8;
+            if ($size === 8) {
+                return $ddl;
+            }
+            if (!in_array($size, [2, 4], true)) {
+                throw new LogicException("Invalid int size for {$name}. Expected: [2, 4, 8]. Got: {$size}.", [
+                    'column' => $name,
+                    'size' => $size,
+                ]);
+            }
+            $min = pow(-2, 8 * $size);
+            $max = pow(2, 8 * $size) - 1;
+            $ddl .= " CHECK({$this->asIdentifier($name)} BETWEEN {$min} AND {$max})";
+            return $ddl;
         }
         if ($type === 'float') {
             return 'REAL';
@@ -55,23 +73,29 @@ class SqliteSchemaSyntax extends SchemaSyntax
             return 'NUMERIC';
         }
         if ($type === 'bool') {
-            return 'INT';
+            return "INT CHECK({$this->asIdentifier($name)} IN (TRUE, FALSE))";
         }
         if ($type === 'datetime') {
             return 'TEXT';
         }
         if ($type === 'string') {
-            return 'TEXT';
+            $ddl = 'TEXT';
+            if ($size !== null) {
+                $ddl .= " CHECK(length({$this->asIdentifier($name)}) <= $size)";
+            }
+            return $ddl;
         }
         if ($type === 'uuid') {
-            return 'TEXT';
+            return "TEXT CHECK(length({$this->asIdentifier($name)}) = 36)";
         }
         if ($type === null) {
             throw new RuntimeException('Definition type cannot be set to null');
         }
 
-        $args = Arr::without([$def->size, $def->scale], null);
-        return strtoupper($type) . (!empty($args) ? '(' . implode(',', $args) . ')' : '');
+        throw new LogicException("Unknown column type: {$type} for {$name}", [
+            'column' => $name,
+            'type' => $type,
+        ]);
     }
 
     /**

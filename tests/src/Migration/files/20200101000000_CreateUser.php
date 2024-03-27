@@ -9,7 +9,7 @@ class CreateUser extends Migration
     {
         $this->on('migration_test')
             ->createTable('User')->tap(function(CreateTableBuilder $t) {
-                $t->uuid('id')->primaryKey()->notNull();
+                $t->uuid('id')->primaryKey()->nullable();
                 $t->string('name', 100)->default('Anonymous');
                 $t->timestamps();
                 $t->index('name')->unique();

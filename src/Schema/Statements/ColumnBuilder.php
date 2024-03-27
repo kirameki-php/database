@@ -25,9 +25,9 @@ class ColumnBuilder
     /**
      * @return $this
      */
-    public function notNull(): static
+    public function nullable(): static
     {
-        $this->definition->nullable = false;
+        $this->definition->nullable = true;
         return $this;
     }
 

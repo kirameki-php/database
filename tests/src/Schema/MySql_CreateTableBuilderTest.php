@@ -88,7 +88,7 @@ class MySql_CreateTableBuilderTest extends SchemaTestCase
     public function test_notNull(): void
     {
         $builder = $this->createTableBuilder('users');
-        $builder->int('id')->primaryKey()->notNull();
+        $builder->int('id')->primaryKey()->nullable();
         $schema = $builder->toString();
         static::assertEquals('CREATE TABLE users (id BIGINT NOT NULL, PRIMARY KEY (id ASC));', $schema);
     }

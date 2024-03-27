@@ -6,7 +6,7 @@ class ColumnDefinition
 {
     public ?bool $primaryKey = null;
 
-    public ?bool $nullable = true;
+    public ?bool $nullable = false;
 
     public ?bool $autoIncrement = null;
 

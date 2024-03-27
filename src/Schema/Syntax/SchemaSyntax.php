@@ -2,9 +2,7 @@
 
 namespace Kirameki\Database\Schema\Syntax;
 
-use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\LogicException;
-use Kirameki\Core\Exceptions\RuntimeException;
 use Kirameki\Core\Value;
 use Kirameki\Database\Schema\Expressions\DefaultValue;
 use Kirameki\Database\Schema\Statements\AlterColumnAction;
@@ -27,7 +25,6 @@ use function is_bool;
 use function is_float;
 use function is_int;
 use function is_string;
-use function strtoupper;
 
 abstract class SchemaSyntax extends Syntax
 {
@@ -39,7 +36,7 @@ abstract class SchemaSyntax extends Syntax
     {
         $parts = [];
         $parts[] = 'CREATE TABLE';
-        $parts[] = $statement->table;
+        $parts[] = $this->asIdentifier($statement->table);
         $columnParts = [];
         foreach ($statement->columns as $definition) {
             $columnParts[] = $this->formatColumnDefinition($definition);
@@ -182,7 +179,7 @@ abstract class SchemaSyntax extends Syntax
     public function formatColumnDefinition(ColumnDefinition $def): string
     {
         $parts = [];
-        $parts[] = $def->name;
+        $parts[] = $this->asIdentifier($def->name);
         $parts[] = $this->formatColumnType($def);
         if (!$def->nullable) {
             $parts[] = 'NOT NULL';

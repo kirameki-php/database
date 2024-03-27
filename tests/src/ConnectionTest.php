@@ -10,16 +10,10 @@ class ConnectionTest extends DatabaseTestCase
     protected function createDummyTable(): void
     {
         $this->createTable('Dummy', function(CreateTableBuilder $schema) {
-            $schema->int('id')->primaryKey()->notNull()->autoIncrement();
+            $schema->int('id')->primaryKey()->nullable()->autoIncrement();
+            $schema->uuid('name')->nullable();
+            $schema->bool('exists')->nullable();
         });
-    }
-
-    /**
-     * TODO delete me
-     */
-    public function testTableExists2(): void
-    {
-        Abc::test('a', 'b', t: 'b', c: 'c');
     }
 
     public function test_tableExists(): void

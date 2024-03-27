@@ -16,10 +16,10 @@ class ColumnBuilderAggregate
     /**
      * @return $this
      */
-    public function notNull(): static
+    public function nullable(): static
     {
         foreach ($this->columns as $column) {
-            $column->notNull();
+            $column->nullable();
         }
         return $this;
     }
