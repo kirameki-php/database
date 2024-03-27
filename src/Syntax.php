@@ -2,15 +2,18 @@
 
 namespace Kirameki\Database;
 
+use Kirameki\Database\Adapters\DatabaseConfig;
 use function str_replace;
 
 abstract class Syntax
 {
     /**
+     * @param DatabaseConfig $config
      * @param string $identifierDelimiter
      * @param string $literalDelimiter
      */
     public function __construct(
+        protected readonly DatabaseConfig $config,
         protected readonly string $identifierDelimiter = '"',
         protected readonly string $literalDelimiter = "'",
     )

@@ -7,6 +7,8 @@ use DateTimeInterface;
 use Kirameki\Core\Exceptions\UnreachableException;
 use Kirameki\Core\Json;
 use Kirameki\Core\Value;
+use Kirameki\Database\Adapters\DatabaseConfig;
+use Kirameki\Database\Info\Statements\ColumnsInfoStatement;
 use Kirameki\Database\Info\Statements\ListTablesStatement;
 use Kirameki\Database\Query\Expressions\Column;
 use Kirameki\Database\Query\Expressions\Expression;
@@ -47,17 +49,19 @@ use function str_contains;
 abstract class QuerySyntax extends Syntax
 {
     /**
+     * @param DatabaseConfig $config
      * @param string $identifierDelimiter
      * @param string $literalDelimiter
      * @param string $dateTimeFormat
      */
     public function __construct(
+        DatabaseConfig $config,
         string $identifierDelimiter,
         string $literalDelimiter,
         protected readonly string $dateTimeFormat,
     )
     {
-        parent::__construct($identifierDelimiter, $literalDelimiter);
+        parent::__construct($config, $identifierDelimiter, $literalDelimiter);
     }
 
     /**
@@ -685,12 +689,20 @@ abstract class QuerySyntax extends Syntax
      */
     public function compileListTablesStatement(ListTablesStatement $statement): string
     {
-        return "SELECT \"name\" FROM \"sqlite_master\" WHERE type = 'table'";
+        return "SELECT * FROM {$this->asColumn('INFORMATION_SCHEMA.TABLES')}"
+            . " WHERE {$this->asIdentifier('TABLE_SCHEMA')} = {$this->asLiteral($this->config->getDatabase())}";
     }
 
-    public function compileColumnsInfoStatement(): string
+    /**
+     * @param ColumnsInfoStatement $statement
+     * @return string
+     */
+    public function compileColumnsInfoStatement(ColumnsInfoStatement $statement): string
     {
-
+        return "SELECT * FROM {$this->asColumn('INFORMATION_SCHEMA.COLUMNS')}"
+            . " WHERE {$this->asIdentifier('TABLE_SCHEMA')} = {$this->asLiteral($this->config->getDatabase())}"
+            . " AND {$this->asIdentifier('TABLE_NAME')} = {$this->asLiteral($statement->table)}"
+            . " ORDER BY {$this->asIdentifier('ORDINAL_POSITION')} ASC";
     }
 
     /**

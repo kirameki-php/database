@@ -25,6 +25,6 @@ class ConnectionTest extends DatabaseTestCase
     public function test_tableExists(): void
     {
         $this->createDummyTable();
-        dump($this->sqliteConnection()->info()->getTableNames());
+        dump($this->sqliteConnection()->info()->getTable('Dummy'));
     }
 }

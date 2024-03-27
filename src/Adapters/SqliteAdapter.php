@@ -37,7 +37,12 @@ class SqliteAdapter extends PdoAdapter
      */
     protected function instantiateQuerySyntax(): SqliteQuerySyntax
     {
-        return new SqliteQuerySyntax($this->identifierDelimiter, $this->literalDelimiter, $this->dateTimeFormat);
+        return new SqliteQuerySyntax(
+            $this->config,
+            $this->identifierDelimiter,
+            $this->literalDelimiter,
+            $this->dateTimeFormat,
+        );
     }
 
     /**
@@ -45,7 +50,11 @@ class SqliteAdapter extends PdoAdapter
      */
     protected function instantiateSchemaSyntax(): SqliteSchemaSyntax
     {
-        return new SqliteSchemaSyntax($this->identifierDelimiter, $this->literalDelimiter);
+        return new SqliteSchemaSyntax(
+            $this->config,
+            $this->identifierDelimiter,
+            $this->literalDelimiter,
+        );
     }
 
     /**
