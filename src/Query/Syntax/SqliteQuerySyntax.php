@@ -2,10 +2,13 @@
 
 namespace Kirameki\Database\Query\Syntax;
 
+use Iterator;
+use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Exceptions\RuntimeException;
 use Kirameki\Database\Info\Statements\ColumnsInfoStatement;
 use Kirameki\Database\Info\Statements\ListTablesStatement;
 use Kirameki\Database\Query\Statements\SelectStatement;
+use stdClass;
 use function implode;
 
 class SqliteQuerySyntax extends QuerySyntax
@@ -32,13 +35,40 @@ class SqliteQuerySyntax extends QuerySyntax
      */
     public function compileColumnsInfoStatement(ColumnsInfoStatement $statement): string
     {
-        return "SELECT " . implode(',', [
+        $columns = implode(',', [
             '"name" as "column"',
             '"type"',
             'NOT "notnull" as "nullable"',
-            'dflt_value as "default"',
-            'CASE "type" WHEN \'BIGINT\' THEN 8 ELSE 0 END as "length"',
-        ]) . " FROM pragma_table_info({$this->asIdentifier($statement->table)})"
+            '"cid" as "position"',
+        ]);
+        return "SELECT {$columns}"
+            . " FROM pragma_table_info({$this->asIdentifier($statement->table)})"
             . " ORDER BY \"cid\" ASC";
+    }
+
+    /**
+     * @param iterable<int, stdClass> $rows
+     * @return Iterator<int, stdClass>
+     */
+    public function normalizeColumnInfoStatement(iterable $rows): Iterator
+    {
+        foreach ($rows as $row) {
+            $row->type = match ($row->type) {
+                'INTEGER' => 'int',
+                'REAL' => 'float',
+                'NUMERIC' => 'decimal',
+                'BOOLEAN' => 'bool',
+                'TEXT' => 'string',
+                'DATETIME' => 'timestamp',
+                'UUID_TEXT' => 'uuid',
+                'JSON_TEXT' => 'json',
+                'BLOB' => 'binary',
+                default => throw new LogicException('Unsupported column type: ' . $row->type, [
+                    'type' => $row->type,
+                ]),
+            };
+            $row->nullable = (bool) $row->nullable;
+            yield $row;
+        }
     }
 }

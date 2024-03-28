@@ -18,15 +18,6 @@ use function strtoupper;
 class SqliteSchemaSyntax extends SchemaSyntax
 {
     /**
-     * @param CreateTableStatement $statement
-     * @return string
-     */
-    public function formatCreateTableStatement(CreateTableStatement $statement): string
-    {
-        return parent::formatCreateTableStatement($statement) . ' STRICT';
-    }
-
-    /**
      * @param PrimaryKeyConstraint $constraint
      * @return string
      */
@@ -63,7 +54,7 @@ class SqliteSchemaSyntax extends SchemaSyntax
             }
             $min = pow(-2, 8 * $size);
             $max = pow(2, 8 * $size) - 1;
-            $ddl .= " CHECK({$this->asIdentifier($name)} BETWEEN {$min} AND {$max})";
+            $ddl .= " CHECK ({$this->asIdentifier($name)} BETWEEN {$min} AND {$max})";
             return $ddl;
         }
         if ($type === 'float') {
@@ -73,20 +64,23 @@ class SqliteSchemaSyntax extends SchemaSyntax
             return 'NUMERIC';
         }
         if ($type === 'bool') {
-            return "INT CHECK({$this->asIdentifier($name)} IN (TRUE, FALSE))";
-        }
-        if ($type === 'datetime') {
-            return 'TEXT';
+            return "BOOLEAN CHECK ({$this->asIdentifier($name)} IN (TRUE, FALSE))";
         }
         if ($type === 'string') {
             $ddl = 'TEXT';
             if ($size !== null) {
-                $ddl .= " CHECK(length({$this->asIdentifier($name)}) <= $size)";
+                $ddl .= " CHECK (length({$this->asIdentifier($name)}) <= $size)";
             }
             return $ddl;
         }
         if ($type === 'uuid') {
-            return "TEXT CHECK(length({$this->asIdentifier($name)}) = 36)";
+            return "UUID_TEXT CHECK (length({$this->asIdentifier($name)}) = 36)";
+        }
+        if ($type === 'json') {
+            return 'JSON_TEXT CHECK (json_valid(' . $this->asIdentifier($name) . '))';
+        }
+        if ($type === 'binary') {
+            return 'BLOB';
         }
         if ($type === null) {
             throw new RuntimeException('Definition type cannot be set to null');

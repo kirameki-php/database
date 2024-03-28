@@ -42,15 +42,6 @@ class CreateTableBuilder extends SchemaBuilder
 
     /**
      * @param string $column
-     * @return ColumnBuilder
-     */
-    public function double(string $column): ColumnBuilder
-    {
-        return $this->column($column, __FUNCTION__);
-    }
-
-    /**
-     * @param string $column
      * @param int|null $precision
      * @param int|null $scale
      * @return ColumnBuilder
@@ -71,15 +62,6 @@ class CreateTableBuilder extends SchemaBuilder
 
     /**
      * @param string $column
-     * @return ColumnBuilder
-     */
-    public function date(string $column): ColumnBuilder
-    {
-        return $this->column($column, __FUNCTION__);
-    }
-
-    /**
-     * @param string $column
      * @param int|null $precision
      * @return TimestampColumnBuilder
      */
@@ -90,30 +72,12 @@ class CreateTableBuilder extends SchemaBuilder
 
     /**
      * @param string $column
-     * @return ColumnBuilder
-     */
-    public function time(string $column): ColumnBuilder
-    {
-        return $this->column($column, __FUNCTION__);
-    }
-
-    /**
-     * @param string $column
      * @param int|null $size
      * @return ColumnBuilder
      */
     public function string(string $column, ?int $size = null): ColumnBuilder
     {
         return $this->column($column, __FUNCTION__, $size);
-    }
-
-    /**
-     * @param string $column
-     * @return ColumnBuilder
-     */
-    public function text(string $column): ColumnBuilder
-    {
-        return $this->column($column, __FUNCTION__);
     }
 
     /**

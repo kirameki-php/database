@@ -13,6 +13,7 @@ class ConnectionTest extends DatabaseTestCase
             $schema->int('id')->primaryKey()->nullable()->autoIncrement();
             $schema->uuid('name')->nullable();
             $schema->bool('exists')->nullable();
+            $schema->json('data');
         });
     }
 

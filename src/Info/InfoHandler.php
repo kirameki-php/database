@@ -40,14 +40,13 @@ class InfoHandler
         $connection = $this->connection;
         $statement = new ColumnsInfoStatement($connection->adapter->getQuerySyntax(), $name);
         $rows = $connection->query()->execute($statement);
-        dump($rows);
         $columns = [];
         foreach ($rows as $row) {
-            $columns[] = new ColumnInfo(
+            $columns[$row->column] = new ColumnInfo(
                 $row->column,
                 $row->type,
                 $row->nullable,
-                $row->default,
+                $row->position,
             );
         }
         return new TableInfo($name, new Map($columns));

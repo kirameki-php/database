@@ -8,13 +8,12 @@ readonly class ColumnInfo
      * @param string $name
      * @param string $type
      * @param bool $nullable
-     * @param mixed|null $default
      */
     public function __construct(
         public string $name,
         public string $type,
         public bool $nullable,
-        public mixed $default = null,
+        public int $position,
     )
     {
     }

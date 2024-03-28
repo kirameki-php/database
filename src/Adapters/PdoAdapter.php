@@ -6,6 +6,7 @@ use Closure;
 use DateTimeInterface;
 use Iterator;
 use Kirameki\Database\Exceptions\SqlException;
+use Kirameki\Database\Query\Statements\Normalizable;
 use Kirameki\Database\Query\Statements\QueryExecution;
 use Kirameki\Database\Query\Statements\QueryResult;
 use Kirameki\Database\Query\Statements\QueryStatement;
@@ -20,6 +21,7 @@ use RuntimeException;
 use function dump;
 use function hrtime;
 use function implode;
+use function iterator_to_array;
 
 /**
  * @template TConfig of DatabaseConfig
@@ -116,6 +118,9 @@ abstract class PdoAdapter implements DatabaseAdapter
         $startTime = hrtime(true);
         $prepared = $this->execQuery($statement);
         $rows = $prepared->fetchAll(PDO::FETCH_OBJ);
+        if ($statement instanceof Normalizable) {
+            $rows = iterator_to_array($statement->normalize($rows));
+        }
         $fetchTimeMs = (hrtime(true) - $startTime) / 1_000_000;
         $count = $prepared->rowCount(...);
         return $this->instantiateQueryResult($statement, $fetchTimeMs, $rows, $count);
@@ -140,6 +145,9 @@ abstract class PdoAdapter implements DatabaseAdapter
                 yield $data;
             }
         })();
+        if ($statement instanceof Normalizable) {
+            $iterator = $statement->normalize($iterator);
+        }
         $execTimeMs = (hrtime(true) - $startTime) / 1_000_000;
         $count = $prepared->rowCount(...);
         return $this->instantiateQueryResult($statement, $execTimeMs, $iterator, $count);

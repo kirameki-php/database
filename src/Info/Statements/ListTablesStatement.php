@@ -14,11 +14,17 @@ class ListTablesStatement extends QueryStatement
         parent::__construct($syntax);
     }
 
+    /**
+     * @inheritDoc
+     */
     public function prepare(): string
     {
         return $this->syntax->compileListTablesStatement($this);
     }
 
+    /**
+     * @inheritDoc
+     */
     public function getParameters(): array
     {
         return [];

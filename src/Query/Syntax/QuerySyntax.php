@@ -4,6 +4,7 @@ namespace Kirameki\Database\Query\Syntax;
 
 use BackedEnum;
 use DateTimeInterface;
+use Iterator;
 use Kirameki\Core\Exceptions\UnreachableException;
 use Kirameki\Core\Json;
 use Kirameki\Core\Value;
@@ -27,6 +28,7 @@ use Kirameki\Database\Query\Support\Operator;
 use Kirameki\Database\Query\Support\Range;
 use Kirameki\Database\Syntax;
 use RuntimeException;
+use stdClass;
 use function array_filter;
 use function array_keys;
 use function array_map;
@@ -901,4 +903,14 @@ abstract class QuerySyntax extends Syntax
         return $value;
     }
 
+    /**
+     * @param iterable<int, stdClass> $rows
+     * @return Iterator<int, stdClass>
+     */
+    public function normalizeColumnInfoStatement(iterable $rows): Iterator
+    {
+        foreach ($rows as $row) {
+            yield $row;
+        }
+    }
 }
