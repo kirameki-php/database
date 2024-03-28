@@ -150,7 +150,7 @@ class ConditionBuilder
 
         // $this->current should always point to the last condition
         $this->current = $this->root;
-        while($this->current->next !== null) {
+        while ($this->current->next !== null) {
             $this->current = $this->current->next;
         }
     }

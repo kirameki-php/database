@@ -42,7 +42,7 @@ class InsertStatement extends QueryStatement
         if ($this->cachedColumns === null) {
             $columnsMap = [];
             foreach ($this->dataset as $data) {
-                foreach($data as $name => $value) {
+                foreach ($data as $name => $value) {
                     if ($value !== null) {
                         $columnsMap[$name] = null;
                     }

@@ -189,7 +189,7 @@ abstract class SchemaSyntax extends Syntax
             $parts[] = 'NOT NULL';
         }
         if ($def->default !== null) {
-            $parts[] = 'DEFAULT '.$this->formatDefaultValue($def);
+            $parts[] = 'DEFAULT ' . $this->formatDefaultValue($def);
         }
         return implode(' ', $parts);
     }

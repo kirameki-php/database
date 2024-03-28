@@ -73,7 +73,7 @@ abstract class QuerySyntax extends Syntax
         $parameters = $this->stringifyParameters($statement->getParameters());
         $remains = count($parameters);
 
-        return (string) preg_replace_callback('/\?\??/', function ($matches) use (&$parameters, &$remains) {
+        return (string) preg_replace_callback('/\?\??/', function($matches) use (&$parameters, &$remains) {
             if ($matches[0] === '??') {
                 return '??';
             }
@@ -242,7 +242,7 @@ abstract class QuerySyntax extends Syntax
             return '*';
         }
 
-        return $this->asCsv(array_map(function (string|Expression $column): string {
+        return $this->asCsv(array_map(function(string|Expression $column): string {
             return ($column instanceof Expression)
                 ? $column->prepare($this)
                 : $this->asColumn($column);
@@ -283,7 +283,7 @@ abstract class QuerySyntax extends Syntax
     {
         $expressions = [];
         foreach ($statement->tables as $table) {
-            $expressions[]= ($table instanceof Expression)
+            $expressions[] = ($table instanceof Expression)
                 ? $table->prepare($this)
                 : $this->asTable($table);
         }
@@ -305,10 +305,10 @@ abstract class QuerySyntax extends Syntax
             return '';
         }
 
-        return implode(' ', array_map(function (JoinDefinition $def): string {
+        return implode(' ', array_map(function(JoinDefinition $def): string {
             $expr = $def->type->value . ' ';
-            $expr.= $this->asTable($def->table) . ' ';
-            $expr.= 'ON ' . $this->formatCondition($def->condition);
+            $expr .= $this->asTable($def->table) . ' ';
+            $expr .= 'ON ' . $this->formatCondition($def->condition);
             return $expr;
         }, $joins));
     }
@@ -438,7 +438,7 @@ abstract class QuerySyntax extends Syntax
     protected function formatConditionForEqual(ConditionDefinition $def): string
     {
         $column = $this->getDefinedColumn($def);
-        $operator = $def->negated ? '!=': '=';
+        $operator = $def->negated ? '!=' : '=';
         $value = $def->value;
 
         if ($value === null) {
@@ -505,10 +505,10 @@ abstract class QuerySyntax extends Syntax
     protected function formatConditionForOperator(string $column, string $operator, mixed $value): string
     {
         return $column . ' ' . $operator . ' ' . match (true) {
-            $value instanceof SelectBuilder => $this->formatSubQuery($value),
-            $value instanceof Expression => $value->prepare($this),
-            default => '?',
-        };
+                $value instanceof SelectBuilder => $this->formatSubQuery($value),
+                $value instanceof Expression => $value->prepare($this),
+                default => '?',
+            };
     }
 
     /**
@@ -732,10 +732,10 @@ abstract class QuerySyntax extends Syntax
         if (preg_match('/(\.| as | AS )/', $name)) {
             $dlm = preg_quote($this->identifierDelimiter);
             $patterns = [];
-            $patterns[] = '(' . $dlm . '?(?<table>[^\.'. $dlm . ']+)' . $dlm . '?\.)?';
+            $patterns[] = '(' . $dlm . '?(?<table>[^\.' . $dlm . ']+)' . $dlm . '?\.)?';
             $patterns[] = $dlm . '?(?<column>[^ ' . $dlm . ']+)' . $dlm . '?';
             if ($withAlias) {
-                $patterns[] = '( (AS|as) ' . $dlm . '?(?<as>[^'.$dlm.']+)' . $dlm . '?)?';
+                $patterns[] = '( (AS|as) ' . $dlm . '?(?<as>[^' . $dlm . ']+)' . $dlm . '?)?';
             }
             $pattern = '/^' . implode('', $patterns) . '$/';
             $match = null;
@@ -755,7 +755,7 @@ abstract class QuerySyntax extends Syntax
         }
 
         if ($as !== null) {
-            $name.= ' AS ' . $this->asIdentifier($as);
+            $name .= ' AS ' . $this->asIdentifier($as);
         }
 
         return $name;
@@ -812,13 +812,11 @@ abstract class QuerySyntax extends Syntax
                 foreach ($value as $parameter) {
                     $parameters[] = $parameter;
                 }
-            }
-            elseif ($value instanceof Expression || $value instanceof QueryStatement) {
+            } elseif ($value instanceof Expression || $value instanceof QueryStatement) {
                 foreach ($value->getParameters() as $parameter) {
                     $parameters[] = $parameter;
                 }
-            }
-            else {
+            } else {
                 $parameters[] = $value;
             }
             $def = $def->next;
@@ -850,7 +848,7 @@ abstract class QuerySyntax extends Syntax
     protected function stringifyParameters(iterable $parameters): array
     {
         $strings = [];
-        foreach($parameters as $name => $parameter) {
+        foreach ($parameters as $name => $parameter) {
             $strings[$name] = $this->stringifyParameter($parameter);
         }
         return $strings;

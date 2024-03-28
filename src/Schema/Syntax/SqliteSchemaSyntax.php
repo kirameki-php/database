@@ -144,6 +144,7 @@ class SqliteSchemaSyntax extends SchemaSyntax
             yield $row;
         }
     }
+
     /**
      * @param TruncateTableStatement $statement
      * @return string

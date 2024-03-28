@@ -35,8 +35,8 @@ class MigrationManager
     {
         foreach ($this->readMigrations($since) as $migration) {
             $migration->up();
-            $migationBuilders = $migration->getBuilders();
-            foreach ($migationBuilders as $builder) {
+            $migrationBuilders = $migration->getBuilders();
+            foreach ($migrationBuilders as $builder) {
                 $builder->apply();
             }
         }

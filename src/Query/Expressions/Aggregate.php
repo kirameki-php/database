@@ -26,11 +26,11 @@ class Aggregate extends Expression
     public function prepare(QuerySyntax $syntax): string
     {
         $expr = $this->function;
-        $expr.= '(';
-        $expr.= $syntax->asColumn($this->column);
-        $expr.= ')';
+        $expr .= '(';
+        $expr .= $syntax->asColumn($this->column);
+        $expr .= ')';
         if ($this->as !== null) {
-            $expr.= ' AS ' . $syntax->asIdentifier($this->as);
+            $expr .= ' AS ' . $syntax->asIdentifier($this->as);
         }
         return $expr;
     }

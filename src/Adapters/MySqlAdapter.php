@@ -35,7 +35,7 @@ class MySqlAdapter extends PdoAdapter
             $parts[] = "unix_socket={$config->socket}";
         } else {
             $host = "host={$config->host}";
-            $host.= $config->port !== null ? "port={$config->port}" : '';
+            $host .= $config->port !== null ? "port={$config->port}" : '';
             $parts[] = $host;
         }
 
@@ -43,11 +43,11 @@ class MySqlAdapter extends PdoAdapter
             $parts[] = "dbname={$config->database}";
         }
 
-        $dsn = 'mysql:'.implode(';', $parts);
+        $dsn = 'mysql:' . implode(';', $parts);
         $username = $config->username ?? 'root';
         $password = $config->password;
         $options = iterator_to_array($config->options ?? []);
-        $options+= [
+        $options += [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
             PDO::MYSQL_ATTR_FOUND_ROWS => true,

@@ -61,7 +61,7 @@ class CreateIndexStatement extends SchemaStatement
     {
         $columns = $this->columns;
 
-        if(empty($columns)) {
+        if (empty($columns)) {
             throw new RuntimeException('At least 1 column needs to be defined to create an index.');
         }
     }

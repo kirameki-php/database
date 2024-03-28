@@ -37,7 +37,7 @@ class DropIndexStatement extends SchemaStatement
         $name = $this->name;
         $columns = $this->columns;
 
-        if($name === null && empty($columns)) {
+        if ($name === null && empty($columns)) {
             throw new RuntimeException('Name or column(s) are required to drop an index.');
         }
     }
@@ -49,7 +49,7 @@ class DropIndexStatement extends SchemaStatement
     {
         $this->preprocess();
         return [
-            $this->syntax->formatDropIndexStatement($this)
+            $this->syntax->formatDropIndexStatement($this),
         ];
     }
 }

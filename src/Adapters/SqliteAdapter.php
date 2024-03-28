@@ -24,7 +24,7 @@ class SqliteAdapter extends PdoAdapter
 
         $dsn = "sqlite:{$config->filename}";
         $options = iterator_to_array($config->options ?? []);
-        $options+= [
+        $options += [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
         ];

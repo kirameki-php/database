@@ -69,7 +69,7 @@ class SelectBuilder extends ConditionsBuilder
      */
     protected function addToSelect(string|Expression $column): static
     {
-        $this->statement->columns[]= $column;
+        $this->statement->columns[] = $column;
         return $this;
     }
 
