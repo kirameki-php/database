@@ -5,7 +5,6 @@ namespace Kirameki\Database\Exceptions;
 use Kirameki\Core\Exceptions\RuntimeException;
 use Kirameki\Database\Statement;
 use Throwable;
-use function dump;
 
 class SqlException extends RuntimeException
 {

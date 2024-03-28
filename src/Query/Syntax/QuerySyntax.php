@@ -25,7 +25,6 @@ use Kirameki\Database\Query\Support\Operator;
 use Kirameki\Database\Query\Support\Range;
 use Kirameki\Database\Syntax;
 use RuntimeException;
-use stdClass;
 use function array_filter;
 use function array_keys;
 use function array_map;

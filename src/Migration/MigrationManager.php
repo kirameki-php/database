@@ -5,7 +5,6 @@ namespace Kirameki\Database\Migration;
 use DateTimeInterface;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Database\DatabaseManager;
-use Kirameki\Database\Schema\Statements\SchemaStatement;
 use Kirameki\Event\EventManager;
 use function assert;
 use function basename;
@@ -100,7 +99,7 @@ class MigrationManager
         $migrations = [];
         foreach ($this->getMigrationFiles() as $file) {
             $datetime = strstr(basename($file), '_', true);
-            if ($datetime !== false || $datetime >= $start) {
+            if ($datetime !== false && $datetime >= $start) {
                 require_once $file;
                 /** @var class-string<Migration> $className */
                 $className = $this->extractClassName($file);

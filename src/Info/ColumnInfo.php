@@ -8,6 +8,7 @@ readonly class ColumnInfo
      * @param string $name
      * @param string $type
      * @param bool $nullable
+     * @param int $position
      */
     public function __construct(
         public string $name,

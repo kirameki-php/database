@@ -3,7 +3,6 @@
 namespace Kirameki\Database\Migration;
 
 use Closure;
-use Kirameki\Collections\Vec;
 use Kirameki\Database\DatabaseManager;
 use Kirameki\Event\EventManager;
 

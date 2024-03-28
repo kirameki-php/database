@@ -20,7 +20,7 @@ class JsonExtract extends Expression
         string $path,
     )
     {
-        $this->path = str_starts_with($path, '$.') ? $path : '$.'.$path;;
+        $this->path = str_starts_with($path, '$.') ? $path : '$.'.$path;
     }
 
     /**

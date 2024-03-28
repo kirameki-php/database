@@ -3,13 +3,11 @@
 namespace Kirameki\Database\Schema\Syntax;
 
 use Iterator;
-use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Exceptions\RuntimeException;
 use Kirameki\Database\Info\Statements\ColumnsInfoStatement;
 use Kirameki\Database\Info\Statements\ListTablesStatement;
 use Kirameki\Database\Schema\Statements\ColumnDefinition;
-use Kirameki\Database\Schema\Statements\CreateTableStatement;
 use Kirameki\Database\Schema\Statements\PrimaryKeyConstraint;
 use Kirameki\Database\Schema\Statements\TruncateTableStatement;
 use stdClass;
@@ -17,7 +15,6 @@ use function array_keys;
 use function implode;
 use function in_array;
 use function pow;
-use function strtoupper;
 
 class SqliteSchemaSyntax extends SchemaSyntax
 {

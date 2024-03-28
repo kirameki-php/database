@@ -2,21 +2,19 @@
 
 namespace Kirameki\Database\Info;
 
-use Kirameki\Collections\Map;
 use Kirameki\Collections\Vec;
 use Kirameki\Database\Connection;
 use Kirameki\Database\Info\Statements\ColumnsInfoStatement;
 use Kirameki\Database\Info\Statements\ListTablesStatement;
 use stdClass;
-use function dump;
 
-class InfoHandler
+readonly class InfoHandler
 {
     /**
      * @param Connection $connection
      */
     public function __construct(
-        public readonly Connection $connection,
+        public Connection $connection,
     )
     {
     }
