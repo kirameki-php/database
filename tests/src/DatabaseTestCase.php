@@ -30,12 +30,12 @@ class DatabaseTestCase extends TestCase
         return $this->connections['sqlite'] ??= $this->createTempConnection('sqlite');
     }
 
-    public function createTable(string $table, callable $callback): void
+    public function createTable(string $connection, string $table, callable $callback): void
     {
-        $connection = $this->sqliteConnection();
-        $builder = new CreateTableBuilder($connection->adapter->getSchemaSyntax(), $table);
+        $conn = $this->connections[$connection] ??= $this->createTempConnection($connection);
+        $builder = new CreateTableBuilder($conn->adapter->getSchemaSyntax(), $table);
         $callback($builder);
-        $connection->schema()->execute($builder->getStatement());
+        $conn->schema()->execute($builder->getStatement());
     }
 
     public function createTempConnection(string $driver): Connection

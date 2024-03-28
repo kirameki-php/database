@@ -7,9 +7,9 @@ use function dump;
 
 class ConnectionTest extends DatabaseTestCase
 {
-    protected function createDummyTable(): void
+    protected function createDummyTable(string $connection): void
     {
-        $this->createTable('Dummy', function(CreateTableBuilder $schema) {
+        $this->createTable($connection, 'Dummy', function(CreateTableBuilder $schema) {
             $schema->int('id')->primaryKey()->nullable()->autoIncrement();
             $schema->uuid('name')->nullable();
             $schema->bool('exists')->nullable();
@@ -19,7 +19,10 @@ class ConnectionTest extends DatabaseTestCase
 
     public function test_tableExists(): void
     {
-        $this->createDummyTable();
+        $this->createDummyTable('sqlite');
         dump($this->sqliteConnection()->info()->getTable('Dummy'));
+
+        $this->createDummyTable('mysql');
+        dump($this->mysqlConnection()->info()->getTable('Dummy'));
     }
 }

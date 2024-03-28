@@ -35,11 +35,11 @@ class SqliteQuerySyntax extends QuerySyntax
      */
     public function compileColumnsInfoStatement(ColumnsInfoStatement $statement): string
     {
-        $columns = implode(',', [
+        $columns = implode(', ', [
             '"name" as "column"',
             '"type"',
             'NOT "notnull" as "nullable"',
-            '"cid" as "position"',
+            '("cid" + 1) as "position"',
         ]);
         return "SELECT {$columns}"
             . " FROM pragma_table_info({$this->asIdentifier($statement->table)})"
@@ -59,7 +59,7 @@ class SqliteQuerySyntax extends QuerySyntax
                 'NUMERIC' => 'decimal',
                 'BOOLEAN' => 'bool',
                 'TEXT' => 'string',
-                'DATETIME' => 'timestamp',
+                'DATETIME' => 'datetime',
                 'UUID_TEXT' => 'uuid',
                 'JSON_TEXT' => 'json',
                 'BLOB' => 'binary',
