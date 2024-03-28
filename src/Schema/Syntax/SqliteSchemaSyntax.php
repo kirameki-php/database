@@ -2,13 +2,17 @@
 
 namespace Kirameki\Database\Schema\Syntax;
 
+use Iterator;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Exceptions\RuntimeException;
+use Kirameki\Database\Info\Statements\ColumnsInfoStatement;
+use Kirameki\Database\Info\Statements\ListTablesStatement;
 use Kirameki\Database\Schema\Statements\ColumnDefinition;
 use Kirameki\Database\Schema\Statements\CreateTableStatement;
 use Kirameki\Database\Schema\Statements\PrimaryKeyConstraint;
 use Kirameki\Database\Schema\Statements\TruncateTableStatement;
+use stdClass;
 use function array_keys;
 use function implode;
 use function in_array;
@@ -92,6 +96,57 @@ class SqliteSchemaSyntax extends SchemaSyntax
         ]);
     }
 
+    /**
+     * @param ListTablesStatement $statement
+     * @return string
+     */
+    public function compileListTablesStatement(ListTablesStatement $statement): string
+    {
+        return "SELECT \"name\" FROM \"sqlite_master\" WHERE type = 'table'";
+    }
+
+    /**
+     * @param ColumnsInfoStatement $statement
+     * @return string
+     */
+    public function compileColumnsInfoStatement(ColumnsInfoStatement $statement): string
+    {
+        $columns = implode(', ', [
+            'name',
+            'type',
+            'NOT "notnull" as `nullable`',
+            '(cid + 1) as `position`',
+        ]);
+        return "SELECT {$columns}"
+            . " FROM pragma_table_info({$this->asIdentifier($statement->table)})"
+            . " ORDER BY \"cid\" ASC";
+    }
+
+    /**
+     * @param iterable<int, stdClass> $rows
+     * @return Iterator<int, stdClass>
+     */
+    public function normalizeColumnInfoStatement(iterable $rows): Iterator
+    {
+        foreach ($rows as $row) {
+            $row->type = match ($row->type) {
+                'INTEGER' => 'int',
+                'REAL' => 'float',
+                'NUMERIC' => 'decimal',
+                'BOOLEAN' => 'bool',
+                'TEXT' => 'string',
+                'DATETIME' => 'datetime',
+                'UUID_TEXT' => 'uuid',
+                'JSON_TEXT' => 'json',
+                'BLOB' => 'binary',
+                default => throw new LogicException('Unsupported column type: ' . $row->type, [
+                    'type' => $row->type,
+                ]),
+            };
+            $row->nullable = (bool) $row->nullable;
+            yield $row;
+        }
+    }
     /**
      * @param TruncateTableStatement $statement
      * @return string

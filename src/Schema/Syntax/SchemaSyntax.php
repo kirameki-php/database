@@ -2,8 +2,11 @@
 
 namespace Kirameki\Database\Schema\Syntax;
 
+use Iterator;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Value;
+use Kirameki\Database\Info\Statements\ColumnsInfoStatement;
+use Kirameki\Database\Info\Statements\ListTablesStatement;
 use Kirameki\Database\Schema\Expressions\DefaultValue;
 use Kirameki\Database\Schema\Statements\AlterColumnAction;
 use Kirameki\Database\Schema\Statements\AlterDropColumnAction;
@@ -17,6 +20,7 @@ use Kirameki\Database\Schema\Statements\PrimaryKeyConstraint;
 use Kirameki\Database\Schema\Statements\RenameTableStatement;
 use Kirameki\Database\Schema\Statements\TruncateTableStatement;
 use Kirameki\Database\Syntax;
+use stdClass;
 use function array_filter;
 use function array_keys;
 use function array_merge;
@@ -253,6 +257,58 @@ abstract class SchemaSyntax extends Syntax
     public function formatUuid(): string
     {
         return 'UUID()';
+    }
+
+    /**
+     * @param ListTablesStatement $statement
+     * @return string
+     */
+    public function compileListTablesStatement(ListTablesStatement $statement): string
+    {
+        return "SELECT * FROM INFORMATION_SCHEMA.TABLES"
+            . " WHERE TABLE_SCHEMA = {$this->asLiteral($this->config->getDatabase())}";
+    }
+
+    /**
+     * @param ColumnsInfoStatement $statement
+     * @return string
+     */
+    public function compileColumnsInfoStatement(ColumnsInfoStatement $statement): string
+    {
+        $columns = implode(', ', [
+            "COLUMN_NAME AS `name`",
+            "DATA_TYPE AS `type`",
+            "IS_NULLABLE AS `nullable`",
+            "ORDINAL_POSITION AS `position`",
+        ]);
+        return "SELECT {$columns} FROM INFORMATION_SCHEMA.COLUMNS"
+            . " WHERE TABLE_SCHEMA = {$this->asLiteral($this->config->getDatabase())}"
+            . " AND TABLE_NAME = {$this->asLiteral($statement->table)}"
+            . " ORDER BY ORDINAL_POSITION ASC";
+    }
+
+    /**
+     * @param iterable<int, stdClass> $rows
+     * @return Iterator<int, stdClass>
+     */
+    public function normalizeColumnInfoStatement(iterable $rows): Iterator
+    {
+        foreach ($rows as $row) {
+            $row->type = match ($row->type) {
+                'int', 'mediumint', 'tinyint', 'smallint', 'bigint' => 'integer',
+                'decimal', 'float', 'double' => 'float',
+                'bool' => 'bool',
+                'varchar' => 'string',
+                'datetime' => 'datetime',
+                'json' => 'json',
+                'blob' => 'binary',
+                default => throw new LogicException('Unsupported column type: ' . $row->type, [
+                    'type' => $row->type,
+                ]),
+            };
+            $row->nullable = $row->nullable === 'YES';
+            yield $row;
+        }
     }
 
     /**

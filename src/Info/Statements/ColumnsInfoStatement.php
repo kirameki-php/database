@@ -3,18 +3,26 @@
 namespace Kirameki\Database\Info\Statements;
 
 use Iterator;
+use Kirameki\Database\Adapters\DatabaseAdapter;
 use Kirameki\Database\Query\Statements\Normalizable;
 use Kirameki\Database\Query\Statements\QueryStatement;
-use Kirameki\Database\Query\Syntax\QuerySyntax;
+use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 
 class ColumnsInfoStatement extends QueryStatement implements Normalizable
 {
+    protected SchemaSyntax $schemaSyntax;
+
+    /**
+     * @param DatabaseAdapter $adapter
+     * @param string $table
+     */
     public function __construct(
-        QuerySyntax $syntax,
+        protected readonly DatabaseAdapter $adapter,
         public readonly string $table,
     )
     {
-        parent::__construct($syntax);
+        $this->schemaSyntax = $adapter->getSchemaSyntax();
+        parent::__construct($adapter->getQuerySyntax());
     }
 
     /**
@@ -22,7 +30,7 @@ class ColumnsInfoStatement extends QueryStatement implements Normalizable
      */
     public function prepare(): string
     {
-        return $this->syntax->compileColumnsInfoStatement($this);
+        return $this->schemaSyntax->compileColumnsInfoStatement($this);
     }
 
     /**
@@ -38,6 +46,6 @@ class ColumnsInfoStatement extends QueryStatement implements Normalizable
      */
     public function normalize(iterable $rows): Iterator
     {
-        return $this->syntax->normalizeColumnInfoStatement($rows);
+        return $this->schemaSyntax->normalizeColumnInfoStatement($rows);
     }
 }

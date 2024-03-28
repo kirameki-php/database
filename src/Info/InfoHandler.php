@@ -27,8 +27,9 @@ class InfoHandler
     public function getTableNames(): Vec
     {
         $connection = $this->connection;
-        $statement = new ListTablesStatement($connection->adapter->getQuerySyntax());
-        return $connection->query()->execute($statement)->map(fn(stdClass $row) => $row->name);
+        return $connection->query()
+            ->execute(new ListTablesStatement($connection->adapter))
+            ->map(fn(stdClass $row) => $row->name);
     }
 
     /**
@@ -38,17 +39,10 @@ class InfoHandler
     public function getTable(string $name): TableInfo
     {
         $connection = $this->connection;
-        $statement = new ColumnsInfoStatement($connection->adapter->getQuerySyntax(), $name);
-        $rows = $connection->query()->execute($statement);
-        $columns = [];
-        foreach ($rows as $row) {
-            $columns[$row->column] = new ColumnInfo(
-                $row->column,
-                $row->type,
-                $row->nullable,
-                $row->position,
-            );
-        }
-        return new TableInfo($name, new Map($columns));
+        $columns = $connection->query()
+            ->execute(new ColumnsInfoStatement($connection->adapter, $name))
+            ->map(fn(stdClass $r) => new ColumnInfo($r->name, $r->type, $r->nullable, $r->position))
+            ->keyBy(fn(ColumnInfo $c) => $c->name);
+        return new TableInfo($name, $columns);
     }
 }
