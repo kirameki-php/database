@@ -58,7 +58,7 @@ class SelectStatement extends ConditionsStatement
      */
     public function prepare(): string
     {
-        return $this->syntax->compileSelectStatement($this);
+        return $this->syntax->formatSelectStatement($this);
     }
 
     /**

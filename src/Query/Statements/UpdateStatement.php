@@ -33,7 +33,7 @@ class UpdateStatement extends ConditionsStatement
      */
     public function prepare(): string
     {
-        return $this->syntax->compileUpdateStatement($this);
+        return $this->syntax->formatUpdateStatement($this);
     }
 
     /**

@@ -58,7 +58,7 @@ class InsertStatement extends QueryStatement
      */
     public function prepare(): string
     {
-        return $this->syntax->compileInsertStatement($this);
+        return $this->syntax->formatInsertStatement($this);
     }
 
     /**

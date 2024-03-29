@@ -97,7 +97,7 @@ abstract class QuerySyntax extends Syntax
      * @param SelectStatement $statement
      * @return string
      */
-    public function compileSelectStatement(SelectStatement $statement): string
+    public function formatSelectStatement(SelectStatement $statement): string
     {
         return implode(' ', array_filter([
             $this->formatSelectPart($statement),
@@ -124,7 +124,7 @@ abstract class QuerySyntax extends Syntax
      * @param InsertStatement $statement
      * @return string
      */
-    public function compileInsertStatement(InsertStatement $statement): string
+    public function formatInsertStatement(InsertStatement $statement): string
     {
         return implode(' ', array_filter([
             'INSERT INTO',
@@ -160,7 +160,7 @@ abstract class QuerySyntax extends Syntax
      * @param UpdateStatement $statement
      * @return string
      */
-    public function compileUpdateStatement(UpdateStatement $statement): string
+    public function formatUpdateStatement(UpdateStatement $statement): string
     {
         return implode(' ', array_filter([
             'UPDATE',
@@ -197,7 +197,7 @@ abstract class QuerySyntax extends Syntax
      * @param DeleteStatement $statement
      * @return string
      */
-    public function compileDeleteStatement(DeleteStatement $statement): string
+    public function formatDeleteStatement(DeleteStatement $statement): string
     {
         return implode(' ', array_filter([
             'DELETE FROM',
