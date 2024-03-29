@@ -14,6 +14,7 @@ class ConnectionTest extends DatabaseTestCase
             $schema->uuid('name')->nullable();
             $schema->bool('exists')->nullable();
             $schema->json('data');
+            $schema->index(['name']);
         });
     }
 
@@ -24,5 +25,7 @@ class ConnectionTest extends DatabaseTestCase
 
         $this->createDummyTable('mysql');
         dump($this->mysqlConnection()->info()->getTable('Dummy'));
+
+        $this->sqliteConnection()->query()->select('*')->from('Dummy')->forceIndex('Dummy_name')->execute();
     }
 }

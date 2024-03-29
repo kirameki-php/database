@@ -13,7 +13,7 @@ class SqliteQuerySyntax extends QuerySyntax
     protected function formatFromUseIndexPart(SelectStatement $statement): string
     {
         return $statement->forceIndex !== null
-            ? "INDEXED BY {$statement->forceIndex}"
+            ? "INDEXED BY {$this->asIdentifier($statement->forceIndex)}"
             : '';
     }
 

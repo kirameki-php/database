@@ -12,7 +12,7 @@ class MySqlQuerySyntax extends QuerySyntax
     protected function formatFromUseIndexPart(SelectStatement $statement): string
     {
         return $statement->forceIndex !== null
-            ? "FORCE INDEX ({$statement->forceIndex})"
+            ? "FORCE INDEX ({$this->asIdentifier($statement->forceIndex)})"
             : '';
     }
 }

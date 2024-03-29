@@ -64,6 +64,16 @@ class SelectBuilder extends ConditionsBuilder
     }
 
     /**
+     * @param string $name
+     * @return $this
+     */
+    public function forceIndex(string $name): static
+    {
+        $this->statement->forceIndex = $name;
+        return $this;
+    }
+
+    /**
      * @param string|Expression $column
      * @return $this
      */
