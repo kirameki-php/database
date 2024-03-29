@@ -13,17 +13,6 @@ class SqliteQuerySyntax extends QuerySyntax
     /**
      * @inheritDoc
      */
-    public function formatInsertStatement(InsertStatement $statement): string
-    {
-        if ($statement->dataset === []) {
-            return "INSERT INTO {$this->asIdentifier($statement->table)} DEFAULT VALUES";
-        }
-        return parent::formatInsertStatement($statement);
-    }
-
-    /**
-     * @inheritDoc
-     */
     protected function formatFromUseIndexPart(SelectStatement $statement): string
     {
         return $statement->forceIndex !== null

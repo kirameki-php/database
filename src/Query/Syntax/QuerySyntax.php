@@ -126,6 +126,10 @@ abstract class QuerySyntax extends Syntax
      */
     public function formatInsertStatement(InsertStatement $statement): string
     {
+        if ($statement->dataset === []) {
+            return "INSERT INTO {$this->asIdentifier($statement->table)} DEFAULT VALUES";
+        }
+
         return implode(' ', array_filter([
             'INSERT INTO',
             $this->asIdentifier($statement->table),
