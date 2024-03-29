@@ -348,9 +348,25 @@ class SelectBuilder extends ConditionsBuilder
     /**
      * @return mixed
      */
+    public function firstOrNull(): mixed
+    {
+        return $this->copy()->limit(1)->execute()->firstOrNull();
+    }
+
+    /**
+     * @return mixed
+     */
     public function last(): mixed
     {
         return $this->copy()->limit(1)->execute()->last();
+    }
+
+    /**
+     * @return mixed
+     */
+    public function lastOrNull(): mixed
+    {
+        return $this->copy()->limit(1)->execute()->lastOrNull();
     }
 
     /**

@@ -5,6 +5,7 @@ namespace Kirameki\Database\Adapters;
 use Closure;
 use DateTimeInterface;
 use Iterator;
+use Kirameki\Collections\LazyIterator;
 use Kirameki\Database\Exceptions\SqlException;
 use Kirameki\Database\Query\Statements\Normalizable;
 use Kirameki\Database\Query\Statements\QueryExecution;
@@ -148,9 +149,10 @@ abstract class PdoAdapter implements DatabaseAdapter
         if ($statement instanceof Normalizable) {
             $iterator = $statement->normalize($iterator);
         }
+        $rows = new LazyIterator($iterator);
         $execTimeMs = (hrtime(true) - $startTime) / 1_000_000;
         $count = $prepared->rowCount(...);
-        return $this->instantiateQueryResult($statement, $execTimeMs, $iterator, $count);
+        return $this->instantiateQueryResult($statement, $execTimeMs, $rows, $count);
     }
 
     /**
