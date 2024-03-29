@@ -53,6 +53,8 @@ class SelectStatement extends ConditionsStatement
      */
     public LockOption|null $lockOption = null;
 
+    public ?string $forceIndex = null;
+
     /**
      * @inheritDoc
      */

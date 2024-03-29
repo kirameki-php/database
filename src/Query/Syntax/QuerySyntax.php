@@ -287,11 +287,21 @@ abstract class QuerySyntax extends Syntax
                 ? $table->prepare($this)
                 : $this->asTable($table);
         }
-
-        return (count($expressions) > 0)
-            ? 'FROM ' . $this->asCsv($expressions)
-            : '';
+        if (count($expressions) === 0) {
+            return '';
+        }
+        return implode(' ', array_filter([
+            'FROM',
+            $this->asCsv($expressions),
+            $this->formatFromUseIndexPart($statement),
+        ]));
     }
+
+    /**
+     * @param SelectStatement $statement
+     * @return string
+     */
+    abstract protected function formatFromUseIndexPart(SelectStatement $statement): string;
 
     /**
      * @param SelectStatement $statement

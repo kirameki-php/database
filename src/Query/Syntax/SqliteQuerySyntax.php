@@ -7,6 +7,19 @@ use Kirameki\Database\Query\Statements\SelectStatement;
 
 class SqliteQuerySyntax extends QuerySyntax
 {
+    /**
+     * @inheritDoc
+     */
+    protected function formatFromUseIndexPart(SelectStatement $statement): string
+    {
+        return $statement->forceIndex !== null
+            ? "INDEXED BY {$statement->forceIndex}"
+            : '';
+    }
+
+    /**
+     * @inheritDoc
+     */
     protected function formatSelectLockOptionPart(SelectStatement $statement): string
     {
         throw new RuntimeException('Sqlite does not support NOWAIT or SKIP LOCKED!', [

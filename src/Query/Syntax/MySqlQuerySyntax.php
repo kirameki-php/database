@@ -2,6 +2,17 @@
 
 namespace Kirameki\Database\Query\Syntax;
 
+use Kirameki\Database\Query\Statements\SelectStatement;
+
 class MySqlQuerySyntax extends QuerySyntax
 {
+    /**
+     * @inheritDoc
+     */
+    protected function formatFromUseIndexPart(SelectStatement $statement): string
+    {
+        return $statement->forceIndex !== null
+            ? "FORCE INDEX ({$statement->forceIndex})"
+            : '';
+    }
 }
