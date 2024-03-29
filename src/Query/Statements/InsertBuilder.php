@@ -58,15 +58,4 @@ class InsertBuilder extends QueryBuilder
         $this->statement->returning = $columns;
         return $this;
     }
-
-    /**
-     * @return QueryResult<InsertStatement>
-     */
-    public function execute(): QueryResult
-    {
-        if (count($this->statement->dataset) === 0) {
-            throw new LogicException('Values must be set in order to execute an insert query');
-        }
-        return parent::execute();
-    }
 }

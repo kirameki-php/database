@@ -10,7 +10,7 @@ class InsertStatement extends QueryStatement
     /**
      * @var array<int, array<string, mixed>>
      */
-    public array $dataset;
+    public array $dataset = [];
 
     /**
      * @var array<string>|null
