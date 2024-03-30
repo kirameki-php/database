@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Info\Statements;
 
 use Kirameki\Database\Adapters\DatabaseAdapter;
+use Kirameki\Database\Query\Statements\Executable;
 use Kirameki\Database\Query\Statements\QueryStatement;
 
 class ListTablesStatement extends QueryStatement
@@ -20,16 +21,8 @@ class ListTablesStatement extends QueryStatement
     /**
      * @inheritDoc
      */
-    public function prepare(): string
+    public function prepare(): Executable
     {
         return $this->adapter->getSchemaSyntax()->compileListTablesStatement($this);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getParameters(): array
-    {
-        return [];
     }
 }

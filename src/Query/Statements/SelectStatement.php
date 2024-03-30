@@ -58,16 +58,8 @@ class SelectStatement extends ConditionsStatement
     /**
      * @inheritDoc
      */
-    public function prepare(): string
+    public function prepare(): Executable
     {
-        return $this->syntax->formatSelectStatement($this);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getParameters(): array
-    {
-        return $this->syntax->prepareParametersForSelect($this);
+        return $this->syntax->compileSelect($this);
     }
 }

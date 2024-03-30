@@ -18,11 +18,6 @@ class InsertStatement extends QueryStatement
     public ?array $returning = null;
 
     /**
-     * @var array<string>|null
-     */
-    protected ?array $cachedColumns = null;
-
-    /**
      * @param QuerySyntax $syntax
      * @param string $table
      */
@@ -35,37 +30,10 @@ class InsertStatement extends QueryStatement
     }
 
     /**
-     * @return array<string>
+     * @inheritDoc
      */
-    public function columns(): array
+    public function prepare(): Executable
     {
-        if ($this->cachedColumns === null) {
-            $columnsMap = [];
-            foreach ($this->dataset as $data) {
-                foreach ($data as $name => $value) {
-                    if ($value !== null) {
-                        $columnsMap[$name] = null;
-                    }
-                }
-            }
-            $this->cachedColumns = array_keys($columnsMap);
-        }
-        return $this->cachedColumns;
-    }
-
-    /**
-     * @return string
-     */
-    public function prepare(): string
-    {
-        return $this->syntax->formatInsertStatement($this);
-    }
-
-    /**
-     * @return array<mixed>
-     */
-    public function getParameters(): array
-    {
-        return $this->syntax->prepareParametersForInsert($this);
+        return $this->syntax->compileInsert($this);
     }
 }

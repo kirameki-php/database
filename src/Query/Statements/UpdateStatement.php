@@ -29,18 +29,10 @@ class UpdateStatement extends ConditionsStatement
     }
 
     /**
-     * @return string
+     * @inheritDoc
      */
-    public function prepare(): string
+    public function prepare(): Executable
     {
-        return $this->syntax->formatUpdateStatement($this);
-    }
-
-    /**
-     * @return array<mixed>
-     */
-    public function getParameters(): array
-    {
-        return $this->syntax->prepareParametersForUpdate($this);
+        return $this->syntax->compileUpdate($this);
     }
 }

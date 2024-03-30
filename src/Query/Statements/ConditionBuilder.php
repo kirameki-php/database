@@ -403,11 +403,17 @@ class ConditionBuilder
     protected function define(Operator $operator, mixed $value): static
     {
         $this->current->operator = $operator;
+
+        if ($value instanceof SelectBuilder) {
+            $value = clone $value->getStatement()->prepare();
+        }
         $this->current->value = $value;
+
         if ($this->defined) {
             throw new RuntimeException('Tried to set condition when it was already set!');
         }
         $this->defined = true;
+
         return $this;
     }
 

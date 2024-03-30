@@ -4,6 +4,7 @@ namespace Kirameki\Database\Info\Statements;
 
 use Iterator;
 use Kirameki\Database\Adapters\DatabaseAdapter;
+use Kirameki\Database\Query\Statements\Executable;
 use Kirameki\Database\Query\Statements\Normalizable;
 use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
@@ -28,17 +29,9 @@ class ColumnsInfoStatement extends QueryStatement implements Normalizable
     /**
      * @inheritDoc
      */
-    public function prepare(): string
+    public function prepare(): Executable
     {
         return $this->schemaSyntax->compileColumnsInfoStatement($this);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getParameters(): array
-    {
-        return [];
     }
 
     /**

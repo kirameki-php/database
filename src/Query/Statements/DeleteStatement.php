@@ -24,18 +24,10 @@ class DeleteStatement extends ConditionsStatement
     }
 
     /**
-     * @return string
+     * @inheritDoc
      */
-    public function prepare(): string
+    public function prepare(): Executable
     {
-        return $this->syntax->formatDeleteStatement($this);
-    }
-
-    /**
-     * @return array<mixed>
-     */
-    public function getParameters(): array
-    {
-        return $this->syntax->prepareParametersForDelete($this);
+        return $this->syntax->compileDelete($this);
     }
 }

@@ -24,17 +24,9 @@ class RawStatement extends QueryStatement
     /**
      * @inheritDoc
      */
-    public function prepare(): string
+    public function prepare(): Executable
     {
         return $this->raw;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getParameters(): array
-    {
-        return $this->parameters;
     }
 
     /**

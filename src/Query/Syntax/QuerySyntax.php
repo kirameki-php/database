@@ -13,10 +13,10 @@ use Kirameki\Database\Query\Expressions\Expression;
 use Kirameki\Database\Query\Statements\ConditionDefinition;
 use Kirameki\Database\Query\Statements\ConditionsStatement;
 use Kirameki\Database\Query\Statements\DeleteStatement;
+use Kirameki\Database\Query\Statements\Executable;
 use Kirameki\Database\Query\Statements\InsertStatement;
 use Kirameki\Database\Query\Statements\JoinDefinition;
 use Kirameki\Database\Query\Statements\QueryStatement;
-use Kirameki\Database\Query\Statements\SelectBuilder;
 use Kirameki\Database\Query\Statements\SelectStatement;
 use Kirameki\Database\Query\Statements\UpdateStatement;
 use Kirameki\Database\Query\Support\LockOption;
@@ -25,10 +25,13 @@ use Kirameki\Database\Query\Support\Operator;
 use Kirameki\Database\Query\Support\Range;
 use Kirameki\Database\Syntax;
 use RuntimeException;
+use function array_fill;
 use function array_filter;
+use function array_key_exists;
 use function array_keys;
 use function array_map;
 use function array_merge;
+use function array_push;
 use function count;
 use function current;
 use function explode;
@@ -70,7 +73,8 @@ abstract class QuerySyntax extends Syntax
      */
     public function interpolate(QueryStatement $statement): string
     {
-        $parameters = $this->stringifyParameters($statement->getParameters());
+        $executable = $statement->prepare();
+        $parameters = $this->stringifyParameters($executable->parameters);
         $remains = count($parameters);
 
         return (string) preg_replace_callback('/\?\??/', function($matches) use (&$parameters, &$remains) {
@@ -90,14 +94,25 @@ abstract class QuerySyntax extends Syntax
             }
 
             throw new UnreachableException('No more parameters to interpolate');
-        }, $statement->prepare());
+        }, $executable->template);
+    }
+
+    /**
+     * @param SelectStatement $statement
+     * @return Executable
+     */
+    public function compileSelect(SelectStatement $statement): Executable
+    {
+        $template = $this->prepareTemplateForSelect($statement);
+        $parameters = $this->prepareParametersForSelect($statement);
+        return $this->toExecutable($template, $parameters);
     }
 
     /**
      * @param SelectStatement $statement
      * @return string
      */
-    public function formatSelectStatement(SelectStatement $statement): string
+    protected function prepareTemplateForSelect(SelectStatement $statement): string
     {
         return implode(' ', array_filter([
             $this->formatSelectPart($statement),
@@ -115,56 +130,88 @@ abstract class QuerySyntax extends Syntax
      * @param SelectStatement $statement
      * @return array<mixed>
      */
-    public function prepareParametersForSelect(SelectStatement $statement): array
+    protected function prepareParametersForSelect(SelectStatement $statement): array
     {
         return $this->stringifyParameters($this->getParametersForConditions($statement));
     }
 
     /**
      * @param InsertStatement $statement
+     * @return Executable
+     */
+    public function compileInsert(InsertStatement $statement): Executable
+    {
+        $columnsMap = [];
+        foreach ($statement->dataset as $data) {
+            foreach (array_keys($data) as $name) {
+                $columnsMap[$name] = null;
+            }
+        }
+        $columns = array_keys($columnsMap);
+
+        $template = $this->prepareTemplateForInsert($statement, $columns);
+        $parameters = $this->prepareParametersForInsert($statement, $columns);
+        return $this->toExecutable($template, $parameters);
+    }
+
+    /**
+     * @param InsertStatement $statement
+     * @param list<string> $columns
      * @return string
      */
-    public function formatInsertStatement(InsertStatement $statement): string
+    protected function prepareTemplateForInsert(InsertStatement $statement, array $columns): string
     {
-        if ($statement->dataset === []) {
+        if ($columns === []) {
             return "INSERT INTO {$this->asIdentifier($statement->table)} DEFAULT VALUES";
         }
 
         return implode(' ', array_filter([
             'INSERT INTO',
             $this->asIdentifier($statement->table),
-            $this->formatInsertColumnsPart($statement),
+            $this->formatInsertColumnsPart($statement, $columns),
             'VALUES',
-            $this->formatInsertValuesPart($statement),
+            $this->formatInsertValuesPart($statement, $columns),
             $this->formatReturningPart($statement),
         ]));
     }
 
     /**
      * @param InsertStatement $statement
+     * @param list<string> $columns
      * @return array<mixed>
      */
-    public function prepareParametersForInsert(InsertStatement $statement): array
+    public function prepareParametersForInsert(InsertStatement $statement, array $columns): array
     {
-        $columns = $statement->columns();
         $parameters = [];
         foreach ($statement->dataset as $data) {
             if (!is_array($data)) {
                 throw new RuntimeException('Data should be an array but ' . Value::getType($data) . ' given.');
             }
             foreach ($columns as $column) {
-                $parameters[] = $data[$column] ?? null;
+                if (array_key_exists($column, $data)) {
+                    $parameters[] = $data[$column];
+                }
             }
         }
-
         return $this->stringifyParameters($parameters);
+    }
+
+    /**
+     * @param UpdateStatement $statement
+     * @return Executable
+     */
+    public function compileUpdate(UpdateStatement $statement): Executable
+    {
+        $template = $this->prepareTemplateForUpdate($statement);
+        $parameters = $this->prepareParametersForUpdate($statement);
+        return $this->toExecutable($template, $parameters);
     }
 
     /**
      * @param UpdateStatement $statement
      * @return string
      */
-    public function formatUpdateStatement(UpdateStatement $statement): string
+    protected function prepareTemplateForUpdate(UpdateStatement $statement): string
     {
         return implode(' ', array_filter([
             'UPDATE',
@@ -174,17 +221,6 @@ abstract class QuerySyntax extends Syntax
             $this->formatConditionsPart($statement),
             $this->formatReturningPart($statement),
         ]));
-    }
-
-    /**
-     * @param UpdateStatement $statement
-     * @return string
-     */
-    protected function formatUpdateAssignmentsPart(UpdateStatement $statement): string
-    {
-        $columns = array_keys($statement->data);
-        $assignments = array_map(fn(string $column): string => "{$this->asIdentifier($column)} = ?", $columns);
-        return $this->asCsv($assignments);
     }
 
     /**
@@ -199,9 +235,20 @@ abstract class QuerySyntax extends Syntax
 
     /**
      * @param DeleteStatement $statement
+     * @return Executable
+     */
+    public function compileDelete(DeleteStatement $statement): Executable
+    {
+        $template = $this->prepareTemplateForDelete($statement);
+        $parameters = $this->prepareParametersForDelete($statement);
+        return $this->toExecutable($template, $parameters);
+    }
+
+    /**
+     * @param DeleteStatement $statement
      * @return string
      */
-    public function formatDeleteStatement(DeleteStatement $statement): string
+    protected function prepareTemplateForDelete(DeleteStatement $statement): string
     {
         return implode(' ', array_filter([
             'DELETE FROM',
@@ -215,7 +262,7 @@ abstract class QuerySyntax extends Syntax
      * @param DeleteStatement $statement
      * @return array<mixed>
      */
-    public function prepareParametersForDelete(DeleteStatement $statement): array
+    protected function prepareParametersForDelete(DeleteStatement $statement): array
     {
         return $this->stringifyParameters($this->getParametersForConditions($statement));
     }
@@ -329,35 +376,41 @@ abstract class QuerySyntax extends Syntax
 
     /**
      * @param InsertStatement $statement
+     * @param list<string> $columns
      * @return string
      */
-    protected function formatInsertColumnsPart(InsertStatement $statement): string
+    protected function formatInsertColumnsPart(InsertStatement $statement, array $columns): string
     {
-        return $this->asEnclosedCsv(
-            array_map(
-                fn(string $column): string => $this->asIdentifier($column),
-                $statement->columns(),
-            ),
-        );
+        return $this->asEnclosedCsv(array_map($this->asColumn(...), $columns));
     }
 
     /**
      * @param InsertStatement $statement
+     * @param list<string> $columns
      * @return string
      */
-    protected function formatInsertValuesPart(InsertStatement $statement): string
+    protected function formatInsertValuesPart(InsertStatement $statement, array $columns): string
     {
-        $listSize = count($statement->dataset);
-        $columnCount = count($statement->columns());
         $placeholders = [];
-        for ($i = 0; $i < $listSize; $i++) {
+        foreach ($statement->dataset as $data) {
             $binders = [];
-            for ($j = 0; $j < $columnCount; $j++) {
-                $binders[] = '?';
+            foreach ($columns as $column) {
+                $binders[] = array_key_exists($column, $data) ? '?' : 'DEFAULT';
             }
             $placeholders[] = $this->asEnclosedCsv($binders);
         }
         return $this->asCsv($placeholders);
+    }
+
+    /**
+     * @param UpdateStatement $statement
+     * @return string
+     */
+    protected function formatUpdateAssignmentsPart(UpdateStatement $statement): string
+    {
+        $columns = array_keys($statement->data);
+        $assignments = array_map(fn(string $column): string => "{$this->asIdentifier($column)} = ?", $columns);
+        return $this->asCsv($assignments);
     }
 
     /**
@@ -519,7 +572,7 @@ abstract class QuerySyntax extends Syntax
     protected function formatConditionForOperator(string $column, string $operator, mixed $value): string
     {
         return $column . ' ' . $operator . ' ' . match (true) {
-                $value instanceof SelectBuilder => $this->formatSubQuery($value),
+                $value instanceof Executable => $this->formatSubQuery($value),
                 $value instanceof Expression => $value->prepare($this),
                 default => '?',
             };
@@ -544,7 +597,7 @@ abstract class QuerySyntax extends Syntax
             return '1 = 0';
         }
 
-        if ($value instanceof SelectBuilder) {
+        if ($value instanceof Executable) {
             $subQuery = $this->formatSubQuery($value);
             return "{$column} {$operator} {$subQuery}";
         }
@@ -573,7 +626,7 @@ abstract class QuerySyntax extends Syntax
         $operator = $def->negated ? 'NOT EXISTS' : 'EXISTS';
         $value = $def->value;
 
-        if ($value instanceof SelectBuilder) {
+        if ($value instanceof Executable) {
             $subQuery = $this->formatSubQuery($value);
             return "{$column} {$operator} {$subQuery}";
         }
@@ -618,12 +671,12 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param SelectBuilder $builder
+     * @param Executable $executable
      * @return string
      */
-    protected function formatSubQuery(SelectBuilder $builder): string
+    protected function formatSubQuery(Executable $executable): string
     {
-        return '(' . $builder->getStatement()->prepare() . ')';
+        return '(' . $executable->template . ')';
     }
 
     /**
@@ -818,21 +871,12 @@ abstract class QuerySyntax extends Syntax
     {
         while ($def !== null) {
             $value = $def->value;
-            if ($value instanceof SelectBuilder) {
-                $value = $value->getStatement();
-            }
-
-            if (is_iterable($value)) {
-                foreach ($value as $parameter) {
-                    $parameters[] = $parameter;
-                }
-            } elseif ($value instanceof Expression || $value instanceof QueryStatement) {
-                foreach ($value->getParameters() as $parameter) {
-                    $parameters[] = $parameter;
-                }
-            } else {
-                $parameters[] = $value;
-            }
+            match (true) {
+                is_iterable($value) => array_push($parameters, ...iterator_to_array($value)),
+                $value instanceof Expression => array_push($parameters, ...$value->getParameters()),
+                $value instanceof Executable => array_push($parameters, ...$value->parameters),
+                default => $parameters[] = $value,
+            };
             $def = $def->next;
         }
     }
@@ -887,5 +931,15 @@ abstract class QuerySyntax extends Syntax
         }
 
         return $value;
+    }
+
+    /**
+     * @param string $template
+     * @param array<array-key, mixed> $parameters
+     * @return Executable
+     */
+    protected function toExecutable(string $template, array $parameters = []): Executable
+    {
+        return new Executable($template, $parameters);
     }
 }

@@ -17,14 +17,9 @@ abstract class QueryStatement implements Statement
     }
 
     /**
-     * @return string
+     * @return Executable
      */
-    abstract public function prepare(): string;
-
-    /**
-     * @return array<mixed>
-     */
-    abstract public function getParameters(): array;
+    abstract public function prepare(): Executable;
 
     /**
      * @return string
