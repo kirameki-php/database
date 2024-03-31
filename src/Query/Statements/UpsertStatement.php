@@ -3,14 +3,23 @@
 namespace Kirameki\Database\Query\Statements;
 
 use Kirameki\Database\Query\Syntax\QuerySyntax;
-use function array_keys;
 
 class UpsertStatement extends QueryStatement
 {
     /**
-     * @var array<int, array<string, mixed>>
+     * @var list<array<string, mixed>>
      */
     public array $dataset = [];
+
+    /**
+     * @var list<string>
+     */
+    public array $onConflict = [];
+
+    /**
+     * @var list<string>|null
+     */
+    public ?array $returning = null;
 
     /**
      * @param QuerySyntax $syntax
@@ -29,6 +38,6 @@ class UpsertStatement extends QueryStatement
      */
     public function prepare(): Executable
     {
-        return $this->syntax->compileInsert($this);
+        return $this->syntax->compileUpsert($this);
     }
 }

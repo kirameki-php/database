@@ -12,7 +12,7 @@ class UpdateStatement extends ConditionsStatement
     public array $data;
 
     /**
-     * @var array<string>|null
+     * @var list<string>|null
      */
     public ?array $returning = null;
 

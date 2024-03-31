@@ -8,9 +8,9 @@ use function array_values;
 use function iterator_to_array;
 
 /**
- * @extends QueryBuilder<InsertStatement>
+ * @extends QueryBuilder<UpsertStatement>
  */
-class InsertBuilder extends QueryBuilder
+class UpsertBuilder extends QueryBuilder
 {
     /**
      * @param QueryHandler $handler
@@ -23,7 +23,7 @@ class InsertBuilder extends QueryBuilder
         string $table,
     )
     {
-        parent::__construct($handler, new InsertStatement($syntax, $table));
+        parent::__construct($handler, new UpsertStatement($syntax, $table));
     }
 
     /**
@@ -45,6 +45,16 @@ class InsertBuilder extends QueryBuilder
         foreach ($dataset as $data) {
             $statement->dataset[] = iterator_to_array($data);
         }
+        return $this;
+    }
+
+    /**
+     * @param string ...$columns
+     * @return $this
+     */
+    public function onConflict(string ...$columns): static
+    {
+        $this->statement->onConflict = array_values($columns);
         return $this;
     }
 

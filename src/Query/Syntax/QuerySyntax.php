@@ -19,6 +19,7 @@ use Kirameki\Database\Query\Statements\JoinDefinition;
 use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Statements\SelectStatement;
 use Kirameki\Database\Query\Statements\UpdateStatement;
+use Kirameki\Database\Query\Statements\UpsertStatement;
 use Kirameki\Database\Query\Support\LockOption;
 use Kirameki\Database\Query\Support\LockType;
 use Kirameki\Database\Query\Support\Operator;
@@ -150,7 +151,7 @@ abstract class QuerySyntax extends Syntax
         $columns = array_keys($columnsMap);
 
         $template = $this->prepareTemplateForInsert($statement, $columns);
-        $parameters = $this->prepareParametersForInsert($statement, $columns);
+        $parameters = $this->formatDatasetParameters($statement->dataset, $columns);
         return $this->toExecutable($template, $parameters);
     }
 
@@ -168,32 +169,49 @@ abstract class QuerySyntax extends Syntax
         return implode(' ', array_filter([
             'INSERT INTO',
             $this->asIdentifier($statement->table),
-            $this->formatInsertColumnsPart($statement, $columns),
+            $this->formatDatasetColumnsPart($columns),
             'VALUES',
-            $this->formatInsertValuesPart($statement, $columns),
-            $this->formatReturningPart($statement),
+            $this->formatDatasetValuesPart($statement->dataset, $columns),
+            $this->formatReturningPart($statement->returning),
         ]));
     }
 
     /**
-     * @param InsertStatement $statement
-     * @param list<string> $columns
-     * @return array<mixed>
+     * @param UpsertStatement $statement
+     * @return Executable
      */
-    public function prepareParametersForInsert(InsertStatement $statement, array $columns): array
+    public function compileUpsert(UpsertStatement $statement): Executable
     {
-        $parameters = [];
+        $columnsMap = [];
         foreach ($statement->dataset as $data) {
-            if (!is_array($data)) {
-                throw new RuntimeException('Data should be an array but ' . Value::getType($data) . ' given.');
-            }
-            foreach ($columns as $column) {
-                if (array_key_exists($column, $data)) {
-                    $parameters[] = $data[$column];
-                }
+            foreach (array_keys($data) as $name) {
+                $columnsMap[$name] = null;
             }
         }
-        return $this->stringifyParameters($parameters);
+        $columns = array_keys($columnsMap);
+
+        $template = $this->prepareTemplateForUpsert($statement, $columns);
+        $parameters = $this->formatDatasetParameters($statement->dataset, $columns);
+        return $this->toExecutable($template, $parameters);
+    }
+
+    /**
+     * @param UpsertStatement $statement
+     * @param list<string> $columns
+     * @return string
+     */
+    protected function prepareTemplateForUpsert(UpsertStatement $statement, array $columns): string
+    {
+        return implode(' ', array_filter([
+            'INSERT INTO',
+            $this->asIdentifier($statement->table),
+            $this->formatDatasetColumnsPart($columns),
+            'VALUES',
+            $this->formatDatasetValuesPart($statement->dataset, $columns),
+            $this->formatUpsertOnConflictPart($statement->onConflict),
+            $this->formatUpsertUpdateSet($columns),
+            $this->formatReturningPart($statement->returning),
+        ]));
     }
 
     /**
@@ -219,7 +237,7 @@ abstract class QuerySyntax extends Syntax
             'SET',
             $this->formatUpdateAssignmentsPart($statement),
             $this->formatConditionsPart($statement),
-            $this->formatReturningPart($statement),
+            $this->formatReturningPart($statement->returning),
         ]));
     }
 
@@ -254,7 +272,7 @@ abstract class QuerySyntax extends Syntax
             'DELETE FROM',
             $this->asIdentifier($statement->table),
             $this->formatConditionsPart($statement),
-            $this->formatReturningPart($statement),
+            $this->formatReturningPart($statement->returning),
         ]));
     }
 
@@ -375,24 +393,23 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param InsertStatement $statement
      * @param list<string> $columns
      * @return string
      */
-    protected function formatInsertColumnsPart(InsertStatement $statement, array $columns): string
+    protected function formatDatasetColumnsPart(array $columns): string
     {
         return $this->asEnclosedCsv(array_map($this->asColumn(...), $columns));
     }
 
     /**
-     * @param InsertStatement $statement
+     * @param list<array<string, mixed>> $dataset
      * @param list<string> $columns
      * @return string
      */
-    protected function formatInsertValuesPart(InsertStatement $statement, array $columns): string
+    protected function formatDatasetValuesPart(array $dataset, array $columns): string
     {
         $placeholders = [];
-        foreach ($statement->dataset as $data) {
+        foreach ($dataset as $data) {
             $binders = [];
             foreach ($columns as $column) {
                 $binders[] = array_key_exists($column, $data) ? '?' : 'DEFAULT';
@@ -400,6 +417,27 @@ abstract class QuerySyntax extends Syntax
             $placeholders[] = $this->asEnclosedCsv($binders);
         }
         return $this->asCsv($placeholders);
+    }
+
+    /**
+     * @param list<array<string, mixed>> $dataset
+     * @param list<string> $columns
+     * @return array<mixed>
+     */
+    protected function formatDatasetParameters(array $dataset, array $columns): array
+    {
+        $parameters = [];
+        foreach ($dataset as $data) {
+            if (!is_array($data)) {
+                throw new RuntimeException('Data should be an array but ' . Value::getType($data) . ' given.');
+            }
+            foreach ($columns as $column) {
+                if (array_key_exists($column, $data)) {
+                    $parameters[] = $data[$column];
+                }
+            }
+        }
+        return $this->stringifyParameters($parameters);
     }
 
     /**
@@ -411,6 +449,30 @@ abstract class QuerySyntax extends Syntax
         $columns = array_keys($statement->data);
         $assignments = array_map(fn(string $column): string => "{$this->asIdentifier($column)} = ?", $columns);
         return $this->asCsv($assignments);
+    }
+
+    /**
+     * @param list<string> $onConflict
+     * @return string
+     */
+    protected function formatUpsertOnConflictPart(array $onConflict): string
+    {
+        $clause = 'ON CONFLICT';
+        if (count($onConflict) === 0) {
+            return $clause;
+        }
+        return $clause . $this->asEnclosedCsv(array_map($this->asIdentifier(...), $onConflict));
+    }
+
+    /**
+     * @param list<string> $columns
+     * @return string
+     */
+    protected function formatUpsertUpdateSet(array $columns): string
+    {
+        $columns = array_map($this->asIdentifier(...), $columns);
+        $columns = array_map(fn(string $column): string => "{$column} = EXCLUDED.{$column}", $columns);
+        return implode(', ', $columns);
     }
 
     /**
@@ -734,16 +796,16 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param InsertStatement|UpdateStatement|DeleteStatement $statement
+     * @param list<string>|null $returning
      * @return string
      */
-    protected function formatReturningPart(InsertStatement|UpdateStatement|DeleteStatement $statement): string
+    protected function formatReturningPart(?array $returning): string
     {
-        if ($statement->returning === null) {
+        if ($returning === null) {
             return '';
         }
 
-        $columns = array_map($this->asIdentifier(...), $statement->returning);
+        $columns = array_map($this->asIdentifier(...), $returning);
 
         return "RETURNING {$this->asCsv($columns)}";
     }

@@ -8,12 +8,12 @@ use function array_keys;
 class InsertStatement extends QueryStatement
 {
     /**
-     * @var array<int, array<string, mixed>>
+     * @var list<array<string, mixed>>
      */
     public array $dataset = [];
 
     /**
-     * @var array<string>|null
+     * @var list<string>|null
      */
     public ?array $returning = null;
 
