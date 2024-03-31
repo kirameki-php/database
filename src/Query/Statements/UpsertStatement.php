@@ -13,11 +13,6 @@ class UpsertStatement extends QueryStatement
     public array $dataset = [];
 
     /**
-     * @var array<string>|null
-     */
-    protected ?array $cachedColumns = null;
-
-    /**
      * @param QuerySyntax $syntax
      * @param string $table
      */
@@ -30,37 +25,10 @@ class UpsertStatement extends QueryStatement
     }
 
     /**
-     * @return array<string>
+     * @inheritDoc
      */
-    public function columns(): array
-    {
-        if ($this->cachedColumns === null) {
-            $columnsMap = [];
-            foreach ($this->dataset as $data) {
-                foreach ($data as $name => $value) {
-                    if ($value !== null) {
-                        $columnsMap[$name] = null;
-                    }
-                }
-            }
-            $this->cachedColumns = array_keys($columnsMap);
-        }
-        return $this->cachedColumns;
-    }
-
-    /**
-     * @return string
-     */
-    public function prepare(): string
+    public function prepare(): Executable
     {
         return $this->syntax->compileInsert($this);
-    }
-
-    /**
-     * @return array<mixed>
-     */
-    public function getParameters(): array
-    {
-        return $this->syntax->prepareParametersForInsert($this);
     }
 }
