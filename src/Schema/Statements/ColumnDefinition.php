@@ -19,7 +19,7 @@ class ColumnDefinition
      * @param int|null $scale
      */
     public function __construct(
-        public string $name,
+        public readonly string $name,
         public ?string $type = null,
         public ?int $size = null,
         public ?int $scale = null,

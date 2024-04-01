@@ -13,10 +13,10 @@ class AlterColumnBuilder extends ColumnBuilder
     }
 
     /**
-     * @param int|null $size
+     * @param int $size
      * @return ColumnBuilder
      */
-    public function int(?int $size = null): ColumnBuilder
+    public function int(int $size = ColumnDefault::INT_SIZE): ColumnBuilder
     {
         return $this->columnType(__FUNCTION__, $size);
     }
@@ -25,14 +25,6 @@ class AlterColumnBuilder extends ColumnBuilder
      * @return ColumnBuilder
      */
     public function float(): ColumnBuilder
-    {
-        return $this->columnType(__FUNCTION__);
-    }
-
-    /**
-     * @return ColumnBuilder
-     */
-    public function double(): ColumnBuilder
     {
         return $this->columnType(__FUNCTION__);
     }
@@ -56,35 +48,19 @@ class AlterColumnBuilder extends ColumnBuilder
     }
 
     /**
+     * @param int $precision
      * @return ColumnBuilder
      */
-    public function date(): ColumnBuilder
-    {
-        return $this->columnType(__FUNCTION__);
-    }
-
-    /**
-     * @param int|null $precision
-     * @return ColumnBuilder
-     */
-    public function datetime(?int $precision = null): ColumnBuilder
+    public function datetime(int $precision = ColumnDefault::TIME_PRECISION): ColumnBuilder
     {
         return $this->columnType(__FUNCTION__, $precision);
     }
 
     /**
+     * @param int $size
      * @return ColumnBuilder
      */
-    public function time(): ColumnBuilder
-    {
-        return $this->columnType(__FUNCTION__);
-    }
-
-    /**
-     * @param int|null $size
-     * @return ColumnBuilder
-     */
-    public function string(?int $size = null): ColumnBuilder
+    public function string(int $size = ColumnDefault::STRING_SIZE): ColumnBuilder
     {
         return $this->columnType(__FUNCTION__, $size);
     }

@@ -23,10 +23,10 @@ class CreateTableBuilder extends SchemaBuilder
 
     /**
      * @param string $column
-     * @param int|null $size
+     * @param int $size
      * @return ColumnBuilder
      */
-    public function int(string $column, ?int $size = null): ColumnBuilder
+    public function int(string $column, int $size = ColumnDefault::INT_SIZE): ColumnBuilder
     {
         return $this->column($column, __FUNCTION__, $size);
     }
@@ -62,22 +62,31 @@ class CreateTableBuilder extends SchemaBuilder
 
     /**
      * @param string $column
-     * @param int|null $precision
+     * @param int $precision
      * @return TimestampColumnBuilder
      */
-    public function datetime(string $column, ?int $precision = null): ColumnBuilder
+    public function datetime(string $column, int $precision = ColumnDefault::TIME_PRECISION): ColumnBuilder
     {
         return new TimestampColumnBuilder($this->addDefinition($column, __FUNCTION__, $precision));
     }
 
     /**
      * @param string $column
-     * @param int|null $size
+     * @param int $size
      * @return ColumnBuilder
      */
-    public function string(string $column, ?int $size = null): ColumnBuilder
+    public function string(string $column, int $size = ColumnDefault::STRING_SIZE): ColumnBuilder
     {
         return $this->column($column, __FUNCTION__, $size);
+    }
+
+    /**
+     * @param string $column
+     * @return ColumnBuilder
+     */
+    public function text(string $column): ColumnBuilder
+    {
+        return $this->column($column, __FUNCTION__);
     }
 
     /**
@@ -108,10 +117,10 @@ class CreateTableBuilder extends SchemaBuilder
     }
 
     /**
-     * @param int|null $precision
+     * @param int $precision
      * @return ColumnBuilderAggregate
      */
-    public function timestamps(?int $precision = null): ColumnBuilderAggregate
+    public function timestamps(int $precision = ColumnDefault::TIME_PRECISION): ColumnBuilderAggregate
     {
         return new ColumnBuilderAggregate([
             $this->datetime('createdAt', $precision)->currentAsDefault(),

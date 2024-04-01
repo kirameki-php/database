@@ -45,6 +45,9 @@ class MySqlSchemaSyntax extends SchemaSyntax
         if ($type === 'string') {
             return 'VARCHAR(' . ($size ?? 191) . ')';
         }
+        if ($type === 'text') {
+            return 'LONGTEXT';
+        }
         if ($type === 'uuid') {
             return 'VARCHAR(36)';
         }

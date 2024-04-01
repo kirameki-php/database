@@ -75,6 +75,9 @@ class SqliteSchemaSyntax extends SchemaSyntax
             }
             return $ddl;
         }
+        if ($type === 'text') {
+            return 'TEXT';
+        }
         if ($type === 'uuid') {
             return "TEXT CHECK (length({$this->asIdentifier($name)}) = 36)";
         }
