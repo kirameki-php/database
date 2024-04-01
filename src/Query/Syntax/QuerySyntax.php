@@ -472,7 +472,7 @@ abstract class QuerySyntax extends Syntax
     {
         $columns = array_map($this->asIdentifier(...), $columns);
         $columns = array_map(fn(string $column): string => "{$column} = EXCLUDED.{$column}", $columns);
-        return implode(', ', $columns);
+        return 'DO UPDATE SET ' . implode(', ', $columns);
     }
 
     /**
@@ -993,15 +993,5 @@ abstract class QuerySyntax extends Syntax
         }
 
         return $value;
-    }
-
-    /**
-     * @param string $template
-     * @param array<array-key, mixed> $parameters
-     * @return Executable
-     */
-    protected function toExecutable(string $template, array $parameters = []): Executable
-    {
-        return new Executable($template, $parameters);
     }
 }

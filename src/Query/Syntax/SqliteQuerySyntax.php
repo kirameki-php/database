@@ -3,16 +3,15 @@
 namespace Kirameki\Database\Query\Syntax;
 
 use Kirameki\Core\Exceptions\RuntimeException;
-use Kirameki\Database\Query\Statements\InsertStatement;
 use Kirameki\Database\Query\Statements\SelectStatement;
-use function array_filter;
-use function implode;
+use Override;
 
 class SqliteQuerySyntax extends QuerySyntax
 {
     /**
      * @inheritDoc
      */
+    #[Override]
     protected function formatFromUseIndexPart(SelectStatement $statement): string
     {
         return $statement->forceIndex !== null
@@ -23,6 +22,7 @@ class SqliteQuerySyntax extends QuerySyntax
     /**
      * @inheritDoc
      */
+    #[Override]
     protected function formatSelectLockOptionPart(SelectStatement $statement): string
     {
         throw new RuntimeException('Sqlite does not support NOWAIT or SKIP LOCKED!', [

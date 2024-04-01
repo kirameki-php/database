@@ -10,7 +10,7 @@ class Executable
      */
     public function __construct(
         public string $template,
-        public array $parameters,
+        public array $parameters = [],
     )
     {
     }

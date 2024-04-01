@@ -3,6 +3,7 @@
 namespace Kirameki\Database;
 
 use Kirameki\Database\Adapters\DatabaseConfig;
+use Kirameki\Database\Query\Statements\Executable;
 use function str_replace;
 
 abstract class Syntax
@@ -48,5 +49,15 @@ abstract class Syntax
     protected function escape(string $string, string $escaping): string
     {
         return str_replace($escaping, $escaping . $escaping, $string);
+    }
+
+    /**
+     * @param string $template
+     * @param array<array-key, mixed> $parameters
+     * @return Executable
+     */
+    protected function toExecutable(string $template, array $parameters = []): Executable
+    {
+        return new Executable($template, $parameters);
     }
 }

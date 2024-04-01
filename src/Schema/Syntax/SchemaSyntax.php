@@ -7,6 +7,7 @@ use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Value;
 use Kirameki\Database\Info\Statements\ColumnsInfoStatement;
 use Kirameki\Database\Info\Statements\ListTablesStatement;
+use Kirameki\Database\Query\Statements\Executable;
 use Kirameki\Database\Schema\Expressions\DefaultValue;
 use Kirameki\Database\Schema\Statements\AlterColumnAction;
 use Kirameki\Database\Schema\Statements\AlterDropColumnAction;
@@ -261,19 +262,19 @@ abstract class SchemaSyntax extends Syntax
 
     /**
      * @param ListTablesStatement $statement
-     * @return string
+     * @return Executable
      */
-    public function compileListTablesStatement(ListTablesStatement $statement): string
+    public function compileListTablesStatement(ListTablesStatement $statement): Executable
     {
-        return "SELECT * FROM INFORMATION_SCHEMA.TABLES"
-            . " WHERE TABLE_SCHEMA = {$this->asLiteral($this->config->getDatabase())}";
+        $database = $this->asLiteral($this->config->getDatabase());
+        return $this->toExecutable("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = {$database}");
     }
 
     /**
      * @param ColumnsInfoStatement $statement
-     * @return string
+     * @return Executable
      */
-    public function compileColumnsInfoStatement(ColumnsInfoStatement $statement): string
+    public function compileColumnsInfoStatement(ColumnsInfoStatement $statement): Executable
     {
         $columns = implode(', ', [
             "COLUMN_NAME AS `name`",
@@ -281,10 +282,14 @@ abstract class SchemaSyntax extends Syntax
             "IS_NULLABLE AS `nullable`",
             "ORDINAL_POSITION AS `position`",
         ]);
-        return "SELECT {$columns} FROM INFORMATION_SCHEMA.COLUMNS"
-            . " WHERE TABLE_SCHEMA = {$this->asLiteral($this->config->getDatabase())}"
-            . " AND TABLE_NAME = {$this->asLiteral($statement->table)}"
-            . " ORDER BY ORDINAL_POSITION ASC";
+        $database = $this->asLiteral($this->config->getDatabase());
+        $table = $this->asLiteral($statement->table);
+        return $this->toExecutable(
+            "SELECT {$columns} FROM INFORMATION_SCHEMA.COLUMNS"
+            . " WHERE TABLE_SCHEMA = {$database}"
+            . " AND TABLE_NAME = {$table}"
+            . " ORDER BY ORDINAL_POSITION ASC"
+        );
     }
 
     /**

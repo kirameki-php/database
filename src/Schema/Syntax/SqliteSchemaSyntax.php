@@ -7,6 +7,7 @@ use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Exceptions\RuntimeException;
 use Kirameki\Database\Info\Statements\ColumnsInfoStatement;
 use Kirameki\Database\Info\Statements\ListTablesStatement;
+use Kirameki\Database\Query\Statements\Executable;
 use Kirameki\Database\Schema\Statements\ColumnDefinition;
 use Kirameki\Database\Schema\Statements\PrimaryKeyConstraint;
 use Kirameki\Database\Schema\Statements\TruncateTableStatement;
@@ -75,7 +76,7 @@ class SqliteSchemaSyntax extends SchemaSyntax
             return $ddl;
         }
         if ($type === 'uuid') {
-            return "UUID_TEXT CHECK (length({$this->asIdentifier($name)}) = 36)";
+            return "TEXT CHECK (length({$this->asIdentifier($name)}) = 36)";
         }
         if ($type === 'json') {
             return 'JSON_TEXT CHECK (json_valid(' . $this->asIdentifier($name) . '))';
@@ -94,19 +95,17 @@ class SqliteSchemaSyntax extends SchemaSyntax
     }
 
     /**
-     * @param ListTablesStatement $statement
-     * @return string
+     * @inheritDoc
      */
-    public function compileListTablesStatement(ListTablesStatement $statement): string
+    public function compileListTablesStatement(ListTablesStatement $statement): Executable
     {
-        return "SELECT \"name\" FROM \"sqlite_master\" WHERE type = 'table'";
+        return $this->toExecutable("SELECT \"name\" FROM \"sqlite_master\" WHERE type = 'table'");
     }
 
     /**
-     * @param ColumnsInfoStatement $statement
-     * @return string
+     * @inheritDoc
      */
-    public function compileColumnsInfoStatement(ColumnsInfoStatement $statement): string
+    public function compileColumnsInfoStatement(ColumnsInfoStatement $statement): Executable
     {
         $columns = implode(', ', [
             'name',
@@ -114,9 +113,8 @@ class SqliteSchemaSyntax extends SchemaSyntax
             'NOT "notnull" as `nullable`',
             '(cid + 1) as `position`',
         ]);
-        return "SELECT {$columns}"
-            . " FROM pragma_table_info({$this->asIdentifier($statement->table)})"
-            . " ORDER BY \"cid\" ASC";
+        $table = $this->asIdentifier($statement->table);
+        return $this->toExecutable("SELECT {$columns} FROM pragma_table_info({$table}) ORDER BY \"cid\" ASC");
     }
 
     /**

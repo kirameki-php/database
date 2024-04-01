@@ -219,8 +219,9 @@ abstract class PdoAdapter implements DatabaseAdapter
      */
     protected function execQuery(QueryStatement $statement): PDOStatement
     {
-        $prepared = $this->getPdo()->prepare($statement->prepare());
-        $prepared->execute($statement->getParameters());
+        $executable = $statement->prepare();
+        $prepared = $this->getPdo()->prepare($executable->template);
+        $prepared->execute($executable->parameters);
         return $prepared;
     }
 
