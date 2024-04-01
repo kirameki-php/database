@@ -176,13 +176,13 @@ class SqliteSchemaSyntax extends SchemaSyntax
     {
         $table = $this->asLiteral($statement->table);
         return $this->toExecutable(implode(' ', [
-            'SELECT "primary" AS "name", group_concat(col) AS "columns", 1 AS "unique", 1 as "primary"',
-            'FROM (SELECT "name" as col FROM pragma_table_info(' . $table . ') WHERE pk > 0 ORDER BY pk, cid)',
+            'SELECT "PRIMARY" AS "name", group_concat(col) AS "columns", "primary" AS "type"',
+            'FROM (SELECT "name" AS "col" FROM pragma_table_info(' . $table . ') WHERE "pk" > 0 ORDER BY "pk", "cid")',
             'GROUP BY "name"',
             'UNION',
-            'SELECT "name", group_concat(col) AS "columns", "unique", "origin" = "pk" AS "primary"',
+            'SELECT "name", group_concat(col) AS "columns", CASE WHEN "origin" = "pk" THEN \'primary\' WHEN "unique" > 0 THEN \'unique\' ELSE \'index\' END AS "type"',
             'FROM (SELECT il.*, ii.name AS col FROM pragma_index_list(' . $table . ') il, pragma_index_info(il.name) ii ORDER BY il.seq, ii.seqno)',
-            'GROUP BY "name", "unique", "primary"',
+            'GROUP BY "name"',
         ]));
     }
 
