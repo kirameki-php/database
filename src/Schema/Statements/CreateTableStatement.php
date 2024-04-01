@@ -51,16 +51,6 @@ class CreateTableStatement extends SchemaStatement
     public function preprocess(): void
     {
         foreach ($this->columns as $column) {
-            if ($column->primaryKey) {
-                if ($this->primaryKey !== null) {
-                    throw new RuntimeException('Multiple primaryKey defined when only one is allowed.');
-                }
-                $this->primaryKey = new PrimaryKeyConstraint();
-                $this->primaryKey->columns[$column->name] = 'ASC';
-            }
-        }
-
-        foreach ($this->columns as $column) {
             if ($column->type === 'int' && Arr::doesNotContain([null, 1, 2, 4, 8], $column->size)) {
                 throw new RuntimeException('Size for integer must be 1, 2, 4, or 8 (bytes). ' . $column->size . ' given.');
             }
@@ -68,10 +58,6 @@ class CreateTableStatement extends SchemaStatement
 
         if (empty($this->columns)) {
             throw new RuntimeException('Table requires at least one column to be defined.');
-        }
-
-        if ($this->primaryKey === null) {
-            throw new RuntimeException('Table must have at least one column as primary key.');
         }
     }
 }

@@ -4,9 +4,11 @@ namespace Kirameki\Database\Info;
 
 use Kirameki\Collections\Vec;
 use Kirameki\Database\Connection;
-use Kirameki\Database\Info\Statements\ColumnsInfoStatement;
+use Kirameki\Database\Info\Statements\ListColumnsStatement;
+use Kirameki\Database\Info\Statements\ListIndexesStatement;
 use Kirameki\Database\Info\Statements\ListTablesStatement;
 use stdClass;
+use function dump;
 
 readonly class InfoHandler
 {
@@ -37,10 +39,20 @@ readonly class InfoHandler
     public function getTable(string $name): TableInfo
     {
         $connection = $this->connection;
+
         $columns = $connection->query()
-            ->execute(new ColumnsInfoStatement($connection->adapter, $name))
+            ->execute(new ListColumnsStatement($connection->adapter, $name))
             ->map(fn(stdClass $r) => new ColumnInfo($r->name, $r->type, $r->nullable, $r->position))
             ->keyBy(fn(ColumnInfo $c) => $c->name);
-        return new TableInfo($name, $columns);
+
+        $indexes = $connection->query()
+            ->execute(new ListIndexesStatement($connection->adapter, $name));
+        dump($indexes->all());
+
+        $indexes = $connection->query()
+            ->execute(new ListIndexesStatement($connection->adapter, $name))
+            ->map(fn(stdClass $r) => new IndexInfo($r->name, $r->columns, $r->type));
+
+        return new TableInfo($name, $columns, $indexes);
     }
 }

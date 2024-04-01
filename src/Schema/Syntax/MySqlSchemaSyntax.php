@@ -6,15 +6,16 @@ use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Exceptions\RuntimeException;
 use Kirameki\Database\Schema\Statements\ColumnDefinition;
+use Override;
 use function implode;
 use function strtoupper;
 
 class MySqlSchemaSyntax extends SchemaSyntax
 {
     /**
-     * @param ColumnDefinition $def
-     * @return string
+     * @inheritDoc
      */
+    #[Override]
     protected function formatColumnType(ColumnDefinition $def): string
     {
         $type = $def->type;
@@ -60,9 +61,9 @@ class MySqlSchemaSyntax extends SchemaSyntax
     }
 
     /**
-     * @param ColumnDefinition $def
-     * @return string
+     * @inheritDoc
      */
+    #[Override]
     public function formatColumnDefinition(ColumnDefinition $def): string
     {
         $parts = [];
@@ -78,6 +79,7 @@ class MySqlSchemaSyntax extends SchemaSyntax
     /**
      * @inheritDoc
      */
+    #[Override]
     public function supportsDdlTransaction(): bool
     {
         return false;

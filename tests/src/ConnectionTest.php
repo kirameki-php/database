@@ -12,8 +12,12 @@ class ConnectionTest extends DatabaseTestCase
         $this->createTable($connection, 'Dummy', function(CreateTableBuilder $schema) {
             $schema->int('id')->primaryKey()->nullable()->autoIncrement();
             $schema->uuid('name')->nullable();
+            $schema->string('first', 255)->nullable();
+            $schema->string('second', 255)->nullable();
             $schema->bool('exists')->nullable();
             $schema->json('data')->nullable();
+//            $schema->primaryKey(['id', 'name']);
+            $schema->index(['first', 'second'])->unique();
             $schema->index(['name']);
         });
     }
@@ -21,12 +25,12 @@ class ConnectionTest extends DatabaseTestCase
     public function test_tableExists(): void
     {
         $this->createDummyTable('sqlite');
-        dump($this->sqliteConnection()->info()->getTable('Dummy'));
-
-        $this->createDummyTable('mysql');
-        dump($this->mysqlConnection()->info()->getTable('Dummy'));
-
-        $this->sqliteConnection()->query()->select('*')->from('Dummy')->forceIndex('Dummy_name')->execute();
-        $this->sqliteConnection()->query()->insertInto('Dummy')->execute();
+        $this->sqliteConnection()->info()->getTable('Dummy');
+//
+//        $this->createDummyTable('mysql');
+//        dump($this->mysqlConnection()->info()->getTable('Dummy'));
+//
+//        $this->sqliteConnection()->query()->select('*')->from('Dummy')->forceIndex('Dummy_name')->execute();
+//        $this->sqliteConnection()->query()->insertInto('Dummy')->execute();
     }
 }

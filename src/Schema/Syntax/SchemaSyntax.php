@@ -5,7 +5,8 @@ namespace Kirameki\Database\Schema\Syntax;
 use Iterator;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Value;
-use Kirameki\Database\Info\Statements\ColumnsInfoStatement;
+use Kirameki\Database\Info\Statements\ListColumnsStatement;
+use Kirameki\Database\Info\Statements\ListIndexesStatement;
 use Kirameki\Database\Info\Statements\ListTablesStatement;
 use Kirameki\Database\Query\Statements\Executable;
 use Kirameki\Database\Schema\Expressions\DefaultValue;
@@ -192,6 +193,9 @@ abstract class SchemaSyntax extends Syntax
         if ($def->default !== null) {
             $parts[] = 'DEFAULT ' . $this->formatDefaultValue($def);
         }
+        if ($def->primaryKey === true) {
+            $parts[] = 'PRIMARY KEY';
+        }
         return implode(' ', $parts);
     }
 
@@ -271,10 +275,10 @@ abstract class SchemaSyntax extends Syntax
     }
 
     /**
-     * @param ColumnsInfoStatement $statement
+     * @param ListColumnsStatement $statement
      * @return Executable
      */
-    public function compileColumnsInfoStatement(ColumnsInfoStatement $statement): Executable
+    public function compileListColumnsStatement(ListColumnsStatement $statement): Executable
     {
         $columns = implode(', ', [
             "COLUMN_NAME AS `name`",
@@ -296,7 +300,7 @@ abstract class SchemaSyntax extends Syntax
      * @param iterable<int, stdClass> $rows
      * @return Iterator<int, stdClass>
      */
-    public function normalizeColumnInfoStatement(iterable $rows): Iterator
+    public function normalizeListColumnsStatement(iterable $rows): Iterator
     {
         foreach ($rows as $row) {
             $row->type = match ($row->type) {
@@ -314,6 +318,14 @@ abstract class SchemaSyntax extends Syntax
             $row->nullable = $row->nullable === 'YES';
             yield $row;
         }
+    }
+
+    /**
+     * @param ListIndexesStatement $statement
+     * @return Executable
+     */
+    public function compileListIndexesStatement(ListIndexesStatement $statement): Executable
+    {
     }
 
     /**

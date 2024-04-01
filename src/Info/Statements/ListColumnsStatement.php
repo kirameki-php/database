@@ -9,8 +9,11 @@ use Kirameki\Database\Query\Statements\Normalizable;
 use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 
-class ColumnsInfoStatement extends QueryStatement implements Normalizable
+class ListColumnsStatement extends QueryStatement implements Normalizable
 {
+    /**
+     * @var SchemaSyntax
+     */
     protected SchemaSyntax $schemaSyntax;
 
     /**
@@ -31,7 +34,7 @@ class ColumnsInfoStatement extends QueryStatement implements Normalizable
      */
     public function prepare(): Executable
     {
-        return $this->schemaSyntax->compileColumnsInfoStatement($this);
+        return $this->schemaSyntax->compileListColumnsStatement($this);
     }
 
     /**
@@ -39,6 +42,6 @@ class ColumnsInfoStatement extends QueryStatement implements Normalizable
      */
     public function normalize(iterable $rows): Iterator
     {
-        return $this->schemaSyntax->normalizeColumnInfoStatement($rows);
+        return $this->schemaSyntax->normalizeListColumnsStatement($rows);
     }
 }

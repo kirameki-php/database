@@ -5,13 +5,14 @@ namespace Kirameki\Database\Schema\Syntax;
 use Iterator;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Exceptions\RuntimeException;
-use Kirameki\Database\Info\Statements\ColumnsInfoStatement;
+use Kirameki\Database\Info\Statements\ListColumnsStatement;
+use Kirameki\Database\Info\Statements\ListIndexesStatement;
 use Kirameki\Database\Info\Statements\ListTablesStatement;
 use Kirameki\Database\Query\Statements\Executable;
 use Kirameki\Database\Schema\Statements\ColumnDefinition;
 use Kirameki\Database\Schema\Statements\PrimaryKeyConstraint;
 use Kirameki\Database\Schema\Statements\TruncateTableStatement;
-use stdClass;
+use Override;
 use function array_keys;
 use function implode;
 use function in_array;
@@ -20,9 +21,28 @@ use function pow;
 class SqliteSchemaSyntax extends SchemaSyntax
 {
     /**
-     * @param PrimaryKeyConstraint $constraint
-     * @return string
+     * @inheritDoc
      */
+    #[Override]
+    public function formatColumnDefinition(ColumnDefinition $def): string
+    {
+        $parts = [];
+        $parts[] = parent::formatColumnDefinition($def);
+
+        if ($def->autoIncrement) {
+            if (!$def->primaryKey) {
+                throw new LogicException('Auto increment column must be the primary key.');
+            }
+            $parts[] = 'AUTOINCREMENT';
+        }
+
+        return implode(' ', $parts);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
     public function formatCreateTablePrimaryKeyPart(PrimaryKeyConstraint $constraint): string
     {
         $pkParts = array_keys($constraint->columns);
@@ -33,9 +53,9 @@ class SqliteSchemaSyntax extends SchemaSyntax
     }
 
     /**
-     * @param ColumnDefinition $def
-     * @return string
+     * @inheritDoc
      */
+    #[Override]
     protected function formatColumnType(ColumnDefinition $def): string
     {
         $name = $def->name;
@@ -100,6 +120,7 @@ class SqliteSchemaSyntax extends SchemaSyntax
     /**
      * @inheritDoc
      */
+    #[Override]
     public function compileListTablesStatement(ListTablesStatement $statement): Executable
     {
         return $this->toExecutable("SELECT \"name\" FROM \"sqlite_master\" WHERE type = 'table'");
@@ -108,7 +129,8 @@ class SqliteSchemaSyntax extends SchemaSyntax
     /**
      * @inheritDoc
      */
-    public function compileColumnsInfoStatement(ColumnsInfoStatement $statement): Executable
+    #[Override]
+    public function compileListColumnsStatement(ListColumnsStatement $statement): Executable
     {
         $columns = implode(', ', [
             'name',
@@ -121,10 +143,10 @@ class SqliteSchemaSyntax extends SchemaSyntax
     }
 
     /**
-     * @param iterable<int, stdClass> $rows
-     * @return Iterator<int, stdClass>
+     * @inheritDoc
      */
-    public function normalizeColumnInfoStatement(iterable $rows): Iterator
+    #[Override]
+    public function normalizeListColumnsStatement(iterable $rows): Iterator
     {
         foreach ($rows as $row) {
             $row->type = match ($row->type) {
@@ -147,9 +169,27 @@ class SqliteSchemaSyntax extends SchemaSyntax
     }
 
     /**
-     * @param TruncateTableStatement $statement
-     * @return string
+     * @inheritDoc
      */
+    #[Override]
+    public function compileListIndexesStatement(ListIndexesStatement $statement): Executable
+    {
+        $table = $this->asLiteral($statement->table);
+        return $this->toExecutable(implode(' ', [
+            'SELECT "primary" AS "name", group_concat(col) AS "columns", 1 AS "unique", 1 as "primary"',
+            'FROM (SELECT "name" as col FROM pragma_table_info(' . $table . ') WHERE pk > 0 ORDER BY pk, cid)',
+            'GROUP BY "name"',
+            'UNION',
+            'SELECT "name", group_concat(col) AS "columns", "unique", "origin" = "pk" AS "primary"',
+            'FROM (SELECT il.*, ii.name AS col FROM pragma_index_list(' . $table . ') il, pragma_index_info(il.name) ii ORDER BY il.seq, ii.seqno)',
+            'GROUP BY "name", "unique", "primary"',
+        ]));
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
     public function formatTruncateTableStatement(TruncateTableStatement $statement): string
     {
         return "DELETE FROM {$this->asIdentifier($statement->table)};";
@@ -158,6 +198,7 @@ class SqliteSchemaSyntax extends SchemaSyntax
     /**
      * @inheritDoc
      */
+    #[Override]
     public function supportsDdlTransaction(): bool
     {
         return true;
