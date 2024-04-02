@@ -119,7 +119,7 @@ abstract class PdoAdapter implements DatabaseAdapter
     {
         try {
             $startTime = hrtime(true);
-            $prepared = $this->execQuery($statement);
+            $prepared = $this->executeQueryStatement($statement);
             $rows = $prepared->fetchAll(PDO::FETCH_OBJ);
             if ($statement instanceof Normalizable) {
                 $rows = iterator_to_array($statement->normalize($rows));
@@ -139,7 +139,7 @@ abstract class PdoAdapter implements DatabaseAdapter
     {
         try {
             $startTime = hrtime(true);
-            $prepared = $this->execQuery($statement);
+            $prepared = $this->executeQueryStatement($statement);
             $iterator = (function() use ($prepared): Iterator {
                 while (true) {
                     $data = $prepared->fetch(PDO::FETCH_OBJ);
@@ -226,7 +226,7 @@ abstract class PdoAdapter implements DatabaseAdapter
      * @param QueryStatement $statement
      * @return PDOStatement
      */
-    protected function execQuery(QueryStatement $statement): PDOStatement
+    protected function executeQueryStatement(QueryStatement $statement): PDOStatement
     {
         $executable = $statement->prepare();
         $prepared = $this->getPdo()->prepare($executable->template);
