@@ -26,17 +26,18 @@ class SqliteSchemaSyntax extends SchemaSyntax
     #[Override]
     public function formatColumnDefinition(ColumnDefinition $def): string
     {
-        $parts = [];
-        $parts[] = parent::formatColumnDefinition($def);
+        $formatted = parent::formatColumnDefinition($def);
 
         if ($def->autoIncrement) {
             if (!$def->primaryKey) {
                 throw new LogicException('Auto increment column must be the primary key.');
             }
-            $parts[] = 'AUTOINCREMENT';
+            $formatted .= 'AUTOINCREMENT';
+        } else {
+            $formatted .= 'WITHOUT ROWID';
         }
 
-        return implode(' ', $parts);
+        return $formatted;
     }
 
     /**
