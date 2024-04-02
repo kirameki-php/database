@@ -137,27 +137,31 @@ abstract class PdoAdapter implements DatabaseAdapter
      */
     public function cursor(QueryStatement $statement): QueryResult
     {
-        $startTime = hrtime(true);
-        $prepared = $this->execQuery($statement);
-        $iterator = (function() use ($prepared): Iterator {
-            while (true) {
-                $data = $prepared->fetch(PDO::FETCH_OBJ);
-                if ($data === false) {
-                    if ($prepared->errorCode() === '00000') {
-                        break;
+        try {
+            $startTime = hrtime(true);
+            $prepared = $this->execQuery($statement);
+            $iterator = (function() use ($prepared): Iterator {
+                while (true) {
+                    $data = $prepared->fetch(PDO::FETCH_OBJ);
+                    if ($data === false) {
+                        if ($prepared->errorCode() === '00000') {
+                            break;
+                        }
+                        $this->throwException($prepared);
                     }
-                    $this->throwException($prepared);
+                    yield $data;
                 }
-                yield $data;
+            })();
+            if ($statement instanceof Normalizable) {
+                $iterator = $statement->normalize($iterator);
             }
-        })();
-        if ($statement instanceof Normalizable) {
-            $iterator = $statement->normalize($iterator);
+            $rows = new LazyIterator($iterator);
+            $execTimeMs = (hrtime(true) - $startTime) / 1_000_000;
+            $count = $prepared->rowCount(...);
+            return $this->instantiateQueryResult($statement, $execTimeMs, $rows, $count);
+        } catch (PDOException $e) {
+            throw new QueryException($e->getMessage(), $statement, $e);
         }
-        $rows = new LazyIterator($iterator);
-        $execTimeMs = (hrtime(true) - $startTime) / 1_000_000;
-        $count = $prepared->rowCount(...);
-        return $this->instantiateQueryResult($statement, $execTimeMs, $rows, $count);
     }
 
     /**
