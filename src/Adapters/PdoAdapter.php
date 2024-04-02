@@ -6,7 +6,7 @@ use Closure;
 use DateTimeInterface;
 use Iterator;
 use Kirameki\Collections\LazyIterator;
-use Kirameki\Database\Exceptions\SqlException;
+use Kirameki\Database\Exceptions\SchemaException;
 use Kirameki\Database\Query\Statements\Normalizable;
 use Kirameki\Database\Query\Statements\QueryExecution;
 use Kirameki\Database\Query\Statements\QueryResult;
@@ -107,7 +107,7 @@ abstract class PdoAdapter implements DatabaseAdapter
             $execTimeMs = (hrtime(true) - $startTime) / 1_000_000;
             return $this->instantiateSchemaExecution($statement, $execTimeMs);
         } catch (PDOException $e) {
-            throw new SqlException($e->getMessage(), $statement, 0, $e);
+            throw new SchemaException($e->getMessage(), $statement, 0, $e);
         }
     }
 

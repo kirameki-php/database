@@ -1,0 +1,18 @@
+<?php declare(strict_types=1);
+
+namespace Kirameki\Database\Exceptions;
+
+use Kirameki\Database\Schema\Statements\SchemaStatement;
+use Throwable;
+
+class SchemaException extends SqlException
+{
+    public function __construct(
+        string $message,
+        SchemaStatement $statement,
+        ?Throwable $previous = null,
+    )
+    {
+        parent::__construct($message, $statement, $previous);
+    }
+}

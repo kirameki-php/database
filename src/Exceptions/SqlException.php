@@ -10,13 +10,20 @@ class SqlException extends RuntimeException
 {
     public function __construct(
         string $message,
-        Statement $statement,
-        int $code = 0,
+        public readonly Statement $statement,
         ?Throwable $previous = null,
     )
     {
-        parent::__construct($message, [
-            'statement' => $statement,
-        ], $code, $previous);
+        parent::__construct($message, [], 0, $previous);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getContext(): array
+    {
+        return parent::getContext() + [
+            'statement' => $this->statement,
+        ];
     }
 }

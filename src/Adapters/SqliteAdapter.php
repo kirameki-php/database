@@ -4,6 +4,8 @@ namespace Kirameki\Database\Adapters;
 
 use Kirameki\Database\Exceptions\DatabaseNotFoundException;
 use Kirameki\Database\Query\Syntax\SqliteQuerySyntax;
+use Kirameki\Database\Schema\Statements\CreateTableBuilder;
+use Kirameki\Database\Schema\Statements\DropTableBuilder;
 use Kirameki\Database\Schema\Syntax\SqliteSchemaSyntax;
 use PDO;
 use function file_exists;
@@ -63,7 +65,17 @@ class SqliteAdapter extends PdoAdapter
      */
     public function createDatabase(bool $ifNotExist = true): void
     {
-        // nothing necessary
+        if ($ifNotExist && $this->databaseExists()) {
+            return;
+        }
+
+        $dummyTableName = '_';
+        $schemaSyntax = $this->getSchemaSyntax();
+        $createTable = new CreateTableBuilder($schemaSyntax, $dummyTableName);
+        $createTable->int('id')->primaryKey()->autoIncrement();
+        $this->runSchema($createTable->getStatement());
+        $dropTable = new DropTableBuilder($schemaSyntax, $dummyTableName);
+        $this->runSchema($dropTable->getStatement());
     }
 
     /**
