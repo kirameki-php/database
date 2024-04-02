@@ -32,9 +32,9 @@ class SqliteSchemaSyntax extends SchemaSyntax
             if (!$def->primaryKey) {
                 throw new LogicException('Auto increment column must be the primary key.');
             }
-            $formatted .= 'AUTOINCREMENT';
+            $formatted .= ' AUTOINCREMENT';
         } else {
-            $formatted .= 'WITHOUT ROWID';
+            $formatted .= ' WITHOUT ROWID';
         }
 
         return $formatted;
