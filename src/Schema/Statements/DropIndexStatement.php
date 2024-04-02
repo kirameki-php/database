@@ -48,8 +48,6 @@ class DropIndexStatement extends SchemaStatement
     public function toCommands(): array
     {
         $this->preprocess();
-        return [
-            $this->syntax->compileDropIndex($this),
-        ];
+        return $this->syntax->compileDropIndex($this);
     }
 }

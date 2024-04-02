@@ -26,7 +26,7 @@ class RawStatement extends QueryStatement
      */
     public function prepare(): Executable
     {
-        return $this->raw;
+        return new Executable($this->raw);
     }
 
     /**

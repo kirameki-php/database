@@ -49,9 +49,7 @@ class CreateIndexStatement extends SchemaStatement
     public function toCommands(): array
     {
         $this->preprocess();
-        return [
-            $this->syntax->compileCreateIndex($this),
-        ];
+        return $this->syntax->compileCreateIndex($this);
     }
 
     /**
