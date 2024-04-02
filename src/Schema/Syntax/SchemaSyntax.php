@@ -326,12 +326,12 @@ abstract class SchemaSyntax extends Syntax
         ]);
         $database = $this->asLiteral($this->config->getDatabase());
         $table = $this->asLiteral($statement->table);
-        return $this->toExecutable(
-            "SELECT {$columns} FROM INFORMATION_SCHEMA.COLUMNS"
-            . " WHERE TABLE_SCHEMA = {$database}"
-            . " AND TABLE_NAME = {$table}"
-            . " ORDER BY ORDINAL_POSITION ASC",
-        );
+        return $this->toExecutable(implode(' ', [
+            "SELECT {$columns} FROM INFORMATION_SCHEMA.COLUMNS",
+            "WHERE TABLE_SCHEMA = {$database}",
+            "AND TABLE_NAME = {$table}",
+            "ORDER BY ORDINAL_POSITION ASC",
+        ]));
     }
 
     /**
@@ -364,7 +364,20 @@ abstract class SchemaSyntax extends Syntax
      */
     public function compileListIndexes(ListIndexesStatement $statement): Executable
     {
-        // TODO: Implement compileListIndexesStatement() method.
+        $columns = implode(', ', [
+            "INDEX_NAME AS `name`",
+            "CASE WHEN `INDEX_NAME` = 'PRIMARY' THEN 'primary' WHEN `NON_UNIQUE` = 0 THEN 'unique' ELSE 'index' END AS `type`",
+            "group_concat(COLUMN_NAME) AS `columns`",
+        ]);
+        $database = $this->asLiteral($this->config->getDatabase());
+        $table = $this->asLiteral($statement->table);
+        return $this->toExecutable(implode(' ', [
+            "SELECT {$columns} FROM INFORMATION_SCHEMA.STATISTICS",
+            "WHERE TABLE_SCHEMA = {$database}",
+            "AND TABLE_NAME = {$table}",
+            "GROUP BY INDEX_NAME, NON_UNIQUE, SEQ_IN_INDEX",
+            "ORDER BY INDEX_NAME ASC, SEQ_IN_INDEX ASC",
+        ]));
     }
 
     /**

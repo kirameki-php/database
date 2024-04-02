@@ -9,6 +9,7 @@ use Kirameki\Database\Info\Statements\ListIndexesStatement;
 use Kirameki\Database\Info\Statements\ListTablesStatement;
 use stdClass;
 use function dump;
+use function explode;
 
 readonly class InfoHandler
 {
@@ -46,12 +47,8 @@ readonly class InfoHandler
             ->keyBy(fn(ColumnInfo $c) => $c->name);
 
         $indexes = $connection->query()
-            ->execute(new ListIndexesStatement($connection->adapter, $name));
-        dump($indexes->all());
-
-        $indexes = $connection->query()
             ->execute(new ListIndexesStatement($connection->adapter, $name))
-            ->map(fn(stdClass $r) => new IndexInfo($r->name, $r->columns, $r->type));
+            ->map(fn(stdClass $r) => new IndexInfo($r->name, explode(',', $r->columns), $r->type));
 
         return new TableInfo($name, $columns, $indexes);
     }
