@@ -6,6 +6,7 @@ use Closure;
 use DateTimeInterface;
 use Iterator;
 use Kirameki\Collections\LazyIterator;
+use Kirameki\Database\Exceptions\QueryException;
 use Kirameki\Database\Exceptions\SchemaException;
 use Kirameki\Database\Query\Statements\Normalizable;
 use Kirameki\Database\Query\Statements\QueryExecution;
@@ -107,7 +108,7 @@ abstract class PdoAdapter implements DatabaseAdapter
             $execTimeMs = (hrtime(true) - $startTime) / 1_000_000;
             return $this->instantiateSchemaExecution($statement, $execTimeMs);
         } catch (PDOException $e) {
-            throw new SchemaException($e->getMessage(), $statement, 0, $e);
+            throw new SchemaException($e->getMessage(), $statement, $e);
         }
     }
 
@@ -116,15 +117,19 @@ abstract class PdoAdapter implements DatabaseAdapter
      */
     public function query(QueryStatement $statement): QueryResult
     {
-        $startTime = hrtime(true);
-        $prepared = $this->execQuery($statement);
-        $rows = $prepared->fetchAll(PDO::FETCH_OBJ);
-        if ($statement instanceof Normalizable) {
-            $rows = iterator_to_array($statement->normalize($rows));
+        try {
+            $startTime = hrtime(true);
+            $prepared = $this->execQuery($statement);
+            $rows = $prepared->fetchAll(PDO::FETCH_OBJ);
+            if ($statement instanceof Normalizable) {
+                $rows = iterator_to_array($statement->normalize($rows));
+            }
+            $fetchTimeMs = (hrtime(true) - $startTime) / 1_000_000;
+            $count = $prepared->rowCount(...);
+            return $this->instantiateQueryResult($statement, $fetchTimeMs, $rows, $count);
+        } catch (PDOException $e) {
+            throw new QueryException($e->getMessage(), $statement, $e);
         }
-        $fetchTimeMs = (hrtime(true) - $startTime) / 1_000_000;
-        $count = $prepared->rowCount(...);
-        return $this->instantiateQueryResult($statement, $fetchTimeMs, $rows, $count);
     }
 
     /**
