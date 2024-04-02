@@ -3,6 +3,8 @@
 namespace Kirameki\Database\Schema\Syntax;
 
 use Iterator;
+use Kirameki\Collections\Utils\Arr;
+use Kirameki\Core\Exceptions\InvalidTypeException;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Value;
 use Kirameki\Database\Info\Statements\ListColumnsStatement;
@@ -13,6 +15,7 @@ use Kirameki\Database\Schema\Expressions\DefaultValue;
 use Kirameki\Database\Schema\Statements\AlterColumnAction;
 use Kirameki\Database\Schema\Statements\AlterDropColumnAction;
 use Kirameki\Database\Schema\Statements\AlterRenameColumnAction;
+use Kirameki\Database\Schema\Statements\AlterTableStatement;
 use Kirameki\Database\Schema\Statements\ColumnDefinition;
 use Kirameki\Database\Schema\Statements\CreateIndexStatement;
 use Kirameki\Database\Schema\Statements\CreateTableStatement;
@@ -25,6 +28,7 @@ use Kirameki\Database\Syntax;
 use stdClass;
 use function array_filter;
 use function array_keys;
+use function array_map;
 use function array_merge;
 use function implode;
 use function is_bool;
@@ -36,9 +40,23 @@ abstract class SchemaSyntax extends Syntax
 {
     /**
      * @param CreateTableStatement $statement
+     * @return list<string>
+     */
+    public function compileCreateTable(CreateTableStatement $statement): array
+    {
+        $formatted = [];
+        $formatted[] = $this->formatCreateTableStatement($statement);
+        foreach ($statement->indexes as $index) {
+            $formatted[] = $this->compileCreateIndex($index);
+        }
+        return Arr::flatten($formatted);
+    }
+
+    /**
+     * @param CreateTableStatement $statement
      * @return string
      */
-    public function formatCreateTableStatement(CreateTableStatement $statement): string
+    protected function formatCreateTableStatement(CreateTableStatement $statement): string
     {
         $parts = [];
         $parts[] = 'CREATE TABLE';
@@ -58,7 +76,7 @@ abstract class SchemaSyntax extends Syntax
      * @param PrimaryKeyConstraint $constraint
      * @return string
      */
-    public function formatCreateTablePrimaryKeyPart(PrimaryKeyConstraint $constraint): string
+    protected function formatCreateTablePrimaryKeyPart(PrimaryKeyConstraint $constraint): string
     {
         $pkParts = [];
         foreach ($constraint->columns as $column => $order) {
@@ -71,10 +89,27 @@ abstract class SchemaSyntax extends Syntax
     }
 
     /**
+     * @param AlterTableStatement $statement
+     * @return list<string>
+     */
+    public function compileAlterTable(AlterTableStatement $statement): array
+    {
+        $statements = array_map(fn(object $action) => match (true) {
+            $action instanceof AlterColumnAction => $this->formatAlterColumnAction($action),
+            $action instanceof AlterDropColumnAction => $this->formatDropColumnAction($action),
+            $action instanceof AlterRenameColumnAction => $this->formatRenameColumnAction($action),
+            $action instanceof CreateIndexStatement => $this->compileCreateIndex($action),
+            $action instanceof DropIndexStatement => $this->compileDropIndex($action),
+            default => throw new InvalidTypeException('Unsupported action type: ' . $action::class),
+        }, $statement->actions);
+        return Arr::flatten($statements);
+    }
+
+    /**
      * @param AlterColumnAction $action
      * @return string
      */
-    public function formatAlterColumnAction(AlterColumnAction $action): string
+    protected function formatAlterColumnAction(AlterColumnAction $action): string
     {
         $parts = [];
         $parts[] = $action->type->value;
@@ -89,7 +124,7 @@ abstract class SchemaSyntax extends Syntax
      * @param AlterDropColumnAction $action
      * @return string
      */
-    public function formatDropColumnAction(AlterDropColumnAction $action): string
+    protected function formatDropColumnAction(AlterDropColumnAction $action): string
     {
         $parts = [];
         $parts[] = 'DROP COLUMN';
@@ -101,7 +136,7 @@ abstract class SchemaSyntax extends Syntax
      * @param AlterRenameColumnAction $action
      * @return string
      */
-    public function formatRenameColumnAction(AlterRenameColumnAction $action): string
+    protected function formatRenameColumnAction(AlterRenameColumnAction $action): string
     {
         $parts = [];
         $parts[] = 'RENAME COLUMN';
@@ -113,35 +148,42 @@ abstract class SchemaSyntax extends Syntax
 
     /**
      * @param RenameTableStatement $statement
-     * @return string
+     * @return list<string>
      */
-    public function formatRenameTableStatement(RenameTableStatement $statement): string
+    public function compileRenameTable(RenameTableStatement $statement): array
     {
-        return implode(' ', [
-            'ALTER TABLE',
-            $this->asIdentifier($statement->from),
-            'RENAME TO',
-            $this->asIdentifier($statement->to),
-        ]);
+        return [
+            "ALTER TABLE {$this->asIdentifier($statement->from)} RENAME TO {$this->asIdentifier($statement->to)}",
+        ];
     }
 
     /**
      * @param DropTableStatement $statement
-     * @return string
+     * @return list<string>
      */
-    public function formatDropTableStatement(DropTableStatement $statement): string
+    public function compileDropTable(DropTableStatement $statement): array
     {
-        return implode(' ', [
-            'DROP TABLE',
-            $this->asIdentifier($statement->table),
-        ]);
+        return [
+            "DROP TABLE {$this->asIdentifier($statement->table)}",
+        ];
+    }
+
+    /**
+     * @param CreateIndexStatement $statement
+     * @return list<string>
+     */
+    public function compileCreateIndex(CreateIndexStatement $statement): array
+    {
+        return [
+            $this->formatCreateIndexStatement($statement),
+        ];
     }
 
     /**
      * @param CreateIndexStatement $statement
      * @return string
      */
-    public function formatCreateIndexStatement(CreateIndexStatement $statement): string
+    protected function formatCreateIndexStatement(CreateIndexStatement $statement): string
     {
         $parts = [];
         $parts[] = 'CREATE';
@@ -165,24 +207,21 @@ abstract class SchemaSyntax extends Syntax
 
     /**
      * @param DropIndexStatement $statement
-     * @return string
+     * @return list<string>
      */
-    public function formatDropIndexStatement(DropIndexStatement $statement): string
+    public function compileDropIndex(DropIndexStatement $statement): array
     {
         $name = $statement->name ?? implode('_', array_merge([$statement->table], $statement->columns));
-        return implode(' ', [
-            'DROP INDEX',
-            $this->asIdentifier($name),
-            'ON',
-            $this->asIdentifier($statement->table),
-        ]);
+        return [
+            "DROP INDEX {$this->asIdentifier($name)} ON {$this->asIdentifier($statement->table)}",
+        ];
     }
 
     /**
      * @param ColumnDefinition $def
      * @return string
      */
-    public function formatColumnDefinition(ColumnDefinition $def): string
+    protected function formatColumnDefinition(ColumnDefinition $def): string
     {
         $parts = [];
         $parts[] = $this->asIdentifier($def->name);
@@ -245,17 +284,6 @@ abstract class SchemaSyntax extends Syntax
     }
 
     /**
-     * @param TruncateTableStatement $statement
-     * @return list<string>
-     */
-    public function formatTruncateTableStatement(TruncateTableStatement $statement): array
-    {
-        return [
-            "TRUNCATE TABLE {$this->asIdentifier($statement->table)}",
-        ];
-    }
-
-    /**
      * @return string
      */
     public function formatUuid(): string
@@ -264,10 +292,21 @@ abstract class SchemaSyntax extends Syntax
     }
 
     /**
+     * @param TruncateTableStatement $statement
+     * @return list<string>
+     */
+    public function compileTruncateTable(TruncateTableStatement $statement): array
+    {
+        return [
+            "TRUNCATE TABLE {$this->asIdentifier($statement->table)}",
+        ];
+    }
+
+    /**
      * @param ListTablesStatement $statement
      * @return Executable
      */
-    public function compileListTablesStatement(ListTablesStatement $statement): Executable
+    public function compileListTables(ListTablesStatement $statement): Executable
     {
         $database = $this->asLiteral($this->config->getDatabase());
         return $this->toExecutable("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = {$database}");
@@ -277,7 +316,7 @@ abstract class SchemaSyntax extends Syntax
      * @param ListColumnsStatement $statement
      * @return Executable
      */
-    public function compileListColumnsStatement(ListColumnsStatement $statement): Executable
+    public function compileListColumns(ListColumnsStatement $statement): Executable
     {
         $columns = implode(', ', [
             "COLUMN_NAME AS `name`",
@@ -291,7 +330,7 @@ abstract class SchemaSyntax extends Syntax
             "SELECT {$columns} FROM INFORMATION_SCHEMA.COLUMNS"
             . " WHERE TABLE_SCHEMA = {$database}"
             . " AND TABLE_NAME = {$table}"
-            . " ORDER BY ORDINAL_POSITION ASC"
+            . " ORDER BY ORDINAL_POSITION ASC",
         );
     }
 
@@ -299,7 +338,7 @@ abstract class SchemaSyntax extends Syntax
      * @param iterable<int, stdClass> $rows
      * @return Iterator<int, stdClass>
      */
-    public function normalizeListColumnsStatement(iterable $rows): Iterator
+    public function normalizeListColumns(iterable $rows): Iterator
     {
         foreach ($rows as $row) {
             $row->type = match ($row->type) {
@@ -323,8 +362,9 @@ abstract class SchemaSyntax extends Syntax
      * @param ListIndexesStatement $statement
      * @return Executable
      */
-    public function compileListIndexesStatement(ListIndexesStatement $statement): Executable
+    public function compileListIndexes(ListIndexesStatement $statement): Executable
     {
+        // TODO: Implement compileListIndexesStatement() method.
     }
 
     /**

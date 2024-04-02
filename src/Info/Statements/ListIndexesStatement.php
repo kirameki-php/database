@@ -34,7 +34,7 @@ class ListIndexesStatement extends QueryStatement implements Normalizable
      */
     public function prepare(): Executable
     {
-        return $this->schemaSyntax->compileListIndexesStatement($this);
+        return $this->schemaSyntax->compileListIndexes($this);
     }
 
     /**

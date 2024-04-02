@@ -24,6 +24,7 @@ class SqliteSchemaSyntax extends SchemaSyntax
     /**
      * @inheritDoc
      */
+    #[Override]
     public function formatCreateTableStatement(CreateTableStatement $statement): string
     {
         $formatted = parent::formatCreateTableStatement($statement);
@@ -142,7 +143,7 @@ class SqliteSchemaSyntax extends SchemaSyntax
      * @inheritDoc
      */
     #[Override]
-    public function compileListTablesStatement(ListTablesStatement $statement): Executable
+    public function compileListTables(ListTablesStatement $statement): Executable
     {
         return $this->toExecutable("SELECT \"name\" FROM \"sqlite_master\" WHERE type = 'table'");
     }
@@ -151,7 +152,7 @@ class SqliteSchemaSyntax extends SchemaSyntax
      * @inheritDoc
      */
     #[Override]
-    public function compileListColumnsStatement(ListColumnsStatement $statement): Executable
+    public function compileListColumns(ListColumnsStatement $statement): Executable
     {
         $columns = implode(', ', [
             'name',
@@ -167,7 +168,7 @@ class SqliteSchemaSyntax extends SchemaSyntax
      * @inheritDoc
      */
     #[Override]
-    public function normalizeListColumnsStatement(iterable $rows): Iterator
+    public function normalizeListColumns(iterable $rows): Iterator
     {
         foreach ($rows as $row) {
             $row->type = match ($row->type) {
@@ -193,7 +194,7 @@ class SqliteSchemaSyntax extends SchemaSyntax
      * @inheritDoc
      */
     #[Override]
-    public function compileListIndexesStatement(ListIndexesStatement $statement): Executable
+    public function compileListIndexes(ListIndexesStatement $statement): Executable
     {
         $table = $this->asLiteral($statement->table);
         return $this->toExecutable(implode(' ', [
@@ -211,7 +212,7 @@ class SqliteSchemaSyntax extends SchemaSyntax
      * @inheritDoc
      */
     #[Override]
-    public function formatTruncateTableStatement(TruncateTableStatement $statement): array
+    public function compileTruncateTable(TruncateTableStatement $statement): array
     {
         $statements = [];
         $statements[] = 'DELETE FROM "sqlite_sequence" WHERE "name" = \'' . $statement->table . '\'';

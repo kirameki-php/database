@@ -23,6 +23,6 @@ class ListTablesStatement extends QueryStatement
      */
     public function prepare(): Executable
     {
-        return $this->adapter->getSchemaSyntax()->compileListTablesStatement($this);
+        return $this->adapter->getSchemaSyntax()->compileListTables($this);
     }
 }

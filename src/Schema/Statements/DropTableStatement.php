@@ -23,8 +23,6 @@ class DropTableStatement extends SchemaStatement
      */
     public function toCommands(): array
     {
-        return [
-            $this->syntax->formatDropTableStatement($this),
-        ];
+        return $this->syntax->compileDropTable($this);
     }
 }

@@ -22,8 +22,8 @@ class TransactionHandler
      * @param EventManager $events
      */
     public function __construct(
-        protected Connection $connection,
-        protected EventManager $events,
+        protected readonly Connection $connection,
+        protected readonly EventManager $events,
     )
     {
     }

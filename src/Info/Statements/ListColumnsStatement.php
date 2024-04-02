@@ -34,7 +34,7 @@ class ListColumnsStatement extends QueryStatement implements Normalizable
      */
     public function prepare(): Executable
     {
-        return $this->schemaSyntax->compileListColumnsStatement($this);
+        return $this->schemaSyntax->compileListColumns($this);
     }
 
     /**
@@ -42,6 +42,6 @@ class ListColumnsStatement extends QueryStatement implements Normalizable
      */
     public function normalize(iterable $rows): Iterator
     {
-        return $this->schemaSyntax->normalizeListColumnsStatement($rows);
+        return $this->schemaSyntax->normalizeListColumns($rows);
     }
 }

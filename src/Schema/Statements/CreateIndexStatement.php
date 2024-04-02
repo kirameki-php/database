@@ -50,7 +50,7 @@ class CreateIndexStatement extends SchemaStatement
     {
         $this->preprocess();
         return [
-            $this->syntax->formatCreateIndexStatement($this),
+            $this->syntax->compileCreateIndex($this),
         ];
     }
 

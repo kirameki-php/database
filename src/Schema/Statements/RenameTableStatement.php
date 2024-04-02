@@ -22,8 +22,6 @@ class RenameTableStatement extends SchemaStatement
 
     public function toCommands(): array
     {
-        return [
-            $this->syntax->formatRenameTableStatement($this),
-        ];
+        return $this->syntax->compileRenameTable($this);
     }
 }

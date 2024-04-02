@@ -2,7 +2,10 @@
 
 namespace Kirameki\Database\Schema\Statements;
 
+use Kirameki\Collections\Utils\Arr;
+use Kirameki\Core\Exceptions\InvalidTypeException;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
+use function array_map;
 
 class AlterTableStatement extends SchemaStatement
 {
@@ -32,25 +35,6 @@ class AlterTableStatement extends SchemaStatement
      */
     public function toCommands(): array
     {
-        $syntax = $this->syntax;
-        $statements = [];
-        foreach ($this->actions as $action) {
-            if ($action instanceof AlterColumnAction) {
-                $statements[] = $syntax->formatAlterColumnAction($action);
-            }
-            elseif ($action instanceof AlterDropColumnAction) {
-                $statements[] = $syntax->formatDropColumnAction($action);
-            }
-            elseif ($action instanceof AlterRenameColumnAction) {
-                $statements[] = $syntax->formatRenameColumnAction($action);
-            }
-            elseif ($action instanceof CreateIndexStatement) {
-                $statements[] = $syntax->formatCreateIndexStatement($action);
-            }
-            elseif ($action instanceof DropIndexStatement) {
-                $statements[] = $syntax->formatDropIndexStatement($action);
-            }
-        }
-        return $statements;
+        return $this->syntax->compileAlterTable($this);
     }
 }

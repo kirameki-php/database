@@ -37,12 +37,7 @@ class CreateTableStatement extends SchemaStatement
     public function toCommands(): array
     {
         $this->preprocess();
-        $statements = [];
-        $statements[] = $this->syntax->formatCreateTableStatement($this);
-        foreach ($this->indexes as $index) {
-            $statements[] = $this->syntax->formatCreateIndexStatement($index);
-        }
-        return $statements;
+        return $this->syntax->compileCreateTable($this);
     }
 
     /**

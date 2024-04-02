@@ -31,7 +31,7 @@ class DatabaseManager
      * @param iterable<string, DatabaseConfig> $configs
      */
     public function __construct(
-        protected EventManager $events,
+        protected readonly EventManager $events,
         protected iterable $configs,
     )
     {

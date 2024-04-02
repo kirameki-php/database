@@ -23,6 +23,6 @@ class TruncateTableStatement extends SchemaStatement
      */
     public function toCommands(): array
     {
-        return $this->syntax->formatTruncateTableStatement($this);
+        return $this->syntax->compileTruncateTable($this);
     }
 }

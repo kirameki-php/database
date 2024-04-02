@@ -49,7 +49,7 @@ class DropIndexStatement extends SchemaStatement
     {
         $this->preprocess();
         return [
-            $this->syntax->formatDropIndexStatement($this),
+            $this->syntax->compileDropIndex($this),
         ];
     }
 }
