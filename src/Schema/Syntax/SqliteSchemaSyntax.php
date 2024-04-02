@@ -10,6 +10,7 @@ use Kirameki\Database\Info\Statements\ListIndexesStatement;
 use Kirameki\Database\Info\Statements\ListTablesStatement;
 use Kirameki\Database\Query\Statements\Executable;
 use Kirameki\Database\Schema\Statements\ColumnDefinition;
+use Kirameki\Database\Schema\Statements\CreateTableStatement;
 use Kirameki\Database\Schema\Statements\PrimaryKeyConstraint;
 use Kirameki\Database\Schema\Statements\TruncateTableStatement;
 use Override;
@@ -23,6 +24,27 @@ class SqliteSchemaSyntax extends SchemaSyntax
     /**
      * @inheritDoc
      */
+    public function formatCreateTableStatement(CreateTableStatement $statement): string
+    {
+        $formatted = parent::formatCreateTableStatement($statement);
+
+        $hasAutoIncrementColumn = false;
+        foreach ($statement->columns as $column) {
+            if ($column->autoIncrement) {
+                $hasAutoIncrementColumn = true;
+                break;
+            }
+        }
+        if (!$hasAutoIncrementColumn) {
+            $formatted .= ' WITHOUT ROWID';
+        }
+
+        return $formatted;
+    }
+
+    /**
+     * @inheritDoc
+     */
     #[Override]
     public function formatColumnDefinition(ColumnDefinition $def): string
     {
@@ -33,8 +55,6 @@ class SqliteSchemaSyntax extends SchemaSyntax
                 throw new LogicException('Auto increment column must be the primary key.');
             }
             $formatted .= ' AUTOINCREMENT';
-        } else {
-            $formatted .= ' WITHOUT ROWID';
         }
 
         return $formatted;
@@ -191,9 +211,12 @@ class SqliteSchemaSyntax extends SchemaSyntax
      * @inheritDoc
      */
     #[Override]
-    public function formatTruncateTableStatement(TruncateTableStatement $statement): string
+    public function formatTruncateTableStatement(TruncateTableStatement $statement): array
     {
-        return "DELETE FROM {$this->asIdentifier($statement->table)};";
+        $statements = [];
+        $statements[] = 'DELETE FROM "sqlite_sequence" WHERE "name" = \'' . $statement->table . '\'';
+        $statements[] = "DELETE FROM {$this->asIdentifier($statement->table)}";
+        return $statements;
     }
 
     /**

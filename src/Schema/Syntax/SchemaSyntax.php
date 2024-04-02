@@ -246,14 +246,13 @@ abstract class SchemaSyntax extends Syntax
 
     /**
      * @param TruncateTableStatement $statement
-     * @return string
+     * @return list<string>
      */
-    public function formatTruncateTableStatement(TruncateTableStatement $statement): string
+    public function formatTruncateTableStatement(TruncateTableStatement $statement): array
     {
-        return implode(' ', [
-            'TRUNCATE TABLE',
-            $this->asIdentifier($statement->table),
-        ]);
+        return [
+            "TRUNCATE TABLE {$this->asIdentifier($statement->table)}",
+        ];
     }
 
     /**
