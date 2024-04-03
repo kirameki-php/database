@@ -798,13 +798,7 @@ abstract class QuerySyntax extends Syntax
      * @param Ordering $ordering
      * @return string
      */
-    protected function formatNullOrderingPart(string $column, Ordering $ordering): string
-    {
-        return match ($ordering->nulls) {
-            NullOrder::First => 'NULLS FIRST',
-            NullOrder::Last, null => '',
-        };
-    }
+    abstract protected function formatNullOrderingPart(string $column, Ordering $ordering): string;
 
     /**
      * @param ConditionsStatement $statement

@@ -4,14 +4,10 @@ namespace Kirameki\Database\Query\Syntax;
 
 use Kirameki\Database\Query\Statements\ConditionsStatement;
 use Kirameki\Database\Query\Statements\SelectStatement;
-use Kirameki\Database\Query\Statements\UpsertStatement;
 use Kirameki\Database\Query\Support\NullOrder;
 use Kirameki\Database\Query\Support\Ordering;
 use Override;
-use function array_filter;
-use function array_key_exists;
 use function array_map;
-use function count;
 use function implode;
 
 class MySqlQuerySyntax extends QuerySyntax
@@ -68,6 +64,7 @@ class MySqlQuerySyntax extends QuerySyntax
         foreach ($statement->orderBy as $column => $ordering) {
             $clauses[] = implode(' ', [
                 $this->asIdentifier($column),
+                // For MySQL, the null ordering has to come before the sort order.
                 $this->formatNullOrderingPart($column, $ordering),
                 $this->formatSortOrderingPart($column, $ordering),
             ]);
@@ -81,8 +78,11 @@ class MySqlQuerySyntax extends QuerySyntax
     #[Override]
     protected function formatNullOrderingPart(string $column, Ordering $ordering): string
     {
+        // MySql is NULL FIRST by default, so we only need to add a NULLS LAST.
+        // However, MySql does not support the standard clause so we have to use
+        // "$column IS NULL ASC, ..." to get the same effect.
         return $ordering->nulls === NullOrder::Last
-            ? " IS NULL ASC, {$this->asIdentifier($column)}"
+            ? " IS NULL, {$this->asIdentifier($column)}"
             : '';
     }
 }

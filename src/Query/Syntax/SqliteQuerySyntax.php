@@ -38,6 +38,7 @@ class SqliteQuerySyntax extends QuerySyntax
     #[Override]
     protected function formatNullOrderingPart(string $column, Ordering $ordering): string
     {
+        // Sqlite is NULL FIRST by default, so we only need to add NULLS LAST
         return match ($ordering->nulls) {
             NullOrder::First, null => '',
             NullOrder::Last => 'NULLS LAST',
