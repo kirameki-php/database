@@ -4,6 +4,8 @@ namespace Kirameki\Database\Query\Syntax;
 
 use Kirameki\Core\Exceptions\RuntimeException;
 use Kirameki\Database\Query\Statements\SelectStatement;
+use Kirameki\Database\Query\Support\NullOrder;
+use Kirameki\Database\Query\Support\Ordering;
 use Override;
 
 class SqliteQuerySyntax extends QuerySyntax
@@ -28,5 +30,17 @@ class SqliteQuerySyntax extends QuerySyntax
         throw new RuntimeException('Sqlite does not support NOWAIT or SKIP LOCKED!', [
             'statement' => $statement,
         ]);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    protected function formatNullOrderingPart(string $column, Ordering $ordering): string
+    {
+        return match ($ordering->nulls) {
+            NullOrder::First, null => '',
+            NullOrder::Last => 'NULLS LAST',
+        };
     }
 }

@@ -22,8 +22,11 @@ use Kirameki\Database\Query\Statements\UpdateStatement;
 use Kirameki\Database\Query\Statements\UpsertStatement;
 use Kirameki\Database\Query\Support\LockOption;
 use Kirameki\Database\Query\Support\LockType;
+use Kirameki\Database\Query\Support\NullOrder;
 use Kirameki\Database\Query\Support\Operator;
+use Kirameki\Database\Query\Support\Ordering;
 use Kirameki\Database\Query\Support\Range;
+use Kirameki\Database\Query\Support\SortOrder;
 use Kirameki\Database\Syntax;
 use RuntimeException;
 use function array_fill;
@@ -768,13 +771,39 @@ abstract class QuerySyntax extends Syntax
         }
         $clauses = [];
         foreach ($statement->orderBy as $column => $ordering) {
-            $clause = $this->asColumn($column) . ' ' . $ordering->sort->value;
-            if ($ordering->nulls !== null) {
-                $clause .= $ordering->nulls->value;
-            }
-            $clauses[] = $clause;
+            $clauses[] = implode(' ', array_filter([
+                $this->asIdentifier($column),
+                $this->formatSortOrderingPart($column, $ordering),
+                $this->formatNullOrderingPart($column, $ordering),
+            ]));
         }
         return "ORDER BY {$this->asCsv($clauses)}";
+    }
+
+    /**
+     * @param string $column
+     * @param Ordering $ordering
+     * @return string
+     */
+    protected function formatSortOrderingPart(string $column, Ordering $ordering): string
+    {
+        return match ($ordering->sort) {
+            SortOrder::Ascending => 'ASC',
+            SortOrder::Descending => 'DESC',
+        };
+    }
+
+    /**
+     * @param string $column
+     * @param Ordering $ordering
+     * @return string
+     */
+    protected function formatNullOrderingPart(string $column, Ordering $ordering): string
+    {
+        return match ($ordering->nulls) {
+            NullOrder::First => 'NULLS FIRST',
+            NullOrder::Last, null => '',
+        };
     }
 
     /**
