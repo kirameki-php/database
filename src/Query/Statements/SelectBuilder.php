@@ -10,6 +10,8 @@ use Kirameki\Database\Query\QueryHandler;
 use Kirameki\Database\Query\Support\JoinType;
 use Kirameki\Database\Query\Support\LockOption;
 use Kirameki\Database\Query\Support\LockType;
+use Kirameki\Database\Query\Support\NullOrder;
+use Kirameki\Database\Query\Support\Ordering;
 use Kirameki\Database\Query\Support\SortOrder;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use function func_get_args;
@@ -273,31 +275,38 @@ class SelectBuilder extends ConditionsBuilder
     /**
      * @param string $column
      * @param SortOrder $sort
+     * @param NullOrder|null $nulls
      * @return $this
      */
-    public function orderBy(string $column, SortOrder $sort = SortOrder::Ascending): static
+    public function orderBy(
+        string $column,
+        SortOrder $sort = SortOrder::Ascending,
+        ?NullOrder $nulls = null,
+    ): static
     {
         $this->statement->orderBy ??= [];
-        $this->statement->orderBy[$column] = $sort;
+        $this->statement->orderBy[$column] = new Ordering($sort, $nulls);
         return $this;
     }
 
     /**
      * @param string $column
+     * @param NullOrder|null $nulls
      * @return $this
      */
-    public function orderByAsc(string $column): static
+    public function orderByAsc(string $column, ?NullOrder $nulls = null): static
     {
-        return $this->orderBy($column);
+        return $this->orderBy($column, SortOrder::Ascending, $nulls);
     }
 
     /**
      * @param string $column
+     * @param NullOrder|null $nulls
      * @return $this
      */
-    public function orderByDesc(string $column): static
+    public function orderByDesc(string $column, ?NullOrder $nulls = null): static
     {
-        return $this->orderBy($column, SortOrder::Descending);
+        return $this->orderBy($column, SortOrder::Descending, $nulls);
     }
 
     /**

@@ -766,11 +766,15 @@ abstract class QuerySyntax extends Syntax
         if ($statement->orderBy === null) {
             return '';
         }
-        $clause = [];
-        foreach ($statement->orderBy as $column => $sort) {
-            $clause[] = $this->asColumn($column) . ' ' . $sort->value;
+        $clauses = [];
+        foreach ($statement->orderBy as $column => $ordering) {
+            $clause = $this->asColumn($column) . ' ' . $ordering->sort->value;
+            if ($ordering->nulls !== null) {
+                $clause .= $ordering->nulls->value;
+            }
+            $clauses[] = $clause;
         }
-        return "ORDER BY {$this->asCsv($clause)}";
+        return "ORDER BY {$this->asCsv($clauses)}";
     }
 
     /**

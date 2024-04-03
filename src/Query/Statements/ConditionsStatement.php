@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Query\Statements;
 
-use Kirameki\Database\Query\Support\SortOrder;
+use Kirameki\Database\Query\Support\Ordering;
 
 abstract class ConditionsStatement extends QueryStatement
 {
@@ -12,7 +12,7 @@ abstract class ConditionsStatement extends QueryStatement
     public ?array $where = null;
 
     /**
-     * @var array<string, SortOrder>|null
+     * @var array<string, Ordering>|null
      */
     public ?array $orderBy = null;
 
