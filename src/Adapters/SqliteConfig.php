@@ -2,6 +2,8 @@
 
 namespace Kirameki\Database\Adapters;
 
+use Override;
+
 class SqliteConfig implements DatabaseConfig
 {
     /**
@@ -15,6 +17,10 @@ class SqliteConfig implements DatabaseConfig
     {
     }
 
+    /**
+     * @inheritDoc
+     */
+    #[Override]
     public function getAdapterName(): string
     {
         return 'sqlite';
@@ -22,8 +28,9 @@ class SqliteConfig implements DatabaseConfig
 
 
     /**
-     * @return string
+     * @inheritDoc
      */
+    #[Override]
     public function getDatabase(): string
     {
         return 'sqlite';

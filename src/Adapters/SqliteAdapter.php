@@ -7,6 +7,7 @@ use Kirameki\Database\Query\Syntax\SqliteQuerySyntax;
 use Kirameki\Database\Schema\Statements\CreateTableBuilder;
 use Kirameki\Database\Schema\Statements\DropTableBuilder;
 use Kirameki\Database\Schema\Syntax\SqliteSchemaSyntax;
+use Override;
 use PDO;
 use function file_exists;
 use function iterator_to_array;
@@ -18,8 +19,9 @@ use function unlink;
 class SqliteAdapter extends PdoAdapter
 {
     /**
-     * @return PDO
+     * @inheritDoc
      */
+    #[Override]
     public function createPdo(): PDO
     {
         $config = $this->getConfig();
@@ -37,6 +39,7 @@ class SqliteAdapter extends PdoAdapter
     /**
      * @inheritDoc
      */
+    #[Override]
     protected function instantiateQuerySyntax(): SqliteQuerySyntax
     {
         return new SqliteQuerySyntax(
@@ -50,6 +53,7 @@ class SqliteAdapter extends PdoAdapter
     /**
      * @inheritDoc
      */
+    #[Override]
     protected function instantiateSchemaSyntax(): SqliteSchemaSyntax
     {
         return new SqliteSchemaSyntax(
@@ -60,9 +64,9 @@ class SqliteAdapter extends PdoAdapter
     }
 
     /**
-     * @param bool $ifNotExist
-     * @return void
+     * @inheritDoc
      */
+    #[Override]
     public function createDatabase(bool $ifNotExist = true): void
     {
         if ($ifNotExist && $this->databaseExists()) {
@@ -81,6 +85,7 @@ class SqliteAdapter extends PdoAdapter
     /**
      * @inheritDoc
      */
+    #[Override]
     public function dropDatabase(bool $ifExist = true): void
     {
         if ($this->databaseExists()) {
@@ -97,6 +102,7 @@ class SqliteAdapter extends PdoAdapter
     /**
      * @inheritDoc
      */
+    #[Override]
     public function databaseExists(): bool
     {
         // Databases are always considered to exist if connected.

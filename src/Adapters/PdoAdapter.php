@@ -16,6 +16,7 @@ use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Kirameki\Database\Schema\Statements\SchemaExecution;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
+use Override;
 use PDO;
 use PDOException;
 use PDOStatement;
@@ -63,6 +64,7 @@ abstract class PdoAdapter implements DatabaseAdapter
      * @inheritDoc
      * @return TConfig
      */
+    #[Override]
     public function getConfig(): DatabaseConfig
     {
         return $this->config;
@@ -71,6 +73,7 @@ abstract class PdoAdapter implements DatabaseAdapter
     /**
      * @inheritDoc
      */
+    #[Override]
     public function connect(): static
     {
         $this->pdo = $this->createPdo();
@@ -80,6 +83,7 @@ abstract class PdoAdapter implements DatabaseAdapter
     /**
      * @inheritDoc
      */
+    #[Override]
     public function disconnect(): static
     {
         $this->pdo = null;
@@ -89,6 +93,7 @@ abstract class PdoAdapter implements DatabaseAdapter
     /**
      * @inheritDoc
      */
+    #[Override]
     public function isConnected(): bool
     {
         return $this->pdo !== null;
@@ -97,6 +102,7 @@ abstract class PdoAdapter implements DatabaseAdapter
     /**
      * @inheritDoc
      */
+    #[Override]
     public function runSchema(SchemaStatement $statement): SchemaExecution
     {
         try {
@@ -115,6 +121,7 @@ abstract class PdoAdapter implements DatabaseAdapter
     /**
      * @inheritDoc
      */
+    #[Override]
     public function query(QueryStatement $statement): QueryResult
     {
         try {
@@ -135,6 +142,7 @@ abstract class PdoAdapter implements DatabaseAdapter
     /**
      * @inheritDoc
      */
+    #[Override]
     public function cursor(QueryStatement $statement): QueryResult
     {
         try {
@@ -165,16 +173,18 @@ abstract class PdoAdapter implements DatabaseAdapter
     }
 
     /**
-     * @return void
+     * @inheritDoc
      */
+    #[Override]
     public function beginTransaction(): void
     {
         $this->getPdo()->beginTransaction();
     }
 
     /**
-     * @return void
+     * @inheritDoc
      */
+    #[Override]
     public function commit(): void
     {
         $this->getPdo()->commit();
@@ -183,6 +193,7 @@ abstract class PdoAdapter implements DatabaseAdapter
     /**
      * @inheritDoc
      */
+    #[Override]
     public function rollback(): void
     {
         $this->getPdo()->rollBack();
@@ -191,6 +202,7 @@ abstract class PdoAdapter implements DatabaseAdapter
     /**
      * @inheritDoc
      */
+    #[Override]
     public function inTransaction(): bool
     {
         return $this->getPdo()->inTransaction();
@@ -199,6 +211,7 @@ abstract class PdoAdapter implements DatabaseAdapter
     /**
      * @inheritDoc
      */
+    #[Override]
     public function getQuerySyntax(): QuerySyntax
     {
         return $this->querySyntax ??= $this->instantiateQuerySyntax();
@@ -212,6 +225,7 @@ abstract class PdoAdapter implements DatabaseAdapter
     /**
      * @inheritDoc
      */
+    #[Override]
     public function getSchemaSyntax(): SchemaSyntax
     {
         return $this->schemaSyntax ??= $this->instantiateSchemaSyntax();

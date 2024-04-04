@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Schema\Statements;
 
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
+use Override;
 
 class DropTableStatement extends SchemaStatement
 {
@@ -19,8 +20,9 @@ class DropTableStatement extends SchemaStatement
     }
 
     /**
-     * @return list<string>
+     * @inheritDoc
      */
+    #[Override]
     public function toCommands(): array
     {
         return $this->syntax->compileDropTable($this);

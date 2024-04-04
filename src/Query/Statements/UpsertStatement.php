@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Query\Statements;
 
 use Kirameki\Database\Query\Syntax\QuerySyntax;
+use Override;
 
 class UpsertStatement extends QueryStatement
 {
@@ -36,6 +37,7 @@ class UpsertStatement extends QueryStatement
     /**
      * @inheritDoc
      */
+    #[Override]
     public function prepare(): Executable
     {
         return $this->syntax->compileUpsert($this);

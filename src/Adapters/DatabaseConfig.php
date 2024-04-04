@@ -4,7 +4,13 @@ namespace Kirameki\Database\Adapters;
 
 interface DatabaseConfig
 {
+    /**
+     * @return string
+     */
     public function getAdapterName(): string;
 
+    /**
+     * @return string
+     */
     public function getDatabase(): string;
 }

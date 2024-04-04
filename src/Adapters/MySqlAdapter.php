@@ -7,6 +7,7 @@ use Kirameki\Database\Query\Syntax\MySqlQuerySyntax;
 use Kirameki\Database\Schema\Statements\RawStatement;
 use Kirameki\Database\Schema\Syntax\MySqlSchemaSyntax;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
+use Override;
 use PDO;
 use function array_filter;
 use function implode;
@@ -24,8 +25,9 @@ class MySqlAdapter extends PdoAdapter
     protected string $dateTimeFormat = 'Y-m-d H:i:s.u';
 
     /**
-     * @return PDO
+     * @inheritDoc
      */
+    #[Override]
     protected function createPdo(): PDO
     {
         $config = $this->getConfig();
@@ -59,6 +61,7 @@ class MySqlAdapter extends PdoAdapter
     /**
      * @inheritDoc
      */
+    #[Override]
     protected function instantiateQuerySyntax(): MySqlQuerySyntax
     {
         return new MySqlQuerySyntax(
@@ -72,6 +75,7 @@ class MySqlAdapter extends PdoAdapter
     /**
      * @inheritDoc
      */
+    #[Override]
     protected function instantiateSchemaSyntax(): SchemaSyntax
     {
         return new MySqlSchemaSyntax(
@@ -84,6 +88,7 @@ class MySqlAdapter extends PdoAdapter
     /**
      * @inheritDoc
      */
+    #[Override]
     public function createDatabase(bool $ifNotExist = false): void
     {
         $copy = (clone $this);
@@ -98,6 +103,7 @@ class MySqlAdapter extends PdoAdapter
     /**
      * @inheritDoc
      */
+    #[Override]
     public function dropDatabase(bool $ifExist = false): void
     {
         $copy = (clone $this);
@@ -112,6 +118,7 @@ class MySqlAdapter extends PdoAdapter
     /**
      * @inheritDoc
      */
+    #[Override]
     public function databaseExists(): bool
     {
         $copy = (clone $this);

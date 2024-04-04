@@ -41,7 +41,10 @@ class ConditionDefinition
     {
     }
 
-    public function __clone()
+    /**
+     * @return void
+     */
+    public function __clone(): void
     {
         if ($this->next !== null) {
             $this->next = clone $this->next;

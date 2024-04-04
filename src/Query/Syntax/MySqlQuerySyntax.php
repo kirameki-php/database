@@ -15,6 +15,7 @@ class MySqlQuerySyntax extends QuerySyntax
     /**
      * @inheritDoc
      */
+    #[Override]
     protected function formatFromUseIndexPart(SelectStatement $statement): string
     {
         return $statement->forceIndex !== null

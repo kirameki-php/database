@@ -24,7 +24,7 @@ abstract class ConditionsStatement extends QueryStatement
     /**
      * @return void
      */
-    public function __clone()
+    public function __clone(): void
     {
         if ($this->where !== null) {
             $where = [];

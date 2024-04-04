@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Schema\Statements;
 
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
+use Override;
 
 class RawStatement extends SchemaStatement
 {
@@ -21,6 +22,7 @@ class RawStatement extends SchemaStatement
     /**
      * @inheritDoc
      */
+    #[Override]
     public function toCommands(): array
     {
         return [$this->command];

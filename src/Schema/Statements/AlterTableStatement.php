@@ -5,6 +5,7 @@ namespace Kirameki\Database\Schema\Statements;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\InvalidTypeException;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
+use Override;
 use function array_map;
 
 class AlterTableStatement extends SchemaStatement
@@ -31,8 +32,9 @@ class AlterTableStatement extends SchemaStatement
     }
 
     /**
-     * @return list<string>
+     * @inheritDoc
      */
+    #[Override]
     public function toCommands(): array
     {
         return $this->syntax->compileAlterTable($this);

@@ -2,6 +2,8 @@
 
 namespace Kirameki\Database\Adapters;
 
+use Override;
+
 class MySqlConfig implements DatabaseConfig
 {
     /**
@@ -26,16 +28,18 @@ class MySqlConfig implements DatabaseConfig
     }
 
     /**
-     * @return string
+     * @inheritDoc
      */
+    #[Override]
     public function getAdapterName(): string
     {
         return 'mysql';
     }
 
     /**
-     * @return string
+     * @inheritDoc
      */
+    #[Override]
     public function getDatabase(): string
     {
         return $this->database ?? '';

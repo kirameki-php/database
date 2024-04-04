@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Query\Statements;
 
 use Kirameki\Database\Query\Syntax\QuerySyntax;
+use Override;
 
 class RawStatement extends QueryStatement
 {
@@ -24,6 +25,7 @@ class RawStatement extends QueryStatement
     /**
      * @inheritDoc
      */
+    #[Override]
     public function prepare(): Executable
     {
         return new Executable($this->raw);
@@ -32,6 +34,7 @@ class RawStatement extends QueryStatement
     /**
      * @inheritDoc
      */
+    #[Override]
     public function toString(): string
     {
         return $this->syntax->interpolate($this);

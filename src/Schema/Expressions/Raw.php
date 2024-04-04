@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Schema\Expressions;
 
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
+use Override;
 
 class Raw extends DefaultValue
 {
@@ -16,9 +17,9 @@ class Raw extends DefaultValue
     }
 
     /**
-     * @param SchemaSyntax $syntax
-     * @return string
+     * @inheritDoc
      */
+    #[Override]
     public function toString(SchemaSyntax $syntax): string
     {
         return $this->value;

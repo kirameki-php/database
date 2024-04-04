@@ -29,7 +29,7 @@ abstract class SchemaBuilder
      *
      * @return void
      */
-    public function __clone()
+    public function __clone(): void
     {
         $this->statement = clone $this->statement;
     }

@@ -16,9 +16,9 @@ class Raw extends Expression
     }
 
     /**
-     * @param QuerySyntax $syntax
-     * @return string
+     * @inheritDoc
      */
+    #[Override]
     public function prepare(QuerySyntax $syntax): string
     {
         return $this->value;

@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Query\Expressions;
 
 use Kirameki\Database\Query\Syntax\QuerySyntax;
+use Override;
 
 class Column extends Expression
 {
@@ -16,9 +17,9 @@ class Column extends Expression
     }
 
     /**
-     * @param QuerySyntax $syntax
-     * @return string
+     * @inheritDoc
      */
+    #[Override]
     public function prepare(QuerySyntax $syntax): string
     {
         return $syntax->asColumn($this->column);

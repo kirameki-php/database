@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Schema\Statements;
 
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
+use Override;
 use RuntimeException;
 
 class DropIndexStatement extends SchemaStatement
@@ -43,8 +44,9 @@ class DropIndexStatement extends SchemaStatement
     }
 
     /**
-     * @return list<string>
+     * @inheritDoc
      */
+    #[Override]
     public function toCommands(): array
     {
         $this->preprocess();

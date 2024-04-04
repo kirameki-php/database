@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Query\Expressions;
 
 use Kirameki\Database\Query\Syntax\QuerySyntax;
+use Override;
 
 class Aggregate extends Expression
 {
@@ -20,9 +21,9 @@ class Aggregate extends Expression
     }
 
     /**
-     * @param QuerySyntax $syntax
-     * @return string
+     * @inheritDoc
      */
+    #[Override]
     public function prepare(QuerySyntax $syntax): string
     {
         $expr = $this->function;

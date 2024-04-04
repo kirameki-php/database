@@ -20,6 +20,10 @@ class RenameTableStatement extends SchemaStatement
         parent::__construct($syntax);
     }
 
+    /**
+     * @inheritDoc
+     */
+    #[Override]
     public function toCommands(): array
     {
         return $this->syntax->compileRenameTable($this);

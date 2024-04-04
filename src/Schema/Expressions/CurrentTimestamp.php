@@ -17,9 +17,9 @@ class CurrentTimestamp extends DefaultValue
     }
 
     /**
-     * @param SchemaSyntax $syntax
-     * @return string
+     * @inheritDoc
      */
+    #[Override]
     public function toString(SchemaSyntax $syntax): string
     {
         return $syntax->formatCurrentTimestamp($this->definition->size);

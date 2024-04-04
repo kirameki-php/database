@@ -19,8 +19,9 @@ class TruncateTableStatement extends SchemaStatement
     }
 
     /**
-     * @return list<string>
+     * @inheritDoc
      */
+    #[Override]
     public function toCommands(): array
     {
         return $this->syntax->compileTruncateTable($this);
