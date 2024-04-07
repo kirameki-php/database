@@ -53,10 +53,10 @@ abstract class Syntax
 
     /**
      * @param string $template
-     * @param array<array-key, mixed> $parameters
+     * @param iterable<int, mixed> $parameters
      * @return Executable
      */
-    protected function toExecutable(string $template, array $parameters = []): Executable
+    public function toExecutable(string $template, iterable $parameters = []): Executable
     {
         return new Executable($template, $parameters);
     }

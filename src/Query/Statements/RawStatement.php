@@ -7,16 +7,15 @@ use Override;
 
 class RawStatement extends QueryStatement
 {
-
     /**
      * @param QuerySyntax $syntax
      * @param string $raw
-     * @param array<mixed> $parameters
+     * @param iterable<int, mixed> $parameters
      */
     public function __construct(
         QuerySyntax $syntax,
         protected readonly string $raw,
-        protected readonly array $parameters = [],
+        protected readonly iterable $parameters = [],
     )
     {
         parent::__construct($syntax);
@@ -28,7 +27,7 @@ class RawStatement extends QueryStatement
     #[Override]
     public function prepare(): Executable
     {
-        return new Executable($this->raw);
+        return $this->syntax->toExecutable($this->raw, $this->parameters);
     }
 
     /**

@@ -6,11 +6,11 @@ class Executable
 {
     /**
      * @param string $template
-     * @param array<array-key, mixed> $parameters
+     * @param iterable<int, mixed> $parameters
      */
     public function __construct(
         public string $template,
-        public array $parameters = [],
+        public iterable $parameters = [],
     )
     {
     }

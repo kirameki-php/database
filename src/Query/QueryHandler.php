@@ -9,6 +9,7 @@ use Kirameki\Database\Query\Statements\DeleteBuilder;
 use Kirameki\Database\Query\Statements\InsertBuilder;
 use Kirameki\Database\Query\Statements\QueryResult;
 use Kirameki\Database\Query\Statements\QueryStatement as TStatement;
+use Kirameki\Database\Query\Statements\RawStatement;
 use Kirameki\Database\Query\Statements\SelectBuilder;
 use Kirameki\Database\Query\Statements\UpdateBuilder;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
@@ -74,6 +75,16 @@ readonly class QueryHandler
     public function execute(TStatement $statement): QueryResult
     {
         return $this->processResult($this->connection->adapter->query($statement));
+    }
+
+    /**
+     * @param string $query
+     * @param iterable<array-key, mixed> $bindings
+     * @return QueryResult<RawStatement>
+     */
+    public function executeRaw(string $query, iterable $bindings = []): QueryResult
+    {
+        return $this->execute(new RawStatement($this->syntax, $query, $bindings));
     }
 
     /**
