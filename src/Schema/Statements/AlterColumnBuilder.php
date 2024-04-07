@@ -16,7 +16,7 @@ class AlterColumnBuilder extends ColumnBuilder
      * @param int $size
      * @return ColumnBuilder
      */
-    public function int(int $size = ColumnDefault::INT_SIZE): ColumnBuilder
+    public function int(int $size = ColumnDefinition::DEFAULT_INT_SIZE): ColumnBuilder
     {
         return $this->columnType(__FUNCTION__, $size);
     }
@@ -51,7 +51,7 @@ class AlterColumnBuilder extends ColumnBuilder
      * @param int $precision
      * @return ColumnBuilder
      */
-    public function datetime(int $precision = ColumnDefault::TIME_PRECISION): ColumnBuilder
+    public function datetime(int $precision = ColumnDefinition::DEFAULT_TIME_PRECISION): ColumnBuilder
     {
         return $this->columnType(__FUNCTION__, $precision);
     }
@@ -60,7 +60,7 @@ class AlterColumnBuilder extends ColumnBuilder
      * @param int $size
      * @return ColumnBuilder
      */
-    public function string(int $size = ColumnDefault::STRING_SIZE): ColumnBuilder
+    public function string(int $size = ColumnDefinition::DEFAULT_STRING_SIZE): ColumnBuilder
     {
         return $this->columnType(__FUNCTION__, $size);
     }

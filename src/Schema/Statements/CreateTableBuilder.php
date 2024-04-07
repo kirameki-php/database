@@ -26,7 +26,7 @@ class CreateTableBuilder extends SchemaBuilder
      * @param int $size
      * @return ColumnBuilder
      */
-    public function int(string $column, int $size = ColumnDefault::INT_SIZE): ColumnBuilder
+    public function int(string $column, int $size = ColumnDefinition::DEFAULT_INT_SIZE): ColumnBuilder
     {
         return $this->column($column, __FUNCTION__, $size);
     }
@@ -65,7 +65,7 @@ class CreateTableBuilder extends SchemaBuilder
      * @param int $precision
      * @return TimestampColumnBuilder
      */
-    public function datetime(string $column, int $precision = ColumnDefault::TIME_PRECISION): ColumnBuilder
+    public function datetime(string $column, int $precision = ColumnDefinition::DEFAULT_TIME_PRECISION): ColumnBuilder
     {
         return new TimestampColumnBuilder($this->addDefinition($column, __FUNCTION__, $precision));
     }
@@ -75,7 +75,7 @@ class CreateTableBuilder extends SchemaBuilder
      * @param int $size
      * @return ColumnBuilder
      */
-    public function string(string $column, int $size = ColumnDefault::STRING_SIZE): ColumnBuilder
+    public function string(string $column, int $size = ColumnDefinition::DEFAULT_STRING_SIZE): ColumnBuilder
     {
         return $this->column($column, __FUNCTION__, $size);
     }
@@ -120,7 +120,7 @@ class CreateTableBuilder extends SchemaBuilder
      * @param int $precision
      * @return ColumnBuilderAggregate
      */
-    public function timestamps(int $precision = ColumnDefault::TIME_PRECISION): ColumnBuilderAggregate
+    public function timestamps(int $precision = ColumnDefinition::DEFAULT_TIME_PRECISION): ColumnBuilderAggregate
     {
         return new ColumnBuilderAggregate([
             $this->datetime('createdAt', $precision)->currentAsDefault(),
