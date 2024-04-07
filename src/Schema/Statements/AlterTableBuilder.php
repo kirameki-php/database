@@ -28,7 +28,7 @@ class AlterTableBuilder extends SchemaBuilder
      */
     public function addColumn(string $name): ColumnBuilder
     {
-        $action = new AlterColumnAction(AlterType::Add, new ColumnDefinition($name));
+        $action = new AlterColumnAction(AlterType::Add, $name);
         $this->statement->addAction($action);
         return new AlterColumnBuilder($action);
     }
@@ -39,7 +39,7 @@ class AlterTableBuilder extends SchemaBuilder
      */
     public function modifyColumn(string $name): AlterColumnBuilder
     {
-        $action = new AlterColumnAction(AlterType::Modify, new ColumnDefinition($name));
+        $action = new AlterColumnAction(AlterType::Modify, $name);
         $this->statement->addAction($action);
         return new AlterColumnBuilder($action);
     }

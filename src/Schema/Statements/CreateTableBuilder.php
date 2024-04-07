@@ -174,7 +174,7 @@ class CreateTableBuilder extends SchemaBuilder
      */
     protected function addDefinition(string $name, string $type, ?int $size = null, ?int $scale = null): ColumnDefinition
     {
-        $definition = new ColumnDefinition($name, $type, $size, $scale);
+        $definition = new ColumnDefinition($name, $type, $size, $scale, false);
         $this->statement->columns[] = $definition;
         return $definition;
     }

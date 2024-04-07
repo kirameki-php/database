@@ -2,6 +2,8 @@
 
 namespace Kirameki\Database\Schema\Statements;
 
+use function random_int;
+
 class ColumnBuilder
 {
     /**
@@ -34,9 +36,9 @@ class ColumnBuilder
     /**
      * @return $this
      */
-    public function autoIncrement(): static
+    public function autoIncrement(?int $startFrom = null): static
     {
-        $this->definition->autoIncrement = true;
+        $this->definition->autoIncrement = $startFrom ?? random_int(1, 1000);
         return $this;
     }
 

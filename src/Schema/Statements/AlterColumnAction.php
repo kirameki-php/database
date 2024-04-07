@@ -7,6 +7,11 @@ use Kirameki\Database\Schema\Support\AlterType;
 class AlterColumnAction
 {
     /**
+     * @var ColumnDefinition
+     */
+    public readonly ColumnDefinition $definition;
+
+    /**
      * @var string|null
      */
     public ?string $positionType = null;
@@ -18,13 +23,14 @@ class AlterColumnAction
 
     /**
      * @param AlterType $type
-     * @param ColumnDefinition $definition
+     * @param string $name
      */
     public function __construct(
         public readonly AlterType $type,
-        public readonly ColumnDefinition $definition,
+        string $name,
     )
     {
+        $this->definition = new ColumnDefinition($name);
     }
 
     /**
