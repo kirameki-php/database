@@ -11,22 +11,17 @@ class CreateIndexStatement extends SchemaStatement
     /**
      * @var string|null
      */
-    public ?string $name;
+    public ?string $name = null;
 
     /**
      * @var array<array-key, string>
      */
-    public array $columns;
+    public array $columns = [];
 
     /**
-     * @var bool
+     * @var bool|null
      */
-    public ?bool $unique;
-
-    /**
-     * @var string|null
-     */
-    public ?string $comment;
+    public ?bool $unique = null;
 
     /**
      * @param SchemaSyntax $syntax
@@ -38,10 +33,6 @@ class CreateIndexStatement extends SchemaStatement
     )
     {
         parent::__construct($syntax);
-        $this->name = null;
-        $this->columns = [];
-        $this->unique = null;
-        $this->comment = null;
     }
 
     /**

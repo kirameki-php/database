@@ -199,9 +199,6 @@ abstract class SchemaSyntax extends Syntax
             $columnParts[] = "$column $order";
         }
         $parts[] = '(' . implode(', ', $columnParts) . ')';
-        if ($statement->comment !== null) {
-            $parts[] = $this->asLiteral($statement->comment);
-        }
         return implode(' ', $parts);
     }
 

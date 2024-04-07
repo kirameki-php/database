@@ -54,14 +54,4 @@ class CreateIndexBuilder extends SchemaBuilder
         $this->statement->unique = true;
         return $this;
     }
-
-    /**
-     * @param string $comment
-     * @return $this
-     */
-    public function comment(string $comment): static
-    {
-        $this->statement->comment = $comment;
-        return $this;
-    }
 }
