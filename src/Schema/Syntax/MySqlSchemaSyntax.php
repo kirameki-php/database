@@ -6,12 +6,41 @@ use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Exceptions\RuntimeException;
 use Kirameki\Database\Schema\Statements\ColumnDefinition;
+use Kirameki\Database\Schema\Statements\CreateTableStatement;
 use Override;
 use function implode;
+use function is_int;
 use function strtoupper;
 
 class MySqlSchemaSyntax extends SchemaSyntax
 {
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function compileCreateTable(CreateTableStatement $statement): array
+    {
+        return [
+            ...parent::compileCreateTable($statement),
+            ...$this->addAutoIncrementStartingValue($statement),
+        ];
+    }
+
+    /**
+     * @param CreateTableStatement $statement
+     * @return list<string>
+     */
+    protected function addAutoIncrementStartingValue(CreateTableStatement $statement): array
+    {
+        $changes = [];
+        foreach ($statement->columns as $column) {
+            if (is_int($column->autoIncrement)) {
+                $changes[] = "ALTER TABLE {$statement->table} AUTO_INCREMENT = {$column->autoIncrement}";
+            }
+        }
+        return $changes;
+    }
+
     /**
      * @inheritDoc
      */
@@ -69,7 +98,7 @@ class MySqlSchemaSyntax extends SchemaSyntax
         $parts = [];
         $parts[] = parent::formatColumnDefinition($def);
 
-        if ($def->autoIncrement) {
+        if ($def->autoIncrement !== null) {
             $parts[] = 'AUTO_INCREMENT';
         }
 

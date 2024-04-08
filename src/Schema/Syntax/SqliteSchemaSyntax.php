@@ -17,10 +17,23 @@ use Override;
 use function array_keys;
 use function implode;
 use function in_array;
+use function is_int;
 use function pow;
 
 class SqliteSchemaSyntax extends SchemaSyntax
 {
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function compileCreateTable(CreateTableStatement $statement): array
+    {
+        return [
+            ...parent::compileCreateTable($statement),
+            ...$this->addAutoIncrementStartingValue($statement),
+        ];
+    }
+
     /**
      * @inheritDoc
      */
@@ -31,7 +44,7 @@ class SqliteSchemaSyntax extends SchemaSyntax
 
         $hasAutoIncrementColumn = false;
         foreach ($statement->columns as $column) {
-            if ($column->autoIncrement) {
+            if ($column->autoIncrement !== null) {
                 $hasAutoIncrementColumn = true;
                 break;
             }
@@ -44,6 +57,23 @@ class SqliteSchemaSyntax extends SchemaSyntax
     }
 
     /**
+     * @param CreateTableStatement $statement
+     * @return list<string>
+     */
+    protected function addAutoIncrementStartingValue(CreateTableStatement $statement): array
+    {
+        $changes = [];
+        foreach ($statement->columns as $column) {
+            if (is_int($column->autoIncrement)) {
+                $seq = $column->autoIncrement;
+                $name = $this->asLiteral($statement->table);
+                $changes[] = "ALTER TABLE \"sqlite_sequence\" SET \"seq\" = {$seq} WHERE \"name\" = {$name}";
+            }
+        }
+        return $changes;
+    }
+
+    /**
      * @inheritDoc
      */
     #[Override]
@@ -51,7 +81,7 @@ class SqliteSchemaSyntax extends SchemaSyntax
     {
         $formatted = parent::formatColumnDefinition($def);
 
-        if ($def->autoIncrement) {
+        if ($def->autoIncrement !== null) {
             if (!$def->primaryKey) {
                 throw new LogicException('Auto increment column must be the primary key.');
             }
@@ -215,7 +245,7 @@ class SqliteSchemaSyntax extends SchemaSyntax
     public function compileTruncateTable(TruncateTableStatement $statement): array
     {
         $statements = [];
-        $statements[] = 'DELETE FROM "sqlite_sequence" WHERE "name" = \'' . $statement->table . '\'';
+        $statements[] = 'DELETE FROM "sqlite_sequence" WHERE "name" = ' . $this->asLiteral($statement->table);
         $statements[] = "DELETE FROM {$this->asIdentifier($statement->table)}";
         return $statements;
     }

@@ -9,11 +9,6 @@ class ColumnDefinition
     public const int DEFAULT_TIME_PRECISION = 6;
 
     /**
-     * @var mixed
-     */
-    public mixed $default = null;
-
-    /**
      * @var bool|null
      */
     public ?bool $primaryKey = null;
@@ -29,6 +24,7 @@ class ColumnDefinition
      * @param int|null $size
      * @param int|null $scale
      * @param bool|null $nullable
+     * @param mixed|null $default
      */
     public function __construct(
         public readonly string $name,
@@ -36,6 +32,7 @@ class ColumnDefinition
         public ?int $size = null,
         public ?int $scale = null,
         public ?bool $nullable = null,
+        public mixed $default = null,
     )
     {
     }
