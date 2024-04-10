@@ -963,7 +963,7 @@ abstract class QuerySyntax extends Syntax
             match (true) {
                 is_iterable($value) => array_push($parameters, ...iterator_to_array($value)),
                 $value instanceof Expression => array_push($parameters, ...$value->getParameters()),
-                $value instanceof Executable => array_push($parameters, ...iterator_to_array($value->parameters)),
+                $value instanceof Executable => array_push($parameters, ...$value->parameters),
                 default => $parameters[] = $value,
             };
             $def = $def->next;

@@ -244,7 +244,7 @@ abstract class PdoAdapter implements DatabaseAdapter
     {
         $executable = $statement->prepare();
         $prepared = $this->getPdo()->prepare($executable->template);
-        $prepared->execute(iterator_to_array($executable->parameters));
+        $prepared->execute($executable->parameters);
         return $prepared;
     }
 

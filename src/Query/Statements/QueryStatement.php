@@ -9,9 +9,11 @@ abstract class QueryStatement implements Statement
 {
     /**
      * @param QuerySyntax $syntax
+     * @param array<string, scalar>|null $tags
      */
     public function __construct(
         protected readonly QuerySyntax $syntax,
+        public readonly ?array $tags = null,
     )
     {
     }

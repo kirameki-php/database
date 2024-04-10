@@ -58,6 +58,6 @@ abstract class Syntax
      */
     public function toExecutable(string $template, iterable $parameters = []): Executable
     {
-        return new Executable($template, $parameters);
+        return new Executable($template, iterator_to_array($parameters));
     }
 }
