@@ -2,6 +2,8 @@
 
 namespace Kirameki\Database\Adapters;
 
+use Kirameki\Database\Query\Support\TagsFormat;
+
 interface DatabaseConfig
 {
     /**
@@ -13,4 +15,9 @@ interface DatabaseConfig
      * @return string
      */
     public function getDatabase(): string;
+
+    /**
+     * @return TagsFormat
+     */
+    public function getTagFormat(): TagsFormat;
 }

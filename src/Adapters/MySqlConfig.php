@@ -2,6 +2,7 @@
 
 namespace Kirameki\Database\Adapters;
 
+use Kirameki\Database\Query\Support\TagsFormat;
 use Override;
 
 class MySqlConfig implements DatabaseConfig
@@ -43,5 +44,14 @@ class MySqlConfig implements DatabaseConfig
     public function getDatabase(): string
     {
         return $this->database ?? '';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function getTagFormat(): TagsFormat
+    {
+        return TagsFormat::Default;
     }
 }

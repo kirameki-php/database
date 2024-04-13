@@ -7,27 +7,22 @@ use Kirameki\Database\Adapters\DatabaseAdapter;
 use Kirameki\Database\Query\Statements\Executable;
 use Kirameki\Database\Query\Statements\Normalizable;
 use Kirameki\Database\Query\Statements\QueryStatement;
+use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 use Override;
 
 class ListIndexesStatement extends QueryStatement implements Normalizable
 {
     /**
-     * @var SchemaSyntax
-     */
-    protected SchemaSyntax $schemaSyntax;
-
-    /**
-     * @param DatabaseAdapter $adapter
+     * @param QuerySyntax $syntax
      * @param string $table
      */
     public function __construct(
-        protected readonly DatabaseAdapter $adapter,
+        QuerySyntax $syntax,
         public readonly string $table,
     )
     {
-        $this->schemaSyntax = $adapter->getSchemaSyntax();
-        parent::__construct($adapter->getQuerySyntax());
+        parent::__construct($syntax);
     }
 
     /**
@@ -36,7 +31,7 @@ class ListIndexesStatement extends QueryStatement implements Normalizable
     #[Override]
     public function prepare(): Executable
     {
-        return $this->schemaSyntax->compileListIndexes($this);
+        return $this->syntax->compileListIndexes($this);
     }
 
     /**

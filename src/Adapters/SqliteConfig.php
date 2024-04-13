@@ -2,6 +2,7 @@
 
 namespace Kirameki\Database\Adapters;
 
+use Kirameki\Database\Query\Support\TagsFormat;
 use Override;
 
 class SqliteConfig implements DatabaseConfig
@@ -34,5 +35,14 @@ class SqliteConfig implements DatabaseConfig
     public function getDatabase(): string
     {
         return 'sqlite';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function getTagFormat(): TagsFormat
+    {
+        return TagsFormat::Default;
     }
 }

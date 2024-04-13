@@ -4,10 +4,16 @@ namespace Kirameki\Database\Query\Syntax;
 
 use BackedEnum;
 use DateTimeInterface;
+use Iterator;
+use Kirameki\Collections\Utils\Arr;
+use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Exceptions\UnreachableException;
 use Kirameki\Core\Json;
 use Kirameki\Core\Value;
 use Kirameki\Database\Adapters\DatabaseConfig;
+use Kirameki\Database\Info\Statements\ListColumnsStatement;
+use Kirameki\Database\Info\Statements\ListIndexesStatement;
+use Kirameki\Database\Info\Statements\ListTablesStatement;
 use Kirameki\Database\Query\Expressions\Column;
 use Kirameki\Database\Query\Expressions\Expression;
 use Kirameki\Database\Query\Statements\ConditionDefinition;
@@ -22,14 +28,15 @@ use Kirameki\Database\Query\Statements\UpdateStatement;
 use Kirameki\Database\Query\Statements\UpsertStatement;
 use Kirameki\Database\Query\Support\LockOption;
 use Kirameki\Database\Query\Support\LockType;
-use Kirameki\Database\Query\Support\NullOrder;
 use Kirameki\Database\Query\Support\Operator;
 use Kirameki\Database\Query\Support\Ordering;
 use Kirameki\Database\Query\Support\Range;
 use Kirameki\Database\Query\Support\SortOrder;
 use Kirameki\Database\Query\Support\QueryTags;
+use Kirameki\Database\Query\Support\TagsFormat;
 use Kirameki\Database\Syntax;
 use RuntimeException;
+use stdClass;
 use function array_fill;
 use function array_filter;
 use function array_key_exists;
@@ -50,6 +57,7 @@ use function next;
 use function preg_match;
 use function preg_quote;
 use function preg_replace_callback;
+use function rawurlencode;
 use function str_contains;
 
 abstract class QuerySyntax extends Syntax
@@ -68,6 +76,19 @@ abstract class QuerySyntax extends Syntax
     )
     {
         parent::__construct($config, $identifierDelimiter, $literalDelimiter);
+    }
+
+    /**
+     * @template TQueryStatement of QueryStatement
+     * @param TQueryStatement $statement
+     * @param string $template
+     * @param list<mixed> $parameters
+     * @return Executable
+     */
+    public function toExecutable(QueryStatement $statement, string $template, array $parameters = []): Executable
+    {
+        $template .= $this->formatTags($statement->tags);
+        return new Executable($statement, $template, $parameters);
     }
 
     /**
@@ -849,6 +870,41 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
+     * @param QueryTags|null $tags
+     * @return string
+     */
+    public function formatTags(?QueryTags $tags): string
+    {
+        if ($tags === null) {
+            return '';
+        }
+        return match($this->config->getTagFormat()) {
+            TagsFormat::Default => $this->formatTagsForLogs($tags),
+            TagsFormat::OpenTelemetry => $this->formatTagsForOpenTelemetry($tags),
+        };
+    }
+
+    /**
+     * @param QueryTags $tags
+     * @return string
+     */
+    protected function formatTagsForLogs(QueryTags $tags): string
+    {
+        $fields = Arr::map($tags, static fn(mixed $v, string $k) => rawurlencode($k) . '=' . rawurlencode((string) $v));
+        return Arr::join($fields, ',', ' /* ', ' */');
+    }
+
+    /**
+     * @param QueryTags $tags
+     * @return string
+     */
+    protected function formatTagsForOpenTelemetry(QueryTags $tags): string
+    {
+        $fields = Arr::map($tags, static fn(mixed $v, string $k) => rawurlencode($k) . "='" . rawurlencode((string) $v) . "'");
+        return Arr::join($fields, ',', ' /*', '*/');
+    }
+
+    /**
      * @param string $name
      * @return string
      */
@@ -1021,5 +1077,84 @@ abstract class QuerySyntax extends Syntax
         }
 
         return $value;
+    }
+    /**
+     * @param ListTablesStatement $statement
+     * @return Executable
+     */
+    public function compileListTables(ListTablesStatement $statement): Executable
+    {
+        $database = $this->asLiteral($this->config->getDatabase());
+        $template = "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = {$database}";
+        return $this->toExecutable($statement, $template);
+    }
+
+    /**
+     * @param ListColumnsStatement $statement
+     * @return Executable
+     */
+    public function compileListColumns(ListColumnsStatement $statement): Executable
+    {
+        $columns = implode(', ', [
+            "COLUMN_NAME AS `name`",
+            "DATA_TYPE AS `type`",
+            "IS_NULLABLE AS `nullable`",
+            "ORDINAL_POSITION AS `position`",
+        ]);
+        $database = $this->asLiteral($this->config->getDatabase());
+        $table = $this->asLiteral($statement->table);
+        $template = implode(' ', [
+            "SELECT {$columns} FROM INFORMATION_SCHEMA.COLUMNS",
+            "WHERE TABLE_SCHEMA = {$database}",
+            "AND TABLE_NAME = {$table}",
+            "ORDER BY ORDINAL_POSITION ASC",
+        ]);
+        return $this->toExecutable($statement, $template);
+    }
+
+    /**
+     * @param iterable<int, stdClass> $rows
+     * @return Iterator<int, stdClass>
+     */
+    public function normalizeListColumns(iterable $rows): Iterator
+    {
+        foreach ($rows as $row) {
+            $row->type = match ($row->type) {
+                'int', 'mediumint', 'tinyint', 'smallint', 'bigint' => 'integer',
+                'decimal', 'float', 'double' => 'float',
+                'bool' => 'bool',
+                'varchar' => 'string',
+                'datetime' => 'datetime',
+                'json' => 'json',
+                'blob' => 'binary',
+                default => throw new LogicException('Unsupported column type: ' . $row->type, [
+                    'type' => $row->type,
+                ]),
+            };
+            $row->nullable = $row->nullable === 'YES';
+            yield $row;
+        }
+    }
+
+    /**
+     * @param ListIndexesStatement $statement
+     * @return Executable
+     */
+    public function compileListIndexes(ListIndexesStatement $statement): Executable
+    {
+        $columns = implode(', ', [
+            "INDEX_NAME AS `name`",
+            "CASE WHEN `INDEX_NAME` = 'PRIMARY' THEN 'primary' WHEN `NON_UNIQUE` = 0 THEN 'unique' ELSE 'index' END AS `type`",
+            "group_concat(COLUMN_NAME) AS `columns`",
+        ]);
+        $database = $this->asLiteral($this->config->getDatabase());
+        $table = $this->asLiteral($statement->table);
+        return $this->toExecutable($statement, implode(' ', [
+            "SELECT {$columns} FROM INFORMATION_SCHEMA.STATISTICS",
+            "WHERE TABLE_SCHEMA = {$database}",
+            "AND TABLE_NAME = {$table}",
+            "GROUP BY INDEX_NAME, NON_UNIQUE, SEQ_IN_INDEX",
+            "ORDER BY INDEX_NAME ASC, SEQ_IN_INDEX ASC",
+        ]));
     }
 }

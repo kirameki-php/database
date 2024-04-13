@@ -2,10 +2,12 @@
 
 namespace Kirameki\Database;
 
+use Kirameki\Collections\Utils\Arr;
 use Kirameki\Database\Adapters\DatabaseConfig;
 use Kirameki\Database\Query\Statements\Executable;
 use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Support\QueryTags;
+use Kirameki\Database\Query\Support\TagsFormat;
 use function implode;
 use function rawurlencode;
 use function str_replace;
@@ -53,42 +55,5 @@ abstract class Syntax
     protected function escape(string $string, string $escaping): string
     {
         return str_replace($escaping, $escaping . $escaping, $string);
-    }
-
-    /**
-     * @param QueryTags|null $tags
-     * @return string
-     */
-    public function formatTags(?QueryTags $tags): string
-    {
-        if ($tags === null) {
-            return '';
-        }
-
-        $keyValueSeparator = '=';
-        $fieldDelimiter = ',';
-
-        $fields = [];
-        foreach ($tags as $key => $value) {
-            $field = rawurlencode($key);
-            $field.= $keyValueSeparator;
-            $field.= "'" . rawurlencode((string) $value) . "'";
-            $fields[] = $field;
-        }
-        $formatted = implode($fieldDelimiter, $fields);
-        return " /*{$formatted}*/";
-    }
-
-    /**
-     * @template TQueryStatement of QueryStatement
-     * @param TQueryStatement $statement
-     * @param string $template
-     * @param list<mixed> $parameters
-     * @return Executable
-     */
-    public function toExecutable(QueryStatement $statement, string $template, array $parameters = []): Executable
-    {
-        $template .= $this->formatTags($statement->tags);
-        return new Executable($statement, $template, $parameters);
     }
 }

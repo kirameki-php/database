@@ -4,6 +4,7 @@ namespace Kirameki\Database\Schema\Expressions;
 
 use Kirameki\Database\Schema\Statements\ColumnDefinition;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
+use Override;
 
 class CurrentTimestamp extends DefaultValue
 {

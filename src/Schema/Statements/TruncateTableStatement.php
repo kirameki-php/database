@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Schema\Statements;
 
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
+use Override;
 
 class TruncateTableStatement extends SchemaStatement
 {

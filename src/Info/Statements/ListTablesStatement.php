@@ -10,21 +10,11 @@ use Override;
 class ListTablesStatement extends QueryStatement
 {
     /**
-     * @param DatabaseAdapter $adapter
-     */
-    public function __construct(
-        protected readonly DatabaseAdapter $adapter,
-    )
-    {
-        parent::__construct($adapter->getQuerySyntax());
-    }
-
-    /**
      * @inheritDoc
      */
     #[Override]
     public function prepare(): Executable
     {
-        return $this->adapter->getSchemaSyntax()->compileListTables($this);
+        return $this->syntax->compileListTables($this);
     }
 }

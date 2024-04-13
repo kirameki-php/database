@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Query\Expressions;
 
 use Kirameki\Database\Query\Syntax\QuerySyntax;
+use Override;
 
 class Raw extends Expression
 {
