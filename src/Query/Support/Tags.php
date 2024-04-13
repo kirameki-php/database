@@ -8,7 +8,7 @@ use Traversable;
 /**
  * @implements IteratorAggregate<string, scalar>
  */
-class QueryTags implements IteratorAggregate
+class Tags implements IteratorAggregate
 {
     /**
      * @param array<string, scalar> $pairs

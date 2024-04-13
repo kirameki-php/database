@@ -3,7 +3,7 @@
 namespace Kirameki\Database\Query\Statements;
 
 use Kirameki\Database\Query\QueryHandler;
-use Kirameki\Database\Query\Support\QueryTags;
+use Kirameki\Database\Query\Support\Tags;
 
 /**
  * @template TStatement of QueryStatement
@@ -53,7 +53,7 @@ abstract class QueryBuilder
      */
     public function addTag(string $key, mixed $value): static
     {
-        $tags = $this->statement->tags ??= new QueryTags();
+        $tags = $this->statement->tags ??= new Tags();
         $tags->add($key, $value);
         return $this;
     }

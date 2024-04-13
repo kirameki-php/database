@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Query\Statements;
 
-use Kirameki\Database\Query\Support\QueryTags;
+use Kirameki\Database\Query\Support\Tags;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Override;
 use function iterator_to_array;
@@ -13,13 +13,13 @@ class RawStatement extends QueryStatement
      * @param QuerySyntax $syntax
      * @param string $template
      * @param iterable<int, mixed> $parameters
-     * @param QueryTags|null $tags
+     * @param Tags|null $tags
      */
     public function __construct(
         QuerySyntax $syntax,
         public readonly string $template,
         public readonly iterable $parameters = [],
-        ?QueryTags $tags = null,
+        ?Tags $tags = null,
     )
     {
         parent::__construct($syntax, $tags);

@@ -31,12 +31,6 @@ class UpdateStatement extends ConditionsStatement
     #[Override]
     public function prepare(): Executable
     {
-        if ($this->set === null) {
-            throw new LogicException('No assignments set for update statement.', [
-                'statement' => $this,
-            ]);
-        }
-
         return $this->syntax->compileUpdate($this);
     }
 }

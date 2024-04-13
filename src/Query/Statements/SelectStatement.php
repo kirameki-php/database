@@ -5,7 +5,8 @@ namespace Kirameki\Database\Query\Statements;
 use Kirameki\Database\Query\Expressions\Expression;
 use Kirameki\Database\Query\Support\LockOption;
 use Kirameki\Database\Query\Support\LockType;
-use Kirameki\Database\Query\Support\QueryTags;
+use Kirameki\Database\Query\Support\Tags;
+use Kirameki\Database\Query\Support\Lock;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Override;
 
@@ -17,14 +18,9 @@ class SelectStatement extends ConditionsStatement
     public ?bool $distinct = null;
 
     /**
-     * @var LockType|null
+     * @var Lock|null
      */
-    public LockType|null $lockType = null;
-
-    /**
-     * @var LockOption|null
-     */
-    public LockOption|null $lockOption = null;
+    public ?Lock $lock = null;
 
     /**
      * @var string|null
@@ -33,7 +29,7 @@ class SelectStatement extends ConditionsStatement
 
     /**
      * @param QuerySyntax $syntax
-     * @param QueryTags|null $tags
+     * @param Tags|null $tags
      * @param list<string|Expression> $tables
      * @param list<string|Expression>|null $columns
      * @param list<JoinDefinition>|null $joins
@@ -43,7 +39,7 @@ class SelectStatement extends ConditionsStatement
      */
     public function __construct(
         QuerySyntax $syntax,
-        ?QueryTags $tags = null,
+        ?Tags $tags = null,
         public ?array $tables = null,
         public ?array $columns = null,
         public ?array $joins = null,

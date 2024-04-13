@@ -13,6 +13,7 @@ use Kirameki\Database\Query\Support\LockOption;
 use Kirameki\Database\Query\Support\LockType;
 use Kirameki\Database\Query\Support\NullOrder;
 use Kirameki\Database\Query\Support\Ordering;
+use Kirameki\Database\Query\Support\Lock;
 use Kirameki\Database\Query\Support\SortOrder;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use function array_is_list;
@@ -97,8 +98,7 @@ class SelectBuilder extends ConditionsBuilder
      */
     public function forShare(): static
     {
-        $this->statement->lockType = LockType::Shared;
-        $this->statement->lockOption = null;
+        $this->statement->lock = new Lock(LockType::Shared, null);
         return $this;
     }
 
@@ -108,8 +108,7 @@ class SelectBuilder extends ConditionsBuilder
      */
     public function forUpdate(?LockOption $option = null): static
     {
-        $this->statement->lockType = LockType::Exclusive;
-        $this->statement->lockOption = $option;
+        $this->statement->lock = new Lock(LockType::Exclusive, $option);
         return $this;
     }
 

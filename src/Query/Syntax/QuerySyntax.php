@@ -32,7 +32,7 @@ use Kirameki\Database\Query\Support\Operator;
 use Kirameki\Database\Query\Support\Ordering;
 use Kirameki\Database\Query\Support\Range;
 use Kirameki\Database\Query\Support\SortOrder;
-use Kirameki\Database\Query\Support\QueryTags;
+use Kirameki\Database\Query\Support\Tags;
 use Kirameki\Database\Query\Support\TagsFormat;
 use Kirameki\Database\Syntax;
 use RuntimeException;
@@ -271,7 +271,8 @@ abstract class QuerySyntax extends Syntax
      */
     public function prepareParametersForUpdate(UpdateStatement $statement): array
     {
-        $parameters = array_merge($statement->set, $this->getParametersForConditions($statement));
+        $set = $statement->set ?? throw new LogicException('No values to update', ['statement' => $statement]);
+        $parameters = array_merge($set, $this->getParametersForConditions($statement));
         return $this->stringifyParameters($parameters);
     }
 
@@ -348,7 +349,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatSelectLockPart(SelectStatement $statement): string
     {
-        return match ($statement->lockType) {
+        return match ($statement->lock?->type) {
             LockType::Exclusive => 'FOR UPDATE' . $this->formatSelectLockOptionPart($statement),
             LockType::Shared => 'FOR SHARE',
             null => '',
@@ -361,7 +362,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatSelectLockOptionPart(SelectStatement $statement): string
     {
-        return match ($statement->lockOption) {
+        return match ($statement->lock?->option) {
             LockOption::Nowait => ' NOWAIT',
             LockOption::SkipLocked => ' SKIP LOCKED',
             null => '',
@@ -470,7 +471,8 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatUpdateAssignmentsPart(UpdateStatement $statement): string
     {
-        $columns = array_keys($statement->set);
+        $set = $statement->set ?? throw new LogicException('No values to update', ['statement' => $statement]);
+        $columns = array_keys($set);
         $assignments = array_map(fn(string $column): string => "{$this->asIdentifier($column)} = ?", $columns);
         return $this->asCsv($assignments);
     }
@@ -869,10 +871,10 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param QueryTags|null $tags
+     * @param Tags|null $tags
      * @return string
      */
-    public function formatTags(?QueryTags $tags): string
+    public function formatTags(?Tags $tags): string
     {
         if ($tags === null) {
             return '';
@@ -884,20 +886,20 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param QueryTags $tags
+     * @param Tags $tags
      * @return string
      */
-    protected function formatTagsForLogs(QueryTags $tags): string
+    protected function formatTagsForLogs(Tags $tags): string
     {
         $fields = Arr::map($tags, static fn(mixed $v, string $k) => rawurlencode($k) . '=' . rawurlencode((string) $v));
         return Arr::join($fields, ',', ' /* ', ' */');
     }
 
     /**
-     * @param QueryTags $tags
+     * @param Tags $tags
      * @return string
      */
-    protected function formatTagsForOpenTelemetry(QueryTags $tags): string
+    protected function formatTagsForOpenTelemetry(Tags $tags): string
     {
         $fields = Arr::map($tags, static fn(mixed $v, string $k) => rawurlencode($k) . "='" . rawurlencode((string) $v) . "'");
         return Arr::join($fields, ',', ' /*', '*/');
