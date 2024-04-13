@@ -2,6 +2,7 @@
 
 namespace Kirameki\Database\Query\Statements;
 
+use Kirameki\Database\Query\Support\QueryTags;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Kirameki\Database\Statement;
 
@@ -9,11 +10,11 @@ abstract class QueryStatement implements Statement
 {
     /**
      * @param QuerySyntax $syntax
-     * @param array<string, scalar>|null $tags
+     * @param QueryTags|null $tags
      */
     public function __construct(
         protected readonly QuerySyntax $syntax,
-        public readonly ?array $tags = null,
+        public ?QueryTags $tags = null,
     )
     {
     }

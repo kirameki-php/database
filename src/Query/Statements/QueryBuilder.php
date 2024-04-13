@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Query\Statements;
 
 use Kirameki\Database\Query\QueryHandler;
+use Kirameki\Database\Query\Support\QueryTags;
 
 /**
  * @template TStatement of QueryStatement
@@ -46,6 +47,18 @@ abstract class QueryBuilder
     }
 
     /**
+     * @param string $key
+     * @param mixed $value
+     * @return $this
+     */
+    public function addTag(string $key, mixed $value): static
+    {
+        $tags = $this->statement->tags ??= new QueryTags();
+        $tags->add($key, $value);
+        return $this;
+    }
+
+    /**
      * @return QueryResult<TStatement>
      */
     public function execute(): QueryResult
@@ -59,5 +72,13 @@ abstract class QueryBuilder
     public function cursor(): QueryResult
     {
         return $this->handler->cursor($this->statement);
+    }
+
+    /**
+     * @return string
+     */
+    public function toString(): string
+    {
+        return $this->statement->toString();
     }
 }

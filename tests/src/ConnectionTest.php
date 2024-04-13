@@ -26,6 +26,15 @@ class ConnectionTest extends DatabaseTestCase
     {
         $this->createDummyTable('mysql');
         $this->mysqlConnection()->info()->getTable('Dummy');
+
+        $str = $this->mysqlConnection()->query()
+            ->select('*')
+            ->from('Dummy')
+            ->forceIndex('Dummy_name')
+            ->addTag('test', 'te\'st')
+            ->toString();
+
+        dump($str);
 //
 //        $this->createDummyTable('mysql');
 //        dump($this->mysqlConnection()->info()->getTable('Dummy'));

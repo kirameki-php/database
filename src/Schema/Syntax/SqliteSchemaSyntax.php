@@ -175,7 +175,7 @@ class SqliteSchemaSyntax extends SchemaSyntax
     #[Override]
     public function compileListTables(ListTablesStatement $statement): Executable
     {
-        return $this->toExecutable("SELECT \"name\" FROM \"sqlite_master\" WHERE type = 'table'");
+        return $this->toExecutable($statement, "SELECT \"name\" FROM \"sqlite_master\" WHERE type = 'table'");
     }
 
     /**
@@ -191,7 +191,8 @@ class SqliteSchemaSyntax extends SchemaSyntax
             '(cid + 1) as `position`',
         ]);
         $table = $this->asIdentifier($statement->table);
-        return $this->toExecutable("SELECT {$columns} FROM pragma_table_info({$table}) ORDER BY \"cid\" ASC");
+        $template = "SELECT {$columns} FROM pragma_table_info({$table}) ORDER BY \"cid\" ASC";
+        return $this->toExecutable($statement, $template);
     }
 
     /**
@@ -227,7 +228,7 @@ class SqliteSchemaSyntax extends SchemaSyntax
     public function compileListIndexes(ListIndexesStatement $statement): Executable
     {
         $table = $this->asLiteral($statement->table);
-        return $this->toExecutable(implode(' ', [
+        return $this->toExecutable($statement, implode(' ', [
             'SELECT "PRIMARY" AS "name", group_concat(col) AS "columns", "primary" AS "type"',
             'FROM (SELECT "name" AS "col" FROM pragma_table_info(' . $table . ') WHERE "pk" > 0 ORDER BY "pk", "cid")',
             'GROUP BY "name"',

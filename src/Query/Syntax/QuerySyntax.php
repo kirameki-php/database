@@ -27,6 +27,7 @@ use Kirameki\Database\Query\Support\Operator;
 use Kirameki\Database\Query\Support\Ordering;
 use Kirameki\Database\Query\Support\Range;
 use Kirameki\Database\Query\Support\SortOrder;
+use Kirameki\Database\Query\Support\QueryTags;
 use Kirameki\Database\Syntax;
 use RuntimeException;
 use function array_fill;
@@ -109,7 +110,7 @@ abstract class QuerySyntax extends Syntax
     {
         $template = $this->prepareTemplateForSelect($statement);
         $parameters = $this->prepareParametersForSelect($statement);
-        return $this->toExecutable($template, $parameters);
+        return $this->toExecutable($statement, $template, $parameters);
     }
 
     /**
@@ -155,7 +156,7 @@ abstract class QuerySyntax extends Syntax
 
         $template = $this->prepareTemplateForInsert($statement, $columns);
         $parameters = $this->formatDatasetParameters($statement->dataset, $columns);
-        return $this->toExecutable($template, $parameters);
+        return $this->toExecutable($statement, $template, $parameters);
     }
 
     /**
@@ -195,7 +196,7 @@ abstract class QuerySyntax extends Syntax
 
         $template = $this->prepareTemplateForUpsert($statement, $columns);
         $parameters = $this->formatDatasetParameters($statement->dataset, $columns);
-        return $this->toExecutable($template, $parameters);
+        return $this->toExecutable($statement, $template, $parameters);
     }
 
     /**
@@ -225,7 +226,7 @@ abstract class QuerySyntax extends Syntax
     {
         $template = $this->prepareTemplateForUpdate($statement);
         $parameters = $this->prepareParametersForUpdate($statement);
-        return $this->toExecutable($template, $parameters);
+        return $this->toExecutable($statement, $template, $parameters);
     }
 
     /**
@@ -262,7 +263,7 @@ abstract class QuerySyntax extends Syntax
     {
         $template = $this->prepareTemplateForDelete($statement);
         $parameters = $this->prepareParametersForDelete($statement);
-        return $this->toExecutable($template, $parameters);
+        return $this->toExecutable($statement, $template, $parameters);
     }
 
     /**

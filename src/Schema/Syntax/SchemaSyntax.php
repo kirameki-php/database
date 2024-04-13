@@ -306,7 +306,8 @@ abstract class SchemaSyntax extends Syntax
     public function compileListTables(ListTablesStatement $statement): Executable
     {
         $database = $this->asLiteral($this->config->getDatabase());
-        return $this->toExecutable("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = {$database}");
+        $template = "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = {$database}";
+        return $this->toExecutable($statement, $template);
     }
 
     /**
@@ -323,12 +324,13 @@ abstract class SchemaSyntax extends Syntax
         ]);
         $database = $this->asLiteral($this->config->getDatabase());
         $table = $this->asLiteral($statement->table);
-        return $this->toExecutable(implode(' ', [
+        $template = implode(' ', [
             "SELECT {$columns} FROM INFORMATION_SCHEMA.COLUMNS",
             "WHERE TABLE_SCHEMA = {$database}",
             "AND TABLE_NAME = {$table}",
             "ORDER BY ORDINAL_POSITION ASC",
-        ]));
+        ]);
+        return $this->toExecutable($statement, $template);
     }
 
     /**
@@ -368,7 +370,7 @@ abstract class SchemaSyntax extends Syntax
         ]);
         $database = $this->asLiteral($this->config->getDatabase());
         $table = $this->asLiteral($statement->table);
-        return $this->toExecutable(implode(' ', [
+        return $this->toExecutable($statement, implode(' ', [
             "SELECT {$columns} FROM INFORMATION_SCHEMA.STATISTICS",
             "WHERE TABLE_SCHEMA = {$database}",
             "AND TABLE_NAME = {$table}",
