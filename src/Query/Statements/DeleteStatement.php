@@ -8,17 +8,14 @@ use Override;
 class DeleteStatement extends ConditionsStatement
 {
     /**
-     * @var array<string>|null
-     */
-    public ?array $returning = null;
-
-    /**
      * @param QuerySyntax $syntax
      * @param string $table
+     * @param list<string>|null $returning
      */
     public function __construct(
         QuerySyntax $syntax,
         public readonly string $table,
+        public ?array $returning = null,
     )
     {
         parent::__construct($syntax);

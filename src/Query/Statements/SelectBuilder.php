@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Query\Statements;
 
 use Closure;
+use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Query\Expressions\Aggregate;
 use Kirameki\Database\Query\Expressions\Expression;
@@ -14,6 +15,8 @@ use Kirameki\Database\Query\Support\NullOrder;
 use Kirameki\Database\Query\Support\Ordering;
 use Kirameki\Database\Query\Support\SortOrder;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
+use function array_is_list;
+use function array_values;
 use function func_get_args;
 use function is_array;
 
@@ -42,7 +45,7 @@ class SelectBuilder extends ConditionsBuilder
      */
     public function from(string|Expression ...$tables): static
     {
-        $this->statement->tables = $tables;
+        $this->statement->tables = array_is_list($tables) ? $tables : array_values($tables);
         return $this;
     }
 
@@ -52,7 +55,7 @@ class SelectBuilder extends ConditionsBuilder
      */
     public function columns(string|Expression ...$columns): static
     {
-        $this->statement->columns = $columns;
+        $this->statement->columns = array_is_list($columns) ? $columns : array_values($columns);
         return $this;
     }
 
@@ -240,7 +243,7 @@ class SelectBuilder extends ConditionsBuilder
      */
     public function groupBy(string ...$columns): static
     {
-        $this->statement->groupBy = $columns;
+        $this->statement->groupBy = array_is_list($columns) ? $columns : array_values($columns);
         return $this;
     }
 

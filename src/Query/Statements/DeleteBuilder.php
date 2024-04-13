@@ -4,6 +4,8 @@ namespace Kirameki\Database\Query\Statements;
 
 use Kirameki\Database\Query\QueryHandler;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
+use function array_is_list;
+use function array_values;
 
 /**
  * @extends ConditionsBuilder<DeleteStatement>
@@ -30,7 +32,7 @@ class DeleteBuilder extends ConditionsBuilder
      */
     public function returning(string ...$columns): static
     {
-        $this->statement->returning = $columns;
+        $this->statement->returning = array_is_list($columns) ? $columns : array_values($columns);
         return $this;
     }
 }

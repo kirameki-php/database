@@ -9,22 +9,16 @@ use function array_keys;
 class InsertStatement extends QueryStatement
 {
     /**
-     * @var list<array<string, mixed>>
-     */
-    public array $dataset = [];
-
-    /**
-     * @var list<string>|null
-     */
-    public ?array $returning = null;
-
-    /**
      * @param QuerySyntax $syntax
      * @param string $table
+     * @param list<array<string, mixed>> $dataset
+     * @param list<string>|null $returning
      */
     public function __construct(
         QuerySyntax $syntax,
         public readonly string $table,
+        public array $dataset = [],
+        public ?array $returning = null,
     )
     {
         parent::__construct($syntax);

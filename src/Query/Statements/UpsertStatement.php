@@ -8,27 +8,18 @@ use Override;
 class UpsertStatement extends QueryStatement
 {
     /**
-     * @var list<array<string, mixed>>
-     */
-    public array $dataset = [];
-
-    /**
-     * @var list<string>
-     */
-    public array $onConflict = [];
-
-    /**
-     * @var list<string>|null
-     */
-    public ?array $returning = null;
-
-    /**
      * @param QuerySyntax $syntax
+     * @param list<array<string, mixed>> $dataset
+     * @param list<string> $onConflict
+     * @param list<string>|null $returning
      * @param string $table
      */
     public function __construct(
         QuerySyntax $syntax,
         public readonly string $table,
+        public array $dataset = [],
+        public array $onConflict = [],
+        public ?array $returning = null,
     )
     {
         parent::__construct($syntax);

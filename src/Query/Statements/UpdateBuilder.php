@@ -32,7 +32,7 @@ class UpdateBuilder extends ConditionsBuilder
      */
     public function set(iterable $assignments): static
     {
-        $this->statement->data = iterator_to_array($assignments);
+        $this->statement->set = iterator_to_array($assignments);
         return $this;
     }
 

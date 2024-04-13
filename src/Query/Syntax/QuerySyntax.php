@@ -271,7 +271,7 @@ abstract class QuerySyntax extends Syntax
      */
     public function prepareParametersForUpdate(UpdateStatement $statement): array
     {
-        $parameters = array_merge($statement->data, $this->getParametersForConditions($statement));
+        $parameters = array_merge($statement->set, $this->getParametersForConditions($statement));
         return $this->stringifyParameters($parameters);
     }
 
@@ -375,7 +375,7 @@ abstract class QuerySyntax extends Syntax
     protected function formatFromPart(SelectStatement $statement): string
     {
         $expressions = [];
-        foreach ($statement->tables as $table) {
+        foreach ($statement->tables ?? [] as $table) {
             $expressions[] = ($table instanceof Expression)
                 ? $table->prepare($this)
                 : $this->asTable($table);
@@ -470,7 +470,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatUpdateAssignmentsPart(UpdateStatement $statement): string
     {
-        $columns = array_keys($statement->data);
+        $columns = array_keys($statement->set);
         $assignments = array_map(fn(string $column): string => "{$this->asIdentifier($column)} = ?", $columns);
         return $this->asCsv($assignments);
     }
