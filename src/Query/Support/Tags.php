@@ -29,7 +29,7 @@ class Tags implements IteratorAggregate
 
     /**
      * @param string $key
-     * @param mixed $value
+     * @param scalar $value
      * @return $this
      */
     public function add(string $key, mixed $value): static
