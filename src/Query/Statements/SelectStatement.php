@@ -53,10 +53,10 @@ class SelectStatement extends ConditionsStatement
 
     /**
      * @inheritDoc
-     * @return Executable<self>
+     * @return QueryExecutable<self>
      */
     #[Override]
-    public function prepare(): Executable
+    public function prepare(): QueryExecutable
     {
         return $this->syntax->compileSelect($this);
     }

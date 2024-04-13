@@ -8,7 +8,7 @@ use Kirameki\Core\Exceptions\RuntimeException;
 use Kirameki\Database\Info\Statements\ListColumnsStatement;
 use Kirameki\Database\Info\Statements\ListIndexesStatement;
 use Kirameki\Database\Info\Statements\ListTablesStatement;
-use Kirameki\Database\Query\Statements\Executable;
+use Kirameki\Database\Query\Statements\QueryExecutable;
 use Kirameki\Database\Query\Statements\SelectStatement;
 use Kirameki\Database\Query\Support\NullOrder;
 use Kirameki\Database\Query\Support\Ordering;
@@ -55,7 +55,7 @@ class SqliteQuerySyntax extends QuerySyntax
      * @inheritDoc
      */
     #[Override]
-    public function compileListTables(ListTablesStatement $statement): Executable
+    public function compileListTables(ListTablesStatement $statement): QueryExecutable
     {
         return $this->toExecutable($statement, "SELECT \"name\" FROM \"sqlite_master\" WHERE type = 'table'");
     }
@@ -64,7 +64,7 @@ class SqliteQuerySyntax extends QuerySyntax
      * @inheritDoc
      */
     #[Override]
-    public function compileListColumns(ListColumnsStatement $statement): Executable
+    public function compileListColumns(ListColumnsStatement $statement): QueryExecutable
     {
         $columns = implode(', ', [
             'name',
@@ -107,7 +107,7 @@ class SqliteQuerySyntax extends QuerySyntax
      * @inheritDoc
      */
     #[Override]
-    public function compileListIndexes(ListIndexesStatement $statement): Executable
+    public function compileListIndexes(ListIndexesStatement $statement): QueryExecutable
     {
         $table = $this->asLiteral($statement->table);
         return $this->toExecutable($statement, implode(' ', [

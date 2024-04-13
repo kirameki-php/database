@@ -2,15 +2,10 @@
 
 namespace Kirameki\Database\Schema\Syntax;
 
-use Iterator;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\InvalidTypeException;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Value;
-use Kirameki\Database\Info\Statements\ListColumnsStatement;
-use Kirameki\Database\Info\Statements\ListIndexesStatement;
-use Kirameki\Database\Info\Statements\ListTablesStatement;
-use Kirameki\Database\Query\Statements\Executable;
 use Kirameki\Database\Schema\Expressions\DefaultValue;
 use Kirameki\Database\Schema\Statements\AlterColumnAction;
 use Kirameki\Database\Schema\Statements\AlterDropColumnAction;
@@ -25,7 +20,6 @@ use Kirameki\Database\Schema\Statements\PrimaryKeyConstraint;
 use Kirameki\Database\Schema\Statements\RenameTableStatement;
 use Kirameki\Database\Schema\Statements\TruncateTableStatement;
 use Kirameki\Database\Syntax;
-use stdClass;
 use function array_filter;
 use function array_keys;
 use function array_map;

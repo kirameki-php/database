@@ -2,13 +2,8 @@
 
 namespace Kirameki\Database\Schema\Syntax;
 
-use Iterator;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Exceptions\RuntimeException;
-use Kirameki\Database\Info\Statements\ListColumnsStatement;
-use Kirameki\Database\Info\Statements\ListIndexesStatement;
-use Kirameki\Database\Info\Statements\ListTablesStatement;
-use Kirameki\Database\Query\Statements\Executable;
 use Kirameki\Database\Schema\Statements\ColumnDefinition;
 use Kirameki\Database\Schema\Statements\CreateTableStatement;
 use Kirameki\Database\Schema\Statements\PrimaryKeyConstraint;

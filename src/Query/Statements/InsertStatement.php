@@ -26,10 +26,10 @@ class InsertStatement extends QueryStatement
 
     /**
      * @inheritDoc
-     * @return Executable<self>
+     * @return QueryExecutable<self>
      */
     #[Override]
-    public function prepare(): Executable
+    public function prepare(): QueryExecutable
     {
         return $this->syntax->compileInsert($this);
     }

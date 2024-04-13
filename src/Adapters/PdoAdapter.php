@@ -8,7 +8,7 @@ use Iterator;
 use Kirameki\Collections\LazyIterator;
 use Kirameki\Database\Exceptions\QueryException;
 use Kirameki\Database\Exceptions\SchemaException;
-use Kirameki\Database\Query\Statements\Executable;
+use Kirameki\Database\Query\Statements\QueryExecutable;
 use Kirameki\Database\Query\Statements\Normalizable;
 use Kirameki\Database\Query\Statements\QueryExecution;
 use Kirameki\Database\Query\Statements\QueryResult;
@@ -241,10 +241,10 @@ abstract class PdoAdapter implements DatabaseAdapter
 
     /**
      * @template TQueryStatement of QueryStatement
-     * @param Executable<TQueryStatement> $executable
+     * @param QueryExecutable<TQueryStatement> $executable
      * @return PDOStatement
      */
-    protected function executeQueryStatement(Executable $executable): PDOStatement
+    protected function executeQueryStatement(QueryExecutable $executable): PDOStatement
     {
         $prepared = $this->getPdo()->prepare($executable->template);
         $prepared->execute($executable->parameters);
@@ -283,14 +283,14 @@ abstract class PdoAdapter implements DatabaseAdapter
 
     /**
      * @template TQueryStatement of QueryStatement
-     * @param Executable<TQueryStatement> $executable
+     * @param QueryExecutable<TQueryStatement> $executable
      * @param float $elapsedMs
      * @param iterable<int, mixed> $rows
      * @param int|Closure(): int $affectedRowCount
      * @return QueryResult<TQueryStatement>
      */
     protected function instantiateQueryResult(
-        Executable $executable,
+        QueryExecutable $executable,
         float $elapsedMs,
         iterable $rows,
         int|Closure $affectedRowCount,

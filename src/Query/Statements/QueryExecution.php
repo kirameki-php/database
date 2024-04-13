@@ -10,12 +10,12 @@ use Closure;
 class QueryExecution
 {
     /**
-     * @param Executable<TQueryStatement> $executable
+     * @param QueryExecutable<TQueryStatement> $executable
      * @param float $elapsedMs
      * @param Closure(): int $affectedRowCount
      */
     public function __construct(
-        public readonly Executable $executable,
+        public readonly QueryExecutable $executable,
         public readonly float $elapsedMs,
         protected int|Closure $affectedRowCount,
     )

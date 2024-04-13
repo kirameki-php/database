@@ -29,7 +29,7 @@ class RawStatement extends QueryStatement
      * @inheritDoc
      */
     #[Override]
-    public function prepare(): Executable
+    public function prepare(): QueryExecutable
     {
         return $this->syntax->toExecutable(
             $this,

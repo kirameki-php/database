@@ -19,7 +19,7 @@ use Kirameki\Database\Query\Expressions\Expression;
 use Kirameki\Database\Query\Statements\ConditionDefinition;
 use Kirameki\Database\Query\Statements\ConditionsStatement;
 use Kirameki\Database\Query\Statements\DeleteStatement;
-use Kirameki\Database\Query\Statements\Executable;
+use Kirameki\Database\Query\Statements\QueryExecutable;
 use Kirameki\Database\Query\Statements\InsertStatement;
 use Kirameki\Database\Query\Statements\JoinDefinition;
 use Kirameki\Database\Query\Statements\QueryStatement;
@@ -83,21 +83,21 @@ abstract class QuerySyntax extends Syntax
      * @param TQueryStatement $statement
      * @param string $template
      * @param list<mixed> $parameters
-     * @return Executable<TQueryStatement>
+     * @return QueryExecutable<TQueryStatement>
      */
-    public function toExecutable(QueryStatement $statement, string $template, array $parameters = []): Executable
+    public function toExecutable(QueryStatement $statement, string $template, array $parameters = []): QueryExecutable
     {
         $template .= $this->formatTags($statement->tags);
-        return new Executable($statement, $template, $parameters);
+        return new QueryExecutable($statement, $template, $parameters);
     }
 
     /**
      * FOR DEBUGGING ONLY
      *
-     * @param Executable<QueryStatement> $executable
+     * @param QueryExecutable<QueryStatement> $executable
      * @return string
      */
-    public function interpolate(Executable $executable): string
+    public function interpolate(QueryExecutable $executable): string
     {
         $parameters = $this->stringifyParameters($executable->parameters);
         $remains = count($parameters);
@@ -124,9 +124,9 @@ abstract class QuerySyntax extends Syntax
 
     /**
      * @param SelectStatement $statement
-     * @return Executable<SelectStatement>
+     * @return QueryExecutable<SelectStatement>
      */
-    public function compileSelect(SelectStatement $statement): Executable
+    public function compileSelect(SelectStatement $statement): QueryExecutable
     {
         $template = $this->prepareTemplateForSelect($statement);
         $parameters = $this->prepareParametersForSelect($statement);
@@ -162,9 +162,9 @@ abstract class QuerySyntax extends Syntax
 
     /**
      * @param InsertStatement $statement
-     * @return Executable<InsertStatement>
+     * @return QueryExecutable<InsertStatement>
      */
-    public function compileInsert(InsertStatement $statement): Executable
+    public function compileInsert(InsertStatement $statement): QueryExecutable
     {
         $columnsMap = [];
         foreach ($statement->dataset as $data) {
@@ -202,9 +202,9 @@ abstract class QuerySyntax extends Syntax
 
     /**
      * @param UpsertStatement $statement
-     * @return Executable<UpsertStatement>
+     * @return QueryExecutable<UpsertStatement>
      */
-    public function compileUpsert(UpsertStatement $statement): Executable
+    public function compileUpsert(UpsertStatement $statement): QueryExecutable
     {
         $columnsMap = [];
         foreach ($statement->dataset as $data) {
@@ -240,9 +240,9 @@ abstract class QuerySyntax extends Syntax
 
     /**
      * @param UpdateStatement $statement
-     * @return Executable<UpdateStatement>
+     * @return QueryExecutable<UpdateStatement>
      */
-    public function compileUpdate(UpdateStatement $statement): Executable
+    public function compileUpdate(UpdateStatement $statement): QueryExecutable
     {
         $template = $this->prepareTemplateForUpdate($statement);
         $parameters = $this->prepareParametersForUpdate($statement);
@@ -278,9 +278,9 @@ abstract class QuerySyntax extends Syntax
 
     /**
      * @param DeleteStatement $statement
-     * @return Executable<DeleteStatement>
+     * @return QueryExecutable<DeleteStatement>
      */
-    public function compileDelete(DeleteStatement $statement): Executable
+    public function compileDelete(DeleteStatement $statement): QueryExecutable
     {
         $template = $this->prepareTemplateForDelete($statement);
         $parameters = $this->prepareParametersForDelete($statement);
@@ -660,7 +660,7 @@ abstract class QuerySyntax extends Syntax
     protected function formatConditionForOperator(string $column, string $operator, mixed $value): string
     {
         return $column . ' ' . $operator . ' ' . match (true) {
-                $value instanceof Executable => $this->formatSubQuery($value),
+                $value instanceof QueryExecutable => $this->formatSubQuery($value),
                 $value instanceof Expression => $value->prepare($this),
                 default => '?',
             };
@@ -685,7 +685,7 @@ abstract class QuerySyntax extends Syntax
             return '1 = 0';
         }
 
-        if ($value instanceof Executable) {
+        if ($value instanceof QueryExecutable) {
             $subQuery = $this->formatSubQuery($value);
             return "{$column} {$operator} {$subQuery}";
         }
@@ -714,7 +714,7 @@ abstract class QuerySyntax extends Syntax
         $operator = $def->negated ? 'NOT EXISTS' : 'EXISTS';
         $value = $def->value;
 
-        if ($value instanceof Executable) {
+        if ($value instanceof QueryExecutable) {
             $subQuery = $this->formatSubQuery($value);
             return "{$column} {$operator} {$subQuery}";
         }
@@ -759,10 +759,10 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param Executable<QueryStatement> $executable
+     * @param QueryExecutable<QueryStatement> $executable
      * @return string
      */
-    protected function formatSubQuery(Executable $executable): string
+    protected function formatSubQuery(QueryExecutable $executable): string
     {
         return '(' . $executable->template . ')';
     }
@@ -1021,7 +1021,7 @@ abstract class QuerySyntax extends Syntax
             match (true) {
                 is_iterable($value) => array_push($parameters, ...iterator_to_array($value)),
                 $value instanceof Expression => array_push($parameters, ...$value->getParameters()),
-                $value instanceof Executable => array_push($parameters, ...$value->parameters),
+                $value instanceof QueryExecutable => array_push($parameters, ...$value->parameters),
                 default => $parameters[] = $value,
             };
             $def = $def->next;
@@ -1081,9 +1081,9 @@ abstract class QuerySyntax extends Syntax
     }
     /**
      * @param ListTablesStatement $statement
-     * @return Executable<ListTablesStatement>
+     * @return QueryExecutable<ListTablesStatement>
      */
-    public function compileListTables(ListTablesStatement $statement): Executable
+    public function compileListTables(ListTablesStatement $statement): QueryExecutable
     {
         $database = $this->asLiteral($this->config->getDatabase());
         $template = "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = {$database}";
@@ -1092,9 +1092,9 @@ abstract class QuerySyntax extends Syntax
 
     /**
      * @param ListColumnsStatement $statement
-     * @return Executable<ListColumnsStatement>
+     * @return QueryExecutable<ListColumnsStatement>
      */
-    public function compileListColumns(ListColumnsStatement $statement): Executable
+    public function compileListColumns(ListColumnsStatement $statement): QueryExecutable
     {
         $columns = implode(', ', [
             "COLUMN_NAME AS `name`",
@@ -1139,9 +1139,9 @@ abstract class QuerySyntax extends Syntax
 
     /**
      * @param ListIndexesStatement $statement
-     * @return Executable<ListIndexesStatement>
+     * @return QueryExecutable<ListIndexesStatement>
      */
-    public function compileListIndexes(ListIndexesStatement $statement): Executable
+    public function compileListIndexes(ListIndexesStatement $statement): QueryExecutable
     {
         $columns = implode(', ', [
             "INDEX_NAME AS `name`",

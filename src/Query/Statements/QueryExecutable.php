@@ -5,7 +5,7 @@ namespace Kirameki\Database\Query\Statements;
 /**
  * @template-covariant TQueryStatement of QueryStatement
  */
-readonly class Executable
+readonly class QueryExecutable
 {
     /**
      * @param TQueryStatement $statement
