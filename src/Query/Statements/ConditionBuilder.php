@@ -405,7 +405,7 @@ class ConditionBuilder
         $this->current->operator = $operator;
 
         if ($value instanceof SelectBuilder) {
-            $value = clone $value->getStatement()->prepare();
+            $value = $value->getStatement()->prepare();
         }
         $this->current->value = $value;
 

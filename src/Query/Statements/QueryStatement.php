@@ -29,6 +29,6 @@ abstract class QueryStatement implements Statement
      */
     public function toString(): string
     {
-        return $this->syntax->interpolate($this);
+        return $this->syntax->interpolate($this->prepare());
     }
 }

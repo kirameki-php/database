@@ -44,6 +44,6 @@ class RawStatement extends QueryStatement
     #[Override]
     public function toString(): string
     {
-        return $this->syntax->interpolate($this);
+        return $this->syntax->interpolate($this->prepare());
     }
 }

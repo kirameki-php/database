@@ -94,12 +94,11 @@ abstract class QuerySyntax extends Syntax
     /**
      * FOR DEBUGGING ONLY
      *
-     * @param QueryStatement $statement
+     * @param Executable $executable
      * @return string
      */
-    public function interpolate(QueryStatement $statement): string
+    public function interpolate(Executable $executable): string
     {
-        $executable = $statement->prepare();
         $parameters = $this->stringifyParameters($executable->parameters);
         $remains = count($parameters);
 
