@@ -20,7 +20,7 @@ abstract class QueryStatement implements Statement
     }
 
     /**
-     * @return Executable
+     * @return Executable<static>
      */
     abstract public function prepare(): Executable;
 

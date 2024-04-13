@@ -2,23 +2,19 @@
 
 namespace Kirameki\Database\Schema\Statements;
 
-use Kirameki\Database\Execution;
-
 /**
- * @template TStatement of SchemaStatement
- * @extends Execution<TStatement>
+ * @template TSchemaStatement of SchemaStatement
  */
-class SchemaExecution extends Execution
+readonly class SchemaExecution
 {
     /**
-     * @param TStatement $statement
+     * @param TSchemaStatement $statement
      * @param float $elapsedMs
      */
     public function __construct(
-        SchemaStatement $statement,
-        float $elapsedMs,
+        public SchemaStatement $statement,
+        public float $elapsedMs,
     )
     {
-        parent::__construct($statement, $elapsedMs);
     }
 }

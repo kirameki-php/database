@@ -32,16 +32,16 @@ interface DatabaseAdapter
     public function isConnected(): bool;
 
     /**
-     * @template TStatement of SchemaStatement
-     * @param TStatement $statement
-     * @return SchemaExecution<TStatement>
+     * @template TSchemaStatement of SchemaStatement
+     * @param TSchemaStatement $statement
+     * @return SchemaExecution<TSchemaStatement>
      */
     public function runSchema(SchemaStatement $statement): SchemaExecution;
 
     /**
-     * @template TStatement of QueryStatement
-     * @param TStatement $statement
-     * @return QueryResult<TStatement>
+     * @template TQueryStatement of QueryStatement
+     * @param TQueryStatement $statement
+     * @return QueryResult<TQueryStatement>
      */
     public function query(QueryStatement $statement): QueryResult;
 

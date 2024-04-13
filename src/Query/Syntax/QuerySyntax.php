@@ -83,7 +83,7 @@ abstract class QuerySyntax extends Syntax
      * @param TQueryStatement $statement
      * @param string $template
      * @param list<mixed> $parameters
-     * @return Executable
+     * @return Executable<TQueryStatement>
      */
     public function toExecutable(QueryStatement $statement, string $template, array $parameters = []): Executable
     {
@@ -94,7 +94,7 @@ abstract class QuerySyntax extends Syntax
     /**
      * FOR DEBUGGING ONLY
      *
-     * @param Executable $executable
+     * @param Executable<QueryStatement> $executable
      * @return string
      */
     public function interpolate(Executable $executable): string
@@ -124,7 +124,7 @@ abstract class QuerySyntax extends Syntax
 
     /**
      * @param SelectStatement $statement
-     * @return Executable
+     * @return Executable<SelectStatement>
      */
     public function compileSelect(SelectStatement $statement): Executable
     {
@@ -162,7 +162,7 @@ abstract class QuerySyntax extends Syntax
 
     /**
      * @param InsertStatement $statement
-     * @return Executable
+     * @return Executable<InsertStatement>
      */
     public function compileInsert(InsertStatement $statement): Executable
     {
@@ -202,7 +202,7 @@ abstract class QuerySyntax extends Syntax
 
     /**
      * @param UpsertStatement $statement
-     * @return Executable
+     * @return Executable<UpsertStatement>
      */
     public function compileUpsert(UpsertStatement $statement): Executable
     {
@@ -240,7 +240,7 @@ abstract class QuerySyntax extends Syntax
 
     /**
      * @param UpdateStatement $statement
-     * @return Executable
+     * @return Executable<UpdateStatement>
      */
     public function compileUpdate(UpdateStatement $statement): Executable
     {
@@ -277,7 +277,7 @@ abstract class QuerySyntax extends Syntax
 
     /**
      * @param DeleteStatement $statement
-     * @return Executable
+     * @return Executable<DeleteStatement>
      */
     public function compileDelete(DeleteStatement $statement): Executable
     {
@@ -757,7 +757,7 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param Executable $executable
+     * @param Executable<QueryStatement> $executable
      * @return string
      */
     protected function formatSubQuery(Executable $executable): string
@@ -1079,7 +1079,7 @@ abstract class QuerySyntax extends Syntax
     }
     /**
      * @param ListTablesStatement $statement
-     * @return Executable
+     * @return Executable<ListTablesStatement>
      */
     public function compileListTables(ListTablesStatement $statement): Executable
     {
@@ -1090,7 +1090,7 @@ abstract class QuerySyntax extends Syntax
 
     /**
      * @param ListColumnsStatement $statement
-     * @return Executable
+     * @return Executable<ListColumnsStatement>
      */
     public function compileListColumns(ListColumnsStatement $statement): Executable
     {
@@ -1137,7 +1137,7 @@ abstract class QuerySyntax extends Syntax
 
     /**
      * @param ListIndexesStatement $statement
-     * @return Executable
+     * @return Executable<ListIndexesStatement>
      */
     public function compileListIndexes(ListIndexesStatement $statement): Executable
     {

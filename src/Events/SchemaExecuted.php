@@ -3,19 +3,19 @@
 namespace Kirameki\Database\Events;
 
 use Kirameki\Database\Connection;
-use Kirameki\Database\Execution;
+use Kirameki\Database\Schema\Statements\SchemaExecution;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
 
 class SchemaExecuted extends StatementExecuted
 {
     /**
-     * @template TStatement of SchemaStatement
+     * @template TSchemaStatement of SchemaStatement
      * @param Connection $connection
-     * @param Execution<TStatement> $execution
+     * @param SchemaExecution<TSchemaStatement> $execution
      */
     public function __construct(
         Connection $connection,
-        public readonly Execution $execution,
+        public readonly SchemaExecution $execution,
     )
     {
         parent::__construct($connection, $execution->statement);

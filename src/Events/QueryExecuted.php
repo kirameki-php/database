@@ -9,14 +9,14 @@ use Kirameki\Database\Query\Statements\QueryStatement;
 class QueryExecuted extends StatementExecuted
 {
     /**
-     * @template TStatement of QueryStatement
-     * @param QueryResult<TStatement> $result
+     * @template TQueryStatement of QueryStatement
+     * @param QueryResult<TQueryStatement> $result
      */
     public function __construct(
         Connection $connection,
         public readonly QueryResult $result,
     )
     {
-        parent::__construct($connection, $result->info->statement);
+        parent::__construct($connection, $result->info->executable->statement);
     }
 }

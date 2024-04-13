@@ -58,6 +58,7 @@ class SelectStatement extends ConditionsStatement
 
     /**
      * @inheritDoc
+     * @return Executable<self>
      */
     #[Override]
     public function prepare(): Executable

@@ -27,6 +27,7 @@ class ListColumnsStatement extends QueryStatement implements Normalizable
 
     /**
      * @inheritDoc
+     * @return Executable<self>
      */
     #[Override]
     public function prepare(): Executable

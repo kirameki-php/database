@@ -36,6 +36,7 @@ class UpsertStatement extends QueryStatement
 
     /**
      * @inheritDoc
+     * @return Executable<self>
      */
     #[Override]
     public function prepare(): Executable

@@ -2,10 +2,12 @@
 
 namespace Kirameki\Database\Query\Statements;
 
+/**
+ * @template-covariant TQueryStatement of QueryStatement
+ */
 readonly class Executable
 {
     /**
-     * @template TQueryStatement of QueryStatement
      * @param TQueryStatement $statement
      * @param string $template
      * @param list<mixed> $parameters

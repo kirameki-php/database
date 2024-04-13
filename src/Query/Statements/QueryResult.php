@@ -5,13 +5,13 @@ namespace Kirameki\Database\Query\Statements;
 use Kirameki\Collections\Vec;
 
 /**
- * @template TStatement of QueryStatement
+ * @template TQueryStatement of QueryStatement
  * @extends Vec<mixed>
  */
 class QueryResult extends Vec
 {
     /**
-     * @param QueryExecution<TStatement> $info
+     * @param QueryExecution<TQueryStatement> $info
      * @param iterable<int, mixed> $rows
      */
     public function __construct(

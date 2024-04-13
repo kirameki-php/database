@@ -4,7 +4,6 @@ namespace Kirameki\Database\Schema;
 
 use Kirameki\Database\Connection;
 use Kirameki\Database\Events\SchemaExecuted;
-use Kirameki\Database\Execution;
 use Kirameki\Database\Schema\Statements\SchemaExecution;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
 use Kirameki\Database\Schema\Statements\TruncateTableStatement;
@@ -39,7 +38,7 @@ readonly class SchemaHandler
      * @param TStatement $statement
      * @return SchemaExecution<TStatement>
      */
-    public function execute(SchemaStatement $statement): Execution
+    public function execute(SchemaStatement $statement): SchemaExecution
     {
         $execution = $this->connection->adapter->runSchema($statement);
         $this->events->emit(new SchemaExecuted($this->connection, $execution));

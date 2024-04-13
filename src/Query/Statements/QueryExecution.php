@@ -3,26 +3,23 @@
 namespace Kirameki\Database\Query\Statements;
 
 use Closure;
-use Kirameki\Database\Execution;
 
 /**
- * @template TStatement of QueryStatement
- * @extends Execution<TStatement>
+ * @template TQueryStatement of QueryStatement
  */
-class QueryExecution extends Execution
+class QueryExecution
 {
     /**
-     * @param TStatement $statement
+     * @param Executable<TQueryStatement> $executable
      * @param float $elapsedMs
      * @param Closure(): int $affectedRowCount
      */
     public function __construct(
-        QueryStatement $statement,
-        float $elapsedMs,
+        public readonly Executable $executable,
+        public readonly float $elapsedMs,
         protected int|Closure $affectedRowCount,
     )
     {
-        parent::__construct($statement, $elapsedMs);
     }
 
     /**
