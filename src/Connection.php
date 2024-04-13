@@ -4,6 +4,7 @@ namespace Kirameki\Database;
 
 use Closure;
 use Kirameki\Database\Adapters\DatabaseAdapter;
+use Kirameki\Database\Events\ConnectionEstablished;
 use Kirameki\Database\Info\InfoHandler;
 use Kirameki\Database\Query\QueryHandler;
 use Kirameki\Database\Schema\SchemaHandler;
@@ -47,6 +48,7 @@ class Connection
     public function connect(): static
     {
         $this->adapter->connect();
+        $this->events->emit(new ConnectionEstablished($this));
         return $this;
     }
 

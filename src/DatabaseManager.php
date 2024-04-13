@@ -10,6 +10,7 @@ use Kirameki\Database\Adapters\MySqlAdapter;
 use Kirameki\Database\Adapters\MySqlConfig;
 use Kirameki\Database\Adapters\SqliteAdapter;
 use Kirameki\Database\Adapters\SqliteConfig;
+use Kirameki\Database\Events\ConnectionCreated;
 use Kirameki\Event\EventManager;
 use LogicException;
 use function array_key_exists;
@@ -62,16 +63,6 @@ class DatabaseManager
     public function purgeAll(): static
     {
         $this->connections = [];
-        return $this;
-    }
-
-    /**
-     * @param Connection $connection
-     * @return $this
-     */
-    public function addConnection(Connection $connection): static
-    {
-        $this->connections[$connection->name] = $connection;
         return $this;
     }
 
