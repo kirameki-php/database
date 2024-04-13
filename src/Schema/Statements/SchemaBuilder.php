@@ -3,12 +3,12 @@
 namespace Kirameki\Database\Schema\Statements;
 
 /**
- * @template TStatement of SchemaStatement
+ * @template TSchemaStatement of SchemaStatement
  */
 abstract class SchemaBuilder
 {
     /**
-     * @param TStatement $statement
+     * @param TSchemaStatement $statement
      */
     public function __construct(
         protected SchemaStatement $statement,

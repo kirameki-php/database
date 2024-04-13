@@ -34,9 +34,9 @@ readonly class SchemaHandler
     }
 
     /**
-     * @template TStatement of SchemaStatement
-     * @param TStatement $statement
-     * @return SchemaExecution<TStatement>
+     * @template TSchemaStatement of SchemaStatement
+     * @param TSchemaStatement $statement
+     * @return SchemaExecution<TSchemaStatement>
      */
     public function execute(SchemaStatement $statement): SchemaExecution
     {

@@ -108,12 +108,12 @@ abstract class PdoAdapter implements DatabaseAdapter
     {
         try {
             $startTime = hrtime(true);
-            foreach ($statement->toCommands() as $schema) {
-                dump($schema);
+            $commands = $statement->toCommands();
+            foreach ($commands as $schema) {
                 $this->getPdo()->exec($schema);
             }
             $execTimeMs = (hrtime(true) - $startTime) / 1_000_000;
-            return $this->instantiateSchemaExecution($statement, $execTimeMs);
+            return $this->instantiateSchemaExecution($statement, $commands, $execTimeMs);
         } catch (PDOException $e) {
             throw new SchemaException($e->getMessage(), $statement, $e);
         }
@@ -123,7 +123,7 @@ abstract class PdoAdapter implements DatabaseAdapter
      * @inheritDoc
      */
     #[Override]
-    public function query(QueryStatement $statement): QueryResult
+    public function runQuery(QueryStatement $statement): QueryResult
     {
         try {
             $startTime = hrtime(true);
@@ -145,7 +145,7 @@ abstract class PdoAdapter implements DatabaseAdapter
      * @inheritDoc
      */
     #[Override]
-    public function cursor(QueryStatement $statement): QueryResult
+    public function runQueryWithCursor(QueryStatement $statement): QueryResult
     {
         try {
             $startTime = hrtime(true);
@@ -268,17 +268,19 @@ abstract class PdoAdapter implements DatabaseAdapter
     abstract protected function createPdo(): PDO;
 
     /**
-     * @template TStatement of SchemaStatement
-     * @param TStatement $statement
+     * @template TSchemaStatement of SchemaStatement
+     * @param TSchemaStatement $statement
+     * @param list<string> $commands
      * @param float $elapsedMs
-     * @return SchemaExecution<TStatement>
+     * @return SchemaExecution<TSchemaStatement>
      */
     protected function instantiateSchemaExecution(
         SchemaStatement $statement,
+        array $commands,
         float $elapsedMs,
     ): SchemaExecution
     {
-        return new SchemaExecution($statement, $elapsedMs);
+        return new SchemaExecution($statement, $commands, $elapsedMs);
     }
 
     /**

@@ -8,7 +8,7 @@ use Kirameki\Database\Query\Expressions\Expression;
 use Kirameki\Database\Query\Statements\DeleteBuilder;
 use Kirameki\Database\Query\Statements\InsertBuilder;
 use Kirameki\Database\Query\Statements\QueryResult;
-use Kirameki\Database\Query\Statements\QueryStatement as TStatement;
+use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Statements\RawStatement;
 use Kirameki\Database\Query\Statements\SelectBuilder;
 use Kirameki\Database\Query\Statements\UpdateBuilder;
@@ -68,13 +68,13 @@ readonly class QueryHandler
     }
 
     /**
-     * @template TStatement of TStatement
-     * @param TStatement $statement
-     * @return QueryResult<TStatement>
+     * @template TQueryStatement of QueryStatement
+     * @param TQueryStatement $statement
+     * @return QueryResult<TQueryStatement>
      */
-    public function execute(TStatement $statement): QueryResult
+    public function execute(QueryStatement $statement): QueryResult
     {
-        return $this->processResult($this->connection->adapter->query($statement));
+        return $this->processResult($this->connection->adapter->runQuery($statement));
     }
 
     /**
@@ -88,19 +88,19 @@ readonly class QueryHandler
     }
 
     /**
-     * @template TStatement of TStatement
-     * @param TStatement $statement
-     * @return QueryResult<TStatement>
+     * @template TQueryStatement of QueryStatement
+     * @param TQueryStatement $statement
+     * @return QueryResult<TQueryStatement>
      */
-    public function cursor(TStatement $statement): QueryResult
+    public function cursor(QueryStatement $statement): QueryResult
     {
-        return $this->processResult($this->connection->adapter->cursor($statement));
+        return $this->processResult($this->connection->adapter->runQueryWithCursor($statement));
     }
 
     /**
-     * @template TStatement of TStatement
-     * @param QueryResult<TStatement> $result
-     * @return QueryResult<TStatement>
+     * @template TQueryStatement of QueryStatement
+     * @param QueryResult<TQueryStatement> $result
+     * @return QueryResult<TQueryStatement>
      */
     protected function processResult(QueryResult $result): QueryResult
     {

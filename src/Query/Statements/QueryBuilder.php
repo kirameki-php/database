@@ -6,13 +6,13 @@ use Kirameki\Database\Query\QueryHandler;
 use Kirameki\Database\Query\Support\Tags;
 
 /**
- * @template TStatement of QueryStatement
+ * @template TQueryStatement of QueryStatement
  */
 abstract class QueryBuilder
 {
     /**
      * @param QueryHandler $handler
-     * @param TStatement $statement
+     * @param TQueryStatement $statement
      */
     public function __construct(
         protected readonly QueryHandler $handler,
@@ -31,7 +31,7 @@ abstract class QueryBuilder
     }
 
     /**
-     * @return TStatement
+     * @return TQueryStatement
      */
     public function getStatement(): QueryStatement
     {
@@ -59,7 +59,7 @@ abstract class QueryBuilder
     }
 
     /**
-     * @return QueryResult<TStatement>
+     * @return QueryResult<TQueryStatement>
      */
     public function execute(): QueryResult
     {
@@ -67,7 +67,7 @@ abstract class QueryBuilder
     }
 
     /**
-     * @return QueryResult<TStatement>
+     * @return QueryResult<TQueryStatement>
      */
     public function cursor(): QueryResult
     {

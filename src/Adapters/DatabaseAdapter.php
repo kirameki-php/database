@@ -43,14 +43,14 @@ interface DatabaseAdapter
      * @param TQueryStatement $statement
      * @return QueryResult<TQueryStatement>
      */
-    public function query(QueryStatement $statement): QueryResult;
+    public function runQuery(QueryStatement $statement): QueryResult;
 
     /**
-     * @template TStatement of QueryStatement
-     * @param TStatement $statement
-     * @return QueryResult<TStatement>
+     * @template TQueryStatement of QueryStatement
+     * @param TQueryStatement $statement
+     * @return QueryResult<TQueryStatement>
      */
-    public function cursor(QueryStatement $statement): QueryResult;
+    public function runQueryWithCursor(QueryStatement $statement): QueryResult;
 
     /**
      * @return void

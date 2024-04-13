@@ -9,10 +9,12 @@ readonly class SchemaExecution
 {
     /**
      * @param TSchemaStatement $statement
+     * @param list<string> $commands
      * @param float $elapsedMs
      */
     public function __construct(
         public SchemaStatement $statement,
+        public array $commands,
         public float $elapsedMs,
     )
     {

@@ -8,8 +8,8 @@ use function assert;
 use function count;
 
 /**
- * @template TStatement of ConditionsStatement
- * @extends QueryBuilder<TStatement>
+ * @template TQueryStatement of ConditionsStatement
+ * @extends QueryBuilder<TQueryStatement>
  */
 abstract class ConditionsBuilder extends QueryBuilder
 {
