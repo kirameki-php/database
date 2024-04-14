@@ -53,7 +53,11 @@ abstract class SchemaSyntax extends Syntax
     protected function formatCreateTableStatement(CreateTableStatement $statement): string
     {
         $parts = [];
-        $parts[] = 'CREATE TABLE';
+        $parts[] = 'CREATE';
+        if ($statement->temporary) {
+            $parts[] = 'TEMPORARY';
+        }
+        $parts[] = 'TABLE';
         $parts[] = $this->asIdentifier($statement->table);
         $columnParts = [];
         foreach ($statement->columns as $definition) {

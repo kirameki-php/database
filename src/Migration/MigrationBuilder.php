@@ -72,6 +72,15 @@ class MigrationBuilder
 
     /**
      * @param string $table
+     * @return CreateTableBuilder
+     */
+    public function createTemporaryTable(string $table): CreateTableBuilder
+    {
+        return $this->builders[] = new CreateTableBuilder($this->getSyntax(), $table, true);
+    }
+
+    /**
+     * @param string $table
      * @return DropTableBuilder
      */
     public function dropTable(string $table): DropTableBuilder

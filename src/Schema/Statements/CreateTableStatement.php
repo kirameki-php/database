@@ -10,23 +10,20 @@ use RuntimeException;
 class CreateTableStatement extends SchemaStatement
 {
     /**
-     * @var ColumnDefinition[]
+     * @param SchemaSyntax $syntax
+     * @param string $table
+     * @param bool $temporary
+     * @param list<ColumnDefinition> $columns
+     * @param PrimaryKeyConstraint|null $primaryKey
+     * @param list<CreateIndexStatement> $indexes
      */
-    public array $columns = [];
-
-    /**
-     * @var PrimaryKeyConstraint|null
-     */
-    public ?PrimaryKeyConstraint $primaryKey = null;
-
-    /**
-     * @var CreateIndexStatement[]
-     */
-    public array $indexes = [];
-
     public function __construct(
         SchemaSyntax $syntax,
         public readonly string $table,
+        public readonly bool $temporary = false,
+        public array $columns = [],
+        public ?PrimaryKeyConstraint $primaryKey = null,
+        public array $indexes = [],
     )
     {
         parent::__construct($syntax);

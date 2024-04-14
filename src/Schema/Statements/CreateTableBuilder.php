@@ -12,13 +12,15 @@ class CreateTableBuilder extends SchemaBuilder
     /**
      * @param SchemaSyntax $syntax
      * @param string $table
+     * @param bool $temporary
      */
     public function __construct(
         protected SchemaSyntax $syntax,
         public readonly string $table,
+        bool $temporary = false,
     )
     {
-        parent::__construct(new CreateTableStatement($syntax, $table));
+        parent::__construct(new CreateTableStatement($syntax, $table, $temporary));
     }
 
     /**
