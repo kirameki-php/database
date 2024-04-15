@@ -871,6 +871,7 @@ abstract class QuerySyntax extends Syntax
             $aggregate->function,
             $aggregate->column !== null ? $this->asColumn($aggregate->column) : null,
             $this->formatWindowFunction($aggregate),
+            $aggregate->as !== null ? 'AS ' . $this->asIdentifier($aggregate->as) : null,
         ]));
     }
 
