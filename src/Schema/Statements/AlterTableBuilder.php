@@ -15,7 +15,7 @@ class AlterTableBuilder extends SchemaBuilder
      * @param string $table
      */
     public function __construct(
-        protected SchemaSyntax $syntax,
+        protected readonly SchemaSyntax $syntax,
         string $table,
     )
     {

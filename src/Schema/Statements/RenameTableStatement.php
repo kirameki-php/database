@@ -13,7 +13,7 @@ class RenameTableStatement extends SchemaStatement
      * @param string $to
      */
     public function __construct(
-        protected SchemaSyntax $syntax,
+        SchemaSyntax $syntax,
         public readonly string $from,
         public readonly string $to,
     )

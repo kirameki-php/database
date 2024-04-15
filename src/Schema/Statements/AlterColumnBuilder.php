@@ -7,7 +7,9 @@ class AlterColumnBuilder extends ColumnBuilder
     /**
      * @param AlterColumnAction $action
      */
-    public function __construct(protected AlterColumnAction $action)
+    public function __construct(
+        protected AlterColumnAction $action,
+    )
     {
         parent::__construct($action->definition);
     }

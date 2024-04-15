@@ -9,22 +9,16 @@ use RuntimeException;
 class DropIndexStatement extends SchemaStatement
 {
     /**
-     * @var string|null
-     */
-    public ?string $name;
-
-    /**
-     * @var string[]
-     */
-    public array $columns = [];
-
-    /**
      * @param SchemaSyntax $syntax
      * @param string $table
+     * @param string|null $name
+     * @param list<string> $columns
      */
     public function __construct(
         SchemaSyntax $syntax,
         public readonly string $table,
+        public ?string $name = null,
+        public array $columns = [],
     )
     {
         parent::__construct($syntax);

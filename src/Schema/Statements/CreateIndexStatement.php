@@ -9,27 +9,18 @@ use RuntimeException;
 class CreateIndexStatement extends SchemaStatement
 {
     /**
-     * @var string|null
-     */
-    public ?string $name = null;
-
-    /**
-     * @var array<array-key, string>
-     */
-    public array $columns = [];
-
-    /**
-     * @var bool|null
-     */
-    public ?bool $unique = null;
-
-    /**
      * @param SchemaSyntax $syntax
      * @param string $table
+     * @param string|null $name
+     * @param array<array-key, string> $columns
+     * @param bool|null $unique
      */
     public function __construct(
         SchemaSyntax $syntax,
         public readonly string $table,
+        public ?string $name = null,
+        public array $columns = [],
+        public ?bool $unique = null,
     )
     {
         parent::__construct($syntax);

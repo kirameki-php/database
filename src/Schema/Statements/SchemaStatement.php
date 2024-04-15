@@ -11,7 +11,7 @@ abstract class SchemaStatement implements Statement
      * @param SchemaSyntax $syntax
      */
     public function __construct(
-        protected SchemaSyntax $syntax,
+        protected readonly SchemaSyntax $syntax,
     )
     {
     }

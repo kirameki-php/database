@@ -16,8 +16,8 @@ class RenameTableBuilder extends SchemaBuilder
      */
     public function __construct(
         SchemaSyntax $syntax,
-        protected string $from,
-        protected string $to,
+        string $from,
+        string $to,
     )
     {
         parent::__construct(new RenameTableStatement($syntax, $from, $to));

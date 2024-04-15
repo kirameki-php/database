@@ -15,7 +15,7 @@ class CreateIndexBuilder extends SchemaBuilder
      */
     public function __construct(
         SchemaSyntax $syntax,
-        public readonly string $table,
+        string $table,
     )
     {
         parent::__construct(new CreateIndexStatement($syntax, $table));

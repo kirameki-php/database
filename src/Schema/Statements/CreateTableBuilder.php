@@ -15,8 +15,8 @@ class CreateTableBuilder extends SchemaBuilder
      * @param bool $temporary
      */
     public function __construct(
-        protected SchemaSyntax $syntax,
-        public readonly string $table,
+        protected readonly SchemaSyntax $syntax,
+        string $table,
         bool $temporary = false,
     )
     {

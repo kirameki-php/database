@@ -12,7 +12,7 @@ class TruncateTableStatement extends SchemaStatement
      * @param string $table
      */
     public function __construct(
-        protected SchemaSyntax $syntax,
+        SchemaSyntax $syntax,
         public readonly string $table,
     )
     {
