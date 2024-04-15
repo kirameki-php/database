@@ -14,6 +14,7 @@ use Kirameki\Database\Adapters\DatabaseConfig;
 use Kirameki\Database\Info\Statements\ListColumnsStatement;
 use Kirameki\Database\Info\Statements\ListIndexesStatement;
 use Kirameki\Database\Info\Statements\ListTablesStatement;
+use Kirameki\Database\Query\Expressions\Aggregate;
 use Kirameki\Database\Query\Expressions\Column;
 use Kirameki\Database\Query\Expressions\Expression;
 use Kirameki\Database\Query\Statements\ConditionDefinition;
@@ -858,6 +859,47 @@ abstract class QuerySyntax extends Syntax
         $columns = array_map($this->asIdentifier(...), $returning);
 
         return "RETURNING {$this->asCsv($columns)}";
+    }
+
+    /**
+     * @param Aggregate $aggregate
+     * @return string
+     */
+    public function formatAggregate(Aggregate $aggregate): string
+    {
+        return implode(' ', array_filter([
+            $aggregate->function,
+            $aggregate->column !== null ? $this->asColumn($aggregate->column) : null,
+            $this->formatWindowFunction($aggregate),
+        ]));
+    }
+
+    /**
+     * @param Aggregate $aggregate
+     * @return string
+     */
+    protected function formatWindowFunction(Aggregate $aggregate): string
+    {
+        if (!$aggregate->isWindowFunction) {
+            return '';
+        }
+
+        $parts = [];
+        if ($aggregate->partitionBy) {
+            $parts[] = 'PARTITION BY ' . $this->asCsv(array_map($this->asIdentifier(...), $aggregate->partitionBy));
+        }
+        if ($aggregate->orderBy !== null) {
+            $clauses = [];
+            foreach ($aggregate->orderBy as $column => $ordering) {
+                $clauses[] = implode(' ', array_filter([
+                    $this->asIdentifier($column),
+                    $this->formatSortOrderingPart($column, $ordering),
+                    $this->formatNullOrderingPart($column, $ordering),
+                ]));
+            }
+            $parts[] = 'ORDER BY ' . $this->asCsv($clauses);
+        }
+        return 'OVER(' . implode(' ', $parts) . ')';
     }
 
     /**
