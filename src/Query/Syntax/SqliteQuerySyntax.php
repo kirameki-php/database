@@ -4,7 +4,6 @@ namespace Kirameki\Database\Query\Syntax;
 
 use Iterator;
 use Kirameki\Core\Exceptions\LogicException;
-use Kirameki\Core\Exceptions\RuntimeException;
 use Kirameki\Database\Info\Statements\ListColumnsStatement;
 use Kirameki\Database\Info\Statements\ListIndexesStatement;
 use Kirameki\Database\Info\Statements\ListTablesStatement;
@@ -34,7 +33,7 @@ class SqliteQuerySyntax extends QuerySyntax
     #[Override]
     protected function formatSelectLockOptionPart(SelectStatement $statement): string
     {
-        throw new RuntimeException('Sqlite does not support NOWAIT or SKIP LOCKED!', [
+        throw new LogicException('Sqlite does not support NOWAIT or SKIP LOCKED!', [
             'statement' => $statement,
         ]);
     }

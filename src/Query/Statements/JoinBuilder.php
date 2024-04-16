@@ -2,9 +2,9 @@
 
 namespace Kirameki\Database\Query\Statements;
 
+use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Query\Expressions\Column;
 use Kirameki\Database\Query\Support\JoinType;
-use LogicException;
 use function assert;
 use function func_num_args;
 
@@ -91,7 +91,9 @@ class JoinBuilder
     protected function applyOrCondition(ConditionBuilder $condition): static
     {
         if ($this->condition === null) {
-            throw new LogicException('on or where must be defined before applying or condition');
+            throw new LogicException('on or where must be defined before applying or condition', [
+                'definition' => $this->definition,
+            ]);
         }
         $this->condition->or()->apply($condition);
         return $this;

@@ -21,8 +21,6 @@ use Override;
 use PDO;
 use PDOException;
 use PDOStatement;
-use RuntimeException;
-use function dump;
 use function hrtime;
 use function implode;
 use function iterator_to_array;
@@ -158,7 +156,7 @@ abstract class PdoAdapter implements DatabaseAdapter
                         if ($prepared->errorCode() === '00000') {
                             break;
                         }
-                        $this->throwException($prepared);
+                        $this->throwException($prepared, $statement);
                     }
                     yield $data;
                 }
@@ -303,11 +301,11 @@ abstract class PdoAdapter implements DatabaseAdapter
     }
 
     /**
-     * @param PDOStatement $statement
+     * @param PDOStatement $prepared
      * @return void
      */
-    protected function throwException(PDOStatement $statement): void
+    protected function throwException(PDOStatement $prepared, QueryStatement $statement): void
     {
-        throw new RuntimeException(implode(' | ', $statement->errorInfo()));
+        throw new QueryException(implode(' | ', $prepared->errorInfo()), $statement);
     }
 }

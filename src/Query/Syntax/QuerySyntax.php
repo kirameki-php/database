@@ -7,6 +7,7 @@ use DateTimeInterface;
 use Iterator;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Core\Exceptions\NotSupportedException;
 use Kirameki\Core\Exceptions\UnreachableException;
 use Kirameki\Core\Json;
 use Kirameki\Core\Value;
@@ -36,7 +37,6 @@ use Kirameki\Database\Query\Support\SortOrder;
 use Kirameki\Database\Query\Support\Tags;
 use Kirameki\Database\Query\Support\TagsFormat;
 use Kirameki\Database\Syntax;
-use RuntimeException;
 use stdClass;
 use function array_fill;
 use function array_filter;
@@ -176,7 +176,7 @@ abstract class QuerySyntax extends Syntax
         $columns = array_keys($columnsMap);
 
         $template = $this->prepareTemplateForInsert($statement, $columns);
-        $parameters = $this->formatDatasetParameters($statement->dataset, $columns);
+        $parameters = $this->formatDatasetParameters($statement, $statement->dataset, $columns);
         return $this->toExecutable($statement, $template, $parameters);
     }
 
@@ -216,7 +216,7 @@ abstract class QuerySyntax extends Syntax
         $columns = array_keys($columnsMap);
 
         $template = $this->prepareTemplateForUpsert($statement, $columns);
-        $parameters = $this->formatDatasetParameters($statement->dataset, $columns);
+        $parameters = $this->formatDatasetParameters($statement, $statement->dataset, $columns);
         return $this->toExecutable($statement, $template, $parameters);
     }
 
@@ -450,12 +450,15 @@ abstract class QuerySyntax extends Syntax
      * @param list<string> $columns
      * @return array<mixed>
      */
-    protected function formatDatasetParameters(array $dataset, array $columns): array
+    protected function formatDatasetParameters(QueryStatement $statement, array $dataset, array $columns): array
     {
         $parameters = [];
         foreach ($dataset as $data) {
             if (!is_array($data)) {
-                throw new RuntimeException('Data should be an array but ' . Value::getType($data) . ' given.');
+                throw new LogicException('Data should be an array but ' . Value::getType($data) . ' given.', [
+                    'statement' => $statement,
+                    'dataset' => $dataset,
+                ]);
             }
             foreach ($columns as $column) {
                 if (array_key_exists($column, $data)) {
@@ -570,7 +573,7 @@ abstract class QuerySyntax extends Syntax
             Operator::Exists => $this->formatConditionForExists($def),
             Operator::Like => $this->formatConditionForLike($def),
             Operator::Range => $this->formatConditionForRange($def),
-            default => throw new RuntimeException('Unknown Operator: ' . Value::getType($def->operator?->value)),
+            default => throw new NotSupportedException('Operator: ' . Value::getType($def->operator?->value)),
         };
     }
 
@@ -584,7 +587,7 @@ abstract class QuerySyntax extends Syntax
             return $def->value->prepare($this);
         }
 
-        throw new RuntimeException('Unknown condition:' . Value::getType($def->value));
+        throw new NotSupportedException('Condition: ' . Value::getType($def->value));
     }
 
     /**
@@ -691,7 +694,9 @@ abstract class QuerySyntax extends Syntax
             return "{$column} {$operator} {$subQuery}";
         }
 
-        throw new RuntimeException('Unknown condition');
+        throw new NotSupportedException('WHERE ' . $operator . ' value: ' . Value::getType($value), [
+            'definition' => $def,
+        ]);
     }
 
     /**
@@ -720,7 +725,9 @@ abstract class QuerySyntax extends Syntax
             return "{$column} {$operator} {$subQuery}";
         }
 
-        throw new RuntimeException('Unknown condition');
+        throw new NotSupportedException('WHERE ' . $operator . ' value: ' . Value::getType($value), [
+            'definition' => $def,
+        ]);
     }
 
     /**
@@ -756,7 +763,9 @@ abstract class QuerySyntax extends Syntax
                 : "{$column} {$lowerOperator} ? AND {$column} {$upperOperator} ?";
         }
 
-        throw new RuntimeException('Unknown condition');
+        throw new NotSupportedException('WHERE ranged value: ' . Value::getType($value), [
+            'definition' => $def,
+        ]);
     }
 
     /**
@@ -1034,7 +1043,9 @@ abstract class QuerySyntax extends Syntax
             return $column->prepare($this);
         }
 
-        throw new RuntimeException('Column name expected but null given');
+        throw new NotSupportedException('Unknown column type: ' . Value::getType($column), [
+            'definition' => $def,
+        ]);
     }
 
     /**

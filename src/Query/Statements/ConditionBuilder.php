@@ -11,7 +11,6 @@ use Kirameki\Database\Query\Expressions\Expression;
 use Kirameki\Database\Query\Expressions\Raw;
 use Kirameki\Database\Query\Support\Operator;
 use Kirameki\Database\Query\Support\Range;
-use RuntimeException;
 use Traversable;
 use function array_key_exists;
 use function assert;
@@ -197,7 +196,11 @@ class ConditionBuilder
         $value = $this->toValue($value);
 
         if (is_iterable($value)) {
-            throw new RuntimeException('Iterable should use in(iterable $iterable) method instead');
+            throw new LogicException('Iterable should use in(iterable $iterable) method instead', [
+                'root' => $this->root,
+                'current' => $this->current,
+                'value' => $value,
+            ]);
         }
 
         return $this->define(Operator::Equals, $value);
@@ -410,7 +413,11 @@ class ConditionBuilder
         $this->current->value = $value;
 
         if ($this->defined) {
-            throw new RuntimeException('Tried to set condition when it was already set!');
+            throw new LogicException('Tried to set condition when it was already set!', [
+                'current' => $this->current,
+                'operator' => $operator,
+                'value' => $value,
+            ]);
         }
         $this->defined = true;
 

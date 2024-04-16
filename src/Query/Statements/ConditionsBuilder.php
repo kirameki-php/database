@@ -2,8 +2,8 @@
 
 namespace Kirameki\Database\Query\Statements;
 
+use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Query\Expressions\Column;
-use LogicException;
 use function assert;
 use function count;
 
@@ -80,7 +80,9 @@ abstract class ConditionsBuilder extends QueryBuilder
             return $this;
         }
 
-        throw new LogicException('and called without a previous condition. Define a where before declaring and');
+        throw new LogicException('and called without a previous condition. Define a where before declaring and', [
+            'statement' => $this->statement,
+        ]);
     }
 
     /**
@@ -93,7 +95,9 @@ abstract class ConditionsBuilder extends QueryBuilder
             return $this;
         }
 
-        throw new LogicException('or called without a previous condition. Define a where before declaring or');
+        throw new LogicException('or called without a previous condition. Define a where before declaring or', [
+            'statement' => $this->statement,
+        ]);
     }
 
     /**

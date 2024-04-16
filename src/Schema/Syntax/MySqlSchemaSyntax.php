@@ -82,7 +82,9 @@ class MySqlSchemaSyntax extends SchemaSyntax
             return 'VARCHAR(36)';
         }
         if ($type === null) {
-            throw new RuntimeException('Definition type cannot be set to null');
+            throw new LogicException('Definition type cannot be set to null', [
+                'definition' => $def,
+            ]);
         }
 
         $args = Arr::without([$size, $def->scale], null);

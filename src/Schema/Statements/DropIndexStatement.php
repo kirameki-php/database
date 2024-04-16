@@ -2,9 +2,10 @@
 
 namespace Kirameki\Database\Schema\Statements;
 
+use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Database\Exceptions\SchemaException;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 use Override;
-use RuntimeException;
 
 class DropIndexStatement extends SchemaStatement
 {
@@ -33,7 +34,9 @@ class DropIndexStatement extends SchemaStatement
         $columns = $this->columns;
 
         if ($name === null && empty($columns)) {
-            throw new RuntimeException('Name or column(s) are required to drop an index.');
+            throw new LogicException('Name or column(s) are required to drop an index.', [
+                'statement' => $this,
+            ]);
         }
     }
 

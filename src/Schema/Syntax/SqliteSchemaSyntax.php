@@ -117,8 +117,7 @@ class SqliteSchemaSyntax extends SchemaSyntax
             }
             if (!in_array($size, [2, 4], true)) {
                 throw new LogicException("Invalid int size for {$name}. Expected: [2, 4, 8]. Got: {$size}.", [
-                    'column' => $name,
-                    'size' => $size,
+                    'definition' => $def,
                 ]);
             }
             $min = pow(-2, 8 * $size);
@@ -155,7 +154,9 @@ class SqliteSchemaSyntax extends SchemaSyntax
             return 'BLOB';
         }
         if ($type === null) {
-            throw new RuntimeException('Definition type cannot be set to null');
+            throw new LogicException('Definition type cannot be set to null', [
+                'definition' => $def,
+            ]);
         }
 
         throw new LogicException("Unknown column type: {$type} for {$name}", [

@@ -4,15 +4,14 @@ namespace Kirameki\Database;
 
 use Closure;
 use Kirameki\Collections\Map;
+use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Adapters\DatabaseAdapter;
 use Kirameki\Database\Adapters\DatabaseConfig;
 use Kirameki\Database\Adapters\MySqlAdapter;
 use Kirameki\Database\Adapters\MySqlConfig;
 use Kirameki\Database\Adapters\SqliteAdapter;
 use Kirameki\Database\Adapters\SqliteConfig;
-use Kirameki\Database\Events\ConnectionCreated;
 use Kirameki\Event\EventManager;
-use LogicException;
 use function array_key_exists;
 
 class DatabaseManager
@@ -102,7 +101,10 @@ class DatabaseManager
      */
     public function getConfig(string $name): DatabaseConfig
     {
-        return $this->configs[$name] ?? throw new LogicException("Database config: $name does not exist");
+        return $this->configs[$name] ?? throw new LogicException("Database config: $name does not exist", [
+            'name' => $name,
+            'configs' => $this->configs,
+        ]);
     }
 
     /**
