@@ -11,15 +11,15 @@ class RawStatement extends QueryStatement
 {
     /**
      * @param QuerySyntax $syntax
+     * @param Tags|null $tags
      * @param string $template
      * @param iterable<int, mixed> $parameters
-     * @param Tags|null $tags
      */
     public function __construct(
         QuerySyntax $syntax,
+        ?Tags $tags,
         public readonly string $template,
         public readonly iterable $parameters = [],
-        ?Tags $tags = null,
     )
     {
         parent::__construct($syntax, $tags);

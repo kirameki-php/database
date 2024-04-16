@@ -13,20 +13,6 @@ use function iterator_to_array;
 class InsertBuilder extends QueryBuilder
 {
     /**
-     * @param QueryHandler $handler
-     * @param QuerySyntax $syntax
-     * @param string $table
-     */
-    public function __construct(
-        QueryHandler $handler,
-        QuerySyntax $syntax,
-        string $table,
-    )
-    {
-        parent::__construct($handler, new InsertStatement($syntax, $table));
-    }
-
-    /**
      * @param iterable<string, mixed> $data
      * @return $this
      */

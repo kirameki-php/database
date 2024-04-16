@@ -2,7 +2,6 @@
 
 namespace Kirameki\Database\Query\Statements;
 
-use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Override;
 

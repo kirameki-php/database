@@ -13,20 +13,6 @@ use function array_values;
 class DeleteBuilder extends ConditionsBuilder
 {
     /**
-     * @param QueryHandler $handler
-     * @param QuerySyntax $syntax
-     * @param string $table
-     */
-    public function __construct(
-        QueryHandler $handler,
-        QuerySyntax $syntax,
-        string $table,
-    )
-    {
-        parent::__construct($handler, new DeleteStatement($syntax, $table));
-    }
-
-    /**
      * @param string ...$columns
      * @return $this
      */

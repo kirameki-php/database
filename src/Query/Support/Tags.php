@@ -37,4 +37,14 @@ class Tags implements IteratorAggregate
         $this->pairs[$key] = $value;
         return $this;
     }
+
+    /**
+     * @param Tags $merge
+     * @return $this
+     */
+    public function merge(Tags $merge): static
+    {
+        $this->pairs = array_merge($this->pairs, $merge->pairs);
+        return $this;
+    }
 }

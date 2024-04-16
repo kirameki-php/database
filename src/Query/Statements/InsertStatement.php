@@ -4,7 +4,6 @@ namespace Kirameki\Database\Query\Statements;
 
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Override;
-use function array_keys;
 
 class InsertStatement extends QueryStatement
 {

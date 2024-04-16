@@ -3,11 +3,9 @@
 namespace Kirameki\Database\Query\Statements;
 
 use Closure;
-use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Query\Expressions\Aggregate;
 use Kirameki\Database\Query\Expressions\Expression;
-use Kirameki\Database\Query\QueryHandler;
 use Kirameki\Database\Query\Support\JoinType;
 use Kirameki\Database\Query\Support\LockOption;
 use Kirameki\Database\Query\Support\LockType;
@@ -15,7 +13,6 @@ use Kirameki\Database\Query\Support\NullOrder;
 use Kirameki\Database\Query\Support\Ordering;
 use Kirameki\Database\Query\Support\Lock;
 use Kirameki\Database\Query\Support\SortOrder;
-use Kirameki\Database\Query\Syntax\QuerySyntax;
 use function array_is_list;
 use function array_values;
 use function func_get_args;
@@ -26,18 +23,6 @@ use function is_array;
  */
 class SelectBuilder extends ConditionsBuilder
 {
-    /**
-     * @param QueryHandler $handler
-     * @param QuerySyntax $syntax
-     */
-    public function __construct(
-        QueryHandler $handler,
-        QuerySyntax $syntax,
-    )
-    {
-        parent::__construct($handler, new SelectStatement($syntax));
-    }
-
     #region selecting --------------------------------------------------------------------------------------------------
 
     /**
