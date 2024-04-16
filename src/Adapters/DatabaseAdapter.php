@@ -5,7 +5,7 @@ namespace Kirameki\Database\Adapters;
 use Kirameki\Database\Query\Statements\QueryResult;
 use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
-use Kirameki\Database\Schema\Statements\SchemaExecution;
+use Kirameki\Database\Schema\Statements\SchemaResult;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 
@@ -34,9 +34,9 @@ interface DatabaseAdapter
     /**
      * @template TSchemaStatement of SchemaStatement
      * @param TSchemaStatement $statement
-     * @return SchemaExecution<TSchemaStatement>
+     * @return SchemaResult<TSchemaStatement>
      */
-    public function runSchema(SchemaStatement $statement): SchemaExecution;
+    public function runSchema(SchemaStatement $statement): SchemaResult;
 
     /**
      * @template TQueryStatement of QueryStatement

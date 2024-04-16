@@ -13,7 +13,7 @@ use Kirameki\Database\Query\Statements\Normalizable;
 use Kirameki\Database\Query\Statements\QueryResult;
 use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
-use Kirameki\Database\Schema\Statements\SchemaExecution;
+use Kirameki\Database\Schema\Statements\SchemaResult;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 use Override;
@@ -101,7 +101,7 @@ abstract class PdoAdapter implements DatabaseAdapter
      * @inheritDoc
      */
     #[Override]
-    public function runSchema(SchemaStatement $statement): SchemaExecution
+    public function runSchema(SchemaStatement $statement): SchemaResult
     {
         try {
             $startTime = hrtime(true);
@@ -269,15 +269,15 @@ abstract class PdoAdapter implements DatabaseAdapter
      * @param TSchemaStatement $statement
      * @param list<string> $commands
      * @param float $elapsedMs
-     * @return SchemaExecution<TSchemaStatement>
+     * @return SchemaResult<TSchemaStatement>
      */
     protected function instantiateSchemaExecution(
         SchemaStatement $statement,
         array $commands,
         float $elapsedMs,
-    ): SchemaExecution
+    ): SchemaResult
     {
-        return new SchemaExecution($statement, $commands, $elapsedMs);
+        return new SchemaResult($statement, $commands, $elapsedMs);
     }
 
     /**

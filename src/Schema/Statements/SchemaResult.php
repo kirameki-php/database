@@ -5,7 +5,7 @@ namespace Kirameki\Database\Schema\Statements;
 /**
  * @template TSchemaStatement of SchemaStatement
  */
-readonly class SchemaExecution
+readonly class SchemaResult
 {
     /**
      * @param TSchemaStatement $statement
