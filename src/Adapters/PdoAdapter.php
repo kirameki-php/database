@@ -10,7 +10,6 @@ use Kirameki\Database\Exceptions\QueryException;
 use Kirameki\Database\Exceptions\SchemaException;
 use Kirameki\Database\Query\Statements\QueryExecutable;
 use Kirameki\Database\Query\Statements\Normalizable;
-use Kirameki\Database\Query\Statements\QueryExecution;
 use Kirameki\Database\Query\Statements\QueryResult;
 use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
@@ -149,7 +148,7 @@ abstract class PdoAdapter implements DatabaseAdapter
             $startTime = hrtime(true);
             $executable = $statement->prepare();
             $prepared = $this->executeQueryStatement($executable);
-            $iterator = (function() use ($prepared): Iterator {
+            $iterator = (function() use ($prepared, $statement): Iterator {
                 while (true) {
                     $data = $prepared->fetch(PDO::FETCH_OBJ);
                     if ($data === false) {
@@ -296,8 +295,7 @@ abstract class PdoAdapter implements DatabaseAdapter
         int|Closure $affectedRowCount,
     ): QueryResult
     {
-        $execution = new QueryExecution($executable, $elapsedMs, $affectedRowCount);
-        return new QueryResult($execution, $rows);
+        return new QueryResult($executable, $elapsedMs, $affectedRowCount, $rows);
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace Kirameki\Database\Query\Statements;
 
+use Closure;
 use Kirameki\Collections\Vec;
 
 /**
@@ -11,14 +12,29 @@ use Kirameki\Collections\Vec;
 class QueryResult extends Vec
 {
     /**
-     * @param QueryExecution<TQueryStatement> $info
+     * @param QueryExecutable<TQueryStatement> $executable
+     * @param float $elapsedMs
+     * @param Closure(): int $affectedRowCount
      * @param iterable<int, mixed> $rows
      */
     public function __construct(
-        public readonly QueryExecution $info,
+        public readonly QueryExecutable $executable,
+        public readonly float $elapsedMs,
+        protected int|Closure $affectedRowCount,
         iterable $rows,
     )
     {
         parent::__construct($rows);
+    }
+
+    /**
+     * @return int
+     */
+    public function getAffectedRowCount(): int
+    {
+        if ($this->affectedRowCount instanceof Closure) {
+            $this->affectedRowCount = ($this->affectedRowCount)();
+        }
+        return $this->affectedRowCount;
     }
 }

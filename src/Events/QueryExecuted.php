@@ -17,6 +17,6 @@ class QueryExecuted extends StatementExecuted
         public readonly QueryResult $result,
     )
     {
-        parent::__construct($connection, $result->info->executable->statement);
+        parent::__construct($connection, $result->executable->statement);
     }
 }
