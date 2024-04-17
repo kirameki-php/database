@@ -37,13 +37,4 @@ class RawStatement extends QueryStatement
             iterator_to_array($this->parameters),
         );
     }
-
-    /**
-     * @inheritDoc
-     */
-    #[Override]
-    public function toString(): string
-    {
-        return $this->syntax->interpolate($this->prepare());
-    }
 }
