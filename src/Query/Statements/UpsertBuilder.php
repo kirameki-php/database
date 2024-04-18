@@ -2,8 +2,6 @@
 
 namespace Kirameki\Database\Query\Statements;
 
-use Kirameki\Database\Query\QueryHandler;
-use Kirameki\Database\Query\Syntax\QuerySyntax;
 use function array_values;
 use function iterator_to_array;
 

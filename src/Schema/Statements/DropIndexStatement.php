@@ -3,7 +3,6 @@
 namespace Kirameki\Database\Schema\Statements;
 
 use Kirameki\Core\Exceptions\LogicException;
-use Kirameki\Database\Exceptions\SchemaException;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 use Override;
 

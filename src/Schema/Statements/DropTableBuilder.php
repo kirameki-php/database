@@ -2,8 +2,6 @@
 
 namespace Kirameki\Database\Schema\Statements;
 
-use Kirameki\Database\Schema\Syntax\SchemaSyntax;
-
 /**
  * @extends SchemaBuilder<DropTableStatement>
  */

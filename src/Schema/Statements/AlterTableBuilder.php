@@ -3,7 +3,6 @@
 namespace Kirameki\Database\Schema\Statements;
 
 use Kirameki\Database\Schema\Support\AlterType;
-use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 
 /**
  * @extends SchemaBuilder<AlterTableStatement>
