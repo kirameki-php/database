@@ -20,7 +20,7 @@ class RawStatement extends SchemaStatement
      * @inheritDoc
      */
     #[Override]
-    public function toCommands(SchemaSyntax $syntax): array
+    public function toExecutable(SchemaSyntax $syntax): array
     {
         return [$this->command];
     }

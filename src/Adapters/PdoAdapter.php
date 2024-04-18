@@ -104,7 +104,7 @@ abstract class PdoAdapter implements DatabaseAdapter
     {
         try {
             $startTime = hrtime(true);
-            $commands = $statement->toCommands($this->getSchemaSyntax());
+            $commands = $statement->toExecutable($this->getSchemaSyntax());
             foreach ($commands as $schema) {
                 $this->getPdo()->exec($schema);
             }

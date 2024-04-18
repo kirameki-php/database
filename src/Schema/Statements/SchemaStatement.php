@@ -10,5 +10,5 @@ abstract class SchemaStatement implements Statement
     /**
      * @return list<string>
      */
-    abstract public function toCommands(SchemaSyntax $syntax): array;
+    abstract public function toExecutable(SchemaSyntax $syntax): array;
 }

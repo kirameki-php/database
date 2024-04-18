@@ -83,7 +83,7 @@ class MigrationManager
             foreach ($migration->getBuilders() as $builder) {
                 $syntax = $builder->connection->adapter->getSchemaSyntax();
                 foreach ($builder->toStatements() as $statement) {
-                    $statements[] = $statement->toCommands($syntax);
+                    $statements[] = $statement->toExecutable($syntax);
                 }
             }
         }

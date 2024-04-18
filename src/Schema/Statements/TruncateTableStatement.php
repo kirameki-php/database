@@ -20,7 +20,7 @@ class TruncateTableStatement extends SchemaStatement
      * @inheritDoc
      */
     #[Override]
-    public function toCommands(SchemaSyntax $syntax): array
+    public function toExecutable(SchemaSyntax $syntax): array
     {
         return $syntax->compileTruncateTable($this);
     }
