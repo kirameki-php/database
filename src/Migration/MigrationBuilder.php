@@ -28,7 +28,7 @@ class MigrationBuilder
      * @param EventManager $events
      */
     public function __construct(
-        protected readonly Connection $connection,
+        public readonly Connection $connection,
         protected readonly EventManager $events,
     )
     {
@@ -54,20 +54,12 @@ class MigrationBuilder
     }
 
     /**
-     * @return SchemaSyntax
-     */
-    protected function getSyntax(): SchemaSyntax
-    {
-        return $this->connection->adapter->getSchemaSyntax();
-    }
-
-    /**
      * @param string $table
      * @return CreateTableBuilder
      */
     public function createTable(string $table): CreateTableBuilder
     {
-        return $this->builders[] = new CreateTableBuilder($this->getSyntax(), $table);
+        return $this->builders[] = new CreateTableBuilder($table);
     }
 
     /**
@@ -76,7 +68,7 @@ class MigrationBuilder
      */
     public function createTemporaryTable(string $table): CreateTableBuilder
     {
-        return $this->builders[] = new CreateTableBuilder($this->getSyntax(), $table, true);
+        return $this->builders[] = new CreateTableBuilder($table, true);
     }
 
     /**
@@ -85,7 +77,7 @@ class MigrationBuilder
      */
     public function dropTable(string $table): DropTableBuilder
     {
-        return $this->builders[] = new DropTableBuilder($this->getSyntax(), $table);
+        return $this->builders[] = new DropTableBuilder($table);
     }
 
     /**
@@ -94,7 +86,7 @@ class MigrationBuilder
      */
     public function alterTable(string $table): AlterTableBuilder
     {
-        return $this->builders[] = new AlterTableBuilder($this->getSyntax(), $table);
+        return $this->builders[] = new AlterTableBuilder($table);
     }
 
     /**
@@ -104,7 +96,7 @@ class MigrationBuilder
      */
     public function renameTable(string $from, string $to): RenameTableBuilder
     {
-        return $this->builders[] = new RenameTableBuilder($this->getSyntax(), $from, $to);
+        return $this->builders[] = new RenameTableBuilder($from, $to);
     }
 
     /**
@@ -113,7 +105,7 @@ class MigrationBuilder
      */
     public function createIndex(string $table): CreateIndexBuilder
     {
-        return $this->builders[] = new CreateIndexBuilder($this->getSyntax(), $table);
+        return $this->builders[] = new CreateIndexBuilder($table);
     }
 
     /**
@@ -122,6 +114,6 @@ class MigrationBuilder
      */
     public function dropIndex(string $table): DropIndexBuilder
     {
-        return $this->builders[] = new DropIndexBuilder($this->getSyntax(), $table);
+        return $this->builders[] = new DropIndexBuilder($table);
     }
 }

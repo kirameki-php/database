@@ -8,22 +8,19 @@ use Override;
 class RawStatement extends SchemaStatement
 {
     /**
-     * @param SchemaSyntax $syntax
      * @param string $command
      */
     public function __construct(
-        SchemaSyntax $syntax,
         protected string $command,
     )
     {
-        parent::__construct($syntax);
     }
 
     /**
      * @inheritDoc
      */
     #[Override]
-    public function toCommands(): array
+    public function toCommands(SchemaSyntax $syntax): array
     {
         return [$this->command];
     }

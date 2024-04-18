@@ -8,25 +8,22 @@ use Override;
 class RenameTableStatement extends SchemaStatement
 {
     /**
-     * @param SchemaSyntax $syntax
      * @param string $from
      * @param string $to
      */
     public function __construct(
-        SchemaSyntax $syntax,
         public readonly string $from,
         public readonly string $to,
     )
     {
-        parent::__construct($syntax);
     }
 
     /**
      * @inheritDoc
      */
     #[Override]
-    public function toCommands(): array
+    public function toCommands(SchemaSyntax $syntax): array
     {
-        return $this->syntax->compileRenameTable($this);
+        return $syntax->compileRenameTable($this);
     }
 }

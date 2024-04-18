@@ -15,12 +15,13 @@ class AlterTableStatement extends SchemaStatement
      */
     public array $actions;
 
+    /**
+     * @param string $table
+     */
     public function __construct(
-        SchemaSyntax $syntax,
         public readonly string $table,
     )
     {
-        parent::__construct($syntax);
     }
 
     /**
@@ -35,8 +36,8 @@ class AlterTableStatement extends SchemaStatement
      * @inheritDoc
      */
     #[Override]
-    public function toCommands(): array
+    public function toCommands(SchemaSyntax $syntax): array
     {
-        return $this->syntax->compileAlterTable($this);
+        return $syntax->compileAlterTable($this);
     }
 }

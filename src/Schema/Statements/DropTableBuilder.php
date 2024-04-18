@@ -10,14 +10,12 @@ use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 class DropTableBuilder extends SchemaBuilder
 {
     /**
-     * @param SchemaSyntax $syntax
      * @param string $table
      */
     public function __construct(
-        SchemaSyntax $syntax,
         string $table,
     )
     {
-        parent::__construct(new DropTableStatement($syntax, $table));
+        parent::__construct(new DropTableStatement($table));
     }
 }

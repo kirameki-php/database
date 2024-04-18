@@ -10,19 +10,16 @@ use Override;
 class DropIndexStatement extends SchemaStatement
 {
     /**
-     * @param SchemaSyntax $syntax
      * @param string $table
      * @param string|null $name
      * @param list<string> $columns
      */
     public function __construct(
-        SchemaSyntax $syntax,
         public readonly string $table,
         public ?string $name = null,
         public array $columns = [],
     )
     {
-        parent::__construct($syntax);
     }
 
     /**
@@ -44,9 +41,9 @@ class DropIndexStatement extends SchemaStatement
      * @inheritDoc
      */
     #[Override]
-    public function toCommands(): array
+    public function toCommands(SchemaSyntax $syntax): array
     {
         $this->preprocess();
-        return $this->syntax->compileDropIndex($this);
+        return $syntax->compileDropIndex($this);
     }
 }

@@ -10,7 +10,6 @@ use Override;
 class CreateTableStatement extends SchemaStatement
 {
     /**
-     * @param SchemaSyntax $syntax
      * @param string $table
      * @param bool $temporary
      * @param list<ColumnDefinition> $columns
@@ -18,7 +17,6 @@ class CreateTableStatement extends SchemaStatement
      * @param list<CreateIndexStatement> $indexes
      */
     public function __construct(
-        SchemaSyntax $syntax,
         public readonly string $table,
         public readonly bool $temporary = false,
         public array $columns = [],
@@ -26,17 +24,16 @@ class CreateTableStatement extends SchemaStatement
         public array $indexes = [],
     )
     {
-        parent::__construct($syntax);
     }
 
     /**
      * @inheritDoc
      */
     #[Override]
-    public function toCommands(): array
+    public function toCommands(SchemaSyntax $syntax): array
     {
         $this->preprocess();
-        return $this->syntax->compileCreateTable($this);
+        return $syntax->compileCreateTable($this);
     }
 
     /**

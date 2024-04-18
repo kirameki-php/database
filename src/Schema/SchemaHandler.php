@@ -30,7 +30,7 @@ readonly class SchemaHandler
      */
     public function truncate(string $table): void
     {
-        $this->execute(new TruncateTableStatement($this->syntax, $table));
+        $this->execute(new TruncateTableStatement($table));
     }
 
     /**

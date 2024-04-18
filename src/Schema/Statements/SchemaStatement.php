@@ -8,16 +8,7 @@ use Kirameki\Database\Statement;
 abstract class SchemaStatement implements Statement
 {
     /**
-     * @param SchemaSyntax $syntax
-     */
-    public function __construct(
-        protected readonly SchemaSyntax $syntax,
-    )
-    {
-    }
-
-    /**
      * @return list<string>
      */
-    abstract public function toCommands(): array;
+    abstract public function toCommands(SchemaSyntax $syntax): array;
 }

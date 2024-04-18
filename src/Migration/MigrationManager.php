@@ -81,8 +81,9 @@ class MigrationManager
         foreach ($this->readMigrations($since) as $migration) {
             $migration->$direction();
             foreach ($migration->getBuilders() as $builder) {
+                $syntax = $builder->connection->adapter->getSchemaSyntax();
                 foreach ($builder->toStatements() as $statement) {
-                    $statements[] = $statement->toCommands();
+                    $statements[] = $statement->toCommands($syntax);
                 }
             }
         }

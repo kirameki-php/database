@@ -11,15 +11,13 @@ use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 class AlterTableBuilder extends SchemaBuilder
 {
     /**
-     * @param SchemaSyntax $syntax
      * @param string $table
      */
     public function __construct(
-        protected readonly SchemaSyntax $syntax,
         string $table,
     )
     {
-        parent::__construct(new AlterTableStatement($syntax, $table));
+        parent::__construct(new AlterTableStatement($table));
     }
 
     /**
@@ -67,7 +65,7 @@ class AlterTableBuilder extends SchemaBuilder
      */
     public function createIndex(iterable $columns): CreateIndexBuilder
     {
-        $builder = new CreateIndexBuilder($this->syntax, $this->statement->table);
+        $builder = new CreateIndexBuilder($this->statement->table);
         $builder->columns($columns);
         $this->statement->addAction($builder->statement);
         return $builder;
@@ -79,7 +77,7 @@ class AlterTableBuilder extends SchemaBuilder
      */
     public function dropIndex(iterable $columns): DropIndexBuilder
     {
-        $builder = new DropIndexBuilder($this->syntax, $this->statement->table);
+        $builder = new DropIndexBuilder($this->statement->table);
         $builder->columns($columns);
         $this->statement->addAction($builder->statement);
         return $builder;

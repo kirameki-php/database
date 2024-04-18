@@ -10,17 +10,15 @@ use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 class CreateTableBuilder extends SchemaBuilder
 {
     /**
-     * @param SchemaSyntax $syntax
      * @param string $table
      * @param bool $temporary
      */
     public function __construct(
-        protected readonly SchemaSyntax $syntax,
         string $table,
         bool $temporary = false,
     )
     {
-        parent::__construct(new CreateTableStatement($syntax, $table, $temporary));
+        parent::__construct(new CreateTableStatement($table, $temporary));
     }
 
     /**
@@ -150,7 +148,7 @@ class CreateTableBuilder extends SchemaBuilder
      */
     public function index(iterable $columns): CreateIndexBuilder
     {
-        $builder = new CreateIndexBuilder($this->syntax, $this->statement->table);
+        $builder = new CreateIndexBuilder($this->statement->table);
         $this->statement->indexes[] = $builder->statement;
         return $builder->columns($columns);
     }

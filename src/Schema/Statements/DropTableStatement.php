@@ -8,23 +8,20 @@ use Override;
 class DropTableStatement extends SchemaStatement
 {
     /**
-     * @param SchemaSyntax $syntax
      * @param string $table
      */
     public function __construct(
-        SchemaSyntax $syntax,
         public readonly string $table,
     )
     {
-        parent::__construct($syntax);
     }
 
     /**
      * @inheritDoc
      */
     #[Override]
-    public function toCommands(): array
+    public function toCommands(SchemaSyntax $syntax): array
     {
-        return $this->syntax->compileDropTable($this);
+        return $syntax->compileDropTable($this);
     }
 }

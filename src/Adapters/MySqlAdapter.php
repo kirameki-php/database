@@ -93,7 +93,7 @@ class MySqlAdapter extends PdoAdapter
     {
         $copy = (clone $this);
         $copy->config->database = null;
-        $copy->runSchema(new RawStatement($this->getSchemaSyntax(), implode(' ', array_filter([
+        $copy->runSchema(new RawStatement(implode(' ', array_filter([
             'CREATE DATABASE',
             $ifNotExist ? 'IF NOT EXISTS' : null,
             $this->config->database,
@@ -108,7 +108,7 @@ class MySqlAdapter extends PdoAdapter
     {
         $copy = (clone $this);
         $copy->config->database = null;
-        $copy->runSchema(new RawStatement($this->getSchemaSyntax(), implode(' ', array_filter([
+        $copy->runSchema(new RawStatement(implode(' ', array_filter([
             'DROP DATABASE',
             $ifExist ? 'IF EXISTS' : null,
             $this->config->database,

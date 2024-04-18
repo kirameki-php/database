@@ -75,10 +75,10 @@ class SqliteAdapter extends PdoAdapter
 
         $dummyTableName = '_';
         $schemaSyntax = $this->getSchemaSyntax();
-        $createTable = new CreateTableBuilder($schemaSyntax, $dummyTableName);
+        $createTable = new CreateTableBuilder($dummyTableName);
         $createTable->int('id')->primaryKey()->autoIncrement();
         $this->runSchema($createTable->getStatement());
-        $dropTable = new DropTableBuilder($schemaSyntax, $dummyTableName);
+        $dropTable = new DropTableBuilder($dummyTableName);
         $this->runSchema($dropTable->getStatement());
     }
 

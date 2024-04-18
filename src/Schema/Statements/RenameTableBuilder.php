@@ -10,16 +10,14 @@ use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 class RenameTableBuilder extends SchemaBuilder
 {
     /**
-     * @param SchemaSyntax $syntax
      * @param string $from
      * @param string $to
      */
     public function __construct(
-        SchemaSyntax $syntax,
         string $from,
         string $to,
     )
     {
-        parent::__construct(new RenameTableStatement($syntax, $from, $to));
+        parent::__construct(new RenameTableStatement($from, $to));
     }
 }
