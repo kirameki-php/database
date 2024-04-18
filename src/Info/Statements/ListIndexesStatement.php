@@ -3,43 +3,46 @@
 namespace Kirameki\Database\Info\Statements;
 
 use Iterator;
-use Kirameki\Database\Adapters\DatabaseAdapter;
-use Kirameki\Database\Query\Statements\QueryExecutable;
 use Kirameki\Database\Query\Statements\Normalizable;
 use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
-use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 use Override;
 
 class ListIndexesStatement extends QueryStatement implements Normalizable
 {
     /**
-     * @param QuerySyntax $syntax
      * @param string $table
      */
     public function __construct(
-        QuerySyntax $syntax,
         public readonly string $table,
     )
     {
-        parent::__construct($syntax);
+        parent::__construct();
     }
 
     /**
      * @inheritDoc
-     * @return QueryExecutable<self>
      */
     #[Override]
-    public function prepare(): QueryExecutable
+    public function generateTemplate(QuerySyntax $syntax): string
     {
-        return $this->syntax->compileListIndexes($this);
+        return $syntax->prepareTemplateForListIndexes($this);
     }
 
     /**
      * @inheritDoc
      */
     #[Override]
-    public function normalize(iterable $rows): Iterator
+    public function generateParameters(QuerySyntax $syntax): array
+    {
+        return [];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function normalize(QuerySyntax $syntax, iterable $rows): Iterator
     {
         return yield from $rows;
     }

@@ -3,12 +3,14 @@
 namespace Kirameki\Database\Query\Statements;
 
 use Iterator;
+use Kirameki\Database\Query\Syntax\QuerySyntax;
 
 interface Normalizable
 {
     /**
+     * @param QuerySyntax $syntax
      * @param iterable<int, mixed> $rows
      * @return Iterator<int, mixed>
      */
-    public function normalize(iterable $rows): Iterator;
+    public function normalize(QuerySyntax $syntax, iterable $rows): Iterator;
 }

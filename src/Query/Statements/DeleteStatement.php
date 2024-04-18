@@ -8,26 +8,32 @@ use Override;
 class DeleteStatement extends ConditionsStatement
 {
     /**
-     * @param QuerySyntax $syntax
      * @param string $table
      * @param list<string>|null $returning
      */
     public function __construct(
-        QuerySyntax $syntax,
         public readonly string $table,
         public ?array $returning = null,
     )
     {
-        parent::__construct($syntax);
+        parent::__construct();
     }
 
     /**
      * @inheritDoc
-     * @return QueryExecutable<self>
      */
     #[Override]
-    public function prepare(): QueryExecutable
+    public function generateTemplate(QuerySyntax $syntax): string
     {
-        return $this->syntax->compileDelete($this);
+        return $syntax->prepareTemplateForDelete($this);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function generateParameters(QuerySyntax $syntax): array
+    {
+        return $syntax->prepareParametersForDelete($this);
     }
 }

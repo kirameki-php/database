@@ -79,6 +79,6 @@ abstract class QueryBuilder
      */
     public function toString(): string
     {
-        return $this->statement->toString();
+        return $this->handler->toString($this->statement);
     }
 }

@@ -20,7 +20,7 @@ class Raw extends Expression
      * @inheritDoc
      */
     #[Override]
-    public function prepare(QuerySyntax $syntax): string
+    public function generateTemplate(QuerySyntax $syntax): string
     {
         return $this->value;
     }

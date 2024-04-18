@@ -9,26 +9,36 @@ use Kirameki\Database\Statement;
 abstract class QueryStatement implements Statement
 {
     /**
-     * @param QuerySyntax $syntax
      * @param Tags|null $tags
      */
     public function __construct(
-        protected readonly QuerySyntax $syntax,
         public ?Tags $tags = null,
     )
     {
     }
 
     /**
-     * @return QueryExecutable<static>
-     */
-    abstract public function prepare(): QueryExecutable;
-
-    /**
+     * @param QuerySyntax $syntax
      * @return string
      */
-    public function toString(): string
+    abstract public function generateTemplate(QuerySyntax $syntax): string;
+
+    /**
+     * @param QuerySyntax $syntax
+     * @return list<mixed>
+     */
+    abstract public function generateParameters(QuerySyntax $syntax): array;
+
+    /**
+     * @param QuerySyntax $syntax
+     * @return string
+     */
+    public function toString(QuerySyntax $syntax): string
     {
-        return $this->syntax->interpolate($this->prepare());
+        return $syntax->interpolate(
+            $this->generateTemplate($syntax),
+            $this->generateParameters($syntax),
+            $this->tags,
+        );
     }
 }

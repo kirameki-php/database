@@ -10,31 +10,34 @@ use function iterator_to_array;
 class RawStatement extends QueryStatement
 {
     /**
-     * @param QuerySyntax $syntax
      * @param Tags|null $tags
      * @param string $template
      * @param iterable<int, mixed> $parameters
      */
     public function __construct(
-        QuerySyntax $syntax,
         ?Tags $tags,
         public readonly string $template,
         public readonly iterable $parameters = [],
     )
     {
-        parent::__construct($syntax, $tags);
+        parent::__construct($tags);
     }
 
     /**
      * @inheritDoc
      */
     #[Override]
-    public function prepare(): QueryExecutable
+    public function generateTemplate(QuerySyntax $syntax): string
     {
-        return $this->syntax->toExecutable(
-            $this,
-            $this->template,
-            iterator_to_array($this->parameters),
-        );
+        return $this->template;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function generateParameters(QuerySyntax $syntax): array
+    {
+        return iterator_to_array($this->parameters);
     }
 }

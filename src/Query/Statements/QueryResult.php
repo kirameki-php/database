@@ -12,13 +12,17 @@ use Kirameki\Collections\Vec;
 class QueryResult extends Vec
 {
     /**
-     * @param QueryExecutable<TQueryStatement> $executable
+     * @param TQueryStatement $statement
+     * @param string $template
+     * @param list<mixed> $parameters
      * @param float $elapsedMs
      * @param Closure(): int $affectedRowCount
      * @param iterable<int, mixed> $rows
      */
     public function __construct(
-        public readonly QueryExecutable $executable,
+        public readonly QueryStatement $statement,
+        public readonly string $template,
+        public readonly array $parameters,
         public readonly float $elapsedMs,
         protected int|Closure $affectedRowCount,
         iterable $rows,

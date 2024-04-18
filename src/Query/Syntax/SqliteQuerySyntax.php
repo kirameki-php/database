@@ -7,7 +7,6 @@ use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Info\Statements\ListColumnsStatement;
 use Kirameki\Database\Info\Statements\ListIndexesStatement;
 use Kirameki\Database\Info\Statements\ListTablesStatement;
-use Kirameki\Database\Query\Statements\QueryExecutable;
 use Kirameki\Database\Query\Statements\SelectStatement;
 use Kirameki\Database\Query\Support\NullOrder;
 use Kirameki\Database\Query\Support\Ordering;
@@ -54,16 +53,16 @@ class SqliteQuerySyntax extends QuerySyntax
      * @inheritDoc
      */
     #[Override]
-    public function compileListTables(ListTablesStatement $statement): QueryExecutable
+    public function prepareTemplateForListTables(ListTablesStatement $statement): string
     {
-        return $this->toExecutable($statement, "SELECT \"name\" FROM \"sqlite_master\" WHERE type = 'table'");
+        return "SELECT \"name\" FROM \"sqlite_master\" WHERE type = 'table'";
     }
 
     /**
      * @inheritDoc
      */
     #[Override]
-    public function compileListColumns(ListColumnsStatement $statement): QueryExecutable
+    public function prepareTemplateForListColumns(ListColumnsStatement $statement): string
     {
         $columns = implode(', ', [
             'name',
@@ -72,8 +71,7 @@ class SqliteQuerySyntax extends QuerySyntax
             '(cid + 1) as `position`',
         ]);
         $table = $this->asIdentifier($statement->table);
-        $template = "SELECT {$columns} FROM pragma_table_info({$table}) ORDER BY \"cid\" ASC";
-        return $this->toExecutable($statement, $template);
+        return "SELECT {$columns} FROM pragma_table_info({$table}) ORDER BY \"cid\" ASC";
     }
 
     /**
@@ -106,10 +104,10 @@ class SqliteQuerySyntax extends QuerySyntax
      * @inheritDoc
      */
     #[Override]
-    public function compileListIndexes(ListIndexesStatement $statement): QueryExecutable
+    public function prepareTemplateForListIndexes(ListIndexesStatement $statement): string
     {
         $table = $this->asLiteral($statement->table);
-        return $this->toExecutable($statement, implode(' ', [
+        return implode(' ', [
             'SELECT "PRIMARY" AS "name", group_concat(col) AS "columns", "primary" AS "type"',
             'FROM (SELECT "name" AS "col" FROM pragma_table_info(' . $table . ') WHERE "pk" > 0 ORDER BY "pk", "cid")',
             'GROUP BY "name"',
@@ -117,7 +115,7 @@ class SqliteQuerySyntax extends QuerySyntax
             'SELECT "name", group_concat(col) AS "columns", (CASE WHEN "origin" = "pk" THEN \'primary\' WHEN "unique" > 0 THEN \'unique\' ELSE \'index\' END) AS "type"',
             'FROM (SELECT il.*, ii.name AS col FROM pragma_index_list(' . $table . ') il, pragma_index_info(il.name) ii ORDER BY il.seq, ii.seqno)',
             'GROUP BY "name"',
-        ]));
+        ]);
     }
 
 }

@@ -25,7 +25,6 @@ class SelectStatement extends ConditionsStatement
     public ?string $forceIndex = null;
 
     /**
-     * @param QuerySyntax $syntax
      * @param list<string|Expression> $tables
      * @param list<string|Expression>|null $columns
      * @param list<JoinDefinition>|null $joins
@@ -34,7 +33,6 @@ class SelectStatement extends ConditionsStatement
      * @param int|null $offset
      */
     public function __construct(
-        QuerySyntax $syntax,
         public ?array $tables = null,
         public ?array $columns = null,
         public ?array $joins = null,
@@ -43,16 +41,24 @@ class SelectStatement extends ConditionsStatement
         public ?int $offset = null,
     )
     {
-        parent::__construct($syntax);
+        parent::__construct();
     }
 
     /**
      * @inheritDoc
-     * @return QueryExecutable<self>
      */
     #[Override]
-    public function prepare(): QueryExecutable
+    public function generateTemplate(QuerySyntax $syntax): string
     {
-        return $this->syntax->compileSelect($this);
+        return $syntax->prepareTemplateForSelect($this);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function generateParameters(QuerySyntax $syntax): array
+    {
+        return $syntax->prepareParametersForSelect($this);
     }
 }

@@ -8,28 +8,34 @@ use Override;
 class UpdateStatement extends ConditionsStatement
 {
     /**
-     * @param QuerySyntax $syntax
      * @param string $table
      * @param array<string, mixed>|null $set
      * @param list<string>|null $returning
      */
     public function __construct(
-        QuerySyntax $syntax,
         public readonly string $table,
         public ?array $set = null,
         public ?array $returning = null,
     )
     {
-        parent::__construct($syntax);
+        parent::__construct();
     }
 
     /**
      * @inheritDoc
-     * @return QueryExecutable<self>
      */
     #[Override]
-    public function prepare(): QueryExecutable
+    public function generateTemplate(QuerySyntax $syntax): string
     {
-        return $this->syntax->compileUpdate($this);
+        return $syntax->prepareTemplateForUpdate($this);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function generateParameters(QuerySyntax $syntax): array
+    {
+        return $syntax->prepareParametersForUpdate($this);
     }
 }

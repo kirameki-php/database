@@ -31,7 +31,7 @@ readonly class InfoHandler
         $connection = $this->connection;
         $syntax = $connection->adapter->getQuerySyntax();
         return $connection->query()
-            ->execute(new ListTablesStatement($syntax))
+            ->execute(new ListTablesStatement())
             ->map(fn(stdClass $row) => $row->name);
     }
 
@@ -45,12 +45,12 @@ readonly class InfoHandler
         $syntax = $connection->adapter->getQuerySyntax();
 
         $columns = $connection->query()
-            ->execute(new ListColumnsStatement($syntax, $name))
+            ->execute(new ListColumnsStatement($name))
             ->map(fn(stdClass $r) => new ColumnInfo($r->name, $r->type, $r->nullable, $r->position))
             ->keyBy(fn(ColumnInfo $c) => $c->name);
 
         $indexes = $connection->query()
-            ->execute(new ListIndexesStatement($syntax, $name))
+            ->execute(new ListIndexesStatement($name))
             ->map(fn(stdClass $r) => new IndexInfo($r->name, explode(',', $r->columns), $r->type));
 
         return new TableInfo($name, $columns, $indexes);

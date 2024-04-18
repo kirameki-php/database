@@ -28,7 +28,7 @@ class JsonExtract extends Expression
      * @inheritDoc
      */
     #[Override]
-    public function prepare(QuerySyntax $syntax): string
+    public function generateTemplate(QuerySyntax $syntax): string
     {
         return $syntax->formatJsonExtract($this->column, $this->path);
     }

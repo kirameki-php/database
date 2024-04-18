@@ -10,12 +10,12 @@ abstract class Expression
      * @param QuerySyntax $syntax
      * @return string
      */
-    abstract public function prepare(QuerySyntax $syntax): string;
+    abstract public function generateTemplate(QuerySyntax $syntax): string;
 
     /**
      * @return array<int, mixed>
      */
-    public function getParameters(): array
+    public function generateParameters(QuerySyntax $syntax): array
     {
         return [];
     }

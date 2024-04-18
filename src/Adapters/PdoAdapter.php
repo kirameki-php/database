@@ -8,7 +8,6 @@ use Iterator;
 use Kirameki\Collections\LazyIterator;
 use Kirameki\Database\Exceptions\QueryException;
 use Kirameki\Database\Exceptions\SchemaException;
-use Kirameki\Database\Query\Statements\QueryExecutable;
 use Kirameki\Database\Query\Statements\Normalizable;
 use Kirameki\Database\Query\Statements\QueryResult;
 use Kirameki\Database\Query\Statements\QueryStatement;
@@ -124,15 +123,17 @@ abstract class PdoAdapter implements DatabaseAdapter
     {
         try {
             $startTime = hrtime(true);
-            $executable = $statement->prepare();
-            $prepared = $this->executeQueryStatement($executable);
+            $syntax = $this->getQuerySyntax();
+            $template = $statement->generateTemplate($syntax);
+            $parameters = $statement->generateParameters($syntax);
+            $prepared = $this->executeQueryStatement($template, $parameters);
             $rows = $prepared->fetchAll(PDO::FETCH_OBJ);
             if ($statement instanceof Normalizable) {
-                $rows = iterator_to_array($statement->normalize($rows));
+                $rows = iterator_to_array($statement->normalize($syntax, $rows));
             }
             $fetchTimeMs = (hrtime(true) - $startTime) / 1_000_000;
             $count = $prepared->rowCount(...);
-            return $this->instantiateQueryResult($executable, $fetchTimeMs, $rows, $count);
+            return $this->instantiateQueryResult($statement, $template, $parameters, $fetchTimeMs, $rows, $count);
         } catch (PDOException $e) {
             throw new QueryException($e->getMessage(), $statement, $e);
         }
@@ -146,8 +147,10 @@ abstract class PdoAdapter implements DatabaseAdapter
     {
         try {
             $startTime = hrtime(true);
-            $executable = $statement->prepare();
-            $prepared = $this->executeQueryStatement($executable);
+            $syntax = $this->getQuerySyntax();
+            $template = $statement->generateTemplate($syntax);
+            $parameters = $statement->generateParameters($syntax);
+            $prepared = $this->executeQueryStatement($template, $parameters);
             $iterator = (function() use ($prepared, $statement): Iterator {
                 while (true) {
                     $data = $prepared->fetch(PDO::FETCH_OBJ);
@@ -161,12 +164,12 @@ abstract class PdoAdapter implements DatabaseAdapter
                 }
             })();
             if ($statement instanceof Normalizable) {
-                $iterator = $statement->normalize($iterator);
+                $iterator = $statement->normalize($syntax, $iterator);
             }
             $rows = new LazyIterator($iterator);
             $execTimeMs = (hrtime(true) - $startTime) / 1_000_000;
             $count = $prepared->rowCount(...);
-            return $this->instantiateQueryResult($executable, $execTimeMs, $rows, $count);
+            return $this->instantiateQueryResult($statement, $template, $parameters, $execTimeMs, $rows, $count);
         } catch (PDOException $e) {
             throw new QueryException($e->getMessage(), $statement, $e);
         }
@@ -237,14 +240,14 @@ abstract class PdoAdapter implements DatabaseAdapter
     abstract protected function instantiateSchemaSyntax(): SchemaSyntax;
 
     /**
-     * @template TQueryStatement of QueryStatement
-     * @param QueryExecutable<TQueryStatement> $executable
+     * @param string $template
+     * @param list<mixed> $parameters
      * @return PDOStatement
      */
-    protected function executeQueryStatement(QueryExecutable $executable): PDOStatement
+    protected function executeQueryStatement(string $template, array $parameters): PDOStatement
     {
-        $prepared = $this->getPdo()->prepare($executable->template);
-        $prepared->execute($executable->parameters);
+        $prepared = $this->getPdo()->prepare($template);
+        $prepared->execute($parameters);
         return $prepared;
     }
 
@@ -282,20 +285,24 @@ abstract class PdoAdapter implements DatabaseAdapter
 
     /**
      * @template TQueryStatement of QueryStatement
-     * @param QueryExecutable<TQueryStatement> $executable
+     * @param TQueryStatement $statement
+     * @param string $template
+     * @param list<mixed> $parameters
      * @param float $elapsedMs
      * @param iterable<int, mixed> $rows
      * @param int|Closure(): int $affectedRowCount
      * @return QueryResult<TQueryStatement>
      */
     protected function instantiateQueryResult(
-        QueryExecutable $executable,
+        QueryStatement $statement,
+        string $template,
+        array $parameters,
         float $elapsedMs,
         iterable $rows,
         int|Closure $affectedRowCount,
     ): QueryResult
     {
-        return new QueryResult($executable, $elapsedMs, $affectedRowCount, $rows);
+        return new QueryResult($statement, $template, $parameters, $elapsedMs, $affectedRowCount, $rows);
     }
 
     /**

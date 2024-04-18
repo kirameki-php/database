@@ -43,7 +43,7 @@ readonly class QueryHandler
      */
     public function select(string|Expression ...$columns): SelectBuilder
     {
-        return (new SelectBuilder($this, new SelectStatement($this->syntax)))->columns(...$columns);
+        return (new SelectBuilder($this, new SelectStatement()))->columns(...$columns);
     }
 
     /**
@@ -52,7 +52,7 @@ readonly class QueryHandler
      */
     public function insertInto(string $table): InsertBuilder
     {
-        return new InsertBuilder($this, new InsertStatement($this->syntax, $table));
+        return new InsertBuilder($this, new InsertStatement($table));
     }
 
     /**
@@ -61,7 +61,7 @@ readonly class QueryHandler
      */
     public function update(string $table): UpdateBuilder
     {
-        return new UpdateBuilder($this, new UpdateStatement($this->syntax, $table));
+        return new UpdateBuilder($this, new UpdateStatement($table));
     }
 
     /**
@@ -70,7 +70,7 @@ readonly class QueryHandler
      */
     public function delete(string $table): DeleteBuilder
     {
-        return new DeleteBuilder($this, new DeleteStatement($this->syntax, $table));
+        return new DeleteBuilder($this, new DeleteStatement($table));
     }
 
     /**
@@ -86,12 +86,13 @@ readonly class QueryHandler
 
     /**
      * @param string $query
-     * @param iterable<array-key, mixed> $bindings
+     * @param iterable<array-key, mixed> $parameters
+     * @param Tags|null $tags
      * @return QueryResult<RawStatement>
      */
-    public function executeRaw(string $query, iterable $bindings = [], ?Tags $tags = null): QueryResult
+    public function executeRaw(string $query, iterable $parameters = [], ?Tags $tags = null): QueryResult
     {
-        return $this->execute(new RawStatement($this->syntax, $tags, $query, $bindings));
+        return $this->execute(new RawStatement($tags, $query, $parameters));
     }
 
     /**
@@ -103,6 +104,11 @@ readonly class QueryHandler
     {
         $this->preprocessStatement($statement);
         return $this->processResult($this->connection->adapter->runQueryWithCursor($statement));
+    }
+
+    public function toString(QueryStatement $statement): string
+    {
+        return $statement->toString($this->syntax);
     }
 
     /**

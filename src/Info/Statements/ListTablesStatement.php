@@ -2,20 +2,27 @@
 
 namespace Kirameki\Database\Info\Statements;
 
-use Kirameki\Database\Adapters\DatabaseAdapter;
-use Kirameki\Database\Query\Statements\QueryExecutable;
 use Kirameki\Database\Query\Statements\QueryStatement;
+use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Override;
 
 class ListTablesStatement extends QueryStatement
 {
     /**
      * @inheritDoc
-     * @return QueryExecutable<self>
      */
     #[Override]
-    public function prepare(): QueryExecutable
+    public function generateTemplate(QuerySyntax $syntax): string
     {
-        return $this->syntax->compileListTables($this);
+        return $syntax->prepareTemplateForListTables($this);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function generateParameters(QuerySyntax $syntax): array
+    {
+        return [];
     }
 }
