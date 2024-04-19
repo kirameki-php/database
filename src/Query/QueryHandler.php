@@ -74,7 +74,7 @@ readonly class QueryHandler
     /**
      * @template TQueryStatement of QueryStatement
      * @param TQueryStatement $statement
-     * @return QueryResult<TQueryStatement>
+     * @return QueryResult<TQueryStatement, mixed>
      */
     public function execute(QueryStatement $statement): QueryResult
     {
@@ -86,7 +86,7 @@ readonly class QueryHandler
      * @param string $query
      * @param iterable<array-key, mixed> $parameters
      * @param Tags|null $tags
-     * @return QueryResult<RawStatement>
+     * @return QueryResult<RawStatement, mixed>
      */
     public function executeRaw(string $query, iterable $parameters = [], ?Tags $tags = null): QueryResult
     {
@@ -96,7 +96,7 @@ readonly class QueryHandler
     /**
      * @template TQueryStatement of QueryStatement
      * @param TQueryStatement $statement
-     * @return QueryResult<TQueryStatement>
+     * @return QueryResult<TQueryStatement, mixed>
      */
     public function cursor(QueryStatement $statement): QueryResult
     {
@@ -124,8 +124,9 @@ readonly class QueryHandler
 
     /**
      * @template TQueryStatement of QueryStatement
-     * @param QueryResult<TQueryStatement> $result
-     * @return QueryResult<TQueryStatement>
+     * @template TRow of mixed
+     * @param QueryResult<TQueryStatement, TRow> $result
+     * @return QueryResult<TQueryStatement, TRow>
      */
     protected function processResult(QueryResult $result): QueryResult
     {

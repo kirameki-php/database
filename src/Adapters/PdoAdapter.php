@@ -291,7 +291,7 @@ abstract class PdoAdapter implements DatabaseAdapter
      * @param float $elapsedMs
      * @param iterable<int, mixed> $rows
      * @param int|Closure(): int $affectedRowCount
-     * @return QueryResult<TQueryStatement>
+     * @return QueryResult<TQueryStatement, mixed>
      */
     protected function instantiateQueryResult(
         QueryStatement $statement,
@@ -307,6 +307,7 @@ abstract class PdoAdapter implements DatabaseAdapter
 
     /**
      * @param PDOStatement $prepared
+     * @param QueryStatement $statement
      * @return void
      */
     protected function throwException(PDOStatement $prepared, QueryStatement $statement): void

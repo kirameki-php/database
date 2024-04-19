@@ -41,14 +41,14 @@ interface DatabaseAdapter
     /**
      * @template TQueryStatement of QueryStatement
      * @param TQueryStatement $statement
-     * @return QueryResult<TQueryStatement>
+     * @return QueryResult<TQueryStatement, mixed>
      */
     public function runQuery(QueryStatement $statement): QueryResult;
 
     /**
      * @template TQueryStatement of QueryStatement
      * @param TQueryStatement $statement
-     * @return QueryResult<TQueryStatement>
+     * @return QueryResult<TQueryStatement, mixed>
      */
     public function runQueryWithCursor(QueryStatement $statement): QueryResult;
 

@@ -352,25 +352,18 @@ class SelectBuilder extends ConditionsBuilder
     /**
      * @return mixed
      */
-    public function last(): mixed
-    {
-        return $this->copy()->limit(1)->execute()->last();
-    }
-
-    /**
-     * @return mixed
-     */
-    public function lastOrNull(): mixed
-    {
-        return $this->copy()->limit(1)->execute()->lastOrNull();
-    }
-
-    /**
-     * @return mixed
-     */
     public function single(): mixed
     {
         return $this->copy()->limit(2)->execute()->single();
+    }
+
+    /**
+     * @param int $size
+     * @return QueryResult<SelectStatement, mixed>
+     */
+    public function exactly(int $size): QueryResult
+    {
+        return $this->copy()->limit($size)->execute()->ensureCountIs($size);
     }
 
     /**

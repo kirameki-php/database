@@ -59,7 +59,7 @@ abstract class QueryBuilder
     }
 
     /**
-     * @return QueryResult<TQueryStatement>
+     * @return QueryResult<TQueryStatement, mixed>
      */
     public function execute(): QueryResult
     {
@@ -67,7 +67,7 @@ abstract class QueryBuilder
     }
 
     /**
-     * @return QueryResult<TQueryStatement>
+     * @return QueryResult<TQueryStatement, mixed>
      */
     public function cursor(): QueryResult
     {

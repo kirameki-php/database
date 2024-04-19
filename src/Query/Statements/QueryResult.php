@@ -7,7 +7,8 @@ use Kirameki\Collections\Vec;
 
 /**
  * @template TQueryStatement of QueryStatement
- * @extends Vec<mixed>
+ * @template TRow of mixed
+ * @extends Vec<TRow>
  */
 class QueryResult extends Vec
 {
@@ -17,7 +18,7 @@ class QueryResult extends Vec
      * @param list<mixed> $parameters
      * @param float $elapsedMs
      * @param Closure(): int $affectedRowCount
-     * @param iterable<int, mixed> $rows
+     * @param iterable<int, TRow> $rows
      */
     public function __construct(
         public readonly QueryStatement $statement,

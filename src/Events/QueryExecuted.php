@@ -10,7 +10,8 @@ class QueryExecuted extends StatementExecuted
 {
     /**
      * @template TQueryStatement of QueryStatement
-     * @param QueryResult<TQueryStatement> $result
+     * @template TRow of mixed
+     * @param QueryResult<TQueryStatement, TRow> $result
      */
     public function __construct(
         Connection $connection,
