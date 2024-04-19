@@ -15,12 +15,10 @@ readonly class SchemaHandler
     /**
      * @param Connection $connection
      * @param EventManager $events
-     * @param SchemaSyntax $syntax
      */
     public function __construct(
         public Connection $connection,
         protected EventManager $events,
-        protected SchemaSyntax $syntax,
     )
     {
     }

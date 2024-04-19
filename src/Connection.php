@@ -74,11 +74,7 @@ class Connection
      */
     public function query(): QueryHandler
     {
-        return $this->queryHandler ??= new QueryHandler(
-            $this,
-            $this->events,
-            $this->adapter->getQuerySyntax(),
-        );
+        return $this->queryHandler ??= new QueryHandler($this, $this->events);
     }
 
     /**
@@ -86,11 +82,7 @@ class Connection
      */
     public function schema(): SchemaHandler
     {
-        return $this->schemaHandler ??= new SchemaHandler(
-            $this,
-            $this->events,
-            $this->adapter->getSchemaSyntax(),
-        );
+        return $this->schemaHandler ??= new SchemaHandler($this, $this->events);
     }
 
     public function info(): InfoHandler

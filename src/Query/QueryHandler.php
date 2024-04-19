@@ -25,13 +25,11 @@ readonly class QueryHandler
     /**
      * @param Connection $connection
      * @param EventManager $events
-     * @param QuerySyntax $syntax
      * @param Tags|null $tags
      */
     public function __construct(
         public Connection $connection,
         protected EventManager $events,
-        protected QuerySyntax $syntax,
         protected ?Tags $tags = null,
     )
     {
@@ -108,7 +106,7 @@ readonly class QueryHandler
 
     public function toString(QueryStatement $statement): string
     {
-        return $statement->toString($this->syntax);
+        return $statement->toString($this->connection->adapter->getQuerySyntax());
     }
 
     /**

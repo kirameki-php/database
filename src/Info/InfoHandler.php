@@ -28,9 +28,7 @@ readonly class InfoHandler
      */
     public function getTableNames(): Vec
     {
-        $connection = $this->connection;
-        $syntax = $connection->adapter->getQuerySyntax();
-        return $connection->query()
+        return $this->connection->query()
             ->execute(new ListTablesStatement())
             ->map(fn(stdClass $row) => $row->name);
     }
@@ -42,7 +40,6 @@ readonly class InfoHandler
     public function getTable(string $name): TableInfo
     {
         $connection = $this->connection;
-        $syntax = $connection->adapter->getQuerySyntax();
 
         $columns = $connection->query()
             ->execute(new ListColumnsStatement($name))
