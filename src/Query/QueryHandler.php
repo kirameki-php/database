@@ -20,7 +20,6 @@ use Kirameki\Database\Query\Statements\UpsertBuilder;
 use Kirameki\Database\Query\Statements\UpsertStatement;
 use Kirameki\Database\Query\Support\Dataset;
 use Kirameki\Database\Query\Support\Tags;
-use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Kirameki\Event\EventManager;
 
 readonly class QueryHandler
