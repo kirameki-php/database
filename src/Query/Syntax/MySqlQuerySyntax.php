@@ -4,6 +4,7 @@ namespace Kirameki\Database\Query\Syntax;
 
 use Kirameki\Database\Query\Statements\ConditionsStatement;
 use Kirameki\Database\Query\Statements\SelectStatement;
+use Kirameki\Database\Query\Support\Dataset;
 use Kirameki\Database\Query\Support\NullOrder;
 use Kirameki\Database\Query\Support\Ordering;
 use Override;
@@ -27,7 +28,7 @@ class MySqlQuerySyntax extends QuerySyntax
      * @inheritDoc
      */
     #[Override]
-    protected function formatDatasetValuesPart(array $dataset, array $columns): string
+    protected function formatDatasetValuesPart(Dataset $dataset, array $columns): string
     {
         return parent::formatDatasetValuesPart($dataset, $columns) . 'AS new';
     }

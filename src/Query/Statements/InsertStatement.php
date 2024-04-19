@@ -2,6 +2,7 @@
 
 namespace Kirameki\Database\Query\Statements;
 
+use Kirameki\Database\Query\Support\Dataset;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Override;
 use function array_keys;
@@ -10,12 +11,12 @@ class InsertStatement extends QueryStatement
 {
     /**
      * @param string $table
-     * @param list<array<string, mixed>> $dataset
+     * @param Dataset $dataset
      * @param list<string>|null $returning
      */
     public function __construct(
         public readonly string $table,
-        public array $dataset = [],
+        public Dataset $dataset,
         public ?array $returning = null,
     )
     {
@@ -28,7 +29,7 @@ class InsertStatement extends QueryStatement
     #[Override]
     public function generateTemplate(QuerySyntax $syntax): string
     {
-        return $syntax->prepareTemplateForInsert($this, $this->getDatasetColumns($this));
+        return $syntax->prepareTemplateForInsert($this, $this->dataset->getColumns());
     }
 
     /**
@@ -37,21 +38,6 @@ class InsertStatement extends QueryStatement
     #[Override]
     public function generateParameters(QuerySyntax $syntax): array
     {
-        return $syntax->prepareParametersForInsert($this, $this->getDatasetColumns($this));
-    }
-
-    /**
-     * @param static $statement
-     * @return list<string>
-     */
-    protected function getDatasetColumns(self $statement): array
-    {
-        $columnsMap = [];
-        foreach ($statement->dataset as $data) {
-            foreach (array_keys($data) as $name) {
-                $columnsMap[$name] = null;
-            }
-        }
-        return array_keys($columnsMap);
+        return $syntax->prepareParametersForInsert($this, $this->dataset->getColumns());
     }
 }

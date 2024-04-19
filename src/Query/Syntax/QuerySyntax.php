@@ -27,6 +27,7 @@ use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Statements\SelectStatement;
 use Kirameki\Database\Query\Statements\UpdateStatement;
 use Kirameki\Database\Query\Statements\UpsertStatement;
+use Kirameki\Database\Query\Support\Dataset;
 use Kirameki\Database\Query\Support\LockOption;
 use Kirameki\Database\Query\Support\LockType;
 use Kirameki\Database\Query\Support\Operator;
@@ -365,11 +366,11 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param list<array<string, mixed>> $dataset
+     * @param Dataset $dataset
      * @param list<string> $columns
      * @return string
      */
-    protected function formatDatasetValuesPart(array $dataset, array $columns): string
+    protected function formatDatasetValuesPart(Dataset $dataset, array $columns): string
     {
         $placeholders = [];
         foreach ($dataset as $data) {
@@ -383,18 +384,20 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param list<array<string, mixed>> $dataset
+     * @param QueryStatement $statement
+     * @param Dataset $dataset
      * @param list<string> $columns
      * @return array<mixed>
      */
-    protected function formatDatasetParameters(QueryStatement $statement, array $dataset, array $columns): array
+    protected function formatDatasetParameters(QueryStatement $statement, Dataset $dataset, array $columns): array
     {
         $parameters = [];
-        foreach ($dataset as $data) {
+        foreach ($dataset as $index => $data) {
             if (!is_array($data)) {
                 throw new LogicException('Data should be an array but ' . Value::getType($data) . ' given.', [
                     'statement' => $statement,
                     'dataset' => $dataset,
+                    'index' => $index,
                 ]);
             }
             foreach ($columns as $column) {

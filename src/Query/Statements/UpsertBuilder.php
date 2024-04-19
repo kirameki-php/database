@@ -3,7 +3,6 @@
 namespace Kirameki\Database\Query\Statements;
 
 use function array_values;
-use function iterator_to_array;
 
 /**
  * @extends QueryBuilder<UpsertStatement>
@@ -25,10 +24,7 @@ class UpsertBuilder extends QueryBuilder
      */
     public function values(iterable $dataset): static
     {
-        $statement = $this->statement;
-        foreach ($dataset as $data) {
-            $statement->dataset[] = iterator_to_array($data);
-        }
+        $this->statement->dataset->merge($dataset);
         return $this;
     }
 

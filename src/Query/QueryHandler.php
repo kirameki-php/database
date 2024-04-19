@@ -16,6 +16,9 @@ use Kirameki\Database\Query\Statements\SelectBuilder;
 use Kirameki\Database\Query\Statements\SelectStatement;
 use Kirameki\Database\Query\Statements\UpdateBuilder;
 use Kirameki\Database\Query\Statements\UpdateStatement;
+use Kirameki\Database\Query\Statements\UpsertBuilder;
+use Kirameki\Database\Query\Statements\UpsertStatement;
+use Kirameki\Database\Query\Support\Dataset;
 use Kirameki\Database\Query\Support\Tags;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Kirameki\Event\EventManager;
@@ -50,7 +53,7 @@ readonly class QueryHandler
      */
     public function insertInto(string $table): InsertBuilder
     {
-        return new InsertBuilder($this, new InsertStatement($table));
+        return new InsertBuilder($this, new InsertStatement($table, new Dataset()));
     }
 
     /**
@@ -60,6 +63,15 @@ readonly class QueryHandler
     public function update(string $table): UpdateBuilder
     {
         return new UpdateBuilder($this, new UpdateStatement($table));
+    }
+
+    /**
+     * @param string $table
+     * @return UpsertBuilder
+     */
+    public function upsertInto(string $table): UpsertBuilder
+    {
+        return new UpsertBuilder($this, new UpsertStatement($table, new Dataset()));
     }
 
     /**
