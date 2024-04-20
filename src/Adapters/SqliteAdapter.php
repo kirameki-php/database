@@ -40,6 +40,17 @@ class SqliteAdapter extends PdoAdapter
      * @inheritDoc
      */
     #[Override]
+    public function connect(): static
+    {
+        parent::connect();
+        $this->getPdo()->exec('PRAGMA foreign_keys = ON');
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
     protected function instantiateQuerySyntax(): SqliteQuerySyntax
     {
         return new SqliteQuerySyntax(
