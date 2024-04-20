@@ -7,7 +7,6 @@ use Kirameki\Database\Events\SchemaExecuted;
 use Kirameki\Database\Schema\Statements\SchemaResult;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
 use Kirameki\Database\Schema\Statements\TruncateTableStatement;
-use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 use Kirameki\Event\EventManager;
 
 readonly class SchemaHandler
@@ -38,8 +37,27 @@ readonly class SchemaHandler
      */
     public function execute(SchemaStatement $statement): SchemaResult
     {
-        $execution = $this->connection->adapter->runSchema($statement);
-        $this->events->emit(new SchemaExecuted($this->connection, $execution));
-        return $execution;
+        $this->preprocess($statement);
+        $result = $this->connection->adapter->runSchema($statement);
+        return $this->postprocess($result);
+    }
+
+    /**
+     * @param SchemaStatement $statement
+     */
+    protected function preprocess(SchemaStatement $statement): void
+    {
+        $this->connection->connectIfNotConnected();
+    }
+
+    /**
+     * @template TSchemaStatement of SchemaStatement
+     * @param SchemaResult<TSchemaStatement> $result
+     * @return SchemaResult<TSchemaStatement>
+     */
+    protected function postprocess(SchemaResult $result): SchemaResult
+    {
+        $this->events->emit(new SchemaExecuted($this->connection, $result));
+        return $result;
     }
 }

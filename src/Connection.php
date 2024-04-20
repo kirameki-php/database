@@ -3,6 +3,7 @@
 namespace Kirameki\Database;
 
 use Closure;
+use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Adapters\DatabaseAdapter;
 use Kirameki\Database\Events\ConnectionEstablished;
 use Kirameki\Database\Info\InfoHandler;
@@ -47,9 +48,28 @@ class Connection
      */
     public function connect(): static
     {
+        if ($this->isConnected()) {
+            throw new LogicException("Connection: {$this->name} is already established.", [
+                'name' => $this->name,
+            ]);
+        }
         $this->adapter->connect();
         $this->events->emit(new ConnectionEstablished($this));
         return $this;
+    }
+
+    /**
+     * Returns **true** if the connection was established, **false** if it was already connected.
+     *
+     * @return bool
+     */
+    public function connectIfNotConnected(): bool
+    {
+        if (!$this->isConnected()) {
+            $this->connect();
+            return true;
+        }
+        return false;
     }
 
     /**

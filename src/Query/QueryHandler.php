@@ -89,8 +89,9 @@ readonly class QueryHandler
      */
     public function execute(QueryStatement $statement): QueryResult
     {
-        $this->preprocessStatement($statement);
-        return $this->processResult($this->connection->adapter->runQuery($statement));
+        $this->preprocess($statement);
+        $result = $this->connection->adapter->runQuery($statement);
+        return $this->postprocess($result);
     }
 
     /**
@@ -111,8 +112,9 @@ readonly class QueryHandler
      */
     public function cursor(QueryStatement $statement): QueryResult
     {
-        $this->preprocessStatement($statement);
-        return $this->processResult($this->connection->adapter->runQueryWithCursor($statement));
+        $this->preprocess($statement);
+        $result = $this->connection->adapter->runQueryWithCursor($statement);
+        return $this->postprocess($result);
     }
 
     public function toString(QueryStatement $statement): string
@@ -124,7 +126,13 @@ readonly class QueryHandler
      * @param QueryStatement $statement
      * @return void
      */
-    protected function preprocessStatement(QueryStatement $statement): void
+    protected function preprocess(QueryStatement $statement): void
+    {
+        $this->mergeConnectionTags($statement);
+        $this->connection->connectIfNotConnected();
+    }
+
+    protected function mergeConnectionTags(QueryStatement $statement): void
     {
         if ($this->tags !== null) {
             $statement->tags !== null
@@ -139,7 +147,7 @@ readonly class QueryHandler
      * @param QueryResult<TQueryStatement, TRow> $result
      * @return QueryResult<TQueryStatement, TRow>
      */
-    protected function processResult(QueryResult $result): QueryResult
+    protected function postprocess(QueryResult $result): QueryResult
     {
         $this->events->emit(new QueryExecuted($this->connection, $result));
         return $result;

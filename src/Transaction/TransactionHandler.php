@@ -68,6 +68,7 @@ class TransactionHandler
      */
     protected function handleBegin(): void
     {
+        $this->connection->connectIfNotConnected();
         $this->connection->adapter->beginTransaction();
         $this->events->emit(new TransactionBegan($this->connection));
     }
