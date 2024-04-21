@@ -15,6 +15,7 @@ class CreateTableStatement extends SchemaStatement
      * @param list<ColumnDefinition> $columns
      * @param PrimaryKeyConstraint|null $primaryKey
      * @param list<CreateIndexStatement> $indexes
+     * @param list<ForeignKeyConstraint> $foreignKeys
      */
     public function __construct(
         public readonly string $table,
@@ -22,6 +23,7 @@ class CreateTableStatement extends SchemaStatement
         public array $columns = [],
         public ?PrimaryKeyConstraint $primaryKey = null,
         public array $indexes = [],
+        public array $foreignKeys = [],
     )
     {
     }
