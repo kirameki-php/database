@@ -25,6 +25,7 @@ class ColumnDefinition
      * @param int|null $scale
      * @param bool|null $nullable
      * @param mixed|null $default
+     * @param ForeignKeyConstraint|null $references
      */
     public function __construct(
         public readonly string $name,
@@ -33,6 +34,7 @@ class ColumnDefinition
         public ?int $scale = null,
         public ?bool $nullable = null,
         public mixed $default = null,
+        public ?ForeignKeyConstraint $references = null,
     )
     {
     }

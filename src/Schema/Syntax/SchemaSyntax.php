@@ -16,6 +16,7 @@ use Kirameki\Database\Schema\Statements\CreateIndexStatement;
 use Kirameki\Database\Schema\Statements\CreateTableStatement;
 use Kirameki\Database\Schema\Statements\DropIndexStatement;
 use Kirameki\Database\Schema\Statements\DropTableStatement;
+use Kirameki\Database\Schema\Statements\ForeignKeyConstraint;
 use Kirameki\Database\Schema\Statements\PrimaryKeyConstraint;
 use Kirameki\Database\Schema\Statements\RenameTableStatement;
 use Kirameki\Database\Schema\Statements\TruncateTableStatement;
@@ -66,7 +67,7 @@ abstract class SchemaSyntax extends Syntax
         if ($statement->primaryKey !== null) {
             $columnParts[] = $this->formatCreateTablePrimaryKeyPart($statement->primaryKey);
         }
-        $parts[] = '(' . implode(', ', $columnParts) . ')';
+        $parts[] = $this->asEnclosedCsv($columnParts);
         return implode(' ', $parts);
     }
 
@@ -196,7 +197,7 @@ abstract class SchemaSyntax extends Syntax
         foreach ($statement->columns as $column => $order) {
             $columnParts[] = "$column $order";
         }
-        $parts[] = '(' . implode(', ', $columnParts) . ')';
+        $parts[] = $this->asEnclosedCsv($columnParts);
         return implode(' ', $parts);
     }
 
@@ -229,6 +230,9 @@ abstract class SchemaSyntax extends Syntax
         }
         if ($def->primaryKey === true) {
             $parts[] = 'PRIMARY KEY';
+        }
+        if ($def->references !== null) {
+            $parts[] = $this->formatReferencesClause($def->references);
         }
         return implode(' ', $parts);
     }
@@ -267,6 +271,21 @@ abstract class SchemaSyntax extends Syntax
             'value' => $value,
             'column' => $def->name,
         ]);
+    }
+
+    protected function formatReferencesClause(ForeignKeyConstraint $constraint): string
+    {
+        $parts = [];
+        $parts[] = 'REFERENCES';
+        $parts[] = $this->asIdentifier($constraint->referenceTable);
+        $parts[] = $this->asEnclosedCsv(array_map($this->asIdentifier(...), $constraint->referenceColumns));
+        if ($constraint->onDelete !== null) {
+            $parts[] = 'ON DELETE ' . $constraint->onDelete->value;
+        }
+        if ($constraint->onUpdate !== null) {
+            $parts[] = 'ON UPDATE ' . $constraint->onUpdate->value;
+        }
+        return implode(' ', $parts);
     }
 
     /**

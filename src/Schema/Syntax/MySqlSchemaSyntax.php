@@ -8,6 +8,7 @@ use Kirameki\Core\Exceptions\RuntimeException;
 use Kirameki\Database\Schema\Statements\ColumnDefinition;
 use Kirameki\Database\Schema\Statements\CreateTableStatement;
 use Override;
+use function array_filter;
 use function implode;
 use function is_int;
 use function strtoupper;
@@ -63,8 +64,8 @@ class MySqlSchemaSyntax extends SchemaSyntax
             };
         }
         if ($type === 'decimal') {
-            $args = Arr::without([$size, $def->scale], null);
-            return 'DECIMAL' . (!empty($args) ? '(' . implode(',', $args) . ')' : '');
+            $args = array_filter([$size, $def->scale], fn($arg) => $arg !== null);
+            return 'DECIMAL' . (!empty($args) ? $this->asEnclosedCsv($args) : '');
         }
         if ($type === 'bool') {
             return 'BOOL';
@@ -87,8 +88,8 @@ class MySqlSchemaSyntax extends SchemaSyntax
             ]);
         }
 
-        $args = Arr::without([$size, $def->scale], null);
-        return strtoupper($type) . (!empty($args) ? '(' . implode(',', $args) . ')' : '');
+        $args = array_filter([$size, $def->scale], fn($arg) => $arg !== null);
+        return strtoupper($type) . (!empty($args) ? $this->asEnclosedCsv($args) : '');
     }
 
     /**

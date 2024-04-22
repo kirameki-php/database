@@ -1023,24 +1023,6 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param array<scalar> $values
-     * @return string
-     */
-    protected function asEnclosedCsv(array $values): string
-    {
-        return '(' . $this->asCsv($values) . ')';
-    }
-
-    /**
-     * @param array<scalar> $values
-     * @return string
-     */
-    protected function asCsv(array $values): string
-    {
-        return implode(', ', $values);
-    }
-
-    /**
      * @param iterable<array-key, mixed> $parameters
      * @return array<mixed>
      */

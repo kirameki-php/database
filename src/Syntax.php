@@ -3,6 +3,7 @@
 namespace Kirameki\Database;
 
 use Kirameki\Database\Adapters\DatabaseConfig;
+use function implode;
 use function str_replace;
 
 abstract class Syntax
@@ -48,5 +49,23 @@ abstract class Syntax
     protected function escape(string $string, string $escaping): string
     {
         return str_replace($escaping, $escaping . $escaping, $string);
+    }
+
+    /**
+     * @param array<scalar> $values
+     * @return string
+     */
+    protected function asEnclosedCsv(array $values): string
+    {
+        return '(' . $this->asCsv($values) . ')';
+    }
+
+    /**
+     * @param array<scalar> $values
+     * @return string
+     */
+    protected function asCsv(array $values): string
+    {
+        return implode(', ', $values);
     }
 }

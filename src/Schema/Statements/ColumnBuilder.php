@@ -2,6 +2,7 @@
 
 namespace Kirameki\Database\Schema\Statements;
 
+use Kirameki\Database\Schema\Support\ReferenceOption;
 use function random_int;
 
 class ColumnBuilder
@@ -49,6 +50,31 @@ class ColumnBuilder
     public function default(mixed $value): static
     {
         $this->definition->default = $value;
+        return $this;
+    }
+
+    /**
+     * @param string $table
+     * @param string $column
+     * @param ReferenceOption|null $onDelete
+     * @param ReferenceOption|null $onUpdate
+     * @return $this
+     */
+    public function references(
+        string $table,
+        string $column,
+        ReferenceOption $onDelete = null,
+        ReferenceOption $onUpdate = null,
+    ): static
+    {
+        $this->definition->references = new ForeignKeyConstraint(
+            [$this->definition->name],
+            $table,
+            [$column],
+            null,
+            $onDelete,
+            $onUpdate,
+        );
         return $this;
     }
 }
