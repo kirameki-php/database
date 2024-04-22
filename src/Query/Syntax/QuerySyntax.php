@@ -64,22 +64,6 @@ use function str_contains;
 abstract class QuerySyntax extends Syntax
 {
     /**
-     * @param DatabaseConfig $config
-     * @param string $identifierDelimiter
-     * @param string $literalDelimiter
-     * @param string $dateTimeFormat
-     */
-    public function __construct(
-        DatabaseConfig $config,
-        string $identifierDelimiter,
-        string $literalDelimiter,
-        protected readonly string $dateTimeFormat,
-    )
-    {
-        parent::__construct($config, $identifierDelimiter, $literalDelimiter);
-    }
-
-    /**
      * FOR DEBUGGING ONLY
      *
      * @param string $template
@@ -89,7 +73,7 @@ abstract class QuerySyntax extends Syntax
      */
     public function interpolate(string $template, array $parameters, ?Tags $tags = null): string
     {
-        $parameters = $this->stringifyParameters($parameters);
+        $parameters = $this->stringifyValues($parameters);
         $remains = count($parameters);
 
         $interpolated = (string) preg_replace_callback('/\?\??/', function($matches) use (&$parameters, &$remains) {
@@ -136,7 +120,7 @@ abstract class QuerySyntax extends Syntax
      */
     public function prepareParametersForSelect(SelectStatement $statement): array
     {
-        return $this->stringifyParameters($this->getParametersForConditions($statement));
+        return $this->stringifyValues($this->getParametersForConditions($statement));
     }
 
     /**
@@ -223,7 +207,7 @@ abstract class QuerySyntax extends Syntax
     {
         $set = $statement->set ?? throw new LogicException('No values to update', ['statement' => $statement]);
         $parameters = array_merge($set, $this->getParametersForConditions($statement));
-        return $this->stringifyParameters($parameters);
+        return $this->stringifyValues($parameters);
     }
 
     /**
@@ -246,7 +230,7 @@ abstract class QuerySyntax extends Syntax
      */
     public function prepareParametersForDelete(DeleteStatement $statement): array
     {
-        return $this->stringifyParameters($this->getParametersForConditions($statement));
+        return $this->stringifyValues($this->getParametersForConditions($statement));
     }
 
     /**
@@ -406,7 +390,7 @@ abstract class QuerySyntax extends Syntax
                 }
             }
         }
-        return $this->stringifyParameters($parameters);
+        return $this->stringifyValues($parameters);
     }
 
     /**
@@ -1026,11 +1010,11 @@ abstract class QuerySyntax extends Syntax
      * @param iterable<array-key, mixed> $parameters
      * @return array<mixed>
      */
-    protected function stringifyParameters(iterable $parameters): array
+    protected function stringifyValues(iterable $parameters): array
     {
         $strings = [];
         foreach ($parameters as $name => $parameter) {
-            $strings[$name] = $this->stringifyParameter($parameter);
+            $strings[$name] = $this->stringifyValue($parameter);
         }
         return $strings;
     }
@@ -1039,7 +1023,7 @@ abstract class QuerySyntax extends Syntax
      * @param mixed $value
      * @return mixed
      */
-    protected function stringifyParameter(mixed $value): mixed
+    protected function stringifyValue(mixed $value): mixed
     {
         if (is_iterable($value)) {
             return Json::encode(iterator_to_array($value));

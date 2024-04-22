@@ -82,6 +82,7 @@ class MySqlAdapter extends PdoAdapter
             $this->config,
             $this->identifierDelimiter,
             $this->literalDelimiter,
+            $this->dateTimeFormat,
         );
     }
 

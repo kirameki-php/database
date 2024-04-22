@@ -2,8 +2,13 @@
 
 namespace Kirameki\Database;
 
+use BackedEnum;
+use DateTimeInterface;
+use Kirameki\Core\Json;
 use Kirameki\Database\Adapters\DatabaseConfig;
 use function implode;
+use function is_iterable;
+use function iterator_to_array;
 use function str_replace;
 
 abstract class Syntax
@@ -12,11 +17,13 @@ abstract class Syntax
      * @param DatabaseConfig $config
      * @param string $identifierDelimiter
      * @param string $literalDelimiter
+     * @param string $dateTimeFormat
      */
     public function __construct(
         protected readonly DatabaseConfig $config,
-        protected readonly string $identifierDelimiter = '"',
-        protected readonly string $literalDelimiter = "'",
+        protected readonly string $identifierDelimiter,
+        protected readonly string $literalDelimiter,
+        protected readonly string $dateTimeFormat,
     )
     {
     }
@@ -68,4 +75,39 @@ abstract class Syntax
     {
         return implode(', ', $values);
     }
+
+    /**
+     * @param iterable<array-key, mixed> $parameters
+     * @return array<mixed>
+     */
+    protected function stringifyValues(iterable $parameters): array
+    {
+        $strings = [];
+        foreach ($parameters as $name => $parameter) {
+            $strings[$name] = $this->stringifyValue($parameter);
+        }
+        return $strings;
+    }
+
+    /**
+     * @param mixed $value
+     * @return mixed
+     */
+    protected function stringifyValue(mixed $value): mixed
+    {
+        if (is_iterable($value)) {
+            return Json::encode(iterator_to_array($value));
+        }
+
+        if ($value instanceof DateTimeInterface) {
+            return $value->format($this->dateTimeFormat);
+        }
+
+        if ($value instanceof BackedEnum) {
+            return $value->value;
+        }
+
+        return $value;
+    }
+
 }

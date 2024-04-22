@@ -71,6 +71,7 @@ class SqliteAdapter extends PdoAdapter
             $this->config,
             $this->identifierDelimiter,
             $this->literalDelimiter,
+            $this->dateTimeFormat,
         );
     }
 
