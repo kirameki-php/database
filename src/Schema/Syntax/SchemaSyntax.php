@@ -44,6 +44,9 @@ abstract class SchemaSyntax extends Syntax
         foreach ($statement->indexes as $index) {
             $formatted[] = $this->compileCreateIndex($index);
         }
+        foreach ($statement->foreignKeys as $foreignKey) {
+            $formatted[] = $this->formatForeignKeyConstraint($foreignKey);
+        }
         return Arr::flatten($formatted);
     }
 
@@ -273,6 +276,27 @@ abstract class SchemaSyntax extends Syntax
         ]);
     }
 
+    /**
+     * @param ForeignKeyConstraint $constraint
+     * @return string
+     */
+    protected function formatForeignKeyConstraint(ForeignKeyConstraint $constraint): string
+    {
+        $parts = [];
+        if ($constraint->name !== null) {
+            $parts[] = 'CONSTRAINT';
+            $parts[] = $this->asIdentifier($constraint->name);
+        }
+        $parts[] = 'FOREIGN KEY';
+        $parts[] = $this->asEnclosedCsv(array_map($this->asIdentifier(...), $constraint->foreignKeyColumns));
+        $parts[] = $this->formatReferencesClause($constraint);
+        return implode(' ', $parts);
+    }
+
+    /**
+     * @param ForeignKeyConstraint $constraint
+     * @return string
+     */
     protected function formatReferencesClause(ForeignKeyConstraint $constraint): string
     {
         $parts = [];

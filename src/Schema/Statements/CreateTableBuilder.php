@@ -2,6 +2,8 @@
 
 namespace Kirameki\Database\Schema\Statements;
 
+use function iterator_to_array;
+
 /**
  * @extends SchemaBuilder<CreateTableStatement>
  */
@@ -149,6 +151,27 @@ class CreateTableBuilder extends SchemaBuilder
         $builder = new CreateIndexBuilder($this->statement->table);
         $this->statement->indexes[] = $builder->statement;
         return $builder->columns($columns);
+    }
+
+    /**
+     * @param iterable<int, string> $columns
+     * @param string $referenceTable
+     * @param iterable<int, string> $referenceColumns
+     * @return ForeignKeyBuilder
+     */
+    public function foreignKey(
+        iterable $columns,
+        string $referenceTable,
+        iterable $referenceColumns,
+    ): ForeignKeyBuilder
+    {
+        $constraint = new ForeignKeyConstraint(
+            iterator_to_array($columns),
+            $referenceTable,
+            iterator_to_array($referenceColumns),
+        );
+        $this->statement->foreignKeys[] = $constraint;
+        return new ForeignKeyBuilder($constraint);
     }
 
     /**
