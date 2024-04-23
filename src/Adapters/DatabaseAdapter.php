@@ -53,6 +53,13 @@ interface DatabaseAdapter
     public function runQueryWithCursor(QueryStatement $statement): QueryResult;
 
     /**
+     * @template TQueryStatement of QueryStatement
+     * @param TQueryStatement $statement
+     * @return QueryResult<TQueryStatement, mixed>
+     */
+    public function explainQuery(QueryStatement $statement): QueryResult;
+
+    /**
      * @return void
      */
     public function beginTransaction(): void;

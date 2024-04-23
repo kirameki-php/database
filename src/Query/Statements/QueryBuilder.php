@@ -75,6 +75,14 @@ abstract class QueryBuilder
     }
 
     /**
+     * @return QueryResult<TQueryStatement, mixed>
+     */
+    public function explain(): QueryResult
+    {
+        return $this->handler->explain($this->statement);
+    }
+
+    /**
      * @return string
      */
     public function toString(): string

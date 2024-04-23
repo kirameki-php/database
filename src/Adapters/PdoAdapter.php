@@ -108,8 +108,7 @@ abstract class PdoAdapter implements DatabaseAdapter
             foreach ($commands as $schema) {
                 $this->getPdo()->exec($schema);
             }
-            $execTimeMs = (hrtime(true) - $startTime) / 1_000_000;
-            return $this->instantiateSchemaExecution($statement, $commands, $execTimeMs);
+            return $this->instantiateSchemaExecution($statement, $commands, $startTime);
         } catch (PDOException $e) {
             throw new SchemaException($e->getMessage(), $statement, $e);
         }
@@ -131,9 +130,8 @@ abstract class PdoAdapter implements DatabaseAdapter
             if ($statement instanceof Normalizable) {
                 $rows = iterator_to_array($statement->normalize($syntax, $rows));
             }
-            $fetchTimeMs = (hrtime(true) - $startTime) / 1_000_000;
             $count = $prepared->rowCount(...);
-            return $this->instantiateQueryResult($statement, $template, $parameters, $fetchTimeMs, $rows, $count);
+            return $this->instantiateQueryResult($statement, $template, $parameters, $startTime, $rows, $count);
         } catch (PDOException $e) {
             throw new QueryException($e->getMessage(), $statement, $e);
         }
@@ -167,9 +165,27 @@ abstract class PdoAdapter implements DatabaseAdapter
                 $iterator = $statement->normalize($syntax, $iterator);
             }
             $rows = new LazyIterator($iterator);
-            $execTimeMs = (hrtime(true) - $startTime) / 1_000_000;
             $count = $prepared->rowCount(...);
-            return $this->instantiateQueryResult($statement, $template, $parameters, $execTimeMs, $rows, $count);
+            return $this->instantiateQueryResult($statement, $template, $parameters, $startTime, $rows, $count);
+        } catch (PDOException $e) {
+            throw new QueryException($e->getMessage(), $statement, $e);
+        }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function explainQuery(QueryStatement $statement): QueryResult
+    {
+        try {
+            $startTime = hrtime(true);
+            $syntax = $this->getQuerySyntax();
+            $template = 'EXPLAIN ' . $statement->generateTemplate($syntax);
+            $parameters = $statement->generateParameters($syntax);
+            $prepared = $this->executeQueryStatement($template, $parameters);
+            $rows = $prepared->fetchAll(PDO::FETCH_OBJ);
+            return $this->instantiateQueryResult($statement, $template, $parameters, $startTime, $rows, 0);
         } catch (PDOException $e) {
             throw new QueryException($e->getMessage(), $statement, $e);
         }
@@ -271,15 +287,16 @@ abstract class PdoAdapter implements DatabaseAdapter
      * @template TSchemaStatement of SchemaStatement
      * @param TSchemaStatement $statement
      * @param list<string> $commands
-     * @param float $elapsedMs
+     * @param float $startTime
      * @return SchemaResult<TSchemaStatement>
      */
     protected function instantiateSchemaExecution(
         SchemaStatement $statement,
         array $commands,
-        float $elapsedMs,
+        float $startTime,
     ): SchemaResult
     {
+        $elapsedMs = (hrtime(true) - $startTime) / 1_000_000;
         return new SchemaResult($statement, $commands, $elapsedMs);
     }
 
@@ -288,7 +305,7 @@ abstract class PdoAdapter implements DatabaseAdapter
      * @param TQueryStatement $statement
      * @param string $template
      * @param list<mixed> $parameters
-     * @param float $elapsedMs
+     * @param float $startTime
      * @param iterable<int, mixed> $rows
      * @param int|Closure(): int $affectedRowCount
      * @return QueryResult<TQueryStatement, mixed>
@@ -297,11 +314,12 @@ abstract class PdoAdapter implements DatabaseAdapter
         QueryStatement $statement,
         string $template,
         array $parameters,
-        float $elapsedMs,
+        float $startTime,
         iterable $rows,
         int|Closure $affectedRowCount,
     ): QueryResult
     {
+        $elapsedMs = (hrtime(true) - $startTime) / 1_000_000;
         return new QueryResult($statement, $template, $parameters, $elapsedMs, $affectedRowCount, $rows);
     }
 

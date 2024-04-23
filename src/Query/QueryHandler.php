@@ -117,6 +117,21 @@ readonly class QueryHandler
         return $this->postprocess($result);
     }
 
+    /**
+     * @template TQueryStatement of QueryStatement
+     * @param TQueryStatement $statement
+     * @return QueryResult<TQueryStatement, mixed>
+     */
+    public function explain(QueryStatement $statement): QueryResult
+    {
+        $this->preprocess($statement);
+        return $this->connection->adapter->explainQuery($statement);
+    }
+
+    /**
+     * @param QueryStatement $statement
+     * @return string
+     */
     public function toString(QueryStatement $statement): string
     {
         return $statement->toString($this->connection->adapter->getQuerySyntax());
@@ -132,15 +147,6 @@ readonly class QueryHandler
         $this->connection->connectIfNotConnected();
     }
 
-    protected function mergeConnectionTags(QueryStatement $statement): void
-    {
-        if ($this->tags !== null) {
-            $statement->tags !== null
-                ? $statement->tags->merge($this->tags)
-                : $statement->tags = $this->tags;
-        }
-    }
-
     /**
      * @template TQueryStatement of QueryStatement
      * @template TRow of mixed
@@ -152,4 +158,18 @@ readonly class QueryHandler
         $this->events->emit(new QueryExecuted($this->connection, $result));
         return $result;
     }
+
+    /**
+     * @param QueryStatement $statement
+     * @return void
+     */
+    protected function mergeConnectionTags(QueryStatement $statement): void
+    {
+        if ($this->tags !== null) {
+            $statement->tags !== null
+                ? $statement->tags->merge($this->tags)
+                : $statement->tags = $this->tags;
+        }
+    }
+
 }
