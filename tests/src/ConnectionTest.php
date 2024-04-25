@@ -24,15 +24,21 @@ class ConnectionTest extends DatabaseTestCase
 
     public function test_tableExists(): void
     {
-        $this->createDummyTable('mysql');
-        $this->mysqlConnection()->info()->getTable('Dummy');
+        $this->createDummyTable('sqlite');
+        $this->sqliteConnection()->info()->getTable('Dummy');
 
-        $str = $this->mysqlConnection()->query()
+        $str = $this->sqliteConnection()->query()
             ->select('*')
             ->from('Dummy')
             ->forceIndex('Dummy_name')
             ->addTag('test', 'te\'st')
-            ->toString();
+            ->execute();
+
+        $str = $this->sqliteConnection()->query()
+            ->insertInto('Dummy')
+            ->value(['first' => 'test'])
+            ->addTag('test', 'te\'st')
+            ->execute();
 
         dump($str);
 //

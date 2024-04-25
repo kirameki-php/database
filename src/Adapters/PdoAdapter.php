@@ -19,6 +19,8 @@ use Override;
 use PDO;
 use PDOException;
 use PDOStatement;
+use function assert;
+use function dump;
 use function hrtime;
 use function implode;
 use function iterator_to_array;
@@ -28,6 +30,11 @@ use function iterator_to_array;
  */
 abstract class PdoAdapter implements DatabaseAdapter
 {
+    /**
+     * @var bool
+     */
+    protected bool $readonly = false;
+
     protected string $identifierDelimiter = '"';
 
     protected string $literalDelimiter = "'";
@@ -47,6 +54,7 @@ abstract class PdoAdapter implements DatabaseAdapter
         protected ?SchemaSyntax $schemaSyntax = null,
     )
     {
+        $this->readonly = $config->isReadOnly();
     }
 
     /**
@@ -231,6 +239,24 @@ abstract class PdoAdapter implements DatabaseAdapter
      * @inheritDoc
      */
     #[Override]
+    public function setReadOnlyMode(bool $enable): void
+    {
+        $this->readonly = $enable;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function inReadOnlyMode(): bool
+    {
+        return $this->readonly;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
     public function getQuerySyntax(): QuerySyntax
     {
         return $this->querySyntax ??= $this->instantiateQuerySyntax();
@@ -272,9 +298,11 @@ abstract class PdoAdapter implements DatabaseAdapter
      */
     protected function getPdo(): PDO
     {
-        if ($this->pdo === null) {
-            $this->pdo = $this->createPdo();
+        if ($this->pdo !== null) {
+            return $this->pdo;
         }
+        $this->connect();
+        assert($this->pdo !== null);
         return $this->pdo;
     }
 

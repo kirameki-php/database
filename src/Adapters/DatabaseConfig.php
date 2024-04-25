@@ -20,4 +20,9 @@ interface DatabaseConfig
      * @return TagsFormat
      */
     public function getTagFormat(): TagsFormat;
+
+    /**
+     * @return bool
+     */
+    public function isReadOnly(): bool;
 }

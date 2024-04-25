@@ -62,7 +62,7 @@ class SqliteSchemaSyntax extends SchemaSyntax
             if (is_int($column->autoIncrement)) {
                 $seq = $column->autoIncrement;
                 $name = $this->asLiteral($statement->table);
-                $changes[] = "ALTER TABLE \"sqlite_sequence\" SET \"seq\" = {$seq} WHERE \"name\" = {$name}";
+                $changes[] = "UPDATE \"sqlite_sequence\" SET \"seq\" = {$seq} WHERE \"name\" = {$name}";
             }
         }
         return $changes;

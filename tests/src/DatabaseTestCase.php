@@ -33,7 +33,7 @@ class DatabaseTestCase extends TestCase
     public function createTable(string $connection, string $table, callable $callback): void
     {
         $conn = $this->connections[$connection] ??= $this->createTempConnection($connection);
-        $builder = new CreateTableBuilder($conn->adapter->getSchemaSyntax(), $table);
+        $builder = new CreateTableBuilder($table, true);
         $callback($builder);
         $conn->schema()->execute($builder->getStatement());
     }

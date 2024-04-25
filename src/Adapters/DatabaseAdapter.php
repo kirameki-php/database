@@ -80,6 +80,17 @@ interface DatabaseAdapter
     public function inTransaction(): bool;
 
     /**
+     * @param bool $enable
+     * @return void
+     */
+    public function setReadOnlyMode(bool $enable): void;
+
+    /**
+     * @return bool
+     */
+    public function inReadOnlyMode(): bool;
+
+    /**
      * @param bool $ifNotExist
      * @return void
      */

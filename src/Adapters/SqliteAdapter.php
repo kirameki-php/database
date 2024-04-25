@@ -9,7 +9,9 @@ use Kirameki\Database\Schema\Statements\DropTableBuilder;
 use Kirameki\Database\Schema\Syntax\SqliteSchemaSyntax;
 use Override;
 use PDO;
+use function dump;
 use function file_exists;
+use function implode;
 use function iterator_to_array;
 use function unlink;
 
@@ -43,7 +45,13 @@ class SqliteAdapter extends PdoAdapter
     public function connect(): static
     {
         parent::connect();
-        $this->getPdo()->exec('PRAGMA foreign_keys = ON');
+        $settings = [
+            'PRAGMA foreign_keys = ON',
+        ];
+        if ($this->config->readonly) {
+            $settings[] = 'PRAGMA query_only = ON';
+        }
+        $this->getPdo()->exec(implode(';', $settings));
         return $this;
     }
 
@@ -86,7 +94,6 @@ class SqliteAdapter extends PdoAdapter
         }
 
         $dummyTableName = '_';
-        $schemaSyntax = $this->getSchemaSyntax();
         $createTable = new CreateTableBuilder($dummyTableName);
         $createTable->int('id')->primaryKey()->autoIncrement();
         $this->runSchema($createTable->getStatement());

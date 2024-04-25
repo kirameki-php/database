@@ -62,6 +62,23 @@ class MySqlAdapter extends PdoAdapter
      * @inheritDoc
      */
     #[Override]
+    public function connect(): static
+    {
+        parent::connect();
+        $settings = [];
+        if ($this->config->readonly) {
+            $settings[] = 'SET SESSION TRANSACTION READ ONLY';
+        }
+        if ($settings !== []) {
+            $this->getPdo()->exec(implode(';', $settings));
+        }
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
     protected function instantiateQuerySyntax(): MySqlQuerySyntax
     {
         return new MySqlQuerySyntax(

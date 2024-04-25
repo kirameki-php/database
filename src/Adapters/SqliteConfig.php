@@ -13,6 +13,7 @@ class SqliteConfig implements DatabaseConfig
      */
     public function __construct(
         public string $filename,
+        public bool $readonly = false,
         public ?iterable $options = null,
     )
     {
@@ -44,5 +45,14 @@ class SqliteConfig implements DatabaseConfig
     public function getTagFormat(): TagsFormat
     {
         return TagsFormat::Default;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function isReadOnly(): bool
+    {
+        return $this->readonly;
     }
 }

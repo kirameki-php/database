@@ -14,6 +14,7 @@ class MySqlConfig implements DatabaseConfig
      * @param string|null $database
      * @param string|null $username
      * @param string|null $password
+     * @param bool $readonly
      * @param iterable<string, mixed>|null $options
      */
     public function __construct(
@@ -23,6 +24,7 @@ class MySqlConfig implements DatabaseConfig
         public ?string $database = null,
         public ?string $username = 'root',
         public ?string $password = 'root',
+        public bool $readonly = false,
         public ?iterable $options = null,
     )
     {
@@ -53,5 +55,14 @@ class MySqlConfig implements DatabaseConfig
     public function getTagFormat(): TagsFormat
     {
         return TagsFormat::Default;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function isReadOnly(): bool
+    {
+        return $this->readonly;
     }
 }
