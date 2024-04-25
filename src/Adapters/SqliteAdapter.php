@@ -48,7 +48,7 @@ class SqliteAdapter extends PdoAdapter
         $settings = [
             'PRAGMA foreign_keys = ON',
         ];
-        if ($this->config->readonly) {
+        if ($this->config->isReadOnly()) {
             $settings[] = 'PRAGMA query_only = ON';
         }
         $this->getPdo()->exec(implode(';', $settings));
