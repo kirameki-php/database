@@ -18,11 +18,11 @@ class MySqlConfig implements DatabaseConfig
      * @param string|null $username
      * @param string|null $password
      * @param int $connectTimeoutSeconds
-     * @param bool $readonly
      * @param string|null $database
      * @param string|null $charset
      * @param string|null $collation
      * @param array<string, mixed>|null $options
+     * @param bool $replica
      */
     public function __construct(
         public ?string $host = null,
@@ -31,11 +31,11 @@ class MySqlConfig implements DatabaseConfig
         public ?string $username = 'root',
         public ?string $password = 'root',
         public int $connectTimeoutSeconds = 3,
-        public bool $readonly = false,
         public ?string $database = null,
         public ?string $charset = 'utf8mb4',
         public ?string $collation = 'utf8mb4_bin',
         public ?array $options = null,
+        public bool $replica = false,
     )
     {
     }
@@ -71,8 +71,8 @@ class MySqlConfig implements DatabaseConfig
      * @inheritDoc
      */
     #[Override]
-    public function isReadOnly(): bool
+    public function isReplica(): bool
     {
-        return $this->readonly;
+        return $this->replica;
     }
 }

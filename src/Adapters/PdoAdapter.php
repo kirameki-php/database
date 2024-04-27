@@ -54,7 +54,7 @@ abstract class PdoAdapter implements DatabaseAdapter
         protected ?SchemaSyntax $schemaSyntax = null,
     )
     {
-        $this->readonly = $config->isReadOnly();
+        $this->readonly = $config->isReplica();
     }
 
     /**

@@ -14,7 +14,6 @@ class SqliteConfig implements DatabaseConfig
      */
     public function __construct(
         public string $filename,
-        public bool $readonly = false,
         public int $busyTimeoutSeconds = 30,
         public ?iterable $options = null,
     )
@@ -53,8 +52,8 @@ class SqliteConfig implements DatabaseConfig
      * @inheritDoc
      */
     #[Override]
-    public function isReadOnly(): bool
+    public function isReplica(): bool
     {
-        return $this->readonly;
+        return false;
     }
 }

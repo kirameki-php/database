@@ -24,5 +24,5 @@ interface DatabaseConfig
     /**
      * @return bool
      */
-    public function isReadOnly(): bool;
+    public function isReplica(): bool;
 }
