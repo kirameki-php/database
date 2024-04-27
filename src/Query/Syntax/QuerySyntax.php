@@ -1046,7 +1046,7 @@ abstract class QuerySyntax extends Syntax
      */
     public function prepareTemplateForListTables(ListTablesStatement $statement): string
     {
-        $database = $this->asLiteral($this->config->getDatabase());
+        $database = $this->asLiteral($this->config->getTableSchema());
         return "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = {$database}";
     }
 
@@ -1062,7 +1062,7 @@ abstract class QuerySyntax extends Syntax
             "IS_NULLABLE AS `nullable`",
             "ORDINAL_POSITION AS `position`",
         ]);
-        $database = $this->asLiteral($this->config->getDatabase());
+        $database = $this->asLiteral($this->config->getTableSchema());
         $table = $this->asLiteral($statement->table);
         return implode(' ', [
             "SELECT {$columns} FROM INFORMATION_SCHEMA.COLUMNS",
@@ -1107,7 +1107,7 @@ abstract class QuerySyntax extends Syntax
             "CASE WHEN `INDEX_NAME` = 'PRIMARY' THEN 'primary' WHEN `NON_UNIQUE` = 0 THEN 'unique' ELSE 'index' END AS `type`",
             "group_concat(COLUMN_NAME) AS `columns`",
         ]);
-        $database = $this->asLiteral($this->config->getDatabase());
+        $database = $this->asLiteral($this->config->getTableSchema());
         $table = $this->asLiteral($statement->table);
         return implode(' ', [
             "SELECT {$columns} FROM INFORMATION_SCHEMA.STATISTICS",

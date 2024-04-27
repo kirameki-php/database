@@ -14,7 +14,7 @@ interface DatabaseConfig
     /**
      * @return string
      */
-    public function getDatabase(): string;
+    public function getTableSchema(): string;
 
     /**
      * @return TagsFormat

@@ -34,7 +34,7 @@ class SqliteConfig implements DatabaseConfig
      * @inheritDoc
      */
     #[Override]
-    public function getDatabase(): string
+    public function getTableSchema(): string
     {
         return 'sqlite';
     }

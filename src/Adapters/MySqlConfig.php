@@ -53,7 +53,7 @@ class MySqlConfig implements DatabaseConfig
      * @inheritDoc
      */
     #[Override]
-    public function getDatabase(): string
+    public function getTableSchema(): string
     {
         return $this->database ?? '';
     }
