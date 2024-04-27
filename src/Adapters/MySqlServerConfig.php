@@ -22,7 +22,6 @@ class MySqlServerConfig
         public ?string $password = 'root',
         public bool $readonly = false,
         public int $connectTimeoutSeconds = 3,
-        public ?iterable $options = null,
     )
     {
     }

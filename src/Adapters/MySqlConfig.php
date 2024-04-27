@@ -17,11 +17,13 @@ class MySqlConfig extends MySqlServerConfig implements DatabaseConfig
      * @param string|null $database
      * @param string|null $username
      * @param string|null $password
-     * @param iterable<string, mixed>|null $options
+     * @param bool $readonly
+     * @param int $connectTimeoutSeconds
      * @param string|null $database
      * @param string|null $charset
      * @param string|null $collation
      * @param iterable<int, MySqlServerConfig>|null $replicas
+     * @param iterable<string, mixed>|null $options
      */
     public function __construct(
         ?string $host = null,
@@ -31,14 +33,14 @@ class MySqlConfig extends MySqlServerConfig implements DatabaseConfig
         ?string $password = 'root',
         bool $readonly = false,
         int $connectTimeoutSeconds = 3,
-        ?iterable $options = null,
         public ?string $database = null,
         public ?string $charset = 'utf8mb4',
         public ?string $collation = 'utf8mb4_bin',
         public ?iterable $replicas = null,
+        public ?iterable $options = null,
     )
     {
-        parent::__construct($host, $port, $socket, $username, $password, $readonly, $connectTimeoutSeconds, $options);
+        parent::__construct($host, $port, $socket, $username, $password, $readonly, $connectTimeoutSeconds);
     }
 
     /**
