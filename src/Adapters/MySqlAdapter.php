@@ -111,14 +111,15 @@ class MySqlAdapter extends PdoAdapter
     #[Override]
     public function createDatabase(bool $ifNotExist = false): void
     {
+        $config= $this->config;
         $copy = (clone $this);
         $copy->config->database = null;
         $copy->runSchema(new RawStatement(implode(' ', array_filter([
             'CREATE DATABASE',
             $ifNotExist ? 'IF NOT EXISTS' : null,
-            $this->config->database,
-            'CHARACTER SET ' . $this->config->charset,
-            'COLLATE ' . $this->config->collation,
+            $config->database,
+            $config->charset ? 'CHARACTER SET ' . $config->charset : null,
+            $config->collation ? 'COLLATE ' . $config->collation : null,
         ]))));
     }
 

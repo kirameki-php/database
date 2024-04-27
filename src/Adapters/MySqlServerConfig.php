@@ -12,7 +12,6 @@ class MySqlServerConfig
      * @param string|null $password
      * @param bool $readonly
      * @param int $connectTimeoutSeconds
-     * @param iterable<string, mixed>|null $options
      */
     public function __construct(
         public ?string $host = null,
@@ -24,5 +23,13 @@ class MySqlServerConfig
         public int $connectTimeoutSeconds = 3,
     )
     {
+    }
+
+    /**
+     * @return bool
+     */
+    public function isReadOnly(): bool
+    {
+        return $this->readonly;
     }
 }

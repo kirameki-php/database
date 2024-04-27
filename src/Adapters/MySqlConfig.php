@@ -22,8 +22,8 @@ class MySqlConfig extends MySqlServerConfig implements DatabaseConfig
      * @param string|null $database
      * @param string|null $charset
      * @param string|null $collation
-     * @param iterable<int, MySqlServerConfig>|null $replicas
-     * @param iterable<string, mixed>|null $options
+     * @param list<MySqlServerConfig>|null $replicas
+     * @param array<string, mixed>|null $options
      */
     public function __construct(
         ?string $host = null,
@@ -36,8 +36,8 @@ class MySqlConfig extends MySqlServerConfig implements DatabaseConfig
         public ?string $database = null,
         public ?string $charset = 'utf8mb4',
         public ?string $collation = 'utf8mb4_bin',
-        public ?iterable $replicas = null,
-        public ?iterable $options = null,
+        public ?array $replicas = null,
+        public ?array $options = null,
     )
     {
         parent::__construct($host, $port, $socket, $username, $password, $readonly, $connectTimeoutSeconds);
@@ -68,14 +68,5 @@ class MySqlConfig extends MySqlServerConfig implements DatabaseConfig
     public function getTagFormat(): TagsFormat
     {
         return TagsFormat::Default;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    #[Override]
-    public function isReadOnly(): bool
-    {
-        return $this->readonly;
     }
 }
