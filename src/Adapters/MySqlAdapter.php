@@ -53,6 +53,7 @@ class MySqlAdapter extends PdoAdapter
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
             PDO::MYSQL_ATTR_FOUND_ROWS => true,
+            PDO::MYSQL_ATTR_MULTI_STATEMENTS => false,
         ];
 
         return new PDO($dsn, $username, $password, $options);
