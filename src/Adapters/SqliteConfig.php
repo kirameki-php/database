@@ -9,11 +9,13 @@ class SqliteConfig implements DatabaseConfig
 {
     /**
      * @param string $filename
+     * @param int $busyTimeoutSeconds
      * @param iterable<string, mixed>|null $options
      */
     public function __construct(
         public string $filename,
         public bool $readonly = false,
+        public int $busyTimeoutSeconds = 30,
         public ?iterable $options = null,
     )
     {

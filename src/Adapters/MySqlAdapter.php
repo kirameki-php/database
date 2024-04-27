@@ -52,6 +52,7 @@ class MySqlAdapter extends PdoAdapter
         $options += [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
+            PDO::ATTR_TIMEOUT => $config->connectTimeoutSeconds,
             PDO::MYSQL_ATTR_FOUND_ROWS => true,
             PDO::MYSQL_ATTR_MULTI_STATEMENTS => false,
         ];
@@ -116,6 +117,8 @@ class MySqlAdapter extends PdoAdapter
             'CREATE DATABASE',
             $ifNotExist ? 'IF NOT EXISTS' : null,
             $this->config->database,
+            'CHARACTER SET ' . $this->config->charset,
+            'COLLATE ' . $this->config->collation,
         ]))));
     }
 

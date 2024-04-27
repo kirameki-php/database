@@ -2,9 +2,7 @@
 
 namespace Kirameki\Database\Schema\Syntax;
 
-use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\LogicException;
-use Kirameki\Core\Exceptions\RuntimeException;
 use Kirameki\Database\Schema\Statements\ColumnDefinition;
 use Kirameki\Database\Schema\Statements\CreateTableStatement;
 use Override;

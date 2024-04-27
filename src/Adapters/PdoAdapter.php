@@ -49,7 +49,7 @@ abstract class PdoAdapter implements DatabaseAdapter
      */
     public function __construct(
         protected DatabaseConfig $config,
-        protected ?PDO $pdo = null,
+        public ?PDO $pdo = null,
         protected ?QuerySyntax $querySyntax = null,
         protected ?SchemaSyntax $schemaSyntax = null,
     )
