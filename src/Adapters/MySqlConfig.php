@@ -5,7 +5,7 @@ namespace Kirameki\Database\Adapters;
 use Kirameki\Database\Query\Support\TagsFormat;
 use Override;
 
-class MySqlConfig extends MySqlServerConfig implements DatabaseConfig
+class MySqlConfig implements DatabaseConfig
 {
     /**
      * For why the collation is set to utf8mb4_bin by default, see
@@ -17,30 +17,27 @@ class MySqlConfig extends MySqlServerConfig implements DatabaseConfig
      * @param string|null $database
      * @param string|null $username
      * @param string|null $password
-     * @param bool $readonly
      * @param int $connectTimeoutSeconds
+     * @param bool $readonly
      * @param string|null $database
      * @param string|null $charset
      * @param string|null $collation
-     * @param list<MySqlServerConfig>|null $replicas
      * @param array<string, mixed>|null $options
      */
     public function __construct(
-        ?string $host = null,
-        ?int $port = null,
-        ?string $socket = null,
-        ?string $username = 'root',
-        ?string $password = 'root',
-        bool $readonly = false,
-        int $connectTimeoutSeconds = 3,
+        public ?string $host = null,
+        public ?int $port = null,
+        public ?string $socket = null,
+        public ?string $username = 'root',
+        public ?string $password = 'root',
+        public int $connectTimeoutSeconds = 3,
+        public bool $readonly = false,
         public ?string $database = null,
         public ?string $charset = 'utf8mb4',
         public ?string $collation = 'utf8mb4_bin',
-        public ?array $replicas = null,
         public ?array $options = null,
     )
     {
-        parent::__construct($host, $port, $socket, $username, $password, $readonly, $connectTimeoutSeconds);
     }
 
     /**
@@ -68,5 +65,14 @@ class MySqlConfig extends MySqlServerConfig implements DatabaseConfig
     public function getTagFormat(): TagsFormat
     {
         return TagsFormat::Default;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function isReadOnly(): bool
+    {
+        return $this->readonly;
     }
 }
