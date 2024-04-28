@@ -11,12 +11,12 @@ abstract class Migration
     /**
      * @param DatabaseManager $db
      * @param EventManager $events
-     * @param list<MigrationBuilder> $builders
+     * @param list<MigrationPlan> $plans
      */
     public function __construct(
         protected readonly DatabaseManager $db,
         protected readonly EventManager $events,
-        protected array $builders = [],
+        protected array $plans = [],
     )
     {
     }
@@ -33,21 +33,21 @@ abstract class Migration
 
     /**
      * @param string $connection
-     * @param Closure $callback
+     * @param Closure(MigrationPlan): void $callback
      * @return void
      */
-    protected function on(string $connection, Closure $callback): void
+    protected function use(string $connection, Closure $callback): void
     {
-        $builder = new MigrationBuilder($this->db->use($connection), $this->events);
-        $this->builders[] = $builder;
-        $callback($builder);
+        $plan = new MigrationPlan($this->db->use($connection));
+        $this->plans[] = $plan;
+        $callback($plan);
     }
 
     /**
-     * @return list<MigrationBuilder>
+     * @return list<MigrationPlan>
      */
-    public function getBuilders(): array
+    public function getPlans(): array
     {
-        return new $this->builders;
+        return new $this->plans;
     }
 }

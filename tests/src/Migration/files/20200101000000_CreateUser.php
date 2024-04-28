@@ -7,7 +7,7 @@ class CreateUser extends Migration
 {
     public function up(): void
     {
-        $this->on('migration_test')
+        $this->use('migration_test')
             ->createTable('User')->tap(function(CreateTableBuilder $t) {
                 $t->uuid('id')->primaryKey()->nullable();
                 $t->string('name', 100)->default('Anonymous');
@@ -18,7 +18,7 @@ class CreateUser extends Migration
 
     public function down(): void
     {
-        $this->on('migration_test')
+        $this->use('migration_test')
             ->dropTable('User');
     }
 }

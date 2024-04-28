@@ -5,7 +5,9 @@ namespace Kirameki\Database\Migration;
 use DateTimeInterface;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Database\DatabaseManager;
+use Kirameki\Database\Events\SchemaExecuted;
 use Kirameki\Event\EventManager;
+use function array_map;
 use function assert;
 use function basename;
 use function glob;
@@ -35,10 +37,7 @@ class MigrationManager
     {
         foreach ($this->readMigrations($since) as $migration) {
             $migration->up();
-            $migrationBuilders = $migration->getBuilders();
-            foreach ($migrationBuilders as $builder) {
-                $builder->apply();
-            }
+            array_map($this->applyPlan(...), $migration->getPlans());
         }
     }
 
@@ -80,9 +79,9 @@ class MigrationManager
         $statements = [];
         foreach ($this->readMigrations($since) as $migration) {
             $migration->$direction();
-            foreach ($migration->getBuilders() as $builder) {
-                $syntax = $builder->connection->adapter->getSchemaSyntax();
-                foreach ($builder->toStatements() as $statement) {
+            foreach ($migration->getPlans() as $plan) {
+                $syntax = $plan->connection->adapter->getSchemaSyntax();
+                foreach ($plan->toStatements() as $statement) {
                     $statements[] = $statement->toExecutable($syntax);
                 }
             }
@@ -92,7 +91,7 @@ class MigrationManager
 
     /**
      * @param DateTimeInterface|null $startAt
-     * @return Migration[]
+     * @return list<Migration>
      */
     protected function readMigrations(?DateTimeInterface $startAt = null): array
     {
@@ -102,11 +101,8 @@ class MigrationManager
             $datetime = strstr(basename($file), '_', true);
             if ($datetime !== false && $datetime >= $start) {
                 require_once $file;
-                /** @var class-string<Migration> $className */
                 $className = $this->extractClassName($file);
-                $migration = new $className($this->db, $this->events, $datetime);
-                assert($migration instanceof Migration);
-                $migrations[] = $migration;
+                $migrations[] = new $className($this->db, $datetime);
             }
         }
         return $migrations;
@@ -130,4 +126,19 @@ class MigrationManager
         assert(is_a($className, Migration::class, true));
         return $className;
     }
+
+    /**
+     * @param MigrationPlan $plan
+     * @return void
+     */
+    protected function applyPlan(MigrationPlan $plan): void
+    {
+        $connection = $plan->connection;
+        $events = $this->events;
+        foreach ($plan->toStatements() as $statement) {
+            $execution = $connection->adapter->runSchema($statement);
+            $events->emit(new SchemaExecuted($connection, $execution));
+        }
+    }
+
 }

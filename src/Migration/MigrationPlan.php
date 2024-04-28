@@ -3,7 +3,6 @@
 namespace Kirameki\Database\Migration;
 
 use Kirameki\Database\Connection;
-use Kirameki\Database\Events\SchemaExecuted;
 use Kirameki\Database\Schema\Statements\AlterTableBuilder;
 use Kirameki\Database\Schema\Statements\CreateIndexBuilder;
 use Kirameki\Database\Schema\Statements\CreateTableBuilder;
@@ -12,11 +11,9 @@ use Kirameki\Database\Schema\Statements\DropTableBuilder;
 use Kirameki\Database\Schema\Statements\RenameTableBuilder;
 use Kirameki\Database\Schema\Statements\SchemaBuilder;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
-use Kirameki\Database\Schema\Syntax\SchemaSyntax;
-use Kirameki\Event\EventManager;
 use function array_map;
 
-class MigrationBuilder
+class MigrationPlan
 {
     /**
      * @var list<SchemaBuilder<covariant SchemaStatement>>
@@ -25,11 +22,9 @@ class MigrationBuilder
 
     /**
      * @param Connection $connection
-     * @param EventManager $events
      */
     public function __construct(
         public readonly Connection $connection,
-        protected readonly EventManager $events,
     )
     {
     }
@@ -40,17 +35,6 @@ class MigrationBuilder
     public function toStatements(): array
     {
         return array_map(static fn(SchemaBuilder $b) => $b->getStatement(), $this->builders);
-    }
-
-    /**
-     * @return void
-     */
-    public function apply(): void
-    {
-        foreach ($this->toStatements() as $statement) {
-            $execution = $this->connection->adapter->runSchema($statement);
-            $this->events->emit(new SchemaExecuted($this->connection, $execution));
-        }
     }
 
     /**
