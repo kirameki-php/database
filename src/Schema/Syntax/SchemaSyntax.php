@@ -9,6 +9,7 @@ use Kirameki\Core\Value;
 use Kirameki\Database\Schema\Expressions\DefaultValue;
 use Kirameki\Database\Schema\Statements\AlterColumnAction;
 use Kirameki\Database\Schema\Statements\AlterDropColumnAction;
+use Kirameki\Database\Schema\Statements\AlterDropForeignKeyAction;
 use Kirameki\Database\Schema\Statements\AlterRenameColumnAction;
 use Kirameki\Database\Schema\Statements\AlterTableStatement;
 use Kirameki\Database\Schema\Statements\ColumnDefinition;
@@ -102,6 +103,8 @@ abstract class SchemaSyntax extends Syntax
             $action instanceof AlterRenameColumnAction => $this->formatRenameColumnAction($action),
             $action instanceof CreateIndexStatement => $this->compileCreateIndex($action),
             $action instanceof DropIndexStatement => $this->compileDropIndex($action),
+            $action instanceof ForeignKeyConstraint => $this->formatAddForeignKeyAction($action),
+            $action instanceof AlterDropForeignKeyAction => $this->formatDropForeignKeyAction($action),
             default => throw new InvalidTypeException('Unsupported action type: ' . $action::class),
         }, $statement->actions);
         return Arr::flatten($statements);
@@ -290,6 +293,19 @@ abstract class SchemaSyntax extends Syntax
         $parts[] = 'FOREIGN KEY';
         $parts[] = $this->asEnclosedCsv(array_map($this->asIdentifier(...), $constraint->foreignKeyColumns));
         $parts[] = $this->formatReferencesClause($constraint);
+        return implode(' ', $parts);
+    }
+
+    protected function formatAddForeignKeyAction(ForeignKeyConstraint $action): string
+    {
+        return 'ADD ' . $this->formatForeignKeyConstraint($action);
+    }
+
+    protected function formatDropForeignKeyAction(AlterDropForeignKeyAction $action): string
+    {
+        $parts = [];
+        $parts[] = 'DROP FOREIGN KEY';
+        $parts[] = $this->asIdentifier($action->name);
         return implode(' ', $parts);
     }
 

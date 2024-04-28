@@ -2,24 +2,18 @@
 
 namespace Kirameki\Database\Schema\Statements;
 
-use Kirameki\Collections\Utils\Arr;
-use Kirameki\Core\Exceptions\InvalidTypeException;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 use Override;
-use function array_map;
 
 class AlterTableStatement extends SchemaStatement
 {
     /**
-     * @var list<mixed>
-     */
-    public array $actions;
-
-    /**
      * @param string $table
+     * @param list<mixed> $actions
      */
     public function __construct(
         public readonly string $table,
+        public array $actions = [],
     )
     {
     }

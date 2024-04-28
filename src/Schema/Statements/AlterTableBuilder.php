@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Schema\Statements;
 
 use Kirameki\Database\Schema\Support\AlterType;
+use function iterator_to_array;
 
 /**
  * @extends SchemaBuilder<AlterTableStatement>
@@ -80,5 +81,27 @@ class AlterTableBuilder extends SchemaBuilder
         $builder->columns($columns);
         $this->statement->addAction($builder->statement);
         return $builder;
+    }
+
+    /**
+     * @param iterable<int, string> $columns
+     * @param string $referenceTable
+     * @param iterable<int, string> $referenceColumns
+     * @return ForeignKeyBuilder
+     */
+    public function addForeignKey(iterable $columns, string $referenceTable, iterable $referenceColumns): ForeignKeyBuilder
+    {
+        $constraint = new ForeignKeyConstraint(
+            iterator_to_array($columns),
+            $referenceTable,
+            iterator_to_array($referenceColumns),
+        );
+        $this->statement->addAction($constraint);
+        return new ForeignKeyBuilder($constraint);
+    }
+
+    public function dropForeignKey(string $name): void
+    {
+        $this->statement->addAction(new AlterDropForeignKeyAction($name));
     }
 }

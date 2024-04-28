@@ -159,11 +159,7 @@ class CreateTableBuilder extends SchemaBuilder
      * @param iterable<int, string> $referenceColumns
      * @return ForeignKeyBuilder
      */
-    public function foreignKey(
-        iterable $columns,
-        string $referenceTable,
-        iterable $referenceColumns,
-    ): ForeignKeyBuilder
+    public function foreignKey(iterable $columns, string $referenceTable, iterable $referenceColumns): ForeignKeyBuilder
     {
         $constraint = new ForeignKeyConstraint(
             iterator_to_array($columns),
