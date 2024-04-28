@@ -4,9 +4,8 @@ namespace Kirameki\Database\Query\Statements;
 
 use Kirameki\Database\Query\Support\Tags;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
-use Kirameki\Database\Statement;
 
-abstract class QueryStatement implements Statement
+abstract class QueryStatement
 {
     /**
      * @param Tags|null $tags

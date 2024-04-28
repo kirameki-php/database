@@ -3,9 +3,8 @@
 namespace Kirameki\Database\Schema\Statements;
 
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
-use Kirameki\Database\Statement;
 
-abstract class SchemaStatement implements Statement
+abstract class SchemaStatement
 {
     /**
      * @return list<string>

@@ -21,8 +21,8 @@ class MySqlConfig implements DatabaseConfig
      * @param string|null $database
      * @param string|null $charset
      * @param string|null $collation
-     * @param array<string, mixed>|null $options
      * @param bool $replica
+     * @param array<string, mixed>|null $serverOptions
      */
     public function __construct(
         public ?string $host = null,
@@ -34,8 +34,8 @@ class MySqlConfig implements DatabaseConfig
         public ?string $database = null,
         public ?string $charset = 'utf8mb4',
         public ?string $collation = 'utf8mb4_bin',
-        public ?array $options = null,
         public bool $replica = false,
+        public ?array $serverOptions = null,
     )
     {
     }

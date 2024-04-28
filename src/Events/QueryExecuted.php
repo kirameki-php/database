@@ -6,7 +6,7 @@ use Kirameki\Database\Connection;
 use Kirameki\Database\Query\Statements\QueryResult;
 use Kirameki\Database\Query\Statements\QueryStatement;
 
-class QueryExecuted extends StatementExecuted
+class QueryExecuted extends DatabaseEvent
 {
     /**
      * @template TQueryStatement of QueryStatement
@@ -18,6 +18,6 @@ class QueryExecuted extends StatementExecuted
         public readonly QueryResult $result,
     )
     {
-        parent::__construct($connection, $result->statement);
+        parent::__construct($connection);
     }
 }

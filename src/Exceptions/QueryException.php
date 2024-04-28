@@ -9,10 +9,10 @@ class QueryException extends SqlException
 {
     public function __construct(
         string $message,
-        QueryStatement $statement,
+        public readonly QueryStatement $statement,
         ?Throwable $previous = null,
     )
     {
-        parent::__construct($message, $statement, $previous);
+        parent::__construct($message, ['statement' => $statement], previous: $previous);
     }
 }
