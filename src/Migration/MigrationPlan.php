@@ -8,6 +8,7 @@ use Kirameki\Database\Schema\Statements\CreateIndexBuilder;
 use Kirameki\Database\Schema\Statements\CreateTableBuilder;
 use Kirameki\Database\Schema\Statements\DropIndexBuilder;
 use Kirameki\Database\Schema\Statements\DropTableBuilder;
+use Kirameki\Database\Schema\Statements\DropTableStatement;
 use Kirameki\Database\Schema\Statements\RenameTableBuilder;
 use Kirameki\Database\Schema\Statements\SchemaBuilder;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
@@ -57,15 +58,6 @@ class MigrationPlan
 
     /**
      * @param string $table
-     * @return DropTableBuilder
-     */
-    public function dropTable(string $table): DropTableBuilder
-    {
-        return $this->builders[] = new DropTableBuilder($table);
-    }
-
-    /**
-     * @param string $table
      * @return AlterTableBuilder
      */
     public function alterTable(string $table): AlterTableBuilder
@@ -81,6 +73,15 @@ class MigrationPlan
     public function renameTable(string $from, string $to): RenameTableBuilder
     {
         return $this->builders[] = new RenameTableBuilder($from, $to);
+    }
+
+    /**
+     * @param string $table
+     * @return DropTableBuilder
+     */
+    public function dropTable(string $table): DropTableBuilder
+    {
+        return $this->builders[] = new DropTableBuilder($table);
     }
 
     /**
