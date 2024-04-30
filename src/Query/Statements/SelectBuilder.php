@@ -6,6 +6,8 @@ use Closure;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Query\Expressions\Aggregate;
 use Kirameki\Database\Query\Expressions\Expression;
+use Kirameki\Database\Query\QueryHandler;
+use Kirameki\Database\Query\Support\Dataset;
 use Kirameki\Database\Query\Support\JoinType;
 use Kirameki\Database\Query\Support\LockOption;
 use Kirameki\Database\Query\Support\LockType;
@@ -23,6 +25,14 @@ use function is_array;
  */
 class SelectBuilder extends ConditionsBuilder
 {
+    /**
+     * @param QueryHandler $handler
+     */
+    public function __construct(QueryHandler $handler)
+    {
+        parent::__construct($handler, new SelectStatement());
+    }
+
     #region selecting --------------------------------------------------------------------------------------------------
 
     /**

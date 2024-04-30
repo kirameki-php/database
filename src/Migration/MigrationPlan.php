@@ -8,7 +8,6 @@ use Kirameki\Database\Schema\Statements\CreateIndexBuilder;
 use Kirameki\Database\Schema\Statements\CreateTableBuilder;
 use Kirameki\Database\Schema\Statements\DropIndexBuilder;
 use Kirameki\Database\Schema\Statements\DropTableBuilder;
-use Kirameki\Database\Schema\Statements\DropTableStatement;
 use Kirameki\Database\Schema\Statements\RenameTableBuilder;
 use Kirameki\Database\Schema\Statements\SchemaBuilder;
 use Kirameki\Database\Schema\Statements\SchemaStatement;

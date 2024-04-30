@@ -2,6 +2,8 @@
 
 namespace Kirameki\Database\Query\Statements;
 
+use Kirameki\Database\Query\QueryHandler;
+use Kirameki\Database\Query\Support\Dataset;
 use function array_values;
 
 /**
@@ -9,6 +11,15 @@ use function array_values;
  */
 class UpsertBuilder extends QueryBuilder
 {
+    /**
+     * @param QueryHandler $handler
+     * @param string $table
+     */
+    public function __construct(QueryHandler $handler, string $table)
+    {
+        parent::__construct($handler, new UpsertStatement($table, new Dataset()));
+    }
+
     /**
      * @param iterable<string, mixed> $data
      * @return $this

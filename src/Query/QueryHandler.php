@@ -43,7 +43,7 @@ readonly class QueryHandler
      */
     public function select(string|Expression ...$columns): SelectBuilder
     {
-        return (new SelectBuilder($this, new SelectStatement()))->columns(...$columns);
+        return (new SelectBuilder($this))->columns(...$columns);
     }
 
     /**
@@ -52,7 +52,7 @@ readonly class QueryHandler
      */
     public function insertInto(string $table): InsertBuilder
     {
-        return new InsertBuilder($this, new InsertStatement($table, new Dataset()));
+        return new InsertBuilder($this, $table);
     }
 
     /**
@@ -61,7 +61,7 @@ readonly class QueryHandler
      */
     public function update(string $table): UpdateBuilder
     {
-        return new UpdateBuilder($this, new UpdateStatement($table));
+        return new UpdateBuilder($this, $table);
     }
 
     /**
@@ -70,7 +70,7 @@ readonly class QueryHandler
      */
     public function upsertInto(string $table): UpsertBuilder
     {
-        return new UpsertBuilder($this, new UpsertStatement($table, new Dataset()));
+        return new UpsertBuilder($this, $table);
     }
 
     /**
@@ -79,7 +79,7 @@ readonly class QueryHandler
      */
     public function delete(string $table): DeleteBuilder
     {
-        return new DeleteBuilder($this, new DeleteStatement($table));
+        return new DeleteBuilder($this, $table);
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace Kirameki\Database\Query\Statements;
 
+use Kirameki\Database\Query\QueryHandler;
 use function array_values;
 use function iterator_to_array;
 
@@ -10,6 +11,15 @@ use function iterator_to_array;
  */
 class UpdateBuilder extends ConditionsBuilder
 {
+    /**
+     * @param QueryHandler $handler
+     * @param string $table
+     */
+    public function __construct(QueryHandler $handler, string $table)
+    {
+        parent::__construct($handler, new UpdateStatement($table));
+    }
+
     /**
      * @param iterable<string, mixed> $assignments
      * @return $this

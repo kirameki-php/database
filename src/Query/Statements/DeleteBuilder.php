@@ -2,6 +2,7 @@
 
 namespace Kirameki\Database\Query\Statements;
 
+use Kirameki\Database\Query\QueryHandler;
 use function array_is_list;
 use function array_values;
 
@@ -10,6 +11,15 @@ use function array_values;
  */
 class DeleteBuilder extends ConditionsBuilder
 {
+    /**
+     * @param QueryHandler $handler
+     * @param string $table
+     */
+    public function __construct(QueryHandler $handler, string $table)
+    {
+        parent::__construct($handler, new DeleteStatement($table));
+    }
+
     /**
      * @param string ...$columns
      * @return $this
