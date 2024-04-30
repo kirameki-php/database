@@ -15,6 +15,7 @@ use Kirameki\Database\Adapters\DatabaseConfig;
 use Kirameki\Database\Info\Statements\ListColumnsStatement;
 use Kirameki\Database\Info\Statements\ListIndexesStatement;
 use Kirameki\Database\Info\Statements\ListTablesStatement;
+use Kirameki\Database\Info\Statements\TableExistsStatement;
 use Kirameki\Database\Query\Expressions\Aggregate;
 use Kirameki\Database\Query\Expressions\Column;
 use Kirameki\Database\Query\Expressions\Expression;
@@ -425,7 +426,7 @@ abstract class QuerySyntax extends Syntax
     protected function formatUpsertUpdateSet(array $columns): string
     {
         $columns = array_map($this->asIdentifier(...), $columns);
-        $columns = array_map(fn(string $column): string => "{$column} = EXCLUDED.{$column}", $columns);
+        $columns = array_map(static fn(string $column): string => "{$column} = EXCLUDED.{$column}", $columns);
         return 'DO UPDATE SET ' . implode(', ', $columns);
     }
 
@@ -1048,6 +1049,21 @@ abstract class QuerySyntax extends Syntax
     {
         $database = $this->asLiteral($this->config->getTableSchema());
         return "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = {$database}";
+    }
+
+    /**
+     * @param TableExistsStatement $statement
+     * @return string
+     */
+    public function prepareTemplateForTableExists(TableExistsStatement $statement): string
+    {
+        $database = $this->asLiteral($this->config->getTableSchema());
+        $table = $this->asLiteral($statement->table);
+        return implode(' ', [
+            "SELECT 1 FROM INFORMATION_SCHEMA.TABLES",
+            "WHERE TABLE_SCHEMA = {$database}",
+            "AND TABLE_NAME = {$table}",
+        ]);
     }
 
     /**
