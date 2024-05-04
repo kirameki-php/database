@@ -9,8 +9,12 @@ class ConnectionTest extends DatabaseTestCase
 {
     protected function createDummyTable(string $connection): void
     {
+        $this->createTable($connection, 'Parent', function(CreateTableBuilder $schema) {
+            $schema->int('id')->primaryKey()->nullable()->autoIncrement();
+        });
         $this->createTable($connection, 'Dummy', function(CreateTableBuilder $schema) {
             $schema->int('id')->primaryKey()->nullable()->autoIncrement();
+            $schema->int('parentId')->references('Parent', 'id');
             $schema->uuid('name')->nullable();
             $schema->string('first', 255)->nullable();
             $schema->string('second', 255)->nullable();
@@ -24,23 +28,9 @@ class ConnectionTest extends DatabaseTestCase
 
     public function test_tableExists(): void
     {
-        $this->createDummyTable('sqlite');
-        $this->sqliteConnection()->info()->getTableInfo('Dummy');
-
-        $str = $this->sqliteConnection()->query()
-            ->select('*')
-            ->from('Dummy')
-            ->forceIndex('Dummy_name')
-            ->addTag('test', 'te\'st')
-            ->execute();
-
-        $str = $this->sqliteConnection()->query()
-            ->insertInto('Dummy')
-            ->value(['first' => 'test'])
-            ->addTag('test', 'te\'st')
-            ->execute();
-
-        dump($str);
+        $this->createDummyTable('mysql');
+        $info = $this->mysqlConnection()->info()->getTableInfo('Dummy');
+        dump($info);
 //
 //        $this->createDummyTable('mysql');
 //        dump($this->mysqlConnection()->info()->getTable('Dummy'));

@@ -7,8 +7,9 @@ use Kirameki\Database\Query\Statements\Normalizable;
 use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Override;
+use function dump;
 
-class ListIndexesStatement extends QueryStatement implements Normalizable
+class ListForeignKeysStatement extends QueryStatement implements Normalizable
 {
     /**
      * @param string $table
@@ -26,7 +27,7 @@ class ListIndexesStatement extends QueryStatement implements Normalizable
     #[Override]
     public function generateTemplate(QuerySyntax $syntax): string
     {
-        return $syntax->prepareTemplateForListIndexes($this);
+        return $syntax->prepareTemplateForListForeignKeys($this);
     }
 
     /**
@@ -44,8 +45,8 @@ class ListIndexesStatement extends QueryStatement implements Normalizable
     #[Override]
     public function normalize(QuerySyntax $syntax, iterable $rows): Iterator
     {
+        dump($rows);
         foreach ($rows as $row) {
-            $row->columns = explode(',', $row->columns);
             yield $row;
         }
     }

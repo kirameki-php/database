@@ -11,11 +11,13 @@ readonly class TableInfo
      * @param string $table
      * @param Map<string, ColumnInfo> $columns
      * @param Vec<IndexInfo> $indexes
+     * @param Vec<ForeignKeyInfo> $foreignKeys
      */
     public function __construct(
         public string $table,
         public Map $columns,
         public Vec $indexes,
+        public Vec $foreignKeys,
     )
     {
     }

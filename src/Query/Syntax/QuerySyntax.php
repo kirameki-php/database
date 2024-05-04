@@ -13,6 +13,7 @@ use Kirameki\Core\Json;
 use Kirameki\Core\Value;
 use Kirameki\Database\Adapters\DatabaseConfig;
 use Kirameki\Database\Info\Statements\ListColumnsStatement;
+use Kirameki\Database\Info\Statements\ListForeignKeysStatement;
 use Kirameki\Database\Info\Statements\ListIndexesStatement;
 use Kirameki\Database\Info\Statements\ListTablesStatement;
 use Kirameki\Database\Info\Statements\TableExistsStatement;
@@ -1131,6 +1132,21 @@ abstract class QuerySyntax extends Syntax
             "AND TABLE_NAME = {$table}",
             "GROUP BY INDEX_NAME, NON_UNIQUE, SEQ_IN_INDEX",
             "ORDER BY INDEX_NAME ASC, SEQ_IN_INDEX ASC",
+        ]);
+    }
+
+    /**
+     * @param ListForeignKeysStatement $statement
+     * @return string
+     */
+    public function prepareTemplateForListForeignKeys(ListForeignKeysStatement $statement): string
+    {
+        $database = $this->asLiteral($this->config->getTableSchema());
+        $table = $this->asLiteral($statement->table);
+        return implode(' ', [
+            "SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS",
+            "WHERE TABLE_SCHEMA = {$database}",
+            "AND CONSTRAINT_TYPE = {$this->asLiteral('FOREIGN KEY')}",
         ]);
     }
 }

@@ -5,6 +5,7 @@ namespace Kirameki\Database\Info;
 use Kirameki\Collections\Vec;
 use Kirameki\Database\Connection;
 use Kirameki\Database\Info\Statements\ListColumnsStatement;
+use Kirameki\Database\Info\Statements\ListForeignKeysStatement;
 use Kirameki\Database\Info\Statements\ListIndexesStatement;
 use Kirameki\Database\Info\Statements\ListTablesStatement;
 use Kirameki\Database\Info\Statements\TableExistsStatement;
@@ -60,8 +61,12 @@ readonly class InfoHandler
 
         $indexes = $connection->query()
             ->execute(new ListIndexesStatement($name))
-            ->map(static fn(stdClass $r) => new IndexInfo($r->name, explode(',', $r->columns), $r->type));
+            ->map(static fn(stdClass $r) => new IndexInfo($r->name, $r->columns, $r->type));
 
-        return new TableInfo($name, $columns, $indexes);
+        $foreignKeys = $connection->query()
+            ->execute(new ListForeignKeysStatement($name))
+            ->map(static fn(stdClass $r) => dump($r));
+
+        return new TableInfo($name, $columns, $indexes, $foreignKeys);
     }
 }

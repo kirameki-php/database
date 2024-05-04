@@ -26,6 +26,7 @@ use function array_filter;
 use function array_keys;
 use function array_map;
 use function array_merge;
+use function dump;
 use function implode;
 use function is_bool;
 use function is_float;
@@ -40,15 +41,9 @@ abstract class SchemaSyntax extends Syntax
      */
     public function compileCreateTable(CreateTableStatement $statement): array
     {
-        $formatted = [];
-        $formatted[] = $this->formatCreateTableStatement($statement);
-        foreach ($statement->indexes as $index) {
-            $formatted[] = $this->compileCreateIndex($index);
-        }
-        foreach ($statement->foreignKeys as $foreignKey) {
-            $formatted[] = $this->formatForeignKeyConstraint($foreignKey);
-        }
-        return Arr::flatten($formatted);
+        return [
+            $this->formatCreateTableStatement($statement),
+        ];
     }
 
     /**
@@ -64,31 +59,58 @@ abstract class SchemaSyntax extends Syntax
         }
         $parts[] = 'TABLE';
         $parts[] = $this->asIdentifier($statement->table);
-        $columnParts = [];
-        foreach ($statement->columns as $definition) {
-            $columnParts[] = $this->formatColumnDefinition($definition);
-        }
-        if ($statement->primaryKey !== null) {
-            $columnParts[] = $this->formatCreateTablePrimaryKeyPart($statement->primaryKey);
-        }
-        $parts[] = $this->asEnclosedCsv($columnParts);
+        $subParts = array_map($this->formatColumnDefinition(...), $statement->columns);
+        $subParts[] = $this->formatCreateTablePrimaryKeyPart($statement);
+        $subParts[] = $this->formatCreateTableIndexParts($statement);
+        $subParts[] = $this->formatCreateTableForeignKeyParts($statement);
+        $parts[] = $this->asEnclosedCsv(array_filter(Arr::flatten($subParts), fn($v) => $v !== null));
         return implode(' ', $parts);
     }
 
     /**
-     * @param PrimaryKeyConstraint $constraint
+     * @param CreateTableStatement $statement
      * @return string
      */
-    protected function formatCreateTablePrimaryKeyPart(PrimaryKeyConstraint $constraint): string
+    protected function formatCreateTablePrimaryKeyPart(CreateTableStatement $statement): ?string
     {
         $pkParts = [];
-        foreach ($constraint->columns as $column => $order) {
+        foreach ($statement->primaryKey?->columns ?? [] as $column => $order) {
             $pkParts[] = "$column $order";
         }
         if ($pkParts !== []) {
             return 'PRIMARY KEY (' . implode(', ', $pkParts) . ')';
         }
-        return '';
+        return null;
+    }
+
+    /**
+     * @param CreateTableStatement $statement
+     * @return list<string>
+     */
+    protected function formatCreateTableIndexParts(CreateTableStatement $statement): array
+    {
+        return array_map(function(CreateIndexStatement $index) {
+            $parts = [];
+            if ($index->unique) {
+                $parts[] = 'UNIQUE';
+            }
+            $parts[] = 'INDEX';
+            $columnParts = [];
+            foreach ($index->columns as $column => $order) {
+                $columnParts[] = "$column $order";
+            }
+            $parts[] = $this->asEnclosedCsv($columnParts);
+            return implode(' ', $parts);
+        }, $statement->indexes);
+    }
+
+    /**
+     * @param CreateTableStatement $statement
+     * @return list<string>
+     */
+    public function formatCreateTableForeignKeyParts(CreateTableStatement $statement): array
+    {
+        return array_map($this->formatForeignKeyConstraint(...), $statement->foreignKeys);
     }
 
     /**

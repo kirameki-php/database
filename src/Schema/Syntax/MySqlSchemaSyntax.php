@@ -7,6 +7,7 @@ use Kirameki\Database\Schema\Statements\ColumnDefinition;
 use Kirameki\Database\Schema\Statements\CreateTableStatement;
 use Override;
 use function array_filter;
+use function array_map;
 use function implode;
 use function is_int;
 use function strtoupper;
@@ -104,6 +105,21 @@ class MySqlSchemaSyntax extends SchemaSyntax
         }
 
         return implode(' ', $parts);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function formatCreateTableForeignKeyParts(CreateTableStatement $statement): array
+    {
+        $foreignKeys = $statement->foreignKeys;
+        foreach ($statement->columns as $column) {
+            if ($column->references !== null) {
+                $foreignKeys[] = $column->references;
+            }
+        }
+
+        return array_map($this->formatForeignKeyConstraint(...), $foreignKeys);
     }
 
     /**
