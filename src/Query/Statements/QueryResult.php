@@ -9,6 +9,7 @@ use Kirameki\Collections\Vec;
  * @template TQueryStatement of QueryStatement
  * @template TRow of mixed
  * @extends Vec<TRow>
+ * @consistent-constructor
  */
 class QueryResult extends Vec
 {
@@ -41,5 +42,13 @@ class QueryResult extends Vec
             $this->affectedRowCount = ($this->affectedRowCount)();
         }
         return $this->affectedRowCount;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function instantiate(mixed $items): static
+    {
+        return new static($this->statement, $this->template, $this->parameters, $this->elapsedMs, $this->affectedRowCount, $items);
     }
 }

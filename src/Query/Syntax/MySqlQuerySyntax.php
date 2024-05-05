@@ -135,7 +135,6 @@ class MySqlQuerySyntax extends QuerySyntax
             "WHERE TABLE_SCHEMA = {$database}",
             "AND TABLE_NAME = {$table}",
             "GROUP BY INDEX_NAME, NON_UNIQUE",
-            "ORDER BY INDEX_NAME ASC",
         ]);
     }
 
