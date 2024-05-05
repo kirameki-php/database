@@ -150,15 +150,15 @@ class MySqlQuerySyntax extends QuerySyntax
         $columns = implode(', ', [
             "CONSTRAINT_NAME AS `name`",
             "GROUP_CONCAT(COLUMN_NAME ORDER BY ORDINAL_POSITION) AS `columns`",
-            "REFERENCED_TABLE_NAME AS `referenced_table`",
-            "GROUP_CONCAT(REFERENCED_COLUMN_NAME ORDER BY ORDINAL_POSITION) AS `referenced_columns`",
+            "REFERENCED_TABLE_NAME AS `referencedTable`",
+            "GROUP_CONCAT(REFERENCED_COLUMN_NAME ORDER BY ORDINAL_POSITION) AS `referencedColumns`",
         ]);
         return implode(' ', [
             "SELECT {$columns} FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE",
             "WHERE TABLE_SCHEMA = {$database}",
             "AND TABLE_NAME = {$table}",
             "AND REFERENCED_TABLE_NAME IS NOT NULL",
-            "GROUP BY CONSTRAINT_NAME",
+            "GROUP BY CONSTRAINT_NAME, REFERENCED_TABLE_NAME",
         ]);
     }
 }
