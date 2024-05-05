@@ -112,11 +112,11 @@ abstract class PdoAdapter implements DatabaseAdapter
     {
         try {
             $startTime = hrtime(true);
-            $commands = $statement->toExecutable($this->getSchemaSyntax());
-            foreach ($commands as $schema) {
-                $this->getPdo()->exec($schema);
+            $executables = $statement->toExecutable($this->getSchemaSyntax());
+            foreach ($executables as $executable) {
+                $this->getPdo()->exec($executable);
             }
-            return $this->instantiateSchemaExecution($statement, $commands, $startTime);
+            return $this->instantiateSchemaExecution($statement, $executables, $startTime);
         } catch (PDOException $e) {
             throw new SchemaException($e->getMessage(), $statement, $e);
         }

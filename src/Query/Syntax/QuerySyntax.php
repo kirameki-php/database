@@ -1122,7 +1122,7 @@ abstract class QuerySyntax extends Syntax
         $columns = implode(', ', [
             "INDEX_NAME AS `name`",
             "CASE WHEN `INDEX_NAME` = 'PRIMARY' THEN 'primary' WHEN `NON_UNIQUE` = 0 THEN 'unique' ELSE 'index' END AS `type`",
-            "group_concat(COLUMN_NAME) AS `columns`",
+            "GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX ASC) AS `columns`",
         ]);
         $database = $this->asLiteral($this->config->getTableSchema());
         $table = $this->asLiteral($statement->table);
@@ -1130,8 +1130,8 @@ abstract class QuerySyntax extends Syntax
             "SELECT {$columns} FROM INFORMATION_SCHEMA.STATISTICS",
             "WHERE TABLE_SCHEMA = {$database}",
             "AND TABLE_NAME = {$table}",
-            "GROUP BY INDEX_NAME, NON_UNIQUE, SEQ_IN_INDEX",
-            "ORDER BY INDEX_NAME ASC, SEQ_IN_INDEX ASC",
+            "GROUP BY INDEX_NAME, NON_UNIQUE",
+            "ORDER BY INDEX_NAME ASC",
         ]);
     }
 
