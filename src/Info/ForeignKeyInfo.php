@@ -5,16 +5,16 @@ namespace Kirameki\Database\Info;
 readonly class ForeignKeyInfo
 {
     /**
-     * @param string|null $name
-     * @param list<string> $foreignKeyColumns
-     * @param string $referenceTable
-     * @param list<string> $referenceColumns
+     * @param string $name
+     * @param list<string> $columns
+     * @param string $referencedTable
+     * @param list<string> $referencedColumns
      */
     public function __construct(
-        public array $foreignKeyColumns,
-        public string $referenceTable,
-        public array $referenceColumns,
-        public ?string $name,
+        public string $name,
+        public array $columns,
+        public string $referencedTable,
+        public array $referencedColumns,
     )
     {
     }

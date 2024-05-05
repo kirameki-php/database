@@ -2,12 +2,17 @@
 
 namespace Kirameki\Database\Query\Syntax;
 
+use Iterator;
+use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Database\Info\Statements\ListForeignKeysStatement;
+use Kirameki\Database\Info\Statements\ListIndexesStatement;
 use Kirameki\Database\Query\Statements\ConditionsStatement;
 use Kirameki\Database\Query\Statements\SelectStatement;
 use Kirameki\Database\Query\Support\Dataset;
 use Kirameki\Database\Query\Support\NullOrder;
 use Kirameki\Database\Query\Support\Ordering;
 use Override;
+use stdClass;
 use function array_map;
 use function implode;
 
@@ -86,5 +91,74 @@ class MySqlQuerySyntax extends QuerySyntax
         return $ordering->nulls === NullOrder::Last
             ? " IS NULL, {$this->asIdentifier($column)}"
             : '';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function normalizeListColumns(iterable $rows): Iterator
+    {
+        foreach ($rows as $row) {
+            $row->type = match ($row->type) {
+                'int', 'mediumint', 'tinyint', 'smallint', 'bigint' => 'integer',
+                'decimal', 'float', 'double' => 'float',
+                'bool' => 'bool',
+                'varchar' => 'string',
+                'datetime' => 'datetime',
+                'json' => 'json',
+                'blob' => 'binary',
+                default => throw new LogicException('Unsupported column type: ' . $row->type, [
+                    'type' => $row->type,
+                ]),
+            };
+            $row->nullable = $row->nullable === 'YES';
+            yield $row;
+        }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function prepareTemplateForListIndexes(ListIndexesStatement $statement): string
+    {
+        $database = $this->asLiteral($this->config->getTableSchema());
+        $table = $this->asLiteral($statement->table);
+        $columns = implode(', ', [
+            "INDEX_NAME AS `name`",
+            "CASE WHEN `INDEX_NAME` = 'PRIMARY' THEN 'primary' WHEN `NON_UNIQUE` = 0 THEN 'unique' ELSE 'index' END AS `type`",
+            "GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX) AS `columns`",
+        ]);
+        return implode(' ', [
+            "SELECT {$columns} FROM INFORMATION_SCHEMA.STATISTICS",
+            "WHERE TABLE_SCHEMA = {$database}",
+            "AND TABLE_NAME = {$table}",
+            "GROUP BY INDEX_NAME, NON_UNIQUE",
+            "ORDER BY INDEX_NAME ASC",
+        ]);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function prepareTemplateForListForeignKeys(ListForeignKeysStatement $statement): string
+    {
+        $database = $this->asLiteral($this->config->getTableSchema());
+        $table = $this->asLiteral($statement->table);
+        $columns = implode(', ', [
+            "CONSTRAINT_NAME AS `name`",
+            "GROUP_CONCAT(COLUMN_NAME ORDER BY ORDINAL_POSITION) AS `columns`",
+            "REFERENCED_TABLE_NAME AS `referenced_table`",
+            "GROUP_CONCAT(REFERENCED_COLUMN_NAME ORDER BY ORDINAL_POSITION) AS `referenced_columns`",
+        ]);
+        return implode(' ', [
+            "SELECT {$columns} FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE",
+            "WHERE TABLE_SCHEMA = {$database}",
+            "AND TABLE_NAME = {$table}",
+            "AND REFERENCED_TABLE_NAME IS NOT NULL",
+            "GROUP BY CONSTRAINT_NAME",
+        ]);
     }
 }

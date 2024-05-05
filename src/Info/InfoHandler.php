@@ -9,10 +9,7 @@ use Kirameki\Database\Info\Statements\ListForeignKeysStatement;
 use Kirameki\Database\Info\Statements\ListIndexesStatement;
 use Kirameki\Database\Info\Statements\ListTablesStatement;
 use Kirameki\Database\Info\Statements\TableExistsStatement;
-use Kirameki\Database\Query\Syntax\QuerySyntax;
 use stdClass;
-use function dump;
-use function explode;
 
 readonly class InfoHandler
 {
@@ -65,7 +62,7 @@ readonly class InfoHandler
 
         $foreignKeys = $connection->query()
             ->execute(new ListForeignKeysStatement($name))
-            ->map(static fn(stdClass $r) => dump($r));
+            ->map(static fn(stdClass $r) => new ForeignKeyInfo($r->name, $r->columns, $r->referencedTable, $r->referencedColumns));
 
         return new TableInfo($name, $columns, $indexes, $foreignKeys);
     }

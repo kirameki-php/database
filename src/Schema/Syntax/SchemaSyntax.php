@@ -313,7 +313,7 @@ abstract class SchemaSyntax extends Syntax
             $parts[] = $this->asIdentifier($constraint->name);
         }
         $parts[] = 'FOREIGN KEY';
-        $parts[] = $this->asEnclosedCsv(array_map($this->asIdentifier(...), $constraint->foreignKeyColumns));
+        $parts[] = $this->asEnclosedCsv(array_map($this->asIdentifier(...), $constraint->columns));
         $parts[] = $this->formatReferencesClause($constraint);
         return implode(' ', $parts);
     }
@@ -339,8 +339,8 @@ abstract class SchemaSyntax extends Syntax
     {
         $parts = [];
         $parts[] = 'REFERENCES';
-        $parts[] = $this->asIdentifier($constraint->referenceTable);
-        $parts[] = $this->asEnclosedCsv(array_map($this->asIdentifier(...), $constraint->referenceColumns));
+        $parts[] = $this->asIdentifier($constraint->referencedTable);
+        $parts[] = $this->asEnclosedCsv(array_map($this->asIdentifier(...), $constraint->referencedColumns));
         if ($constraint->onDelete !== null) {
             $parts[] = 'ON DELETE ' . $constraint->onDelete->value;
         }

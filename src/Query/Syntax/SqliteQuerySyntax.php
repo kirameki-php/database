@@ -5,6 +5,7 @@ namespace Kirameki\Database\Query\Syntax;
 use Iterator;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Info\Statements\ListColumnsStatement;
+use Kirameki\Database\Info\Statements\ListForeignKeysStatement;
 use Kirameki\Database\Info\Statements\ListIndexesStatement;
 use Kirameki\Database\Info\Statements\ListTablesStatement;
 use Kirameki\Database\Query\Statements\SelectStatement;
@@ -118,4 +119,18 @@ class SqliteQuerySyntax extends QuerySyntax
         ]);
     }
 
+    /**
+     * TODO unconfirmed query
+     *
+     * @inheritDoc
+     */
+    #[Override]
+    public function prepareTemplateForListForeignKeys(ListForeignKeysStatement $statement): string
+    {
+        $table = $this->asLiteral($statement->table);
+        return implode(' ', [
+            'SELECT "from" AS "table", "to" AS "foreignTable", "from_column" AS "column", "to_column" AS "foreignColumn", "name" AS "name"',
+            'FROM pragma_foreign_key_list(' . $table . ')',
+        ]);
+    }
 }

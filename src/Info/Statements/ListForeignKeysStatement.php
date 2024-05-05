@@ -7,7 +7,7 @@ use Kirameki\Database\Query\Statements\Normalizable;
 use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Override;
-use function dump;
+use function explode;
 
 class ListForeignKeysStatement extends QueryStatement implements Normalizable
 {
@@ -45,8 +45,9 @@ class ListForeignKeysStatement extends QueryStatement implements Normalizable
     #[Override]
     public function normalize(QuerySyntax $syntax, iterable $rows): Iterator
     {
-        dump($rows);
         foreach ($rows as $row) {
+            $row->columns = explode(',', $row->columns);
+            $row->referencedColumns = explode(',', $row->referencedColumns);
             yield $row;
         }
     }

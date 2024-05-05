@@ -7,17 +7,17 @@ use Kirameki\Database\Schema\Support\ReferenceOption;
 class ForeignKeyConstraint
 {
     /**
-     * @param list<string> $foreignKeyColumns
-     * @param string $referenceTable
-     * @param list<string> $referenceColumns
+     * @param list<string> $columns
+     * @param string $referencedTable
+     * @param list<string> $referencedColumns
      * @param string|null $name
      * @param ReferenceOption|null $onDelete
      * @param ReferenceOption|null $onUpdate
      */
     public function __construct(
-        public readonly array $foreignKeyColumns,
-        public readonly string $referenceTable,
-        public readonly array $referenceColumns,
+        public readonly array $columns,
+        public readonly string $referencedTable,
+        public readonly array $referencedColumns,
         public ?string $name = null,
         public ?ReferenceOption $onDelete = null,
         public ?ReferenceOption $onUpdate = null,
