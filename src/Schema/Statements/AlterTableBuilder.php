@@ -85,16 +85,16 @@ class AlterTableBuilder extends SchemaBuilder
 
     /**
      * @param iterable<int, string> $columns
-     * @param string $referenceTable
-     * @param iterable<int, string> $referenceColumns
+     * @param string $referencedTable
+     * @param iterable<int, string> $referencedColumns
      * @return ForeignKeyBuilder
      */
-    public function addForeignKey(iterable $columns, string $referenceTable, iterable $referenceColumns): ForeignKeyBuilder
+    public function addForeignKey(iterable $columns, string $referencedTable, iterable $referencedColumns): ForeignKeyBuilder
     {
         $constraint = new ForeignKeyConstraint(
             iterator_to_array($columns),
-            $referenceTable,
-            iterator_to_array($referenceColumns),
+            $referencedTable,
+            iterator_to_array($referencedColumns),
         );
         $this->statement->addAction($constraint);
         return new ForeignKeyBuilder($constraint);
