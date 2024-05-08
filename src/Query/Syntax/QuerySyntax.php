@@ -28,6 +28,7 @@ use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Statements\SelectStatement;
 use Kirameki\Database\Query\Statements\UpdateStatement;
 use Kirameki\Database\Query\Statements\UpsertStatement;
+use Kirameki\Database\Query\Statements\WithDefinition;
 use Kirameki\Database\Query\Support\Dataset;
 use Kirameki\Database\Query\Support\LockOption;
 use Kirameki\Database\Query\Support\LockType;
@@ -104,6 +105,7 @@ abstract class QuerySyntax extends Syntax
     public function prepareTemplateForSelect(SelectStatement $statement): string
     {
         return implode(' ', array_filter([
+            $this->formatWithPart($statement),
             $this->formatSelectPart($statement),
             $this->formatFromPart($statement),
             $this->formatJoinPart($statement),
@@ -135,8 +137,7 @@ abstract class QuerySyntax extends Syntax
             return "INSERT INTO {$this->asIdentifier($statement->table)} DEFAULT VALUES";
         }
 
-        return implode(' ', array_filter([
-            'INSERT INTO',
+        return 'INSERT INTO ' . implode(' ', array_filter([
             $this->asIdentifier($statement->table),
             $this->formatDatasetColumnsPart($columns),
             'VALUES',
@@ -162,8 +163,7 @@ abstract class QuerySyntax extends Syntax
      */
     public function prepareTemplateForUpsert(UpsertStatement $statement, array $columns): string
     {
-        return implode(' ', array_filter([
-            'INSERT INTO',
+        return 'INSERT INTO ' . implode(' ', array_filter([
             $this->asIdentifier($statement->table),
             $this->formatDatasetColumnsPart($columns),
             'VALUES',
@@ -191,6 +191,7 @@ abstract class QuerySyntax extends Syntax
     public function prepareTemplateForUpdate(UpdateStatement $statement): string
     {
         return implode(' ', array_filter([
+            $this->formatWithPart($statement),
             'UPDATE',
             $this->asIdentifier($statement->table),
             'SET',
@@ -218,6 +219,7 @@ abstract class QuerySyntax extends Syntax
     public function prepareTemplateForDelete(DeleteStatement $statement): string
     {
         return implode(' ', array_filter([
+            $this->formatWithPart($statement),
             'DELETE FROM',
             $this->asIdentifier($statement->table),
             $this->formatConditionsPart($statement),
@@ -235,13 +237,37 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
+     * @param ConditionsStatement $statement
+     * @return string
+     */
+    protected function formatWithPart(ConditionsStatement $statement): string
+    {
+        return $statement->with !== null
+            ? 'WITH ' . implode(', ', array_map($this->formatWithDefinition(...), $statement->with))
+            : '';
+    }
+
+    /**
+     * @param WithDefinition $with
+     * @return string
+     */
+    protected function formatWithDefinition(WithDefinition $with): string
+    {
+        return implode(' ', array_filter([
+            $this->asIdentifier($with->name),
+            $with->recursive ? 'RECURSIVE' : null,
+            'AS',
+            $this->formatSubQuery($with->statement),
+        ]));
+    }
+
+    /**
      * @param SelectStatement $statement
      * @return string
      */
     protected function formatSelectPart(SelectStatement $statement): string
     {
-        return implode(' ', array_filter([
-            'SELECT',
+        return 'SELECT ' . implode(' ', array_filter([
             $statement->distinct ? 'DISTINCT' : null,
             $this->formatSelectColumnsPart($statement),
             $this->formatSelectLockPart($statement),
@@ -308,8 +334,7 @@ abstract class QuerySyntax extends Syntax
         if (count($expressions) === 0) {
             return '';
         }
-        return implode(' ', array_filter([
-            'FROM',
+        return 'FROM ' . implode(' ', array_filter([
             $this->asCsv($expressions),
             $this->formatFromUseIndexPart($statement),
         ]));
@@ -336,7 +361,7 @@ abstract class QuerySyntax extends Syntax
         return implode(' ', array_map(function(JoinDefinition $def): string {
             $expr = $def->type->value . ' ';
             $expr .= $this->asTable($def->table) . ' ';
-            $expr .= 'ON ' . $this->formatCondition($def->condition);
+            $expr .= 'ON ' . $this->formatConditionDefinition($def->condition);
             return $expr;
         }, $joins));
     }
@@ -412,7 +437,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatUpsertOnConflictPart(array $onConflict): string
     {
-        $clause = 'ON CONFLICT';
+        $clause = 'ON CONFLICT ';
         if (count($onConflict) === 0) {
             return $clause;
         }
@@ -456,8 +481,8 @@ abstract class QuerySyntax extends Syntax
         $clauses = [];
         foreach ($statement->where as $def) {
             $clauses[] = ($def->next !== null)
-                ? '(' . $this->formatCondition($def) . ')'
-                : $this->formatCondition($def);
+                ? '(' . $this->formatConditionDefinition($def) . ')'
+                : $this->formatConditionDefinition($def);
         }
 
         return 'WHERE ' . implode(' AND ', $clauses);
@@ -467,7 +492,7 @@ abstract class QuerySyntax extends Syntax
      * @param ConditionDefinition $def
      * @return string
      */
-    protected function formatCondition(ConditionDefinition $def): string
+    protected function formatConditionDefinition(ConditionDefinition $def): string
     {
         $parts = [];
         $parts[] = $this->formatConditionSegment($def);
@@ -1072,14 +1097,14 @@ abstract class QuerySyntax extends Syntax
      */
     public function prepareTemplateForListColumns(ListColumnsStatement $statement): string
     {
+        $database = $this->asLiteral($this->config->getTableSchema());
+        $table = $this->asLiteral($statement->table);
         $columns = implode(', ', [
             "COLUMN_NAME AS `name`",
             "DATA_TYPE AS `type`",
             "IS_NULLABLE AS `nullable`",
             "ORDINAL_POSITION AS `position`",
         ]);
-        $database = $this->asLiteral($this->config->getTableSchema());
-        $table = $this->asLiteral($statement->table);
         return implode(' ', [
             "SELECT {$columns} FROM INFORMATION_SCHEMA.COLUMNS",
             "WHERE TABLE_SCHEMA = {$database}",

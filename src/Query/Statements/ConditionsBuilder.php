@@ -8,8 +8,8 @@ use function assert;
 use function count;
 
 /**
- * @template TQueryStatement of ConditionsStatement
- * @extends QueryBuilder<TQueryStatement>
+ * @template TConditionsStatement of ConditionsStatement
+ * @extends QueryBuilder<TConditionsStatement>
  */
 abstract class ConditionsBuilder extends QueryBuilder
 {
@@ -17,6 +17,32 @@ abstract class ConditionsBuilder extends QueryBuilder
      * @var ConditionBuilder|null
      */
     protected ConditionBuilder|null $lastCondition = null;
+
+    /**
+     * @param string $name
+     * @return WithBuilder
+     */
+    public function with(string $name): WithBuilder
+    {
+        return $this->generateWithBuilder($name, false);
+    }
+
+    /**
+     * @param string $name
+     * @return WithBuilder
+     */
+    public function withRecursive(string $name): WithBuilder
+    {
+        return $this->generateWithBuilder($name, true);
+    }
+
+    protected function generateWithBuilder(string $name, bool $recursive): WithBuilder
+    {
+        $builder = new WithBuilder($this->handler, $name, $recursive);
+        $this->statement->with ??= [];
+        $this->statement->with[] = $builder->getDefinition();
+        return $builder;
+    }
 
     /**
      * @param mixed ...$args

@@ -7,6 +7,11 @@ use Kirameki\Database\Query\Support\Ordering;
 abstract class ConditionsStatement extends QueryStatement
 {
     /**
+     * @var list<WithDefinition>|null
+     */
+    public ?array $with = null;
+
+    /**
      * @var array<ConditionDefinition>|null
      */
     public ?array $where = null;
