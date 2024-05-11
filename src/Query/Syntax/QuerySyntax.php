@@ -750,7 +750,7 @@ abstract class QuerySyntax extends Syntax
         if ($statement->groupBy === null) {
             return '';
         }
-        return "GROUP BY {$this->asCsv(array_map($this->asColumn(...), $statement->groupBy)}";
+        return 'GROUP BY ' . $this->asCsv(array_map($this->asColumn(...), $statement->groupBy));
     }
 
     /**

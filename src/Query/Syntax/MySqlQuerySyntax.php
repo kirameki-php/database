@@ -62,13 +62,13 @@ class MySqlQuerySyntax extends QuerySyntax
      * @inheritDoc
      */
     #[Override]
-    protected function formatOrderByPart(ConditionsStatement $statement): string
+    protected function formatOrderByPart(?array $orderBy): string
     {
-        if ($statement->orderBy === null) {
+        if ($orderBy === null) {
             return '';
         }
         $clauses = [];
-        foreach ($statement->orderBy as $column => $ordering) {
+        foreach ($orderBy as $column => $ordering) {
             $clauses[] = implode(' ', [
                 $this->asIdentifier($column),
                 // For MySQL, the null ordering has to come before the sort order.
