@@ -2,8 +2,8 @@
 
 namespace Kirameki\Database\Query\Support;
 
-enum LockType
+enum LockType: string
 {
-    case Exclusive;
-    case Shared;
+    case Exclusive = 'FOR UPDATE';
+    case Shared = 'FOR SHARE';
 }

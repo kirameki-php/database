@@ -2,8 +2,8 @@
 
 namespace Kirameki\Database\Query\Support;
 
-enum SortOrder
+enum SortOrder: string
 {
-    case Ascending;
-    case Descending;
+    case Ascending = 'ASC';
+    case Descending = 'DESC';
 }

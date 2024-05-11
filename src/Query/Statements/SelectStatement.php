@@ -25,6 +25,11 @@ class SelectStatement extends ConditionsStatement
     public ?string $forceIndex = null;
 
     /**
+     * @var CompoundStatement|null
+     */
+    public ?CompoundStatement $compound = null;
+
+    /**
      * @param list<string|Expression> $tables
      * @param list<string|Expression>|null $columns
      * @param list<JoinDefinition>|null $joins

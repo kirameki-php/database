@@ -19,6 +19,7 @@ use Kirameki\Database\Info\Statements\TableExistsStatement;
 use Kirameki\Database\Query\Expressions\Aggregate;
 use Kirameki\Database\Query\Expressions\Column;
 use Kirameki\Database\Query\Expressions\Expression;
+use Kirameki\Database\Query\Statements\CompoundStatement;
 use Kirameki\Database\Query\Statements\ConditionDefinition;
 use Kirameki\Database\Query\Statements\ConditionsStatement;
 use Kirameki\Database\Query\Statements\DeleteStatement;
@@ -30,12 +31,12 @@ use Kirameki\Database\Query\Statements\UpdateStatement;
 use Kirameki\Database\Query\Statements\UpsertStatement;
 use Kirameki\Database\Query\Statements\WithDefinition;
 use Kirameki\Database\Query\Support\Dataset;
+use Kirameki\Database\Query\Support\Lock;
 use Kirameki\Database\Query\Support\LockOption;
 use Kirameki\Database\Query\Support\LockType;
 use Kirameki\Database\Query\Support\Operator;
 use Kirameki\Database\Query\Support\Ordering;
 use Kirameki\Database\Query\Support\Range;
-use Kirameki\Database\Query\Support\SortOrder;
 use Kirameki\Database\Query\Support\Tags;
 use Kirameki\Database\Query\Support\TagsFormat;
 use Kirameki\Database\Syntax;
@@ -104,17 +105,20 @@ abstract class QuerySyntax extends Syntax
      */
     public function prepareTemplateForSelect(SelectStatement $statement): string
     {
-        return implode(' ', array_filter([
+        $query = implode(' ', array_filter([
             $this->formatWithPart($statement),
             $this->formatSelectPart($statement),
             $this->formatFromPart($statement),
             $this->formatJoinPart($statement),
             $this->formatWherePart($statement),
             $this->formatGroupByPart($statement),
-            $this->formatOrderByPart($statement),
-            $this->formatLimitPart($statement),
-            $this->formatOffsetPart($statement),
+            $this->formatHavingPart($statement),
+            $this->formatOrderByPart($statement->orderBy),
+            $this->formatLimitPart($statement->limit),
+            $this->formatOffsetPart($statement->offset),
         ]));
+
+        return $this->formatCompoundPart($query, $statement->compound);
     }
 
     /**
@@ -270,7 +274,7 @@ abstract class QuerySyntax extends Syntax
         return 'SELECT ' . implode(' ', array_filter([
             $statement->distinct ? 'DISTINCT' : null,
             $this->formatSelectColumnsPart($statement),
-            $this->formatSelectLockPart($statement),
+            $this->formatSelectLockPart($statement->lock),
         ]));
     }
 
@@ -294,29 +298,20 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param SelectStatement $statement
+     * @param Lock|null $lock
      * @return string
      */
-    protected function formatSelectLockPart(SelectStatement $statement): string
+    protected function formatSelectLockPart(?Lock $lock): string
     {
-        return match ($statement->lock?->type) {
-            LockType::Exclusive => 'FOR UPDATE' . $this->formatSelectLockOptionPart($statement),
-            LockType::Shared => 'FOR SHARE',
-            null => '',
-        };
-    }
+        $type = $lock?->type;
 
-    /**
-     * @param SelectStatement $statement
-     * @return string
-     */
-    protected function formatSelectLockOptionPart(SelectStatement $statement): string
-    {
-        return match ($statement->lock?->option) {
-            LockOption::Nowait => ' NOWAIT',
-            LockOption::SkipLocked => ' SKIP LOCKED',
-            null => '',
-        };
+        if ($type === null) {
+            return '';
+        }
+
+        return ($type === LockType::Exclusive && $lock->option !== null)
+            ? $type->value . ' ' . $lock->option->value
+            : $type->value;
     }
 
     /**
@@ -364,6 +359,31 @@ abstract class QuerySyntax extends Syntax
             $expr .= 'ON ' . $this->formatConditionDefinition($def->condition);
             return $expr;
         }, $joins));
+    }
+
+    /**
+     * @param string $query
+     * @param CompoundStatement|null $compound
+     * @return string
+     */
+    protected function formatCompoundPart(string $query, ?CompoundStatement $compound): string
+    {
+        if ($compound === null) {
+            return $query;
+        }
+
+        return implode(' ', array_filter([
+            $this->formatCompoundTemplate($query),
+            $compound->operator->value,
+            $this->formatCompoundTemplate($this->prepareTemplateForSelect($compound->query)),
+            $this->formatOrderByPart($compound->orderBy),
+            $this->formatLimitPart($compound->limit),
+        ]));
+    }
+
+    protected function formatCompoundTemplate(string $query): string
+    {
+        return '(' . $query . ')';
     }
 
     /**
@@ -463,8 +483,8 @@ abstract class QuerySyntax extends Syntax
     {
         return implode(' ', array_filter([
             $this->formatWherePart($statement),
-            $this->formatOrderByPart($statement),
-            $this->formatLimitPart($statement),
+            $this->formatOrderByPart($statement->orderBy),
+            $this->formatLimitPart($statement->limit),
         ]));
     }
 
@@ -474,18 +494,9 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatWherePart(ConditionsStatement $statement): string
     {
-        if ($statement->where === null) {
-            return '';
-        }
-
-        $clauses = [];
-        foreach ($statement->where as $def) {
-            $clauses[] = ($def->next !== null)
-                ? '(' . $this->formatConditionDefinition($def) . ')'
-                : $this->formatConditionDefinition($def);
-        }
-
-        return 'WHERE ' . implode(' AND ', $clauses);
+        return $statement->where !== null
+            ? 'WHERE ' . implode(' AND ', array_map($this->formatConditionDefinition(...), $statement->where))
+            : '';
     }
 
     /**
@@ -502,7 +513,10 @@ abstract class QuerySyntax extends Syntax
             $parts[] = $logic . ' ' . $this->formatConditionSegment($def);
         }
 
-        return implode(' ', $parts);
+        $merged = implode(' ', $parts);
+        return (count($parts) > 1)
+            ? '(' . $merged . ')'
+            : $merged;
     }
 
     /**
@@ -736,24 +750,31 @@ abstract class QuerySyntax extends Syntax
         if ($statement->groupBy === null) {
             return '';
         }
-        $clause = [];
-        foreach ($statement->groupBy as $column) {
-            $clause[] = $this->asColumn($column);
-        }
-        return "GROUP BY {$this->asCsv($clause)}";
+        return "GROUP BY {$this->asCsv(array_map($this->asColumn(...), $statement->groupBy)}";
     }
 
     /**
-     * @param ConditionsStatement $statement
+     * @param SelectStatement $statement
      * @return string
      */
-    protected function formatOrderByPart(ConditionsStatement $statement): string
+    protected function formatHavingPart(SelectStatement $statement): string
     {
-        if ($statement->orderBy === null) {
+        return $statement->having !== null
+            ? 'HAVING ' . implode(' AND ', array_map($this->formatConditionDefinition(...), $statement->having))
+            : '';
+    }
+
+    /**
+     * @param array<string, Ordering>|null $orderBy
+     * @return string
+     */
+    protected function formatOrderByPart(?array $orderBy): string
+    {
+        if ($orderBy === null) {
             return '';
         }
         $clauses = [];
-        foreach ($statement->orderBy as $column => $ordering) {
+        foreach ($orderBy as $column => $ordering) {
             $clauses[] = implode(' ', array_filter([
                 $this->asIdentifier($column),
                 $this->formatSortOrderingPart($column, $ordering),
@@ -770,10 +791,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatSortOrderingPart(string $column, Ordering $ordering): string
     {
-        return match ($ordering->sort) {
-            SortOrder::Ascending => 'ASC',
-            SortOrder::Descending => 'DESC',
-        };
+        return $ordering->sort->value;
     }
 
     /**
@@ -784,25 +802,21 @@ abstract class QuerySyntax extends Syntax
     abstract protected function formatNullOrderingPart(string $column, Ordering $ordering): string;
 
     /**
-     * @param ConditionsStatement $statement
+     * @param int|null $limit
      * @return string
      */
-    protected function formatLimitPart(ConditionsStatement $statement): string
+    protected function formatLimitPart(?int $limit): string
     {
-        return $statement->limit !== null
-            ? "LIMIT {$statement->limit}"
-            : '';
+        return $limit !== null ? "LIMIT {$limit}" : '';
     }
 
     /**
-     * @param SelectStatement $statement
+     * @param int|null $offset
      * @return string
      */
-    protected function formatOffsetPart(SelectStatement $statement): string
+    protected function formatOffsetPart(?int $offset): string
     {
-        return $statement->offset !== null
-            ? "OFFSET {$statement->offset}"
-            : '';
+        return $offset !== null ? "OFFSET {$offset}" : '';
     }
 
     /**

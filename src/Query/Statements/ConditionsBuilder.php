@@ -24,7 +24,7 @@ abstract class ConditionsBuilder extends QueryBuilder
      */
     public function with(string $name): WithBuilder
     {
-        return $this->generateWithBuilder($name, false);
+        return $this->addWithDefinition($name, false);
     }
 
     /**
@@ -33,10 +33,10 @@ abstract class ConditionsBuilder extends QueryBuilder
      */
     public function withRecursive(string $name): WithBuilder
     {
-        return $this->generateWithBuilder($name, true);
+        return $this->addWithDefinition($name, true);
     }
 
-    protected function generateWithBuilder(string $name, bool $recursive): WithBuilder
+    protected function addWithDefinition(string $name, bool $recursive): WithBuilder
     {
         $builder = new WithBuilder($this->handler, $name, $recursive);
         $this->statement->with ??= [];

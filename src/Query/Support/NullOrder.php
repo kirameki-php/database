@@ -2,8 +2,8 @@
 
 namespace Kirameki\Database\Query\Support;
 
-enum NullOrder
+enum NullOrder: string
 {
-    case First;
-    case Last;
+    case First = 'NULLS FIRST';
+    case Last = 'NULLS LAST';
 }

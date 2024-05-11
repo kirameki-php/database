@@ -2,8 +2,8 @@
 
 namespace Kirameki\Database\Query\Support;
 
-enum LockOption
+enum LockOption: string
 {
-    case Nowait;
-    case SkipLocked;
+    case Nowait = 'NOWAIT';
+    case SkipLocked = 'SKIP LOCKED';
 }

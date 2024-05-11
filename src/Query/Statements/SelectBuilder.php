@@ -7,6 +7,7 @@ use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Query\Expressions\Aggregate;
 use Kirameki\Database\Query\Expressions\Expression;
 use Kirameki\Database\Query\QueryHandler;
+use Kirameki\Database\Query\Support\CompoundOperator;
 use Kirameki\Database\Query\Support\JoinType;
 use Kirameki\Database\Query\Support\LockOption;
 use Kirameki\Database\Query\Support\LockType;
@@ -339,6 +340,58 @@ class SelectBuilder extends ConditionsBuilder
     }
 
     #endregion limiting ------------------------------------------------------------------------------------------------
+
+    #region compounding ------------------------------------------------------------------------------------------------
+
+    /**
+     * @param SelectBuilder $query
+     * @return CompoundBuilder
+     */
+    public function union(SelectBuilder $query): CompoundBuilder
+    {
+        return $this->setCompoundOperator(CompoundOperator::Union, $query);
+    }
+
+    /**
+     * @param SelectBuilder $query
+     * @return CompoundBuilder
+     */
+    public function unionAll(SelectBuilder $query): CompoundBuilder
+    {
+        return $this->setCompoundOperator(CompoundOperator::UnionAll, $query);
+    }
+
+    /**
+     * @param SelectBuilder $query
+     * @return CompoundBuilder
+     */
+    public function intersect(SelectBuilder $query): CompoundBuilder
+    {
+        return $this->setCompoundOperator(CompoundOperator::Intersect, $query);
+    }
+
+    /**
+     * @param SelectBuilder $query
+     * @return CompoundBuilder
+     */
+    public function except(SelectBuilder $query): CompoundBuilder
+    {
+        return $this->setCompoundOperator(CompoundOperator::Except, $query);
+    }
+
+    /**
+     * @param CompoundOperator $operator
+     * @param SelectBuilder $query
+     * @return CompoundBuilder
+     */
+    protected function setCompoundOperator(CompoundOperator $operator, SelectBuilder $query): CompoundBuilder
+    {
+        $builder =  new CompoundBuilder($this->handler, $operator, $query->getStatement());
+        $this->statement->compound = $builder->getStatement();
+        return $builder;
+    }
+
+    #endregion compounding ---------------------------------------------------------------------------------------------
 
     #region execution --------------------------------------------------------------------------------------------------
 
