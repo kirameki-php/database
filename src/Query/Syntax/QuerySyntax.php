@@ -309,9 +309,18 @@ abstract class QuerySyntax extends Syntax
             return '';
         }
 
-        return ($type === LockType::Exclusive && $lock->option !== null)
-            ? $type->value . ' ' . $lock->option->value
+        return ($type === LockType::Exclusive)
+            ? $type->value . $this->formatSelectLockOptionPart($lock->option)
             : $type->value;
+    }
+
+    /**
+     * @param LockOption|null $option
+     * @return string
+     */
+    protected function formatSelectLockOptionPart(?LockOption $option): string
+    {
+        return $option !== null ? ' ' . $option->value : '';
     }
 
     /**
