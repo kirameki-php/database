@@ -6,29 +6,76 @@ use Kirameki\Database\Query\Support\Ordering;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Override;
 
+/**
+ * @consistent-constructor
+ */
 class Aggregate extends Expression
 {
-    public bool $isWindowFunction = false;
+    /**
+     * @param string $column
+     * @param string|null $as
+     * @return static
+     */
+    public static function min(string $column, string $as = null): static
+    {
+        return new static('MIN', $column, $as);
+    }
 
     /**
-     * @var list<string>|null
+     * @param string $column
+     * @param string|null $as
+     * @return static
      */
-    public ?array $partitionBy = null;
+    public static function max(string $column, string $as = null): static
+    {
+        return new static('MAX', $column, $as);
+    }
 
     /**
-     * @var array<string, Ordering>|null
+     * @param string $column
+     * @param string|null $as
+     * @return static
      */
-    public ?array $orderBy = null;
+    public static function count(string $column, string $as = null): static
+    {
+        return new static('COUNT', $column, $as);
+    }
+
+    /**
+     * @param string $column
+     * @param string|null $as
+     * @return static
+     */
+    public static function avg(string $column, string $as = null): static
+    {
+        return new static('AVG', $column, $as);
+    }
+
+    /**
+     * @param string $column
+     * @param string|null $as
+     * @return static
+     */
+    public static function sum(string $column, string $as = null): static
+    {
+        return new static('SUM', $column, $as);
+    }
 
     /**
      * @param string $function
      * @param string|null $column
      * @param string|null $as
+     * @param bool $isWindowFunction
+     * @param list<string>|null $partitionBy
+     * @param array<string, Ordering>|null $orderBy
      */
     public function __construct(
         public readonly string $function,
         public readonly ?string $column = null,
         public readonly ?string $as = null,
+        public bool $isWindowFunction = false,
+        public ?array $partitionBy = null,
+        public ?array $orderBy = null,
     )
     {
     }

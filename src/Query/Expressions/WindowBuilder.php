@@ -17,6 +17,7 @@ readonly class WindowBuilder
         protected Aggregate $aggregate,
     )
     {
+        $aggregate->isWindowFunction = true;
     }
 
     /**
@@ -41,7 +42,6 @@ readonly class WindowBuilder
         ?NullOrder $nulls = null,
     ): static
     {
-        $this->aggregate->isWindowFunction = true;
         $this->aggregate->orderBy ??= [];
         $this->aggregate->orderBy[$column] = new Ordering($sort, $nulls);
         return $this;
