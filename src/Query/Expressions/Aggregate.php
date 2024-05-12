@@ -16,6 +16,26 @@ class Aggregate extends Expression
      * @param string|null $as
      * @return static
      */
+    public static function first(string $column, string $as = null): static
+    {
+        return new static('FIRST', $column, $as);
+    }
+
+    /**
+     * @param string $column
+     * @param string|null $as
+     * @return static
+     */
+    public static function last(string $column, string $as = null): static
+    {
+        return new static('LAST', $column, $as);
+    }
+
+    /**
+     * @param string $column
+     * @param string|null $as
+     * @return static
+     */
     public static function min(string $column, string $as = null): static
     {
         return new static('MIN', $column, $as);
