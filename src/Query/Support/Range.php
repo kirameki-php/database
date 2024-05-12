@@ -9,12 +9,12 @@ use Traversable;
  * @consistent-constructor
  * @implements IteratorAggregate<int, mixed>
  */
-class Range implements IteratorAggregate
+readonly class Range implements IteratorAggregate
 {
-    public readonly mixed $lowerBound;
-    public readonly bool $lowerClosed;
-    public readonly mixed $upperBound;
-    public readonly bool $upperClosed;
+    public mixed $lowerBound;
+    public bool $lowerClosed;
+    public mixed $upperBound;
+    public bool $upperClosed;
 
     /**
      * @param mixed $lower
