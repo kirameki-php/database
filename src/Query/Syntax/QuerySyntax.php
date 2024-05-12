@@ -790,7 +790,7 @@ abstract class QuerySyntax extends Syntax
                 $this->formatNullOrderingPart($column, $ordering),
             ]));
         }
-        return "ORDER BY {$this->asCsv($clauses)}";
+        return 'ORDER BY ' . $this->asCsv($clauses);
     }
 
     /**

@@ -10,32 +10,16 @@ use Override;
 class SelectStatement extends ConditionsStatement
 {
     /**
-     * @var bool|null
-     */
-    public ?bool $distinct = null;
-
-    /**
-     * @var Lock|null
-     */
-    public ?Lock $lock = null;
-
-    /**
-     * @var string|null
-     */
-    public ?string $forceIndex = null;
-
-    /**
-     * @var CompoundStatement|null
-     */
-    public ?CompoundStatement $compound = null;
-
-    /**
      * @param list<string|Expression> $tables
      * @param list<string|Expression>|null $columns
      * @param list<JoinDefinition>|null $joins
      * @param list<string>|null $groupBy
      * @param list<ConditionDefinition>|null $having
      * @param int|null $offset
+     * @param bool|null $distinct
+     * @param Lock|null $lock
+     * @param string|null $forceIndex
+     * @param CompoundStatement|null $compound
      */
     public function __construct(
         public ?array $tables = null,
@@ -44,6 +28,10 @@ class SelectStatement extends ConditionsStatement
         public ?array $groupBy = null,
         public ?array $having = null,
         public ?int $offset = null,
+        public ?bool $distinct = null,
+        public ?Lock $lock = null,
+        public ?string $forceIndex = null,
+        public ?CompoundStatement $compound = null,
     )
     {
         parent::__construct();

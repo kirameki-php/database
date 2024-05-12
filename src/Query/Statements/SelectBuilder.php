@@ -17,7 +17,6 @@ use Kirameki\Database\Query\Support\Lock;
 use Kirameki\Database\Query\Support\SortOrder;
 use function array_is_list;
 use function array_values;
-use function func_get_args;
 use function is_array;
 
 /**
@@ -242,26 +241,15 @@ class SelectBuilder extends ConditionsBuilder
     }
 
     /**
-     * @param string|ConditionBuilder $column
-     * @param mixed $operator
-     * @param mixed|null $value
+     * @see ConditionsBuilder::where()
+     * @param mixed ...$args
      * @return $this
      */
-    public function having(ConditionBuilder|string $column, mixed $operator, mixed $value = null): static
-    {
-        $this->addHavingCondition($this->buildCondition(...func_get_args())->getDefinition());
-        return $this;
-    }
-
-    /**
-     * @param ConditionDefinition $condition
-     * @return $this
-     */
-    protected function addHavingCondition(ConditionDefinition $condition): static
+    public function having(mixed ...$args): static
     {
         $statement = $this->statement;
         $statement->having ??= [];
-        $statement->having[] = $condition;
+        $statement->having[] = $this->buildCondition(...$args)->getDefinition();
         return $this;
     }
 

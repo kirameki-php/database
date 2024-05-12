@@ -16,7 +16,7 @@ abstract class ConditionsBuilder extends QueryBuilder
     /**
      * @var ConditionBuilder|null
      */
-    protected ConditionBuilder|null $lastCondition = null;
+    protected ConditionBuilder|null $lastWhereCondition = null;
 
     /**
      * @param string $name
@@ -67,8 +67,11 @@ abstract class ConditionsBuilder extends QueryBuilder
     public function where(mixed ...$args): static
     {
         $condition = $this->buildCondition(...$args);
-        $this->appendConditionToStatement($condition);
-        return $this->setLastCondition($condition);
+        $statement = $this->statement;
+        $statement->where ??= [];
+        $statement->where[] = $condition->getDefinition();
+        $this->lastWhereCondition = $condition;
+        return $this;
     }
 
     /**
@@ -102,7 +105,7 @@ abstract class ConditionsBuilder extends QueryBuilder
      */
     public function and(mixed ...$args): static
     {
-        if ($this->lastCondition?->and()->apply($this->buildCondition(...$args)) !== null) {
+        if ($this->lastWhereCondition?->and()->apply($this->buildCondition(...$args)) !== null) {
             return $this;
         }
 
@@ -117,7 +120,7 @@ abstract class ConditionsBuilder extends QueryBuilder
      */
     public function or(mixed ...$args): static
     {
-        if ($this->lastCondition?->or()->apply($this->buildCondition(...$args)) !== null) {
+        if ($this->lastWhereCondition?->or()->apply($this->buildCondition(...$args)) !== null) {
             return $this;
         }
 
@@ -133,26 +136,5 @@ abstract class ConditionsBuilder extends QueryBuilder
     protected function buildCondition(mixed ...$args): ConditionBuilder
     {
         return ConditionBuilder::fromArgs(...$args);
-    }
-
-    /**
-     * @param ConditionBuilder $condition
-     * @return $this
-     */
-    protected function appendConditionToStatement(ConditionBuilder $condition): static
-    {
-        $this->statement->where ??= [];
-        $this->statement->where[] = $condition->getDefinition();
-        return $this;
-    }
-
-    /**
-     * @param ConditionBuilder $condition
-     * @return $this
-     */
-    protected function setLastCondition(ConditionBuilder $condition): static
-    {
-        $this->lastCondition = $condition;
-        return $this;
     }
 }
