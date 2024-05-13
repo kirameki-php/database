@@ -2,6 +2,9 @@
 
 namespace Kirameki\Database\Schema\Statements;
 
+use Kirameki\Database\Schema\SchemaHandler;
+use function implode;
+
 /**
  * @template TSchemaStatement of SchemaStatement
  */
@@ -11,6 +14,7 @@ abstract class SchemaBuilder
      * @param TSchemaStatement $statement
      */
     public function __construct(
+        protected readonly SchemaHandler $handler,
         protected SchemaStatement $statement,
     )
     {
@@ -40,5 +44,29 @@ abstract class SchemaBuilder
     protected function copy(): static
     {
         return clone $this;
+    }
+
+    /**
+     * @return SchemaResult<TSchemaStatement>
+     */
+    public function execute(): SchemaResult
+    {
+        return $this->handler->execute($this->statement);
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function toExecutable(): array
+    {
+        return $this->handler->toExecutable($this->statement);
+    }
+
+    /**
+     * @return string
+     */
+    public function toString(): string
+    {
+        return $this->handler->toString($this->statement);
     }
 }

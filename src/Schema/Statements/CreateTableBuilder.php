@@ -2,6 +2,7 @@
 
 namespace Kirameki\Database\Schema\Statements;
 
+use Kirameki\Database\Schema\SchemaHandler;
 use function iterator_to_array;
 
 /**
@@ -10,15 +11,17 @@ use function iterator_to_array;
 class CreateTableBuilder extends SchemaBuilder
 {
     /**
+     * @param SchemaHandler $handler
      * @param string $table
      * @param bool $temporary
      */
     public function __construct(
+        SchemaHandler $handler,
         string $table,
         bool $temporary = false,
     )
     {
-        parent::__construct(new CreateTableStatement($table, $temporary));
+        parent::__construct($handler, new CreateTableStatement($table, $temporary));
     }
 
     /**
@@ -148,7 +151,7 @@ class CreateTableBuilder extends SchemaBuilder
      */
     public function index(iterable $columns): CreateIndexBuilder
     {
-        $builder = new CreateIndexBuilder($this->statement->table);
+        $builder = new CreateIndexBuilder($this->handler, $this->statement->table);
         $this->statement->indexes[] = $builder->statement;
         return $builder->columns($columns);
     }

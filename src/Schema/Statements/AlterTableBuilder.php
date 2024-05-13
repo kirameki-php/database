@@ -2,6 +2,7 @@
 
 namespace Kirameki\Database\Schema\Statements;
 
+use Kirameki\Database\Schema\SchemaHandler;
 use Kirameki\Database\Schema\Support\AlterType;
 use function iterator_to_array;
 
@@ -11,13 +12,15 @@ use function iterator_to_array;
 class AlterTableBuilder extends SchemaBuilder
 {
     /**
+     * @param SchemaHandler $handler
      * @param string $table
      */
     public function __construct(
+        SchemaHandler $handler,
         string $table,
     )
     {
-        parent::__construct(new AlterTableStatement($table));
+        parent::__construct($handler, new AlterTableStatement($table));
     }
 
     /**

@@ -10,4 +10,13 @@ abstract class SchemaStatement
      * @return list<string>
      */
     abstract public function toExecutable(SchemaSyntax $syntax): array;
+
+    /**
+     * @param SchemaSyntax $syntax
+     * @return string
+     */
+    public function toString(SchemaSyntax $syntax): string
+    {
+        return implode(';', $this->toExecutable($syntax)) . ';';
+    }
 }
