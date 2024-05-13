@@ -5,13 +5,19 @@ namespace Kirameki\Database\Migration;
 use Closure;
 use Kirameki\Database\Connection;
 use Kirameki\Database\DatabaseManager;
-use Kirameki\Database\Events\SchemaExecuted;
 use Kirameki\Database\Schema\SchemaHandler;
 use Kirameki\Database\Schema\Statements\AlterTableBuilder;
+use Kirameki\Database\Schema\Statements\AlterTableStatement;
 use Kirameki\Database\Schema\Statements\CreateIndexBuilder;
+use Kirameki\Database\Schema\Statements\CreateIndexStatement;
 use Kirameki\Database\Schema\Statements\CreateTableBuilder;
+use Kirameki\Database\Schema\Statements\CreateTableStatement;
+use Kirameki\Database\Schema\Statements\DropIndexStatement;
+use Kirameki\Database\Schema\Statements\DropTableStatement;
+use Kirameki\Database\Schema\Statements\RenameTableStatement;
 use Kirameki\Database\Schema\Statements\SchemaBuilder;
-use Kirameki\Event\EventManager;
+use Kirameki\Database\Schema\Statements\SchemaResult;
+use Kirameki\Database\Schema\Statements\SchemaStatement;
 
 /**
  * @consistent-constructor
@@ -30,12 +36,10 @@ abstract class Migration
 
     /**
      * @param DatabaseManager $db
-     * @param EventManager $events
      * @param bool $dryRun
      */
     public function __construct(
         protected readonly DatabaseManager $db,
-        protected readonly EventManager $events,
         protected bool $dryRun,
     )
     {
@@ -62,69 +66,69 @@ abstract class Migration
     /**
      * @param string $table
      * @param Closure(CreateTableBuilder): void $callback
-     * @return void
+     * @return SchemaResult<CreateTableStatement>
      */
-    public function createTable(string $table, Closure $callback): void
+    public function createTable(string $table, Closure $callback): SchemaResult
     {
-        $this->apply($this->getSchemaHandler()->createTable($table), $callback);
+        return $this->apply($this->getSchemaHandler()->createTable($table), $callback);
     }
 
     /**
      * @param string $table
      * @param Closure(CreateTableBuilder): void $callback
-     * @return void
+     * @return SchemaResult<CreateTableStatement>
      */
-    public function createTemporaryTable(string $table, Closure $callback): void
+    public function createTemporaryTable(string $table, Closure $callback): SchemaResult
     {
-        $this->apply($this->getSchemaHandler()->createTemporaryTable($table), $callback);
+        return $this->apply($this->getSchemaHandler()->createTemporaryTable($table), $callback);
     }
 
     /**
      * @param string $table
      * @param Closure(AlterTableBuilder): void $callback
-     * @return void
+     * @return SchemaResult<AlterTableStatement>
      */
-    public function alterTable(string $table, Closure $callback): void
+    public function alterTable(string $table, Closure $callback): SchemaResult
     {
-        $this->apply($this->getSchemaHandler()->alterTable($table), $callback);
+        return $this->apply($this->getSchemaHandler()->alterTable($table), $callback);
     }
 
     /**
      * @param string $from
      * @param string $to
-     * @return void
+     * @return SchemaResult<RenameTableStatement>
      */
-    public function renameTable(string $from, string $to): void
+    public function renameTable(string $from, string $to): SchemaResult
     {
-        $this->apply($this->getSchemaHandler()->renameTable($from, $to));
+        return $this->apply($this->getSchemaHandler()->renameTable($from, $to));
     }
 
     /**
      * @param string $table
-     * @return void
+     * @return SchemaResult<DropTableStatement>
      */
-    public function dropTable(string $table): void
+    public function dropTable(string $table): SchemaResult
     {
-        $this->apply($this->getSchemaHandler()->dropTable($table));
+        return $this->apply($this->getSchemaHandler()->dropTable($table));
     }
 
     /**
      * @param string $table
      * @param Closure(CreateIndexBuilder): void $callback
-     * @return void
+     * @return SchemaResult<CreateIndexStatement>
      */
-    public function createIndex(string $table, Closure $callback): void
+    public function createIndex(string $table, Closure $callback): SchemaResult
     {
-        $this->apply($this->getSchemaHandler()->createIndex($table), $callback);
+       return $this->apply($this->getSchemaHandler()->createIndex($table), $callback);
     }
 
     /**
      * @param string $table
-     * @return void
+     * @return SchemaResult<DropIndexStatement>
      */
-    public function dropIndex(string $table): void
+    public function dropIndex(string $table): SchemaResult
     {
-        $this->apply($this->getSchemaHandler()->dropIndex($table));
+        return $this->apply($this->getSchemaHandler()->dropIndex($table));
     }
 
     /**
@@ -144,27 +148,17 @@ abstract class Migration
     }
 
     /**
-     * @template TSchemaBuilder of SchemaBuilder
+     * @template TSchemaStatement of SchemaStatement
+     * @template TSchemaBuilder of SchemaBuilder<TSchemaStatement>
      * @param TSchemaBuilder $builder
      * @param Closure(TSchemaBuilder): void|null $callback
-     * @return void
+     * @return SchemaResult<TSchemaStatement>
      */
-    protected function apply(SchemaBuilder $builder, ?Closure $callback = null): void
+    protected function apply(SchemaBuilder $builder, ?Closure $callback = null): SchemaResult
     {
         if ($callback !== null) {
             $callback($builder);
         }
-
-        if ($this->dryRun) {
-            $commands = $builder->toExecutable();
-        } else {
-            $result = $builder->execute();
-            $this->events->emit(new SchemaExecuted($this->getConnection(), $result));
-            $commands = $result->commands;
-        }
-
-        foreach ($commands as $command) {
-            $this->executedSchemas[] = $command;
-        }
+        return $builder->execute($this->dryRun);
     }
 }

@@ -16,6 +16,7 @@ readonly class SchemaResult
         public SchemaStatement $statement,
         public array $commands,
         public float $elapsedMs,
+        public bool $dryRun,
     )
     {
     }

@@ -103,23 +103,14 @@ readonly class SchemaHandler
     /**
      * @template TSchemaStatement of SchemaStatement
      * @param TSchemaStatement $statement
+     * @param bool $dryRun
      * @return SchemaResult<TSchemaStatement>
      */
-    public function execute(SchemaStatement $statement): SchemaResult
+    public function execute(SchemaStatement $statement, bool $dryRun = false): SchemaResult
     {
         $this->preprocess($statement);
-        $result = $this->connection->adapter->runSchema($statement);
+        $result = $this->connection->adapter->runSchema($statement, $dryRun);
         return $this->postprocess($result);
-    }
-
-    /**
-     * @template TSchemaStatement of SchemaStatement
-     * @param TSchemaStatement $statement
-     * @return list<string>
-     */
-    public function toExecutable(SchemaStatement $statement): array
-    {
-        return $statement->toExecutable($this->connection->adapter->getSchemaSyntax());
     }
 
     /**

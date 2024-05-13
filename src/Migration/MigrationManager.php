@@ -5,9 +5,7 @@ namespace Kirameki\Database\Migration;
 use Closure;
 use DateTimeInterface;
 use Kirameki\Collections\Utils\Arr;
-use Kirameki\Core\Exceptions\UnreachableException;
 use Kirameki\Database\DatabaseManager;
-use Kirameki\Event\EventManager;
 use function assert;
 use function basename;
 use function glob;
@@ -19,12 +17,10 @@ readonly class MigrationManager
 {
     /**
      * @param DatabaseManager $db
-     * @param EventManager $events
      * @param string $directory
      */
     public function __construct(
         protected DatabaseManager $db,
-        protected EventManager $events,
         protected string $directory,
     )
     {
@@ -88,7 +84,7 @@ readonly class MigrationManager
             if ($datetime !== false && $datetime >= $start) {
                 require_once $file;
                 $className = $this->extractClassName($file);
-                $migrations[] = new $className($this->db, $this->events, $dryRun);
+                $migrations[] = new $className($this->db, $dryRun);
             }
         }
         return $migrations;

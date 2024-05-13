@@ -3,7 +3,6 @@
 namespace Kirameki\Database\Schema\Statements;
 
 use Kirameki\Database\Schema\SchemaHandler;
-use function implode;
 
 /**
  * @template TSchemaStatement of SchemaStatement
@@ -21,7 +20,7 @@ abstract class SchemaBuilder
     }
 
     /**
-     * @return SchemaStatement
+     * @return TSchemaStatement
      */
     public function getStatement(): SchemaStatement
     {
@@ -47,19 +46,12 @@ abstract class SchemaBuilder
     }
 
     /**
+     * @param bool $dryRun
      * @return SchemaResult<TSchemaStatement>
      */
-    public function execute(): SchemaResult
+    public function execute(bool $dryRun = false): SchemaResult
     {
-        return $this->handler->execute($this->statement);
-    }
-
-    /**
-     * @return list<string>
-     */
-    public function toExecutable(): array
-    {
-        return $this->handler->toExecutable($this->statement);
+        return $this->handler->execute($this->statement, $dryRun);
     }
 
     /**

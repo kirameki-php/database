@@ -108,15 +108,17 @@ abstract class PdoAdapter implements DatabaseAdapter
      * @inheritDoc
      */
     #[Override]
-    public function runSchema(SchemaStatement $statement): SchemaResult
+    public function runSchema(SchemaStatement $statement, bool $dryRun = false): SchemaResult
     {
         try {
             $startTime = hrtime(true);
             $executables = $statement->toExecutable($this->getSchemaSyntax());
-            foreach ($executables as $executable) {
-                $this->getPdo()->exec($executable);
+            if ($dryRun) {
+                foreach ($executables as $executable) {
+                    $this->getPdo()->exec($executable);
+                }
             }
-            return $this->instantiateSchemaExecution($statement, $executables, $startTime);
+            return $this->instantiateSchemaExecution($statement, $executables, $startTime, $dryRun);
         } catch (PDOException $e) {
             throw new SchemaException($e->getMessage(), $statement, $e);
         }
@@ -316,16 +318,18 @@ abstract class PdoAdapter implements DatabaseAdapter
      * @param TSchemaStatement $statement
      * @param list<string> $commands
      * @param float $startTime
+     * @param bool $dryRun
      * @return SchemaResult<TSchemaStatement>
      */
     protected function instantiateSchemaExecution(
         SchemaStatement $statement,
         array $commands,
         float $startTime,
+        bool $dryRun,
     ): SchemaResult
     {
-        $elapsedMs = (hrtime(true) - $startTime) / 1_000_000;
-        return new SchemaResult($statement, $commands, $elapsedMs);
+        $elapsedMs = $dryRun ? 0 : (hrtime(true) - $startTime) / 1_000_000;
+        return new SchemaResult($statement, $commands, $elapsedMs, $dryRun);
     }
 
     /**

@@ -308,12 +308,12 @@ class SelectBuilder extends ConditionsBuilder
     #region limiting ---------------------------------------------------------------------------------------------------
 
     /**
-     * @param int $skipRows
+     * @param int $offset
      * @return $this
      */
-    public function offset(int $skipRows): static
+    public function offset(int $offset): static
     {
-        $this->statement->offset = $skipRows;
+        $this->statement->offset = $offset;
         return $this;
     }
 
