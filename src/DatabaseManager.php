@@ -103,7 +103,7 @@ class DatabaseManager
             return array_key_first($primaries);
         }
         throw new LogicException('No default connection could be resolved', [
-            'connections' => $connections,
+            'config' => $this->config,
         ]);
     }
 
@@ -121,7 +121,7 @@ class DatabaseManager
      */
     public function getConfig(string $name): ConnectionConfig
     {
-        return $this->config->connections[$name] ?? throw new LogicException("Database config: $name does not exist", [
+        return $this->config->connections[$name] ?? throw new LogicException("Database: {$name} does not exist", [
             'name' => $name,
             'config' => $this->config,
         ]);
