@@ -5,7 +5,10 @@ namespace Kirameki\Database\Migration;
 use Closure;
 use DateTimeInterface;
 use Kirameki\Collections\Utils\Arr;
+use Kirameki\Collections\Vec;
 use Kirameki\Database\DatabaseManager;
+use Kirameki\Database\Schema\Statements\SchemaResult;
+use Kirameki\Database\Schema\Statements\SchemaStatement;
 use function assert;
 use function basename;
 use function glob;
@@ -32,7 +35,7 @@ readonly class MigrationManager
     public function up(?DateTimeInterface $since = null): void
     {
         foreach ($this->readPendingMigrations($since, false) as $migration) {
-            $this->withTransaction($migration, $migration->up(...));
+            $this->withTransaction($migration, $migration->runUp(...));
         }
     }
 
@@ -42,32 +45,34 @@ readonly class MigrationManager
     public function down(?DateTimeInterface $since = null): void
     {
         foreach ($this->readPendingMigrations($since, false) as $migration) {
-            $this->withTransaction($migration, $migration->down(...));
+            $this->withTransaction($migration, $migration->runDown(...));
         }
     }
 
     /**
      * @param DateTimeInterface|null $since
-     * @return list<string>
+     * @return Vec<SchemaResult<covariant SchemaStatement>>
      */
-    public function inspectUp(?DateTimeInterface $since = null): array
+    public function inspectUp(?DateTimeInterface $since = null): Vec
     {
-        $statements = [];
+        $results = [];
         foreach ($this->readPendingMigrations($since, true) as $migration) {
-            $migration->up();
-            $statements[] = $migration->getExecutedCommands();
+            $results[] = $migration->runUp();
         }
-        return Arr::flatten($statements);
+        return new Vec(Arr::flatten($results));
     }
 
     /**
      * @param DateTimeInterface|null $since
-     * @return list<string>
+     * @return Vec<SchemaResult<covariant SchemaStatement>>
      */
-    public function inspectDown(?DateTimeInterface $since = null): array
+    public function inspectDown(?DateTimeInterface $since = null): Vec
     {
-        // TODO implement
-        return [];
+        $results = [];
+        foreach ($this->readPendingMigrations($since, true) as $migration) {
+            $results[] = $migration->runDown();
+        }
+        return new Vec(Arr::flatten($results));
     }
 
     /**
@@ -111,7 +116,7 @@ readonly class MigrationManager
 
     /**
      * @param Migration $migration
-     * @param Closure(): void $callback
+     * @param Closure(): mixed $callback
      * @return void
      */
     protected function withTransaction(Migration $migration, Closure $callback): void

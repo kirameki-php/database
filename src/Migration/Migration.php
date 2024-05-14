@@ -5,7 +5,6 @@ namespace Kirameki\Database\Migration;
 use Closure;
 use Kirameki\Database\Connection;
 use Kirameki\Database\DatabaseManager;
-use Kirameki\Database\Schema\SchemaHandler;
 use Kirameki\Database\Schema\Statements\AlterTableBuilder;
 use Kirameki\Database\Schema\Statements\AlterTableStatement;
 use Kirameki\Database\Schema\Statements\CreateIndexBuilder;
@@ -30,9 +29,9 @@ abstract class Migration
     protected string $connection;
 
     /**
-     * @var list<string>
+     * @var list<SchemaResult<covariant SchemaStatement>>
      */
-    protected array $executedSchemas = [];
+    protected array $schemaResults = [];
 
     /**
      * @param DatabaseManager $db
@@ -48,12 +47,28 @@ abstract class Migration
     /**
      * @return void
      */
-    abstract public function up(): void;
+    abstract protected function up(): void;
 
     /**
      * @return void
      */
-    abstract public function down(): void;
+    abstract protected function down(): void;
+
+    /**
+     * @return list<SchemaResult<covariant SchemaStatement>>
+     */
+    public function runUp(): array
+    {
+        return $this->captureResults($this->up(...));
+    }
+
+    /**
+     * @return list<SchemaResult<covariant SchemaStatement>>
+     */
+    public function runDown(): array
+    {
+        return $this->captureResults($this->down(...));
+    }
 
     /**
      * @return Connection
@@ -70,7 +85,7 @@ abstract class Migration
      */
     public function createTable(string $table, Closure $callback): SchemaResult
     {
-        return $this->apply($this->getSchemaHandler()->createTable($table), $callback);
+        return $this->apply($this->getConnection()->schema()->createTable($table), $callback);
     }
 
     /**
@@ -80,7 +95,7 @@ abstract class Migration
      */
     public function createTemporaryTable(string $table, Closure $callback): SchemaResult
     {
-        return $this->apply($this->getSchemaHandler()->createTemporaryTable($table), $callback);
+        return $this->apply($this->getConnection()->schema()->createTemporaryTable($table), $callback);
     }
 
     /**
@@ -90,7 +105,7 @@ abstract class Migration
      */
     public function alterTable(string $table, Closure $callback): SchemaResult
     {
-        return $this->apply($this->getSchemaHandler()->alterTable($table), $callback);
+        return $this->apply($this->getConnection()->schema()->alterTable($table), $callback);
     }
 
     /**
@@ -100,7 +115,7 @@ abstract class Migration
      */
     public function renameTable(string $from, string $to): SchemaResult
     {
-        return $this->apply($this->getSchemaHandler()->renameTable($from, $to));
+        return $this->apply($this->getConnection()->schema()->renameTable($from, $to));
     }
 
     /**
@@ -109,7 +124,7 @@ abstract class Migration
      */
     public function dropTable(string $table): SchemaResult
     {
-        return $this->apply($this->getSchemaHandler()->dropTable($table));
+        return $this->apply($this->getConnection()->schema()->dropTable($table));
     }
 
     /**
@@ -119,7 +134,7 @@ abstract class Migration
      */
     public function createIndex(string $table, Closure $callback): SchemaResult
     {
-       return $this->apply($this->getSchemaHandler()->createIndex($table), $callback);
+       return $this->apply($this->getConnection()->schema()->createIndex($table), $callback);
     }
 
     /**
@@ -128,23 +143,17 @@ abstract class Migration
      */
     public function dropIndex(string $table): SchemaResult
     {
-        return $this->apply($this->getSchemaHandler()->dropIndex($table));
+        return $this->apply($this->getConnection()->schema()->dropIndex($table));
     }
 
     /**
-     * @return list<string>
+     * @return list<SchemaResult<covariant SchemaStatement>>
      */
-    public function getExecutedCommands(): array
+    protected function captureResults(Closure $callback): array
     {
-        return $this->executedSchemas;
-    }
-
-    /**
-     * @return SchemaHandler
-     */
-    protected function getSchemaHandler(): SchemaHandler
-    {
-        return $this->getConnection()->schema();
+        $this->schemaResults = [];
+        $callback();
+        return $this->schemaResults;
     }
 
     /**
@@ -159,6 +168,8 @@ abstract class Migration
         if ($callback !== null) {
             $callback($builder);
         }
-        return $builder->execute($this->dryRun);
+        $result = $builder->execute($this->dryRun);
+        $this->schemaResults[] = $result;
+        return $result;
     }
 }
