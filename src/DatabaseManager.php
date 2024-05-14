@@ -8,12 +8,12 @@ use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Adapters\DatabaseAdapter;
 use Kirameki\Database\Adapters\ConnectionConfig;
+use Kirameki\Database\Adapters\DatabaseConfig;
 use Kirameki\Database\Adapters\MySqlAdapter;
 use Kirameki\Database\Adapters\MySqlConfig;
 use Kirameki\Database\Adapters\SqliteAdapter;
 use Kirameki\Database\Adapters\SqliteConfig;
 use Kirameki\Event\EventManager;
-use function array_filter;
 use function array_key_exists;
 use function array_key_first;
 use function count;
@@ -32,16 +32,14 @@ class DatabaseManager
 
     /**
      * @param EventManager $events
-     * @param iterable<string, ConnectionConfig> $configs
-     * @param string|null $default
+     * @param DatabaseConfig $config
      */
     public function __construct(
         protected readonly EventManager $events,
-        protected iterable $configs,
-        protected ?string $default = null,
+        protected DatabaseConfig $config,
     )
     {
-        $this->default ??= $this->resolveDefaultConnectionName();
+        $config->default ??= $this->resolveDefaultConnectionName();
     }
 
     /**
@@ -97,11 +95,12 @@ class DatabaseManager
     /**
      * @return string
      */
-    public function resolveDefaultConnectionName(): string
+    protected function resolveDefaultConnectionName(): string
     {
-        $connections = Arr::filter($this->configs, static fn(ConnectionConfig $c) => $c->isReplica());
-        if (count($connections) === 1) {
-            return array_key_first($connections);
+        $connections = $this->config->connections;
+        $primaries = Arr::filter($connections, static fn(ConnectionConfig $c) => !$c->isReplica());
+        if (count($primaries) === 1) {
+            return array_key_first($primaries);
         }
         throw new LogicException('No default connection could be resolved', [
             'connections' => $connections,
@@ -122,9 +121,9 @@ class DatabaseManager
      */
     public function getConfig(string $name): ConnectionConfig
     {
-        return $this->configs[$name] ?? throw new LogicException("Database config: $name does not exist", [
+        return $this->config->connections[$name] ?? throw new LogicException("Database config: $name does not exist", [
             'name' => $name,
-            'configs' => $this->configs,
+            'config' => $this->config,
         ]);
     }
 
