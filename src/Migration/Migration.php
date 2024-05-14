@@ -27,7 +27,7 @@ abstract class Migration
     /**
      * @var string
      */
-    protected string $connection;
+    public string $connection;
 
     /**
      * @var list<SchemaResult<covariant SchemaStatement>>

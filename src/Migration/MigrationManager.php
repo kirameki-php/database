@@ -121,7 +121,7 @@ readonly class MigrationManager
      */
     protected function withTransaction(Migration $migration, Closure $callback): void
     {
-        $connection = $migration->getConnection();
+        $connection = $this->db->use($migration->connection);
         $connection->adapter->getSchemaSyntax()->supportsDdlTransaction()
             ? $connection->transaction($callback)
             : $callback();
