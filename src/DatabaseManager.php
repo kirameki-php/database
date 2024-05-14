@@ -53,6 +53,14 @@ class DatabaseManager
     }
 
     /**
+     * @return Connection
+     */
+    public function useDefault(): Connection
+    {
+        return $this->use($this->getDefaultConnectionName());
+    }
+
+    /**
      * @param string $name
      * @return $this
      */

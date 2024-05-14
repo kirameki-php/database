@@ -6,6 +6,7 @@ use Closure;
 use DateTimeInterface;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Collections\Vec;
+use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\DatabaseManager;
 use Kirameki\Database\Schema\Statements\SchemaResult;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
@@ -110,8 +111,10 @@ readonly class MigrationManager
     protected function extractClassName(string $file): string
     {
         $className = basename(ltrim((string) strstr($file, '_'), '_'), '.php');
-        assert(is_a($className, Migration::class, true));
-        return $className;
+        if (is_a($className, Migration::class, true)) {
+            return $className;
+        }
+        throw new LogicException($className . ' must extend ' . Migration::class);
     }
 
     /**
@@ -121,7 +124,7 @@ readonly class MigrationManager
      */
     protected function withTransaction(Migration $migration, Closure $callback): void
     {
-        $connection = $this->db->use($migration->connection);
+        $connection = $migration->getConnection();
         $connection->adapter->getSchemaSyntax()->supportsDdlTransaction()
             ? $connection->transaction($callback)
             : $callback();
