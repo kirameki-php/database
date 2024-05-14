@@ -4,7 +4,7 @@ namespace Kirameki\Database\Adapters;
 
 use Kirameki\Database\Query\Support\TagsFormat;
 
-interface DatabaseConfig
+interface ConnectionConfig
 {
     /**
      * @return string

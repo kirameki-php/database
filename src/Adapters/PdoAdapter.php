@@ -26,7 +26,7 @@ use function implode;
 use function iterator_to_array;
 
 /**
- * @template TConfig of DatabaseConfig
+ * @template TConfig of ConnectionConfig
  */
 abstract class PdoAdapter implements DatabaseAdapter
 {
@@ -48,7 +48,7 @@ abstract class PdoAdapter implements DatabaseAdapter
      * @param SchemaSyntax|null $schemaSyntax
      */
     public function __construct(
-        protected DatabaseConfig $config,
+        protected ConnectionConfig $config,
         public ?PDO $pdo = null,
         protected ?QuerySyntax $querySyntax = null,
         protected ?SchemaSyntax $schemaSyntax = null,
@@ -70,7 +70,7 @@ abstract class PdoAdapter implements DatabaseAdapter
      * @return TConfig
      */
     #[Override]
-    public function getConfig(): DatabaseConfig
+    public function getConfig(): ConnectionConfig
     {
         return $this->config;
     }

@@ -12,9 +12,9 @@ use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 interface DatabaseAdapter
 {
     /**
-     * @return DatabaseConfig
+     * @return ConnectionConfig
      */
-    public function getConfig(): DatabaseConfig;
+    public function getConfig(): ConnectionConfig;
 
     /**
      * @return $this

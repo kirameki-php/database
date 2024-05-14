@@ -5,7 +5,7 @@ namespace Kirameki\Database\Adapters;
 use Kirameki\Database\Query\Support\TagsFormat;
 use Override;
 
-class SqliteConfig implements DatabaseConfig
+class SqliteConfig implements ConnectionConfig
 {
     /**
      * @param string $filename

@@ -25,9 +25,9 @@ use Kirameki\Database\Schema\Statements\SchemaStatement;
 abstract class Migration
 {
     /**
-     * @var string
+     * @var string|null
      */
-    public string $connection;
+    public ?string $connection = null;
 
     /**
      * @var list<SchemaResult<covariant SchemaStatement>>|null

@@ -4,15 +4,19 @@ namespace Kirameki\Database;
 
 use Closure;
 use Kirameki\Collections\Map;
+use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Adapters\DatabaseAdapter;
-use Kirameki\Database\Adapters\DatabaseConfig;
+use Kirameki\Database\Adapters\ConnectionConfig;
 use Kirameki\Database\Adapters\MySqlAdapter;
 use Kirameki\Database\Adapters\MySqlConfig;
 use Kirameki\Database\Adapters\SqliteAdapter;
 use Kirameki\Database\Adapters\SqliteConfig;
 use Kirameki\Event\EventManager;
+use function array_filter;
 use function array_key_exists;
+use function array_key_first;
+use function count;
 
 class DatabaseManager
 {
@@ -22,19 +26,22 @@ class DatabaseManager
     protected array $connections = [];
 
     /**
-     * @var array<string, Closure(DatabaseConfig): DatabaseAdapter>
+     * @var array<string, Closure(ConnectionConfig): DatabaseAdapter>
      */
     protected array $adapters = [];
 
     /**
      * @param EventManager $events
-     * @param iterable<string, DatabaseConfig> $configs
+     * @param iterable<string, ConnectionConfig> $configs
+     * @param string|null $default
      */
     public function __construct(
         protected readonly EventManager $events,
         protected iterable $configs,
+        protected ?string $default = null,
     )
     {
+        $this->default ??= $this->resolveDefaultConnectionName();
     }
 
     /**
@@ -67,7 +74,7 @@ class DatabaseManager
 
     /**
      * @param string $name
-     * @param Closure(DatabaseConfig): DatabaseAdapter $deferred
+     * @param Closure(ConnectionConfig): DatabaseAdapter $deferred
      * @return $this
      */
     public function addAdapter(string $name, Closure $deferred): static
@@ -78,13 +85,27 @@ class DatabaseManager
 
     /**
      * @param string $name
-     * @param DatabaseConfig $config
+     * @param ConnectionConfig $config
      * @return Connection
      */
-    protected function createConnection(string $name, DatabaseConfig $config): Connection
+    protected function createConnection(string $name, ConnectionConfig $config): Connection
     {
         $adapter = ($this->getAdapterResolver($config))($config);
         return new Connection($name, $adapter, $this->events);
+    }
+
+    /**
+     * @return string
+     */
+    public function resolveDefaultConnectionName(): string
+    {
+        $connections = Arr::filter($this->configs, static fn(ConnectionConfig $c) => $c->isReplica());
+        if (count($connections) === 1) {
+            return array_key_first($connections);
+        }
+        throw new LogicException('No default connection could be resolved', [
+            'connections' => $connections,
+        ]);
     }
 
     /**
@@ -97,9 +118,9 @@ class DatabaseManager
 
     /**
      * @param string $name
-     * @return DatabaseConfig
+     * @return ConnectionConfig
      */
-    public function getConfig(string $name): DatabaseConfig
+    public function getConfig(string $name): ConnectionConfig
     {
         return $this->configs[$name] ?? throw new LogicException("Database config: $name does not exist", [
             'name' => $name,
@@ -108,10 +129,10 @@ class DatabaseManager
     }
 
     /**
-     * @param DatabaseConfig $config
-     * @return Closure(DatabaseConfig): DatabaseAdapter
+     * @param ConnectionConfig $config
+     * @return Closure(ConnectionConfig): DatabaseAdapter
      */
-    protected function getAdapterResolver(DatabaseConfig $config): Closure
+    protected function getAdapterResolver(ConnectionConfig $config): Closure
     {
         $name = $config->getAdapterName();
         if (!array_key_exists($name, $this->adapters)) {
@@ -122,7 +143,7 @@ class DatabaseManager
 
     /**
      * @param string $adapter
-     * @return Closure(covariant DatabaseConfig): DatabaseAdapter
+     * @return Closure(covariant ConnectionConfig): DatabaseAdapter
      */
     protected function getDefaultAdapterResolver(string $adapter): Closure
     {

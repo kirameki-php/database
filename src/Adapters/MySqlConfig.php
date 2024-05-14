@@ -5,7 +5,7 @@ namespace Kirameki\Database\Adapters;
 use Kirameki\Database\Query\Support\TagsFormat;
 use Override;
 
-class MySqlConfig implements DatabaseConfig
+class MySqlConfig implements ConnectionConfig
 {
     /**
      * For why the collation is set to utf8mb4_bin by default, see
