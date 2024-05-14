@@ -16,6 +16,7 @@ use Kirameki\Database\Adapters\SqliteConfig;
 use Kirameki\Event\EventManager;
 use function array_key_exists;
 use function array_key_first;
+use function assert;
 use function count;
 
 class DatabaseManager
@@ -36,7 +37,7 @@ class DatabaseManager
      */
     public function __construct(
         protected readonly EventManager $events,
-        protected DatabaseConfig $config,
+        protected readonly DatabaseConfig $config,
     )
     {
         $config->default ??= $this->resolveDefaultConnectionName();
@@ -79,6 +80,16 @@ class DatabaseManager
     {
         $this->adapters[$name] = $deferred(...);
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDefaultConnectionName(): string
+    {
+        $default = $this->config->default;
+        assert($default !== null);
+        return $default;
     }
 
     /**
