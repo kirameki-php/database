@@ -5,6 +5,7 @@ namespace Kirameki\Database\Migration;
 use Closure;
 use Kirameki\Database\Connection;
 use Kirameki\Database\DatabaseManager;
+use Kirameki\Database\Schema\SchemaHandler;
 use Kirameki\Database\Schema\Statements\AlterTableBuilder;
 use Kirameki\Database\Schema\Statements\AlterTableStatement;
 use Kirameki\Database\Schema\Statements\CreateIndexBuilder;
@@ -73,19 +74,17 @@ abstract class Migration
     /**
      * @return Connection
      */
-    public function getConnection(): Connection
+    protected function getConnection(): Connection
     {
         return $this->db->use($this->connection);
     }
 
     /**
-     * @param string $table
-     * @param Closure(CreateTableBuilder): void $callback
-     * @return SchemaResult<CreateTableStatement>
+     * @return SchemaHandler
      */
-    public function createTable(string $table, Closure $callback): SchemaResult
+    protected function getSchemaHandler(): SchemaHandler
     {
-        return $this->apply($this->getConnection()->schema()->createTable($table), $callback);
+        return $this->getConnection()->schema();
     }
 
     /**
@@ -93,9 +92,19 @@ abstract class Migration
      * @param Closure(CreateTableBuilder): void $callback
      * @return SchemaResult<CreateTableStatement>
      */
-    public function createTemporaryTable(string $table, Closure $callback): SchemaResult
+    protected function createTable(string $table, Closure $callback): SchemaResult
     {
-        return $this->apply($this->getConnection()->schema()->createTemporaryTable($table), $callback);
+        return $this->apply($this->getSchemaHandler()->createTable($table), $callback);
+    }
+
+    /**
+     * @param string $table
+     * @param Closure(CreateTableBuilder): void $callback
+     * @return SchemaResult<CreateTableStatement>
+     */
+    protected function createTemporaryTable(string $table, Closure $callback): SchemaResult
+    {
+        return $this->apply($this->getSchemaHandler()->createTemporaryTable($table), $callback);
     }
 
     /**
@@ -103,9 +112,9 @@ abstract class Migration
      * @param Closure(AlterTableBuilder): void $callback
      * @return SchemaResult<AlterTableStatement>
      */
-    public function alterTable(string $table, Closure $callback): SchemaResult
+    protected function alterTable(string $table, Closure $callback): SchemaResult
     {
-        return $this->apply($this->getConnection()->schema()->alterTable($table), $callback);
+        return $this->apply($this->getSchemaHandler()->alterTable($table), $callback);
     }
 
     /**
@@ -113,18 +122,18 @@ abstract class Migration
      * @param string $to
      * @return SchemaResult<RenameTableStatement>
      */
-    public function renameTable(string $from, string $to): SchemaResult
+    protected function renameTable(string $from, string $to): SchemaResult
     {
-        return $this->apply($this->getConnection()->schema()->renameTable($from, $to));
+        return $this->apply($this->getSchemaHandler()->renameTable($from, $to));
     }
 
     /**
      * @param string $table
      * @return SchemaResult<DropTableStatement>
      */
-    public function dropTable(string $table): SchemaResult
+    protected function dropTable(string $table): SchemaResult
     {
-        return $this->apply($this->getConnection()->schema()->dropTable($table));
+        return $this->apply($this->getSchemaHandler()->dropTable($table));
     }
 
     /**
@@ -132,18 +141,18 @@ abstract class Migration
      * @param Closure(CreateIndexBuilder): void $callback
      * @return SchemaResult<CreateIndexStatement>
      */
-    public function createIndex(string $table, Closure $callback): SchemaResult
+    protected function createIndex(string $table, Closure $callback): SchemaResult
     {
-       return $this->apply($this->getConnection()->schema()->createIndex($table), $callback);
+       return $this->apply($this->getSchemaHandler()->createIndex($table), $callback);
     }
 
     /**
      * @param string $table
      * @return SchemaResult<DropIndexStatement>
      */
-    public function dropIndex(string $table): SchemaResult
+    protected function dropIndex(string $table): SchemaResult
     {
-        return $this->apply($this->getConnection()->schema()->dropIndex($table));
+        return $this->apply($this->getSchemaHandler()->dropIndex($table));
     }
 
     /**
