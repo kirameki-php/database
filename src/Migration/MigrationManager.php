@@ -6,26 +6,19 @@ use Closure;
 use DateTimeInterface;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Collections\Vec;
-use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\DatabaseManager;
 use Kirameki\Database\Schema\Statements\SchemaResult;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
-use function assert;
-use function basename;
-use function glob;
-use function is_a;
-use function ltrim;
-use function strstr;
 
 readonly class MigrationManager
 {
     /**
      * @param DatabaseManager $db
-     * @param string $directory
+     * @param MigrationFinder $finder
      */
     public function __construct(
         protected DatabaseManager $db,
-        protected string $directory,
+        protected MigrationFinder $finder,
     )
     {
     }
@@ -35,7 +28,7 @@ readonly class MigrationManager
      */
     public function up(?DateTimeInterface $since = null): void
     {
-        foreach ($this->readPendingMigrations($since, false) as $migration) {
+        foreach ($this->finder->scan($since) as $migration) {
             $this->withTransaction($migration, $migration->runUp(...));
         }
     }
@@ -45,7 +38,7 @@ readonly class MigrationManager
      */
     public function down(?DateTimeInterface $since = null): void
     {
-        foreach ($this->readPendingMigrations($since, false) as $migration) {
+        foreach ($this->finder->scan($since) as $migration) {
             $this->withTransaction($migration, $migration->runDown(...));
         }
     }
@@ -57,7 +50,7 @@ readonly class MigrationManager
     public function inspectUp(?DateTimeInterface $since = null): Vec
     {
         $results = [];
-        foreach ($this->readPendingMigrations($since, true) as $migration) {
+        foreach ($this->finder->scan($since, true) as $migration) {
             $results[] = $migration->runUp();
         }
         return new Vec(Arr::flatten($results));
@@ -70,51 +63,10 @@ readonly class MigrationManager
     public function inspectDown(?DateTimeInterface $since = null): Vec
     {
         $results = [];
-        foreach ($this->readPendingMigrations($since, true) as $migration) {
+        foreach ($this->finder->scan($since, true) as $migration) {
             $results[] = $migration->runDown();
         }
         return new Vec(Arr::flatten($results));
-    }
-
-    /**
-     * @param DateTimeInterface|null $startAt
-     * @param bool $dryRun
-     * @return list<Migration>
-     */
-    protected function readPendingMigrations(?DateTimeInterface $startAt, bool $dryRun): array
-    {
-        $start = $startAt ? $startAt->format('YmdHis') : '00000000000000';
-        $migrations = [];
-        foreach ($this->getMigrationFiles() as $file) {
-            $datetime = strstr(basename($file), '_', true);
-            if ($datetime !== false && $datetime >= $start) {
-                require_once $file;
-                $className = $this->extractClassName($file);
-                $migrations[] = new $className($this->db, $dryRun);
-            }
-        }
-        return $migrations;
-    }
-
-    /**
-     * @return list<string>
-     */
-    protected function getMigrationFiles(): array
-    {
-        return glob($this->directory . '/*.php') ?: [];
-    }
-
-    /**
-     * @param string $file
-     * @return class-string<Migration>
-     */
-    protected function extractClassName(string $file): string
-    {
-        $className = basename(ltrim((string) strstr($file, '_'), '_'), '.php');
-        if (is_a($className, Migration::class, true)) {
-            return $className;
-        }
-        throw new LogicException($className . ' must extend ' . Migration::class);
     }
 
     /**
