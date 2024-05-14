@@ -30,9 +30,9 @@ abstract class Migration
     public string $connection;
 
     /**
-     * @var list<SchemaResult<covariant SchemaStatement>>
+     * @var list<SchemaResult<covariant SchemaStatement>>|null
      */
-    protected array $schemaResults = [];
+    protected ?array $schemaResults = null;
 
     /**
      * @param DatabaseManager $db
@@ -178,6 +178,7 @@ abstract class Migration
             $callback($builder);
         }
         $result = $builder->execute($this->dryRun);
+        $this->schemaResults ??= [];
         $this->schemaResults[] = $result;
         return $result;
     }
