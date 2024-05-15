@@ -14,13 +14,26 @@
 composer require kirameki/database
 ```
 
-## Example
+# SQL Database Differences
 
-```php
+## Session Level Timeout
 
-```
+| Database    | Supported | Description                                                                                                                 | Query                                           |
+|-------------|-----------|-----------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------|
+| SQLite      | ╳         | No option exists.                                                                                                           |                                                 |
+| PostgreSQL  | ◯         | Works. ([Docs](https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT))                   | `SET statement_timeout={milliseconds}`          |
+| MySQL       | △         | Only works for SELECT. ([Docs](https://dev.mysql.com/doc/refman/en/server-system-variables.html#sysvar_max_execution_time)) | `SET SESSION max_execution_time={milliseconds}` |
+| MariaDB     | ◯         | Works. ([Docs](https://mariadb.com/kb/en/server-system-variables/#max_statement_time))                                      | `SET max_statement_time={seconds}`              |
 
-## Methods
+## Upsert
+
+| Database    | Supported | Description                                                                                                                                                                     | Query                                        |
+|-------------|-----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
+| SQLite      | ◯         | Works. ([Docs](https://www.sqlite.org/lang_upsert.html))                                                                                                                        | `INSERT INTO … ON CONFLICT … DO UPDATE SET…` |
+| PostgreSQL  | ◯         | Works. ([Docs](https://www.postgresql.org/docs/current/sql-insert.html))                                                                                                        | `INSERT INTO … ON CONFLICT … DO UPDATE SET…` |
+| MySQL       | △         | Does not work as expected on tables with multiple unique indexes.<br>Use with caution. Read the docs carefully. ([Docs](https://dev.mysql.com/doc/en/insert-on-duplicate.html)) | `INSERT INTO … ON DUPLICATE KEY UPDATE …`    |
+| MariaDB     | △         | *Same as MySQL* ([Docs](https://mariadb.com/kb/en/insert-on-duplicate-key-update))                                                                                              | *Same as MySQL*                              |
+
 
 ## License
 

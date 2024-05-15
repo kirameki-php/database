@@ -4,12 +4,9 @@ namespace Kirameki\Database\Adapters;
 
 use Kirameki\Database\Exceptions\DatabaseNotFoundException;
 use Kirameki\Database\Query\Syntax\SqliteQuerySyntax;
-use Kirameki\Database\Schema\Statements\CreateTableBuilder;
-use Kirameki\Database\Schema\Statements\DropTableBuilder;
 use Kirameki\Database\Schema\Syntax\SqliteSchemaSyntax;
 use Override;
 use PDO;
-use function dump;
 use function file_exists;
 use function implode;
 use function iterator_to_array;
@@ -94,12 +91,8 @@ class SqliteAdapter extends PdoAdapter
             return;
         }
 
-        $dummyTableName = '_';
-        $createTable = new CreateTableBuilder($dummyTableName);
-        $createTable->int('id')->primaryKey()->autoIncrement();
-        $this->runSchema($createTable->getStatement());
-        $dropTable = new DropTableBuilder($dummyTableName);
-        $this->runSchema($dropTable->getStatement());
+        $this->getPdo()->exec('CREATE TABLE _setup (id INTEGER PRIMARY KEY AUTOINCREMENT)');
+        $this->getPdo()->exec('DROP TABLE _setup');
     }
 
     /**
