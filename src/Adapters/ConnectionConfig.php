@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Adapters;
 
 use Kirameki\Database\Query\Support\TagsFormat;
+use Kirameki\Database\Transaction\Support\IsolationLevel;
 
 interface ConnectionConfig
 {
@@ -25,4 +26,9 @@ interface ConnectionConfig
      * @return bool
      */
     public function isReplica(): bool;
+
+    /**
+     * @return IsolationLevel
+     */
+    public function getIsolationLevel(): IsolationLevel;
 }

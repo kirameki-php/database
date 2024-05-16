@@ -9,6 +9,7 @@ use Kirameki\Database\Events\ConnectionEstablished;
 use Kirameki\Database\Info\InfoHandler;
 use Kirameki\Database\Query\QueryHandler;
 use Kirameki\Database\Schema\SchemaHandler;
+use Kirameki\Database\Transaction\Support\IsolationLevel;
 use Kirameki\Database\Transaction\TransactionHandler;
 use Kirameki\Event\EventManager;
 
@@ -121,11 +122,12 @@ class Connection
     /**
      * @template TReturn
      * @param Closure(): TReturn $callback
+     * @param IsolationLevel|null $level
      * @return TReturn
      */
-    public function transaction(Closure $callback): mixed
+    public function transaction(Closure $callback, ?IsolationLevel $level = null): mixed
     {
-        return $this->getTransactionHandler()->run($callback);
+        return $this->getTransactionHandler()->run($callback, $level);
     }
 
     /**
@@ -134,5 +136,13 @@ class Connection
     public function inTransaction(): bool
     {
         return $this->getTransactionHandler()->isActive();
+    }
+
+    /**
+     * @return IsolationLevel
+     */
+    public function getTransactionIsolationLevel(): IsolationLevel
+    {
+        return $this->getTransactionHandler()->getIsolationLevel() ?? $this->adapter->getConfig()->getIsolationLevel();
     }
 }

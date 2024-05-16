@@ -2,9 +2,11 @@
 
 namespace Kirameki\Database\Adapters;
 
+use Kirameki\Core\Exceptions\NotSupportedException;
 use Kirameki\Database\Exceptions\DatabaseNotFoundException;
 use Kirameki\Database\Query\Syntax\SqliteQuerySyntax;
 use Kirameki\Database\Schema\Syntax\SqliteSchemaSyntax;
+use Kirameki\Database\Transaction\Support\IsolationLevel;
 use Override;
 use PDO;
 use function file_exists;
@@ -140,5 +142,17 @@ class SqliteAdapter extends PdoAdapter
     {
         $filename = $this->config->filename;
         return $filename !== ':memory:' && $filename !== '';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function beginTransaction(?IsolationLevel $level = null): void
+    {
+        if ($level !== null) {
+            throw new NotSupportedException('Transaction Isolation level changes are not supported in SQLite.');
+        }
+        $this->getPdo()->beginTransaction();
     }
 }

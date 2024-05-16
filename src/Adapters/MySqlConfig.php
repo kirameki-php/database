@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Adapters;
 
 use Kirameki\Database\Query\Support\TagsFormat;
+use Kirameki\Database\Transaction\Support\IsolationLevel;
 use Override;
 
 class MySqlConfig implements ConnectionConfig
@@ -35,6 +36,7 @@ class MySqlConfig implements ConnectionConfig
         public ?string $charset = 'utf8mb4',
         public ?string $collation = 'utf8mb4_bin',
         public bool $replica = false,
+        public IsolationLevel $isolationLevel = IsolationLevel::Serializable,
         public ?array $serverOptions = null,
     )
     {
@@ -74,5 +76,14 @@ class MySqlConfig implements ConnectionConfig
     public function isReplica(): bool
     {
         return $this->replica;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function getIsolationLevel(): IsolationLevel
+    {
+        return $this->isolationLevel;
     }
 }

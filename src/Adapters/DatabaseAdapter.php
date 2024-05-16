@@ -8,6 +8,7 @@ use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Kirameki\Database\Schema\Statements\SchemaResult;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
+use Kirameki\Database\Transaction\Support\IsolationLevel;
 
 interface DatabaseAdapter
 {
@@ -61,9 +62,10 @@ interface DatabaseAdapter
     public function explainQuery(QueryStatement $statement): QueryResult;
 
     /**
+     * @param IsolationLevel|null $level
      * @return void
      */
-    public function beginTransaction(): void;
+    public function beginTransaction(?IsolationLevel $level): void;
 
     /**
      * @return void

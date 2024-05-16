@@ -15,6 +15,7 @@ use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Kirameki\Database\Schema\Statements\SchemaResult;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
+use Kirameki\Database\Transaction\Support\IsolationLevel;
 use Override;
 use PDO;
 use PDOException;
@@ -205,8 +206,11 @@ abstract class PdoAdapter implements DatabaseAdapter
      * @inheritDoc
      */
     #[Override]
-    public function beginTransaction(): void
+    public function beginTransaction(?IsolationLevel $level = null): void
     {
+        if ($level !== null) {
+            $this->getPdo()->exec('SET TRANSACTION ISOLATION LEVEL ' . $level->value);
+        }
         $this->getPdo()->beginTransaction();
     }
 

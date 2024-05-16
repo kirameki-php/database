@@ -7,6 +7,7 @@ use Kirameki\Database\Query\Syntax\MySqlQuerySyntax;
 use Kirameki\Database\Schema\Statements\RawStatement;
 use Kirameki\Database\Schema\Syntax\MySqlSchemaSyntax;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
+use Kirameki\Database\Transaction\Support\IsolationLevel;
 use Override;
 use PDO;
 use function array_filter;
@@ -67,7 +68,9 @@ class MySqlAdapter extends PdoAdapter
     public function connect(): static
     {
         parent::connect();
-        $settings = [];
+        $settings = [
+            'SET SESSION TRANSACTION ISOLATION LEVEL ' . $this->config->isolationLevel->value,
+        ];
         if ($this->readonly) {
             $settings[] = 'SET SESSION TRANSACTION READ ONLY';
         }
@@ -148,5 +151,17 @@ class MySqlAdapter extends PdoAdapter
         $copy->config->database = null;
         $statement = new RawQueryStatement(null, "SHOW DATABASES LIKE '{$this->config->database}'");
         return $copy->runQuery($statement)->getAffectedRowCount() > 0;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function beginTransaction(?IsolationLevel $level = null): void
+    {
+        if ($level !== null) {
+            $this->getPdo()->exec('SET TRANSACTION ISOLATION LEVEL ' . $level->value);
+        }
+        $this->getPdo()->beginTransaction();
     }
 }

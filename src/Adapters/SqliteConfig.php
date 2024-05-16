@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Adapters;
 
 use Kirameki\Database\Query\Support\TagsFormat;
+use Kirameki\Database\Transaction\Support\IsolationLevel;
 use Override;
 
 class SqliteConfig implements ConnectionConfig
@@ -55,5 +56,14 @@ class SqliteConfig implements ConnectionConfig
     public function isReplica(): bool
     {
         return false;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function getIsolationLevel(): IsolationLevel
+    {
+        return IsolationLevel::Serializable;
     }
 }

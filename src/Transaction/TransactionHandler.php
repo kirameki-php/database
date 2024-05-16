@@ -3,10 +3,12 @@
 namespace Kirameki\Database\Transaction;
 
 use Closure;
+use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Connection;
 use Kirameki\Database\Events\TransactionBegan;
 use Kirameki\Database\Events\TransactionCommitted;
 use Kirameki\Database\Events\TransactionRolledBack;
+use Kirameki\Database\Transaction\Support\IsolationLevel;
 use Kirameki\Event\EventManager;
 use Throwable;
 
@@ -16,6 +18,11 @@ class TransactionHandler
      * @var bool
      */
     protected bool $active = false;
+
+    /**
+     * @var IsolationLevel|null
+     */
+    protected ?IsolationLevel $isolationLevel;
 
     /**
      * @param Connection $connection
@@ -31,17 +38,22 @@ class TransactionHandler
     /**
      * @template TReturn
      * @param Closure(): TReturn $callback
+     * @param IsolationLevel|null $level
      * @return TReturn
      */
-    public function run(Closure $callback): mixed
+    public function run(Closure $callback, ?IsolationLevel $level = null): mixed
     {
         // Already in transaction so just execute callback
         if ($this->isActive()) {
+            if ($level !== null) {
+                throw new LogicException('Transaction: Cannot set isolation level in nested transactions.');
+            }
             return $callback();
         }
 
         try {
-            $this->handleBegin();
+            $this->isolationLevel = $level;
+            $this->handleBegin($level);
             $result = $callback();
             $this->handleCommit();
             return $result;
@@ -51,6 +63,7 @@ class TransactionHandler
             $this->rollbackAndThrow($throwable);
         }
         finally {
+            $this->isolationLevel = null;
             $this->active = false;
         }
     }
@@ -64,13 +77,22 @@ class TransactionHandler
     }
 
     /**
+     * @return IsolationLevel|null
+     */
+    public function getIsolationLevel(): ?IsolationLevel
+    {
+        return $this->isolationLevel;
+    }
+
+    /**
+     * @param IsolationLevel|null $level
      * @return void
      */
-    protected function handleBegin(): void
+    protected function handleBegin(?IsolationLevel $level): void
     {
         $this->connection->connectIfNotConnected();
-        $this->connection->adapter->beginTransaction();
-        $this->events->emit(new TransactionBegan($this->connection));
+        $this->connection->adapter->beginTransaction($level);
+        $this->events->emit(new TransactionBegan($this->connection, $level));
     }
 
     /**
