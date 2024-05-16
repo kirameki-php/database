@@ -143,6 +143,7 @@ class Connection
      */
     public function getTransactionIsolationLevel(): IsolationLevel
     {
-        return $this->getTransactionHandler()->getIsolationLevel() ?? $this->adapter->getConfig()->getIsolationLevel();
+        return $this->getTransactionHandler()->getIsolationLevel()
+            ?? $this->adapter->getConfig()->getIsolationLevel();
     }
 }
