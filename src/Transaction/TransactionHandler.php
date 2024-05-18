@@ -45,9 +45,7 @@ class TransactionHandler
     {
         // Already in transaction so just execute callback
         if ($this->isActive()) {
-            if ($level !== null) {
-                throw new LogicException('Transaction: Cannot set isolation level in nested transactions.');
-            }
+            $this->ensureValidIsolationLevel($level);
             return $callback();
         }
 
@@ -113,5 +111,24 @@ class TransactionHandler
         $this->connection->adapter->rollback();
         $this->events->emit(new TransactionRolledBack($this->connection, $throwable));
         throw $throwable;
+    }
+
+    /**
+     * @param IsolationLevel|null $level
+     * @return void|never
+     */
+    protected function ensureValidIsolationLevel(?IsolationLevel $level): void
+    {
+        if ($level === null) {
+            return;
+        }
+        if($level === $this->isolationLevel) {
+            return;
+        }
+        throw new LogicException('Cannot change Isolation level within the same transaction.', [
+            'connection' => $this->connection->name,
+            'current' => $this->isolationLevel,
+            'given' => $level,
+        ]);
     }
 }
