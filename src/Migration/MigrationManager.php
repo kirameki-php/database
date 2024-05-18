@@ -2,7 +2,6 @@
 
 namespace Kirameki\Database\Migration;
 
-use Closure;
 use DateTimeInterface;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Collections\Vec;
@@ -24,61 +23,30 @@ readonly class MigrationManager
     }
 
     /**
-     * @param DateTimeInterface|null $since
-     */
-    public function up(?DateTimeInterface $since = null): void
-    {
-        foreach ($this->finder->scan($since) as $migration) {
-            $this->withTransaction($migration, $migration->runUp(...));
-        }
-    }
-
-    /**
-     * @param DateTimeInterface|null $since
-     */
-    public function down(?DateTimeInterface $since = null): void
-    {
-        foreach ($this->finder->scan($since) as $migration) {
-            $this->withTransaction($migration, $migration->runDown(...));
-        }
-    }
-
-    /**
-     * @param DateTimeInterface|null $since
+     * @param DateTimeInterface|null $to
+     * @param bool $dryRun
      * @return Vec<SchemaResult<covariant SchemaStatement>>
      */
-    public function inspectUp(?DateTimeInterface $since = null): Vec
+    public function up(?DateTimeInterface $to = null, bool $dryRun = false): Vec
     {
         $results = [];
-        foreach ($this->finder->scan($since, true) as $migration) {
-            $results[] = $migration->runUp();
+        foreach ($this->finder->scanUp($to) as $migration) {
+            $results[] = $migration->runUp($dryRun);
         }
         return new Vec(Arr::flatten($results));
     }
 
     /**
-     * @param DateTimeInterface|null $since
+     * @param DateTimeInterface|null $to
+     * @param bool $dryRun
      * @return Vec<SchemaResult<covariant SchemaStatement>>
      */
-    public function inspectDown(?DateTimeInterface $since = null): Vec
+    public function down(?DateTimeInterface $to = null, bool $dryRun = false): Vec
     {
         $results = [];
-        foreach ($this->finder->scan($since, true) as $migration) {
-            $results[] = $migration->runDown();
+        foreach ($this->finder->scanDown($to) as $migration) {
+            $results[] = $migration->runDown($dryRun);
         }
         return new Vec(Arr::flatten($results));
-    }
-
-    /**
-     * @param Migration $migration
-     * @param Closure(): mixed $callback
-     * @return void
-     */
-    protected function withTransaction(Migration $migration, Closure $callback): void
-    {
-        $connection = $migration->getConnection();
-        $connection->adapter->getSchemaSyntax()->supportsDdlTransaction()
-            ? $connection->transaction($callback)
-            : $callback();
     }
 }

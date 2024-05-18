@@ -35,12 +35,15 @@ abstract class Migration
     protected ?array $schemaResults = null;
 
     /**
+     * @var bool
+     */
+    protected bool $dryRun = false;
+
+    /**
      * @param DatabaseManager $db
-     * @param bool $dryRun
      */
     public function __construct(
         protected readonly DatabaseManager $db,
-        protected bool $dryRun,
     )
     {
     }
@@ -58,17 +61,20 @@ abstract class Migration
     /**
      * @return list<SchemaResult<covariant SchemaStatement>>
      */
-    public function runUp(): array
+    public function runUp(bool $dryRun): array
     {
-        return $this->captureResults($this->up(...));
+        $this->dryRun = $dryRun;
+
+        return $this->run($this->up(...));
     }
 
     /**
      * @return list<SchemaResult<covariant SchemaStatement>>
      */
-    public function runDown(): array
+    public function runDown(bool $dryRun): array
     {
-        return $this->captureResults($this->down(...));
+        $this->dryRun = $dryRun;
+        return $this->run($this->down(...));
     }
 
     /**
@@ -158,12 +164,19 @@ abstract class Migration
     }
 
     /**
+     * @param Closure(): mixed $callback
      * @return list<SchemaResult<covariant SchemaStatement>>
      */
-    protected function captureResults(Closure $callback): array
+    protected function run(Closure $callback): array
     {
         $this->schemaResults = [];
-        $callback();
+
+        $connection = $this->getConnection();
+
+        $this->supportsTransaction($connection)
+            ? $connection->transaction($callback)
+            : $callback();
+
         return $this->schemaResults;
     }
 
@@ -183,5 +196,14 @@ abstract class Migration
         $this->schemaResults ??= [];
         $this->schemaResults[] = $result;
         return $result;
+    }
+
+    /**
+     * @param Connection $connection
+     * @return bool
+     */
+    protected function supportsTransaction(Connection $connection): bool
+    {
+        return $connection->adapter->getSchemaSyntax()->supportsDdlTransaction();
     }
 }
