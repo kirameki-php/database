@@ -64,7 +64,6 @@ abstract class Migration
     public function runUp(bool $dryRun): array
     {
         $this->dryRun = $dryRun;
-
         return $this->run($this->up(...));
     }
 
@@ -173,7 +172,7 @@ abstract class Migration
 
         $connection = $this->getConnection();
 
-        $this->supportsTransaction($connection)
+        $this->supportsDdlTransaction($connection)
             ? $connection->transaction($callback)
             : $callback();
 
@@ -202,7 +201,7 @@ abstract class Migration
      * @param Connection $connection
      * @return bool
      */
-    protected function supportsTransaction(Connection $connection): bool
+    protected function supportsDdlTransaction(Connection $connection): bool
     {
         return $connection->adapter->getSchemaSyntax()->supportsDdlTransaction();
     }
