@@ -68,7 +68,7 @@ class AlterTableBuilder extends SchemaBuilder
      */
     public function createIndex(iterable $columns): CreateIndexBuilder
     {
-        $builder = new CreateIndexBuilder($this->statement->table);
+        $builder = new CreateIndexBuilder($this->handler, $this->statement->table);
         $builder->columns($columns);
         $this->statement->addAction($builder->statement);
         return $builder;
@@ -80,7 +80,7 @@ class AlterTableBuilder extends SchemaBuilder
      */
     public function dropIndex(iterable $columns): DropIndexBuilder
     {
-        $builder = new DropIndexBuilder($this->statement->table);
+        $builder = new DropIndexBuilder($this->handler, $this->statement->table);
         $builder->columns($columns);
         $this->statement->addAction($builder->statement);
         return $builder;

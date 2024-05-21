@@ -90,9 +90,13 @@ class SqliteSchemaSyntax extends SchemaSyntax
      * @inheritDoc
      */
     #[Override]
-    public function formatCreateTablePrimaryKeyPart(PrimaryKeyConstraint $constraint): string
+    public function formatCreateTablePrimaryKeyPart(CreateTableStatement $statement): string
     {
-        $pkParts = array_keys($constraint->columns);
+        if ($statement->primaryKey?->columns === null) {
+            return '';
+        }
+
+        $pkParts = array_keys($statement->primaryKey->columns);
         if ($pkParts !== []) {
             return 'PRIMARY KEY (' . implode(', ', $pkParts) . ')';
         }

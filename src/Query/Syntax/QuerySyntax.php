@@ -19,7 +19,7 @@ use Kirameki\Database\Info\Statements\TableExistsStatement;
 use Kirameki\Database\Query\Expressions\Aggregate;
 use Kirameki\Database\Query\Expressions\Column;
 use Kirameki\Database\Query\Expressions\Expression;
-use Kirameki\Database\Query\Statements\CompoundStatement;
+use Kirameki\Database\Query\Statements\CompoundDefinition;
 use Kirameki\Database\Query\Statements\ConditionDefinition;
 use Kirameki\Database\Query\Statements\ConditionsStatement;
 use Kirameki\Database\Query\Statements\DeleteStatement;
@@ -372,10 +372,10 @@ abstract class QuerySyntax extends Syntax
 
     /**
      * @param string $query
-     * @param CompoundStatement|null $compound
+     * @param CompoundDefinition|null $compound
      * @return string
      */
-    protected function formatCompoundPart(string $query, ?CompoundStatement $compound): string
+    protected function formatCompoundPart(string $query, ?CompoundDefinition $compound): string
     {
         if ($compound === null) {
             return $query;

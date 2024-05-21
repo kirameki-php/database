@@ -4,10 +4,8 @@ namespace Kirameki\Database\Query\Statements;
 
 use Kirameki\Database\Query\Support\CompoundOperator;
 use Kirameki\Database\Query\Support\Ordering;
-use Kirameki\Database\Query\Syntax\QuerySyntax;
-use Override;
 
-class CompoundStatement extends QueryStatement
+class CompoundDefinition
 {
     /**
      * @param CompoundOperator $operator
@@ -22,24 +20,5 @@ class CompoundStatement extends QueryStatement
         public ?int $limit = null,
     )
     {
-        parent::__construct();
-    }
-
-    /**
-     * @inheritDoc
-     */
-    #[Override]
-    public function generateTemplate(QuerySyntax $syntax): string
-    {
-        return $syntax->prepareTemplateForSelect($this);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    #[Override]
-    public function generateParameters(QuerySyntax $syntax): array
-    {
-        return $syntax->prepareParametersForSelect($this);
     }
 }

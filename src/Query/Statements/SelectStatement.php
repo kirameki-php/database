@@ -19,7 +19,7 @@ class SelectStatement extends ConditionsStatement
      * @param bool|null $distinct
      * @param Lock|null $lock
      * @param string|null $forceIndex
-     * @param CompoundStatement|null $compound
+     * @param CompoundDefinition|null $compound
      */
     public function __construct(
         public ?array $tables = null,
@@ -31,7 +31,7 @@ class SelectStatement extends ConditionsStatement
         public ?bool $distinct = null,
         public ?Lock $lock = null,
         public ?string $forceIndex = null,
-        public ?CompoundStatement $compound = null,
+        public ?CompoundDefinition $compound = null,
     )
     {
         parent::__construct();

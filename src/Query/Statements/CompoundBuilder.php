@@ -2,29 +2,33 @@
 
 namespace Kirameki\Database\Query\Statements;
 
-use Kirameki\Database\Query\QueryHandler;
 use Kirameki\Database\Query\Support\CompoundOperator;
 use Kirameki\Database\Query\Support\NullOrder;
 use Kirameki\Database\Query\Support\Ordering;
 use Kirameki\Database\Query\Support\SortOrder;
 
-/**
- * @extends QueryBuilder<CompoundStatement>
- */
-class CompoundBuilder extends QueryBuilder
+class CompoundBuilder
 {
+    protected CompoundDefinition $definition;
+
     /**
-     * @param QueryHandler $handler
      * @param CompoundOperator $operator
      * @param SelectStatement $query
      */
     public function __construct(
-        QueryHandler $handler,
         CompoundOperator $operator,
         SelectStatement $query,
     )
     {
-        parent::__construct($handler, new CompoundStatement($operator, $query));
+        $this->definition = new CompoundDefinition($operator, $query);
+    }
+
+    /**
+     * @return CompoundDefinition
+     */
+    public function getDefinition(): CompoundDefinition
+    {
+        return $this->definition;
     }
 
     #region sorting ----------------------------------------------------------------------------------------------------
@@ -41,8 +45,8 @@ class CompoundBuilder extends QueryBuilder
         ?NullOrder $nulls = null,
     ): static
     {
-        $this->statement->orderBy ??= [];
-        $this->statement->orderBy[$column] = new Ordering($sort, $nulls);
+        $this->definition->orderBy ??= [];
+        $this->definition->orderBy[$column] = new Ordering($sort, $nulls);
         return $this;
     }
 
@@ -71,7 +75,7 @@ class CompoundBuilder extends QueryBuilder
      */
     public function reorder(): static
     {
-        $this->statement->orderBy = null;
+        $this->definition->orderBy = null;
         return $this;
     }
 
@@ -85,7 +89,7 @@ class CompoundBuilder extends QueryBuilder
      */
     public function limit(int $count): static
     {
-        $this->statement->limit = $count;
+        $this->definition->limit = $count;
         return $this;
     }
 

@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Migration;
 
 use Closure;
+use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Connection;
 use Kirameki\Database\DatabaseManager;
 use Kirameki\Database\Schema\SchemaHandler;
@@ -18,6 +19,9 @@ use Kirameki\Database\Schema\Statements\RenameTableStatement;
 use Kirameki\Database\Schema\Statements\SchemaBuilder;
 use Kirameki\Database\Schema\Statements\SchemaResult;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
+use ReflectionClass;
+use function basename;
+use function strstr;
 
 /**
  * @consistent-constructor
