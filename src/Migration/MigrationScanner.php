@@ -5,6 +5,7 @@ namespace Kirameki\Database\Migration;
 use Iterator;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\DatabaseManager;
+use Kirameki\Database\Query\Support\SortOrder;
 use function basename;
 use function glob;
 use function is_a;
@@ -27,10 +28,10 @@ readonly class MigrationScanner
     }
 
     /**
-     * @param ScanDirection $direction
+     * @param SortOrder $order
      * @return Iterator<Migration>
      */
-    public function scan(ScanDirection $direction): Iterator
+    public function scan(SortOrder $order): Iterator
     {
         $paths = [];
         foreach ($this->directories as $dir) {
@@ -38,9 +39,9 @@ readonly class MigrationScanner
                 $paths[] = $path;
             }
         }
-        match ($direction) {
-            ScanDirection::Forward => sort($paths),
-            ScanDirection::Backward => rsort($paths),
+        match ($order) {
+            SortOrder::Ascending => sort($paths),
+            SortOrder::Descending => rsort($paths),
         };
         foreach ($paths as $path) {
             yield $this->instantiateClass($path);

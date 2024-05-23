@@ -6,6 +6,7 @@ use Kirameki\Collections\Utils\Arr;
 use Kirameki\Collections\Vec;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\DatabaseManager;
+use Kirameki\Database\Query\Support\SortOrder;
 use Kirameki\Database\Schema\Statements\SchemaResult;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
 use ReflectionClass;
@@ -38,7 +39,7 @@ readonly class MigrationManager
         $version ??= date('YmdHis', time());
         $steps ??= PHP_INT_MAX;
         $results = [];
-        foreach ($this->scanner->scan(ScanDirection::Forward) as $migration) {
+        foreach ($this->scanner->scan(SortOrder::Ascending) as $migration) {
             if ($steps <= 0) {
                 break;
             }
@@ -59,10 +60,12 @@ readonly class MigrationManager
      */
     public function backward(?int $version = null, ?int $steps = null, bool $dryRun = false): Vec
     {
+        $steps ??= $version !== null
+            ? PHP_INT_MAX
+            : 1;
         $version ??= '00000000000000';
-        $steps ??= PHP_INT_MAX;
         $results = [];
-        foreach ($this->scanner->scan(ScanDirection::Backward) as $migration) {
+        foreach ($this->scanner->scan(SortOrder::Descending) as $migration) {
             if ($steps <= 0) {
                 break;
             }
