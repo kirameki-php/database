@@ -39,8 +39,8 @@ readonly class MigrationScanner
             }
         }
         match ($direction) {
-            ScanDirection::Up => sort($paths),
-            ScanDirection::Down => rsort($paths),
+            ScanDirection::Forward => sort($paths),
+            ScanDirection::Backward => rsort($paths),
         };
         foreach ($paths as $path) {
             yield $this->instantiateClass($path);

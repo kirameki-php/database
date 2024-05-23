@@ -5,7 +5,7 @@ use Kirameki\Database\Schema\Statements\CreateTableBuilder;
 
 class CreateUser extends Migration
 {
-    public function up(): void
+    public function forward(): void
     {
         $this->use('migration_test')
             ->createTable('User')->tap(function(CreateTableBuilder $t) {
@@ -16,7 +16,7 @@ class CreateUser extends Migration
             });
     }
 
-    public function down(): void
+    public function backward(): void
     {
         $this->use('migration_test')
             ->dropTable('User');

@@ -51,29 +51,29 @@ abstract class Migration
     /**
      * @return void
      */
-    abstract protected function up(): void;
+    abstract protected function forward(): void;
 
     /**
      * @return void
      */
-    abstract protected function down(): void;
+    abstract protected function backward(): void;
 
     /**
      * @return list<SchemaResult<covariant SchemaStatement>>
      */
-    public function runUp(bool $dryRun): array
+    public function runForward(bool $dryRun): array
     {
         $this->dryRun = $dryRun;
-        return $this->run($this->up(...));
+        return $this->run($this->forward(...));
     }
 
     /**
      * @return list<SchemaResult<covariant SchemaStatement>>
      */
-    public function runDown(bool $dryRun): array
+    public function runBackward(bool $dryRun): array
     {
         $this->dryRun = $dryRun;
-        return $this->run($this->down(...));
+        return $this->run($this->backward(...));
     }
 
     /**

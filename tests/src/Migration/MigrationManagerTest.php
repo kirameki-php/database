@@ -9,7 +9,7 @@ class MigrationManagerTest extends MySql_MigrationTestCase
     public function test_migrate_up(): void
     {
         $manager = new MigrationManager(__DIR__.'/files');
-        $manager->up();
+        $manager->forward();
 
         $connection = db()->using('migration_test');
 

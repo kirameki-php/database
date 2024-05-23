@@ -4,6 +4,6 @@ namespace Kirameki\Database\Migration;
 
 enum ScanDirection: string
 {
-    case Up = 'up';
-    case Down = 'down';
+    case Forward = 'forward';
+    case Backward = 'backward';
 }
