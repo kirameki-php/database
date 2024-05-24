@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Adapters;
 
 use Kirameki\Core\Exceptions\NotSupportedException;
+use Kirameki\Database\Config\SqliteConfig;
 use Kirameki\Database\Exceptions\DatabaseNotFoundException;
 use Kirameki\Database\Query\Syntax\SqliteQuerySyntax;
 use Kirameki\Database\Schema\Syntax\SqliteSchemaSyntax;

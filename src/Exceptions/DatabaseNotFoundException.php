@@ -3,7 +3,7 @@
 namespace Kirameki\Database\Exceptions;
 
 use Kirameki\Core\Exceptions\RuntimeException;
-use Kirameki\Database\Adapters\ConnectionConfig;
+use Kirameki\Database\Config\ConnectionConfig;
 
 class DatabaseNotFoundException extends RuntimeException
 {

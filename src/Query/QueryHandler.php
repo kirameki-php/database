@@ -71,7 +71,7 @@ readonly class QueryHandler
      * @param string $table
      * @return DeleteBuilder
      */
-    public function delete(string $table): DeleteBuilder
+    public function deleteFrom(string $table): DeleteBuilder
     {
         return new DeleteBuilder($this, $table);
     }

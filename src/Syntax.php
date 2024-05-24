@@ -5,7 +5,7 @@ namespace Kirameki\Database;
 use BackedEnum;
 use DateTimeInterface;
 use Kirameki\Core\Json;
-use Kirameki\Database\Adapters\ConnectionConfig;
+use Kirameki\Database\Config\ConnectionConfig;
 use function implode;
 use function is_iterable;
 use function iterator_to_array;

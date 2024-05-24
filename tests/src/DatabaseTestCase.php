@@ -4,9 +4,9 @@ namespace Tests\Kirameki\Database;
 
 use Kirameki\Core\Testing\TestCase;
 use Kirameki\Database\Adapters\MySqlAdapter;
-use Kirameki\Database\Adapters\MySqlConfig;
 use Kirameki\Database\Adapters\SqliteAdapter;
-use Kirameki\Database\Adapters\SqliteConfig;
+use Kirameki\Database\Config\MySqlConfig;
+use Kirameki\Database\Config\SqliteConfig;
 use Kirameki\Database\Connection;
 use Kirameki\Database\Schema\Statements\CreateTableBuilder;
 use Kirameki\Event\EventManager;

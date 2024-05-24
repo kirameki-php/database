@@ -4,6 +4,7 @@ namespace Kirameki\Database\Query\Statements;
 
 use Closure;
 use Kirameki\Collections\Vec;
+use Kirameki\Database\Exceptions\QueryException;
 
 /**
  * @template TQueryStatement of QueryStatement
@@ -42,6 +43,23 @@ class QueryResult extends Vec
             $this->affectedRowCount = ($this->affectedRowCount)();
         }
         return $this->affectedRowCount;
+    }
+
+    /**
+     * @param int $expected
+     * @return $this
+     */
+    public function ensureAffectedRowIs(int $expected): static
+    {
+        $affectedRowCount = $this->getAffectedRowCount();
+        if ($affectedRowCount !== $expected) {
+            throw new QueryException('Unexpected affected row count.', $this->statement, [
+                'result' => $this,
+                'expected' => $expected,
+                'actual' => $affectedRowCount,
+            ]);
+        }
+        return $this;
     }
 
     /**

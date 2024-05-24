@@ -18,6 +18,8 @@ use Kirameki\Database\Schema\Statements\RenameTableStatement;
 use Kirameki\Database\Schema\Statements\SchemaBuilder;
 use Kirameki\Database\Schema\Statements\SchemaResult;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
+use function basename;
+use function str_replace;
 
 /**
  * @consistent-constructor
@@ -27,7 +29,7 @@ abstract class Migration
     /**
      * @var string|null
      */
-    public ?string $connection = null;
+    protected ?string $connection = null;
 
     /**
      * @var list<SchemaResult<covariant SchemaStatement>>|null
@@ -77,13 +79,18 @@ abstract class Migration
     }
 
     /**
+     * @return string
+     */
+    public function getName(): string
+    {
+        return basename(str_replace('\\', '/', $this::class));
+    }
+    /**
      * @return Connection
      */
     public function getConnection(): Connection
     {
-        return $this->connection !== null
-            ? $this->db->use($this->connection)
-            : $this->db->useDefault();
+        return $this->db->use($this->connection ?? $this->db->getDefaultConnectionName());
     }
 
     /**

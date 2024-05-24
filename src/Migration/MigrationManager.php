@@ -2,6 +2,7 @@
 
 namespace Kirameki\Database\Migration;
 
+use Iterator;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Collections\Vec;
 use Kirameki\Core\Exceptions\LogicException;
@@ -9,8 +10,9 @@ use Kirameki\Database\DatabaseManager;
 use Kirameki\Database\Query\Support\SortOrder;
 use Kirameki\Database\Schema\Statements\SchemaResult;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
-use ReflectionClass;
+use function basename;
 use function date;
+use function str_replace;
 use function strstr;
 use function time;
 use const PHP_INT_MAX;
@@ -19,10 +21,12 @@ readonly class MigrationManager
 {
     /**
      * @param DatabaseManager $db
+     * @param MigrationRepository $repository
      * @param MigrationScanner $scanner
      */
     public function __construct(
         protected DatabaseManager $db,
+        protected MigrationRepository $repository,
         protected MigrationScanner $scanner,
     )
     {
@@ -36,20 +40,21 @@ readonly class MigrationManager
      */
     public function forward(?int $version = null, ?int $steps = null, bool $dryRun = false): Vec
     {
-        $version ??= date('YmdHis', time());
         $steps ??= PHP_INT_MAX;
-        $results = [];
-        foreach ($this->scanner->scan(SortOrder::Ascending) as $migration) {
-            if ($steps <= 0) {
-                break;
+        $version ??= 9999_99_99_99_99_99; // YmdHis
+
+        return $this->repository->withDistributedLock(function() use ($version, $steps, $dryRun) {
+            $resultsBundle = [];
+            foreach ($this->getForwardMigrations($steps, $version) as $migration) {
+                $results = $migration->runForward($dryRun);
+                $resultsBundle[] = $results;
+
+                if (!$dryRun) {
+                    $this->repository->push($migration->getName(), $results);
+                }
             }
-            if ($this->getVersion($migration) > $version) {
-                break;
-            }
-            $results[] = $migration->runForward($dryRun);
-            $steps -= 1;
-        }
-        return new Vec(Arr::flatten($results));
+            return new Vec(Arr::flatten($resultsBundle));
+        });
     }
 
     /**
@@ -60,22 +65,64 @@ readonly class MigrationManager
      */
     public function backward(?int $version = null, ?int $steps = null, bool $dryRun = false): Vec
     {
-        $steps ??= $version !== null
-            ? PHP_INT_MAX
-            : 1;
-        $version ??= '00000000000000';
-        $results = [];
-        foreach ($this->scanner->scan(SortOrder::Descending) as $migration) {
-            if ($steps <= 0) {
+        $steps ??= $version !== null ? PHP_INT_MAX : 1;
+        $version ??= 0;
+
+        return $this->repository->withDistributedLock(function() use ($version, $steps, $dryRun) {
+            $resultsBundle = [];
+            foreach ($this->getBackwardMigrations($steps, $version) as $migration) {
+                $results = $migration->runBackward($dryRun);
+                $resultsBundle[] = $results;
+
+                if (!$dryRun) {
+                    $this->repository->pop($migration->getName());
+                }
+            }
+            return new Vec(Arr::flatten($resultsBundle));
+        });
+    }
+
+    /**
+     * @return Iterator<int, Migration>
+     */
+    protected function getForwardMigrations(int $steps, int $targetVersion): Iterator
+    {
+        $latestVersion = $this->getLatestVersion();
+        foreach ($this->scanner->scan(SortOrder::Ascending) as $migration) {
+            $migrationVersion = $this->getVersion($migration);
+            if ($migrationVersion <= $latestVersion) {
+                continue;
+            }
+            if ($steps <= 0 || $migrationVersion > $targetVersion) {
                 break;
             }
-            if ($this->getVersion($migration) < $version) {
-                break;
-            }
-            $results[] = $migration->runForward($dryRun);
+            yield $migrationVersion => $migration;
             $steps -= 1;
         }
-        return new Vec(Arr::flatten($results));
+    }
+
+    protected function getBackwardMigrations(int $steps, int $targetVersion): Iterator
+    {
+        $latestVersion = $this->getLatestVersion();
+        foreach ($this->scanner->scan(SortOrder::Descending) as $migration) {
+            $migrationVersion = $this->getVersion($migration);
+            if ($migrationVersion > $latestVersion) {
+                continue;
+            }
+            if ($steps <= 0 || $migrationVersion < $targetVersion) {
+                break;
+            }
+            yield $migration;
+            $steps -= 1;
+        }
+    }
+
+    protected function getLatestVersion(): int
+    {
+        $latest = $this->repository->getLatestName();
+        return $latest !== null
+            ? $this->getVersionFromName($latest)
+            : 0;
     }
 
     /**
@@ -84,10 +131,18 @@ readonly class MigrationManager
      */
     protected function getVersion(Migration $migration): int
     {
-        $reflection = new ReflectionClass($migration);
-        $version = strstr($reflection->getShortName(), '_', true);
+        return $this->getVersionFromName($migration->getName());
+    }
+
+    /**
+     * @param string $name
+     * @return int
+     */
+    protected function getVersionFromName(string $name): int
+    {
+        $version = strstr($name, '_', true);
         if ($version === false) {
-            throw new LogicException('Invalid migration format: ' . static::class);
+            throw new LogicException('Invalid migration name: ' . $name);
         }
         return (int) $version;
     }

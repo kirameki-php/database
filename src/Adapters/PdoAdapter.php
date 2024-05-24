@@ -6,6 +6,7 @@ use Closure;
 use DateTimeInterface;
 use Iterator;
 use Kirameki\Collections\LazyIterator;
+use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Exceptions\QueryException;
 use Kirameki\Database\Exceptions\SchemaException;
 use Kirameki\Database\Query\Statements\Normalizable;
@@ -21,7 +22,6 @@ use PDO;
 use PDOException;
 use PDOStatement;
 use function assert;
-use function dump;
 use function hrtime;
 use function implode;
 use function iterator_to_array;
@@ -144,7 +144,7 @@ abstract class PdoAdapter implements DatabaseAdapter
             $count = $prepared->rowCount(...);
             return $this->instantiateQueryResult($statement, $template, $parameters, $startTime, $rows, $count);
         } catch (PDOException $e) {
-            throw new QueryException($e->getMessage(), $statement, $e);
+            throw new QueryException($e->getMessage(), $statement, null, $e);
         }
     }
 
@@ -179,7 +179,7 @@ abstract class PdoAdapter implements DatabaseAdapter
             $count = $prepared->rowCount(...);
             return $this->instantiateQueryResult($statement, $template, $parameters, $startTime, $rows, $count);
         } catch (PDOException $e) {
-            throw new QueryException($e->getMessage(), $statement, $e);
+            throw new QueryException($e->getMessage(), $statement, null, $e);
         }
     }
 
@@ -198,7 +198,7 @@ abstract class PdoAdapter implements DatabaseAdapter
             $rows = $prepared->fetchAll(PDO::FETCH_OBJ);
             return $this->instantiateQueryResult($statement, $template, $parameters, $startTime, $rows, 0);
         } catch (PDOException $e) {
-            throw new QueryException($e->getMessage(), $statement, $e);
+            throw new QueryException($e->getMessage(), $statement, null, $e);
         }
     }
 

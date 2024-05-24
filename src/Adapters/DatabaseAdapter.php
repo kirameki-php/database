@@ -2,6 +2,7 @@
 
 namespace Kirameki\Database\Adapters;
 
+use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Query\Statements\QueryResult;
 use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Syntax\QuerySyntax;

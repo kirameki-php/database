@@ -2,6 +2,7 @@
 
 namespace Kirameki\Database\Adapters;
 
+use Kirameki\Database\Config\MySqlConfig;
 use Kirameki\Database\Query\Statements\RawStatement as RawQueryStatement;
 use Kirameki\Database\Query\Syntax\MySqlQuerySyntax;
 use Kirameki\Database\Schema\Statements\RawStatement;

@@ -7,12 +7,24 @@ use Throwable;
 
 class QueryException extends SqlException
 {
+    /**
+     * @param string $message
+     * @param QueryStatement $statement
+     * @param iterable<string, mixed>|null $context
+     * @param Throwable|null $previous
+     */
     public function __construct(
         string $message,
         public readonly QueryStatement $statement,
+        ?iterable $context = null,
         ?Throwable $previous = null,
     )
     {
-        parent::__construct($message, ['statement' => $statement], previous: $previous);
+        parent::__construct(
+            $message,
+            ($context ?? []) + ['statement' => $statement],
+            0,
+            $previous,
+        );
     }
 }

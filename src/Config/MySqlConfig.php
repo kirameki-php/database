@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Adapters;
+namespace Kirameki\Database\Config;
 
 use Kirameki\Database\Query\Support\TagsFormat;
 use Kirameki\Database\Transaction\Support\IsolationLevel;

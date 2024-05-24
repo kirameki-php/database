@@ -2,13 +2,13 @@
 
 namespace Kirameki\Database\Schema\Statements;
 
-class ColumnBuilderAggregate
+readonly class ColumnBuilderAggregate
 {
     /**
      * @param list<ColumnBuilder> $columns
      */
     public function __construct(
-        public readonly array $columns,
+        protected array $columns,
     )
     {
     }
