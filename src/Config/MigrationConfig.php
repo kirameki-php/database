@@ -10,7 +10,7 @@ class MigrationConfig
      */
     public function __construct(
         public ?string $connection = null,
-        public string $table = 'MigrationHistory',
+        public string $table = 'Migration',
     )
     {
     }

@@ -109,5 +109,4 @@ abstract class Syntax
 
         return $value;
     }
-
 }

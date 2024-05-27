@@ -39,6 +39,35 @@ readonly class MigrationRepository
     }
 
     /**
+     * @return void
+     */
+    public function createRepository(): void
+    {
+        $builder = $this->getConnection()->schema()->createTable($this->getTableName());
+        $builder->int('id')->autoIncrement()->primaryKey();
+        $builder->string('name');
+        $builder->datetime('createdAt')->currentAsDefault();
+        $builder->index(['name'])->unique();
+        $builder->execute();
+    }
+
+    /**
+     * @return bool
+     */
+    public function RepositoryExists(): bool
+    {
+        return $this->getConnection()->info()->tableExists($this->getTableName());
+    }
+
+    /**
+     * @return void
+     */
+    public function dropRepository(): void
+    {
+        $this->getConnection()->schema()->dropTable($this->getTableName())->execute();
+    }
+
+    /**
      * @template T
      * @param Closure(): T $callback
      * @return T
@@ -46,12 +75,10 @@ readonly class MigrationRepository
     public function withDistributedLock(Closure $callback): mixed
     {
         $connection = $this->getConnection();
-        return $connection->transaction(function() use ($connection, $callback) {
-            $connection->query()->executeRaw("LOCK TABLES {$this->getTableName()} WRITE");
-            $result = $callback();
-            $connection->query()->executeRaw('UNLOCK TABLES');
-            return $result;
-        });
+        $connection->query()->executeRaw("LOCK TABLES {$this->getTableName()} WRITE");
+        $result = $callback();
+        $connection->query()->executeRaw('UNLOCK TABLES');
+        return $result;
     }
 
     /**
@@ -74,16 +101,9 @@ readonly class MigrationRepository
      */
     public function push(string $name, array $results): void
     {
-        $commands = [];
-        foreach ($results as $result) {
-            foreach ($result->commands as $command) {
-                $commands[] = $command;
-            }
-        }
-
         $this->getConnection()->query()
             ->insertInto($this->getTableName())
-            ->value(['name' => $name, 'commands' => $commands])
+            ->value(['name' => $name])
             ->execute();
     }
 
@@ -96,37 +116,6 @@ readonly class MigrationRepository
         $this->getConnection()->query()
             ->deleteFrom($this->getTableName())
             ->where('name', $name)
-            ->execute()
-            ->ensureAffectedRowIs(1);
-    }
-
-    /**
-     * @return void
-     */
-    public function createRepository(): void
-    {
-        $builder = $this->getConnection()->schema()->createTable($this->getTableName());
-        $builder->int('id')->autoIncrement()->primaryKey();
-        $builder->string('name');
-        $builder->json('commands');
-        $builder->timestamps();
-        $builder->index(['name'])->unique();
-        $builder->execute();
-    }
-
-    /**
-     * @return bool
-     */
-    public function RepositoryExists(): bool
-    {
-        return $this->getConnection()->info()->tableExists($this->getTableName());
-    }
-
-    /**
-     * @return void
-     */
-    public function dropRepository(): void
-    {
-        $this->getConnection()->schema()->dropTable($this->getTableName())->execute();
+            ->execute();
     }
 }
