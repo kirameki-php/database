@@ -74,11 +74,9 @@ readonly class MigrationRepository
      */
     public function withDistributedLock(Closure $callback): mixed
     {
-        $connection = $this->getConnection();
-        $connection->query()->executeRaw("LOCK TABLES {$this->getTableName()} WRITE");
-        $result = $callback();
-        $connection->query()->executeRaw('UNLOCK TABLES');
-        return $result;
+        return $this->getConnection()->transaction(function() use ($callback) {
+            return $callback();
+        });
     }
 
     /**
