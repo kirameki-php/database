@@ -10,11 +10,7 @@ use Kirameki\Database\DatabaseManager;
 use Kirameki\Database\Query\Support\SortOrder;
 use Kirameki\Database\Schema\Statements\SchemaResult;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
-use function basename;
-use function date;
-use function str_replace;
 use function strstr;
-use function time;
 use const PHP_INT_MAX;
 
 readonly class MigrationManager

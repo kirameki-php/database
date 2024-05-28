@@ -6,6 +6,7 @@ use Closure;
 use Kirameki\Database\Config\MigrationConfig;
 use Kirameki\Database\Connection;
 use Kirameki\Database\DatabaseManager;
+use Kirameki\Database\Query\Support\LockOption;
 use Kirameki\Database\Schema\Statements\SchemaResult;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
 
@@ -49,6 +50,11 @@ readonly class MigrationRepository
         $builder->datetime('createdAt')->currentAsDefault();
         $builder->index(['name'])->unique();
         $builder->execute();
+
+        $this->getConnection()->query()
+            ->insertInto($this->getTableName())
+            ->value(['id' => 0, 'name' => '00000000000000_init'])
+            ->execute();
     }
 
     /**
@@ -74,7 +80,15 @@ readonly class MigrationRepository
      */
     public function withDistributedLock(Closure $callback): mixed
     {
-        return $this->getConnection()->transaction(function() use ($callback) {
+        $connection = $this->getConnection();
+        return $connection->transaction(function() use ($callback, $connection) {
+            // acquire a lock on the table
+            $connection->query()
+                ->select('id')
+                ->from($this->getTableName())
+                ->forUpdate(LockOption::Nowait)
+                ->execute();
+
             return $callback();
         });
     }
