@@ -31,23 +31,18 @@ readonly class MigrationManager
     /**
      * @param int|null $version
      * @param int|null $steps
-     * @param bool $dryRun
      * @return Vec<SchemaResult<covariant SchemaStatement>>
      */
-    public function forward(?int $version = null, ?int $steps = null, bool $dryRun = false): Vec
+    public function forward(?int $version = null, ?int $steps = null): Vec
     {
         $steps ??= PHP_INT_MAX;
         $version ??= 9999_99_99_99_99_99; // YmdHis
 
-        return $this->repository->withDistributedLock(function() use ($version, $steps, $dryRun) {
+        return $this->repository->withDistributedLock(function() use ($version, $steps) {
             $resultsBundle = [];
             foreach ($this->getForwardMigrations($steps, $version) as $migration) {
-                $results = $migration->runForward($dryRun);
-                $resultsBundle[] = $results;
-
-                if (!$dryRun) {
-                    $this->repository->push($migration->getName(), $results);
-                }
+                $resultsBundle[] = $migration->runForward();
+                $this->repository->push($migration->getName());
             }
             return new Vec(Arr::flatten($resultsBundle));
         });
@@ -56,23 +51,18 @@ readonly class MigrationManager
     /**
      * @param int|null $version
      * @param int|null $steps
-     * @param bool $dryRun
      * @return Vec<SchemaResult<covariant SchemaStatement>>
      */
-    public function backward(?int $version = null, ?int $steps = null, bool $dryRun = false): Vec
+    public function backward(?int $version = null, ?int $steps = null): Vec
     {
         $steps ??= $version !== null ? PHP_INT_MAX : 1;
         $version ??= 0;
 
-        return $this->repository->withDistributedLock(function() use ($version, $steps, $dryRun) {
+        return $this->repository->withDistributedLock(function() use ($version, $steps) {
             $resultsBundle = [];
             foreach ($this->getBackwardMigrations($steps, $version) as $migration) {
-                $results = $migration->runBackward($dryRun);
-                $resultsBundle[] = $results;
-
-                if (!$dryRun) {
-                    $this->repository->pop($migration->getName());
-                }
+                $resultsBundle[] = $migration->runBackward();
+                $this->repository->pop($migration->getName());
             }
             return new Vec(Arr::flatten($resultsBundle));
         });

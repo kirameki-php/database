@@ -37,11 +37,6 @@ abstract class Migration
     protected ?array $schemaResults = null;
 
     /**
-     * @var bool
-     */
-    protected bool $dryRun = false;
-
-    /**
      * @param DatabaseManager $db
      */
     public function __construct(
@@ -63,18 +58,16 @@ abstract class Migration
     /**
      * @return list<SchemaResult<covariant SchemaStatement>>
      */
-    public function runForward(bool $dryRun): array
+    public function runForward(): array
     {
-        $this->dryRun = $dryRun;
         return $this->run($this->forward(...));
     }
 
     /**
      * @return list<SchemaResult<covariant SchemaStatement>>
      */
-    public function runBackward(bool $dryRun): array
+    public function runBackward(): array
     {
-        $this->dryRun = $dryRun;
         return $this->run($this->backward(...));
     }
 
@@ -198,7 +191,7 @@ abstract class Migration
         if ($callback !== null) {
             $callback($builder);
         }
-        $result = $builder->execute($this->dryRun);
+        $result = $builder->execute();
         $this->schemaResults ??= [];
         $this->schemaResults[] = $result;
         return $result;

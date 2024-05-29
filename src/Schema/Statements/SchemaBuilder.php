@@ -46,12 +46,11 @@ abstract class SchemaBuilder
     }
 
     /**
-     * @param bool $dryRun
      * @return SchemaResult<TSchemaStatement>
      */
-    public function execute(bool $dryRun = false): SchemaResult
+    public function execute(): SchemaResult
     {
-        return $this->handler->execute($this->statement, $dryRun);
+        return $this->handler->execute($this->statement);
     }
 
     /**

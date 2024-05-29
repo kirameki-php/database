@@ -36,10 +36,9 @@ interface DatabaseAdapter
     /**
      * @template TSchemaStatement of SchemaStatement
      * @param TSchemaStatement $statement
-     * @param bool $dryRun
      * @return SchemaResult<TSchemaStatement>
      */
-    public function runSchema(SchemaStatement $statement, bool $dryRun = false): SchemaResult;
+    public function runSchema(SchemaStatement $statement): SchemaResult;
 
     /**
      * @template TQueryStatement of QueryStatement

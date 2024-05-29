@@ -108,10 +108,9 @@ readonly class MigrationRepository
 
     /**
      * @param string $name
-     * @param list<SchemaResult<covariant SchemaStatement>> $results
      * @return void
      */
-    public function push(string $name, array $results): void
+    public function push(string $name): void
     {
         $this->getConnection()->query()
             ->insertInto($this->getTableName())
