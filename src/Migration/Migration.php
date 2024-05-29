@@ -34,7 +34,7 @@ abstract class Migration
     /**
      * @var list<SchemaResult<covariant SchemaStatement>>|null
      */
-    protected ?array $schemaResults = null;
+    private ?array $schemaResults = null;
 
     /**
      * @param DatabaseManager $db
