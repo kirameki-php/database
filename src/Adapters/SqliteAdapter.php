@@ -26,7 +26,7 @@ class SqliteAdapter extends PdoAdapter
     #[Override]
     public function createPdo(): PDO
     {
-        $config = $this->getConfig();
+        $config = $this->getConnectionConfig();
 
         $dsn = "sqlite:{$config->filename}";
         $options = iterator_to_array($config->options ?? []);
@@ -49,7 +49,7 @@ class SqliteAdapter extends PdoAdapter
         $settings = [
             'PRAGMA foreign_keys = ON',
         ];
-        if ($this->config->isReplica()) {
+        if ($this->connectionConfig->isReplica()) {
             $settings[] = 'PRAGMA query_only = ON';
         }
         $this->getPdo()->exec(implode(';', $settings));
@@ -63,7 +63,7 @@ class SqliteAdapter extends PdoAdapter
     protected function instantiateQuerySyntax(): SqliteQuerySyntax
     {
         return new SqliteQuerySyntax(
-            $this->config,
+            $this->connectionConfig,
             $this->identifierDelimiter,
             $this->literalDelimiter,
             $this->dateTimeFormat,
@@ -77,7 +77,7 @@ class SqliteAdapter extends PdoAdapter
     protected function instantiateSchemaSyntax(): SqliteSchemaSyntax
     {
         return new SqliteSchemaSyntax(
-            $this->config,
+            $this->connectionConfig,
             $this->identifierDelimiter,
             $this->literalDelimiter,
             $this->dateTimeFormat,
@@ -106,10 +106,10 @@ class SqliteAdapter extends PdoAdapter
     {
         if ($this->databaseExists()) {
             if ($this->isPersistentDatabase()) {
-                unlink($this->config->filename);
+                unlink($this->connectionConfig->filename);
             }
         } elseif (!$ifExist) {
-            throw new DatabaseNotFoundException($this->config->filename, $this->config);
+            throw new DatabaseNotFoundException($this->connectionConfig->filename, $this->connectionConfig);
         }
 
         $this->disconnect();
@@ -126,7 +126,7 @@ class SqliteAdapter extends PdoAdapter
             return true;
         }
 
-        $filename = $this->config->filename;
+        $filename = $this->connectionConfig->filename;
 
         // In-memory or temporary databases only exist when connected.
         if (!$this->isPersistentDatabase()) {
@@ -141,7 +141,7 @@ class SqliteAdapter extends PdoAdapter
      */
     public function isPersistentDatabase(): bool
     {
-        $filename = $this->config->filename;
+        $filename = $this->connectionConfig->filename;
         return $filename !== ':memory:' && $filename !== '';
     }
 

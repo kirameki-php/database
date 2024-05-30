@@ -6,7 +6,7 @@ use Closure;
 use Kirameki\Collections\Map;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\LogicException;
-use Kirameki\Database\Adapters\DatabaseAdapter;
+use Kirameki\Database\Adapters\Adapter;
 use Kirameki\Database\Adapters\MySqlAdapter;
 use Kirameki\Database\Adapters\SqliteAdapter;
 use Kirameki\Database\Config\ConnectionConfig;
@@ -27,7 +27,7 @@ class DatabaseManager
     protected array $connections = [];
 
     /**
-     * @var array<string, Closure(ConnectionConfig): DatabaseAdapter>
+     * @var array<string, Closure(ConnectionConfig): Adapter<ConnectionConfig>>
      */
     protected array $adapters = [];
 
@@ -37,7 +37,7 @@ class DatabaseManager
      */
     public function __construct(
         protected readonly EventManager $events,
-        protected readonly DatabaseConfig $config,
+        public readonly DatabaseConfig $config,
     )
     {
         $config->default ??= $this->resolveDefaultConnectionName();
@@ -81,7 +81,7 @@ class DatabaseManager
 
     /**
      * @param string $name
-     * @param Closure(ConnectionConfig): DatabaseAdapter $deferred
+     * @param Closure(ConnectionConfig): Adapter<ConnectionConfig> $deferred
      * @return $this
      */
     public function addAdapter(string $name, Closure $deferred): static
@@ -147,8 +147,9 @@ class DatabaseManager
     }
 
     /**
-     * @param ConnectionConfig $config
-     * @return Closure(ConnectionConfig): DatabaseAdapter
+     * @template TConnectionConfig of ConnectionConfig
+     * @param TConnectionConfig $config
+     * @return Closure(TConnectionConfig): Adapter<TConnectionConfig>
      */
     protected function getAdapterResolver(ConnectionConfig $config): Closure
     {
@@ -156,18 +157,19 @@ class DatabaseManager
         if (!array_key_exists($name, $this->adapters)) {
             $this->addAdapter($name, $this->getDefaultAdapterResolver($name));
         }
+        /** @var Closure(TConnectionConfig): Adapter<TConnectionConfig> */
         return $this->adapters[$name];
     }
 
     /**
      * @param string $adapter
-     * @return Closure(covariant ConnectionConfig): DatabaseAdapter
+     * @return Closure(covariant ConnectionConfig): Adapter<ConnectionConfig>
      */
     protected function getDefaultAdapterResolver(string $adapter): Closure
     {
         return match ($adapter) {
-            'mysql' => static fn(MySqlConfig $cfg) => new MySqlAdapter($cfg),
-            'sqlite' => static fn(SqliteConfig $cfg) => new SqliteAdapter($cfg),
+            'mysql' => fn(MySqlConfig $cfg) => new MySqlAdapter($this->config, $cfg),
+            'sqlite' => fn(SqliteConfig $cfg) => new SqliteAdapter($this->config, $cfg),
             default => throw new LogicException("No adapter resolver exists for: {$adapter}"),
         };
     }

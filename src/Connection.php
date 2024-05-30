@@ -4,7 +4,9 @@ namespace Kirameki\Database;
 
 use Closure;
 use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Database\Adapters\Adapter;
 use Kirameki\Database\Adapters\DatabaseAdapter;
+use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Events\ConnectionEstablished;
 use Kirameki\Database\Info\InfoHandler;
 use Kirameki\Database\Query\QueryHandler;
@@ -17,7 +19,7 @@ class Connection
 {
     /**
      * @param string $name
-     * @param DatabaseAdapter $adapter
+     * @param Adapter<ConnectionConfig> $adapter
      * @param EventManager $events
      * @param QueryHandler|null $queryHandler
      * @param SchemaHandler|null $schemaHandler
@@ -26,7 +28,7 @@ class Connection
      */
     public function __construct(
         public readonly string $name,
-        public readonly DatabaseAdapter $adapter,
+        public readonly Adapter $adapter,
         protected readonly EventManager $events,
         protected ?QueryHandler $queryHandler = null,
         protected ?SchemaHandler $schemaHandler = null,
@@ -144,6 +146,6 @@ class Connection
     public function getTransactionIsolationLevel(): IsolationLevel
     {
         return $this->getTransactionHandler()->getIsolationLevel()
-            ?? $this->adapter->getConfig()->getIsolationLevel();
+            ?? $this->adapter->getConnectionConfig()->getIsolationLevel();
     }
 }

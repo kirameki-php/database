@@ -32,7 +32,7 @@ class MySqlAdapter extends PdoAdapter
     #[Override]
     protected function createPdo(): PDO
     {
-        $config = $this->getConfig();
+        $config = $this->getConnectionConfig();
         $parts = [];
 
         if ($config->socket !== null) {
@@ -70,7 +70,7 @@ class MySqlAdapter extends PdoAdapter
     {
         parent::connect();
         $settings = [
-            'SET SESSION TRANSACTION ISOLATION LEVEL ' . $this->config->isolationLevel->value,
+            'SET SESSION TRANSACTION ISOLATION LEVEL ' . $this->connectionConfig->isolationLevel->value,
         ];
         if ($this->readonly) {
             $settings[] = 'SET SESSION TRANSACTION READ ONLY';
@@ -88,7 +88,7 @@ class MySqlAdapter extends PdoAdapter
     protected function instantiateQuerySyntax(): MySqlQuerySyntax
     {
         return new MySqlQuerySyntax(
-            $this->config,
+            $this->connectionConfig,
             $this->identifierDelimiter,
             $this->literalDelimiter,
             $this->dateTimeFormat,
@@ -102,7 +102,7 @@ class MySqlAdapter extends PdoAdapter
     protected function instantiateSchemaSyntax(): SchemaSyntax
     {
         return new MySqlSchemaSyntax(
-            $this->config,
+            $this->connectionConfig,
             $this->identifierDelimiter,
             $this->literalDelimiter,
             $this->dateTimeFormat,
@@ -115,9 +115,9 @@ class MySqlAdapter extends PdoAdapter
     #[Override]
     public function createDatabase(bool $ifNotExist = false): void
     {
-        $config= $this->config;
+        $config= $this->connectionConfig;
         $copy = (clone $this);
-        $copy->config->database = null;
+        $copy->connectionConfig->database = null;
         $copy->runSchema(new RawStatement(implode(' ', array_filter([
             'CREATE DATABASE',
             $ifNotExist ? 'IF NOT EXISTS' : null,
@@ -134,11 +134,11 @@ class MySqlAdapter extends PdoAdapter
     public function dropDatabase(bool $ifExist = false): void
     {
         $copy = (clone $this);
-        $copy->config->database = null;
+        $copy->connectionConfig->database = null;
         $copy->runSchema(new RawStatement(implode(' ', array_filter([
             'DROP DATABASE',
             $ifExist ? 'IF EXISTS' : null,
-            $this->config->database,
+            $this->connectionConfig->database,
         ]))));
     }
 
@@ -149,8 +149,8 @@ class MySqlAdapter extends PdoAdapter
     public function databaseExists(): bool
     {
         $copy = (clone $this);
-        $copy->config->database = null;
-        $statement = new RawQueryStatement(null, "SHOW DATABASES LIKE '{$this->config->database}'");
+        $copy->connectionConfig->database = null;
+        $statement = new RawQueryStatement(null, "SHOW DATABASES LIKE '{$this->connectionConfig->database}'");
         return $copy->runQuery($statement)->getAffectedRowCount() > 0;
     }
 

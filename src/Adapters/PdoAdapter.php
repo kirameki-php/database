@@ -2,11 +2,10 @@
 
 namespace Kirameki\Database\Adapters;
 
-use Closure;
-use DateTimeInterface;
 use Iterator;
 use Kirameki\Collections\LazyIterator;
 use Kirameki\Database\Config\ConnectionConfig;
+use Kirameki\Database\Config\DatabaseConfig;
 use Kirameki\Database\Exceptions\QueryException;
 use Kirameki\Database\Exceptions\SchemaException;
 use Kirameki\Database\Query\Statements\Normalizable;
@@ -28,34 +27,26 @@ use function iterator_to_array;
 
 /**
  * @template TConfig of ConnectionConfig
+ * @extends Adapter<TConfig>
  */
-abstract class PdoAdapter implements DatabaseAdapter
+abstract class PdoAdapter extends Adapter
 {
     /**
-     * @var bool
-     */
-    protected bool $readonly = false;
-
-    protected string $identifierDelimiter = '"';
-
-    protected string $literalDelimiter = "'";
-
-    protected string $dateTimeFormat = DateTimeInterface::RFC3339_EXTENDED;
-
-    /**
-     * @param TConfig $config
-     * @param PDO|null $pdo
+     * @param DatabaseConfig $databaseConfig
+     * @param TConfig $connectionConfig
      * @param QuerySyntax|null $querySyntax
      * @param SchemaSyntax|null $schemaSyntax
+     * @param PDO|null $pdo
      */
     public function __construct(
-        protected ConnectionConfig $config,
-        public ?PDO $pdo = null,
-        protected ?QuerySyntax $querySyntax = null,
-        protected ?SchemaSyntax $schemaSyntax = null,
+        DatabaseConfig $databaseConfig,
+        ConnectionConfig $connectionConfig,
+        ?QuerySyntax $querySyntax = null,
+        ?SchemaSyntax $schemaSyntax = null,
+        protected ?PDO $pdo = null,
     )
     {
-        $this->readonly = $config->isReplica();
+        parent::__construct($databaseConfig, $connectionConfig, $querySyntax, $schemaSyntax);
     }
 
     /**
@@ -63,18 +54,26 @@ abstract class PdoAdapter implements DatabaseAdapter
      */
     public function __clone(): void
     {
-        $this->config = clone $this->config;
+        $this->connectionConfig = clone $this->connectionConfig;
     }
 
     /**
-     * @inheritDoc
-     * @return TConfig
+     * @return PDO
      */
-    #[Override]
-    public function getConfig(): ConnectionConfig
+    protected function getPdo(): PDO
     {
-        return $this->config;
+        if ($this->pdo !== null) {
+            return $this->pdo;
+        }
+        $this->connect();
+        assert($this->pdo !== null);
+        return $this->pdo;
     }
+
+    /**
+     * @return PDO
+     */
+    abstract protected function createPdo(): PDO;
 
     /**
      * @inheritDoc
@@ -111,6 +110,10 @@ abstract class PdoAdapter implements DatabaseAdapter
     #[Override]
     public function runSchema(SchemaStatement $statement): SchemaResult
     {
+        if ($this->dropProtectionEnabled()) {
+            $this->ensureSchemaIsNonDropping($statement);
+        }
+
         try {
             $startTime = hrtime(true);
             $executables = $statement->toExecutable($this->getSchemaSyntax());
@@ -163,7 +166,7 @@ abstract class PdoAdapter implements DatabaseAdapter
                         if ($prepared->errorCode() === '00000') {
                             break;
                         }
-                        $this->throwException($prepared, $statement);
+                        $this->throwQueryException($prepared, $statement);
                     }
                     yield $data;
                 }
@@ -238,52 +241,6 @@ abstract class PdoAdapter implements DatabaseAdapter
     }
 
     /**
-     * @inheritDoc
-     */
-    #[Override]
-    public function setReadOnlyMode(bool $enable): void
-    {
-        $this->readonly = $enable;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    #[Override]
-    public function inReadOnlyMode(): bool
-    {
-        return $this->readonly;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    #[Override]
-    public function getQuerySyntax(): QuerySyntax
-    {
-        return $this->querySyntax ??= $this->instantiateQuerySyntax();
-    }
-
-    /**
-     * @return QuerySyntax
-     */
-    abstract protected function instantiateQuerySyntax(): QuerySyntax;
-
-    /**
-     * @inheritDoc
-     */
-    #[Override]
-    public function getSchemaSyntax(): SchemaSyntax
-    {
-        return $this->schemaSyntax ??= $this->instantiateSchemaSyntax();
-    }
-
-    /**
-     * @return SchemaSyntax
-     */
-    abstract protected function instantiateSchemaSyntax(): SchemaSyntax;
-
-    /**
      * @param string $template
      * @param list<mixed> $parameters
      * @return PDOStatement
@@ -296,69 +253,11 @@ abstract class PdoAdapter implements DatabaseAdapter
     }
 
     /**
-     * @return PDO
-     */
-    protected function getPdo(): PDO
-    {
-        if ($this->pdo !== null) {
-            return $this->pdo;
-        }
-        $this->connect();
-        assert($this->pdo !== null);
-        return $this->pdo;
-    }
-
-    /**
-     * @return PDO
-     */
-    abstract protected function createPdo(): PDO;
-
-    /**
-     * @template TSchemaStatement of SchemaStatement
-     * @param TSchemaStatement $statement
-     * @param list<string> $commands
-     * @param float $startTime
-     * @return SchemaResult<TSchemaStatement>
-     */
-    protected function instantiateSchemaExecution(
-        SchemaStatement $statement,
-        array $commands,
-        float $startTime,
-    ): SchemaResult
-    {
-        $elapsedMs = (hrtime(true) - $startTime) / 1_000_000;
-        return new SchemaResult($statement, $commands, $elapsedMs);
-    }
-
-    /**
-     * @template TQueryStatement of QueryStatement
-     * @param TQueryStatement $statement
-     * @param string $template
-     * @param list<mixed> $parameters
-     * @param float $startTime
-     * @param iterable<int, mixed> $rows
-     * @param int|Closure(): int $affectedRowCount
-     * @return QueryResult<TQueryStatement, mixed>
-     */
-    protected function instantiateQueryResult(
-        QueryStatement $statement,
-        string $template,
-        array $parameters,
-        float $startTime,
-        iterable $rows,
-        int|Closure $affectedRowCount,
-    ): QueryResult
-    {
-        $elapsedMs = (hrtime(true) - $startTime) / 1_000_000;
-        return new QueryResult($statement, $template, $parameters, $elapsedMs, $affectedRowCount, $rows);
-    }
-
-    /**
      * @param PDOStatement $prepared
      * @param QueryStatement $statement
      * @return void
      */
-    protected function throwException(PDOStatement $prepared, QueryStatement $statement): void
+    protected function throwQueryException(PDOStatement $prepared, QueryStatement $statement): void
     {
         throw new QueryException(implode(' | ', $prepared->errorInfo()), $statement);
     }
