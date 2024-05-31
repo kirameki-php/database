@@ -912,7 +912,7 @@ abstract class QuerySyntax extends Syntax
         if ($tags === null) {
             return '';
         }
-        return match($this->connectionConfig->getTagFormat()) {
+        return match($this->databaseConfig->tagsFormat) {
             TagsFormat::Log => $this->formatTagsForLogs($tags),
             TagsFormat::OpenTelemetry => $this->formatTagsForOpenTelemetry($tags),
         };

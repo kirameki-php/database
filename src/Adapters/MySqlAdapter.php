@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Adapters;
 
 use Kirameki\Database\Config\MySqlConfig;
+use Kirameki\Database\Exceptions\DropProtectionException;
 use Kirameki\Database\Query\Statements\RawStatement as RawQueryStatement;
 use Kirameki\Database\Query\Syntax\MySqlQuerySyntax;
 use Kirameki\Database\Schema\Statements\RawStatement;
@@ -135,6 +136,10 @@ class MySqlAdapter extends PdoAdapter
     #[Override]
     public function dropDatabase(bool $ifExist = false): void
     {
+        if ($this->databaseConfig->dropProtection) {
+            throw new DropProtectionException('Dropping databases are prohibited by configuration.');
+        }
+
         $copy = (clone $this);
         $copy->connectionConfig->database = null;
         $copy->runSchema(new RawStatement(implode(' ', array_filter([

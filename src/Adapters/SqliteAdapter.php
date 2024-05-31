@@ -5,6 +5,7 @@ namespace Kirameki\Database\Adapters;
 use Kirameki\Core\Exceptions\NotSupportedException;
 use Kirameki\Database\Config\SqliteConfig;
 use Kirameki\Database\Exceptions\DatabaseNotFoundException;
+use Kirameki\Database\Exceptions\DropProtectionException;
 use Kirameki\Database\Query\Syntax\SqliteQuerySyntax;
 use Kirameki\Database\Schema\Syntax\SqliteSchemaSyntax;
 use Kirameki\Database\Transaction\Support\IsolationLevel;
@@ -113,6 +114,10 @@ class SqliteAdapter extends PdoAdapter
     #[Override]
     public function dropDatabase(bool $ifExist = true): void
     {
+        if ($this->databaseConfig->dropProtection) {
+            throw new DropProtectionException('Dropping databases are prohibited by configuration.');
+        }
+
         if ($this->databaseExists()) {
             if ($this->isPersistentDatabase()) {
                 unlink($this->connectionConfig->filename);

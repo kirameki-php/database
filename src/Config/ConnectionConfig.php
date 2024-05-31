@@ -2,7 +2,6 @@
 
 namespace Kirameki\Database\Config;
 
-use Kirameki\Database\Query\Support\TagsFormat;
 use Kirameki\Database\Transaction\Support\IsolationLevel;
 
 interface ConnectionConfig
@@ -16,11 +15,6 @@ interface ConnectionConfig
      * @return string
      */
     public function getTableSchema(): string;
-
-    /**
-     * @return TagsFormat
-     */
-    public function getTagFormat(): TagsFormat;
 
     /**
      * @return bool

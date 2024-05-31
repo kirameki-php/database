@@ -2,7 +2,6 @@
 
 namespace Kirameki\Database\Config;
 
-use Kirameki\Database\Query\Support\TagsFormat;
 use Kirameki\Database\Transaction\Support\IsolationLevel;
 use Override;
 
@@ -30,7 +29,6 @@ class SqliteConfig implements ConnectionConfig
         return 'sqlite';
     }
 
-
     /**
      * @inheritDoc
      */
@@ -38,15 +36,6 @@ class SqliteConfig implements ConnectionConfig
     public function getTableSchema(): string
     {
         return 'sqlite';
-    }
-
-    /**
-     * @inheritDoc
-     */
-    #[Override]
-    public function getTagFormat(): TagsFormat
-    {
-        return TagsFormat::Log;
     }
 
     /**

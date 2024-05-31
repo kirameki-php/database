@@ -2,7 +2,6 @@
 
 namespace Kirameki\Database\Config;
 
-use Kirameki\Database\Query\Support\TagsFormat;
 use Kirameki\Database\Transaction\Support\IsolationLevel;
 use Override;
 
@@ -58,15 +57,6 @@ class MySqlConfig implements ConnectionConfig
     public function getTableSchema(): string
     {
         return $this->database ?? '';
-    }
-
-    /**
-     * @inheritDoc
-     */
-    #[Override]
-    public function getTagFormat(): TagsFormat
-    {
-        return TagsFormat::Log;
     }
 
     /**
