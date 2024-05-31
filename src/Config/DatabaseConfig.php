@@ -15,11 +15,14 @@ class DatabaseConfig
      */
     public function __construct(
         public array $connections,
+        // The default connection name.
         public ?string $default = null,
-        public ?MigrationConfig $migration = null,
         // Prevents destructive operations (DROP DATABASE, DROP TABLE, DROP COLUMN, TRUNCATE).
         public bool $dropProtection = false,
+        // The format for tags used in queries.
         public TagsFormat $tagsFormat = TagsFormat::Log,
+        // Configurations for migrations.
+        public ?MigrationConfig $migration = null,
     )
     {
     }
