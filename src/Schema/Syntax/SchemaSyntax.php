@@ -6,6 +6,7 @@ use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\InvalidTypeException;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Value;
+use Kirameki\Database\Exceptions\DropProtectionException;
 use Kirameki\Database\Schema\Expressions\DefaultValue;
 use Kirameki\Database\Schema\Statements\AlterColumnAction;
 use Kirameki\Database\Schema\Statements\AlterDropColumnAction;
@@ -18,7 +19,6 @@ use Kirameki\Database\Schema\Statements\CreateTableStatement;
 use Kirameki\Database\Schema\Statements\DropIndexStatement;
 use Kirameki\Database\Schema\Statements\DropTableStatement;
 use Kirameki\Database\Schema\Statements\ForeignKeyConstraint;
-use Kirameki\Database\Schema\Statements\PrimaryKeyConstraint;
 use Kirameki\Database\Schema\Statements\RenameTableStatement;
 use Kirameki\Database\Schema\Statements\TruncateTableStatement;
 use Kirameki\Database\Syntax;
@@ -26,7 +26,6 @@ use function array_filter;
 use function array_keys;
 use function array_map;
 use function array_merge;
-use function dump;
 use function implode;
 use function is_bool;
 use function is_float;
@@ -153,6 +152,12 @@ abstract class SchemaSyntax extends Syntax
      */
     protected function formatDropColumnAction(AlterDropColumnAction $action): string
     {
+        if ($this->databaseConfig->dropProtection) {
+            throw new DropProtectionException('Dropping columns are prohibited by configuration.', [
+                'action' => $action,
+            ]);
+        }
+
         $parts = [];
         $parts[] = 'DROP COLUMN';
         $parts[] = $this->asIdentifier($action->column);
@@ -190,6 +195,12 @@ abstract class SchemaSyntax extends Syntax
      */
     public function compileDropTable(DropTableStatement $statement): array
     {
+        if ($this->databaseConfig->dropProtection) {
+            throw new DropProtectionException('Dropping tables are prohibited by configuration.', [
+                'statement' => $statement,
+            ]);
+        }
+
         return [
             "DROP TABLE {$this->asIdentifier($statement->table)}",
         ];
@@ -373,6 +384,12 @@ abstract class SchemaSyntax extends Syntax
      */
     public function compileTruncateTable(TruncateTableStatement $statement): array
     {
+        if ($this->databaseConfig->dropProtection) {
+            throw new DropProtectionException('TRUNCATE are prohibited by configuration.', [
+                'statement' => $statement,
+            ]);
+        }
+
         return [
             "TRUNCATE TABLE {$this->asIdentifier($statement->table)}",
         ];

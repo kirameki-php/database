@@ -6,13 +6,11 @@ use Iterator;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Info\Statements\ListForeignKeysStatement;
 use Kirameki\Database\Info\Statements\ListIndexesStatement;
-use Kirameki\Database\Query\Statements\ConditionsStatement;
 use Kirameki\Database\Query\Statements\SelectStatement;
 use Kirameki\Database\Query\Support\Dataset;
 use Kirameki\Database\Query\Support\NullOrder;
 use Kirameki\Database\Query\Support\Ordering;
 use Override;
-use stdClass;
 use function array_map;
 use function implode;
 
@@ -123,7 +121,7 @@ class MySqlQuerySyntax extends QuerySyntax
     #[Override]
     public function prepareTemplateForListIndexes(ListIndexesStatement $statement): string
     {
-        $database = $this->asLiteral($this->config->getTableSchema());
+        $database = $this->asLiteral($this->connectionConfig->getTableSchema());
         $table = $this->asLiteral($statement->table);
         $columns = implode(', ', [
             "INDEX_NAME AS `name`",
@@ -144,7 +142,7 @@ class MySqlQuerySyntax extends QuerySyntax
     #[Override]
     public function prepareTemplateForListForeignKeys(ListForeignKeysStatement $statement): string
     {
-        $database = $this->asLiteral($this->config->getTableSchema());
+        $database = $this->asLiteral($this->connectionConfig->getTableSchema());
         $table = $this->asLiteral($statement->table);
         $columns = implode(', ', [
             "CONSTRAINT_NAME AS `name`",

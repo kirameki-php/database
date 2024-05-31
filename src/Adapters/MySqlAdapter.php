@@ -88,6 +88,7 @@ class MySqlAdapter extends PdoAdapter
     protected function instantiateQuerySyntax(): MySqlQuerySyntax
     {
         return new MySqlQuerySyntax(
+            $this->databaseConfig,
             $this->connectionConfig,
             $this->identifierDelimiter,
             $this->literalDelimiter,
@@ -102,6 +103,7 @@ class MySqlAdapter extends PdoAdapter
     protected function instantiateSchemaSyntax(): SchemaSyntax
     {
         return new MySqlSchemaSyntax(
+            $this->databaseConfig,
             $this->connectionConfig,
             $this->identifierDelimiter,
             $this->literalDelimiter,

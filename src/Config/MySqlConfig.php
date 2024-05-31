@@ -66,7 +66,7 @@ class MySqlConfig implements ConnectionConfig
     #[Override]
     public function getTagFormat(): TagsFormat
     {
-        return TagsFormat::Default;
+        return TagsFormat::Log;
     }
 
     /**

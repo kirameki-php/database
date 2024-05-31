@@ -4,6 +4,6 @@ namespace Kirameki\Database\Query\Support;
 
 enum TagsFormat
 {
-    case Default;
+    case Log;
     case OpenTelemetry;
 }

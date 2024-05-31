@@ -11,6 +11,8 @@ use Kirameki\Core\Exceptions\NotSupportedException;
 use Kirameki\Core\Exceptions\UnreachableException;
 use Kirameki\Core\Json;
 use Kirameki\Core\Value;
+use Kirameki\Database\Config\ConnectionConfig;
+use Kirameki\Database\Exceptions\DropProtectionException;
 use Kirameki\Database\Info\Statements\ListColumnsStatement;
 use Kirameki\Database\Info\Statements\ListForeignKeysStatement;
 use Kirameki\Database\Info\Statements\ListIndexesStatement;
@@ -222,6 +224,12 @@ abstract class QuerySyntax extends Syntax
      */
     public function prepareTemplateForDelete(DeleteStatement $statement): string
     {
+        if ($this->databaseConfig->dropProtection && count($statement->where ?? []) === 0) {
+            throw new DropProtectionException('DELETE without a WHERE clause is prohibited by configuration.', [
+                'statement' => $statement,
+            ]);
+        }
+
         return implode(' ', array_filter([
             $this->formatWithPart($statement),
             'DELETE FROM',
@@ -904,8 +912,8 @@ abstract class QuerySyntax extends Syntax
         if ($tags === null) {
             return '';
         }
-        return match($this->config->getTagFormat()) {
-            TagsFormat::Default => $this->formatTagsForLogs($tags),
+        return match($this->connectionConfig->getTagFormat()) {
+            TagsFormat::Log => $this->formatTagsForLogs($tags),
             TagsFormat::OpenTelemetry => $this->formatTagsForOpenTelemetry($tags),
         };
     }
@@ -1095,7 +1103,7 @@ abstract class QuerySyntax extends Syntax
      */
     public function prepareTemplateForListTables(ListTablesStatement $statement): string
     {
-        $database = $this->asLiteral($this->config->getTableSchema());
+        $database = $this->asLiteral($this->connectionConfig->getTableSchema());
         return "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = {$database}";
     }
 
@@ -1105,7 +1113,7 @@ abstract class QuerySyntax extends Syntax
      */
     public function prepareTemplateForTableExists(TableExistsStatement $statement): string
     {
-        $database = $this->asLiteral($this->config->getTableSchema());
+        $database = $this->asLiteral($this->connectionConfig->getTableSchema());
         $table = $this->asLiteral($statement->table);
         return implode(' ', [
             "SELECT 1 FROM INFORMATION_SCHEMA.TABLES",
@@ -1120,7 +1128,7 @@ abstract class QuerySyntax extends Syntax
      */
     public function prepareTemplateForListColumns(ListColumnsStatement $statement): string
     {
-        $database = $this->asLiteral($this->config->getTableSchema());
+        $database = $this->asLiteral($this->connectionConfig->getTableSchema());
         $table = $this->asLiteral($statement->table);
         $columns = implode(', ', [
             "COLUMN_NAME AS `name`",

@@ -6,6 +6,7 @@ use BackedEnum;
 use DateTimeInterface;
 use Kirameki\Core\Json;
 use Kirameki\Database\Config\ConnectionConfig;
+use Kirameki\Database\Config\DatabaseConfig;
 use function implode;
 use function is_iterable;
 use function iterator_to_array;
@@ -14,13 +15,15 @@ use function str_replace;
 abstract class Syntax
 {
     /**
-     * @param ConnectionConfig $config
+     * @param DatabaseConfig $databaseConfig
+     * @param ConnectionConfig $connectionConfig
      * @param string $identifierDelimiter
      * @param string $literalDelimiter
      * @param string $dateTimeFormat
      */
     public function __construct(
-        protected readonly ConnectionConfig $config,
+        protected readonly DatabaseConfig $databaseConfig,
+        protected readonly ConnectionConfig $connectionConfig,
         protected readonly string $identifierDelimiter,
         protected readonly string $literalDelimiter,
         protected readonly string $dateTimeFormat,

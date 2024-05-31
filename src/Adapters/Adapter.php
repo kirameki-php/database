@@ -6,14 +6,11 @@ use Closure;
 use DateTimeInterface;
 use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
-use Kirameki\Database\Exceptions\SchemaException;
 use Kirameki\Database\Query\Statements\QueryResult;
 use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
-use Kirameki\Database\Schema\Statements\DropTableStatement;
 use Kirameki\Database\Schema\Statements\SchemaResult;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
-use Kirameki\Database\Schema\Statements\TruncateTableStatement;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 use Kirameki\Database\Transaction\Support\IsolationLevel;
 use function hrtime;
@@ -82,14 +79,6 @@ abstract class Adapter
     public function inReadOnlyMode(): bool
     {
         return $this->readonly;
-    }
-
-    /**
-     * @return bool
-     */
-    public function dropProtectionEnabled(): bool
-    {
-        return $this->databaseConfig->dropProtection;
     }
 
     /**
@@ -237,20 +226,5 @@ abstract class Adapter
     {
         $elapsedMs = (hrtime(true) - $startTime) / 1_000_000;
         return new QueryResult($statement, $template, $parameters, $elapsedMs, $affectedRowCount, $rows);
-    }
-
-    /**
-     * @param SchemaStatement $statement
-     * @return void
-     */
-    protected function ensureSchemaIsNonDropping(SchemaStatement $statement): void
-    {
-        if ($statement instanceof DropTableStatement) {
-            throw new SchemaException("Drop Protection Enabled: {$statement->table} cannot be dropped.", $statement);
-        }
-
-        if ($statement instanceof TruncateTableStatement) {
-            throw new SchemaException("Drop Protection Enabled: {$statement->table} cannot be truncated.", $statement);
-        }
     }
 }

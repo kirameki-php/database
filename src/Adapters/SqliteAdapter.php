@@ -70,6 +70,7 @@ class SqliteAdapter extends PdoAdapter
     protected function instantiateQuerySyntax(): SqliteQuerySyntax
     {
         return new SqliteQuerySyntax(
+            $this->databaseConfig,
             $this->connectionConfig,
             $this->identifierDelimiter,
             $this->literalDelimiter,
@@ -84,6 +85,7 @@ class SqliteAdapter extends PdoAdapter
     protected function instantiateSchemaSyntax(): SqliteSchemaSyntax
     {
         return new SqliteSchemaSyntax(
+            $this->databaseConfig,
             $this->connectionConfig,
             $this->identifierDelimiter,
             $this->literalDelimiter,

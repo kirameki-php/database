@@ -110,10 +110,6 @@ abstract class PdoAdapter extends Adapter
     #[Override]
     public function runSchema(SchemaStatement $statement): SchemaResult
     {
-        if ($this->dropProtectionEnabled()) {
-            $this->ensureSchemaIsNonDropping($statement);
-        }
-
         try {
             $startTime = hrtime(true);
             $executables = $statement->toExecutable($this->getSchemaSyntax());
