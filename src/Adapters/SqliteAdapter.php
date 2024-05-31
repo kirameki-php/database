@@ -50,18 +50,18 @@ class SqliteAdapter extends PdoAdapter
         $settings = [
             // As of SQLite version 3.6.19, the default setting for foreign key enforcement is OFF
             // https://sqlite.org/pragma.html#pragma_foreign_keys
-            'PRAGMA foreign_keys = ON',
+            'PRAGMA foreign_keys=ON',
             // WAL is significantly faster in most scenarios.
             // https://www.sqlite.org/wal.html
-            'PRAGMA journal_mode = WAL',
+            'PRAGMA journal_mode=WAL',
             // The synchronous=NORMAL setting is a good choice for most applications running in WAL mode.
             // https://www.sqlite.org/pragma.html#pragma_synchronous
-            'PRAGMA synchronous = NORMAL',
+            'PRAGMA synchronous=NORMAL',
         ];
         if ($this->connectionConfig->isReplica()) {
             // The query_only pragma prevents data changes on database files when enabled.
             // https://sqlite.org/pragma.html#pragma_query_only
-            $settings[] = 'PRAGMA query_only = ON';
+            $settings[] = 'PRAGMA query_only=ON';
         }
         $this->getPdo()->exec(implode(';', $settings));
         return $this;
