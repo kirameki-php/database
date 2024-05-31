@@ -16,9 +16,11 @@ class CreateIndexBuilder extends SchemaBuilder
     public function __construct(
         SchemaHandler $handler,
         string $table,
+        bool $unique = false,
     )
     {
         parent::__construct($handler, new CreateIndexStatement($table));
+        $this->statement->unique = $unique;
     }
 
     /**
@@ -43,15 +45,6 @@ class CreateIndexBuilder extends SchemaBuilder
                 ? $this->column($column, $order)
                 : $this->column($order);
         }
-        return $this;
-    }
-
-    /**
-     * @return $this
-     */
-    public function unique(): static
-    {
-        $this->statement->unique = true;
         return $this;
     }
 }

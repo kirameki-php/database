@@ -146,12 +146,31 @@ class CreateTableBuilder extends SchemaBuilder
     }
 
     /**
-     * @param iterable<array-key, string> $columns
+     * @param string ...$column
      * @return CreateIndexBuilder
      */
-    public function index(iterable $columns): CreateIndexBuilder
+    public function index(string ...$column): CreateIndexBuilder
     {
-        $builder = new CreateIndexBuilder($this->handler, $this->statement->table);
+        return $this->newIndexBuilder($column, false);
+    }
+
+    /**
+     * @param string ...$column
+     * @return CreateIndexBuilder
+     */
+    public function uniqueIndex(string ...$column): CreateIndexBuilder
+    {
+        return $this->newIndexBuilder($column, true);
+    }
+
+    /**
+     * @param iterable<array-key, string> $columns
+     * @param bool $unique
+     * @return CreateIndexBuilder
+     */
+    protected function newIndexBuilder(iterable $columns, bool $unique): CreateIndexBuilder
+    {
+        $builder = new CreateIndexBuilder($this->handler, $this->statement->table, $unique);
         $this->statement->indexes[] = $builder->statement;
         return $builder->columns($columns);
     }
