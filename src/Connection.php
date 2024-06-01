@@ -5,7 +5,6 @@ namespace Kirameki\Database;
 use Closure;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Adapters\Adapter;
-use Kirameki\Database\Adapters\DatabaseAdapter;
 use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Events\ConnectionEstablished;
 use Kirameki\Database\Info\InfoHandler;

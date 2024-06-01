@@ -55,7 +55,7 @@ class TransactionHandler
             $this->rollbackAndThrow($throwable);
         }
         finally {
-            $this->context = null;
+            $this->cleanUp();
         }
     }
 
@@ -121,6 +121,14 @@ class TransactionHandler
         $this->events->emit(new TransactionRolledBack($connection, $throwable));
         $this->getContext()->runAfterRollbackCallbacks();
         throw $throwable;
+    }
+
+    /**
+     * @return void
+     */
+    protected function cleanUp(): void
+    {
+        $this->context = null;
     }
 
     /**
