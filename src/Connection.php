@@ -206,15 +206,6 @@ class Connection
     }
 
     /**
-     * @return IsolationLevel
-     */
-    public function getTransactionIsolationLevel(): IsolationLevel
-    {
-        return $this->getTransactionContext()->isolationLevel
-            ?? $this->adapter->connectionConfig->getIsolationLevel();
-    }
-
-    /**
      * @param Closure(): mixed $callback
      * @return $this
      */
