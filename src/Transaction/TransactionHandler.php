@@ -15,14 +15,9 @@ use Throwable;
 class TransactionHandler
 {
     /**
-     * @var bool
+     * @var TransactionContext|null
      */
-    protected bool $active = false;
-
-    /**
-     * @var IsolationLevel|null
-     */
-    protected ?IsolationLevel $isolationLevel;
+    protected ?TransactionContext $context = null;
 
     /**
      * @param Connection $connection
@@ -50,7 +45,6 @@ class TransactionHandler
         }
 
         try {
-            $this->isolationLevel = $level;
             $this->handleBegin($level);
             $result = $callback();
             $this->handleCommit();
@@ -61,8 +55,7 @@ class TransactionHandler
             $this->rollbackAndThrow($throwable);
         }
         finally {
-            $this->isolationLevel = null;
-            $this->active = false;
+            $this->context = null;
         }
     }
 
@@ -71,7 +64,16 @@ class TransactionHandler
      */
     public function isActive(): bool
     {
-        return $this->active;
+        return $this->context !== null;
+    }
+
+    public function getContext(): TransactionContext
+    {
+        $context = $this->context;
+        if ($context === null) {
+            throw new LogicException('No transaction in progress.');
+        }
+        return $context;
     }
 
     /**
@@ -79,7 +81,7 @@ class TransactionHandler
      */
     public function getIsolationLevel(): ?IsolationLevel
     {
-        return $this->isolationLevel;
+        return $this->context?->isolationLevel;
     }
 
     /**
@@ -88,9 +90,11 @@ class TransactionHandler
      */
     protected function handleBegin(?IsolationLevel $level): void
     {
-        $this->connection->connectIfNotConnected();
-        $this->connection->adapter->beginTransaction($level);
-        $this->events->emit(new TransactionBegan($this->connection, $level));
+        $connection = $this->connection;
+        $connection->connectIfNotConnected();
+        $connection->adapter->beginTransaction($level);
+        $this->events->emit(new TransactionBegan($connection, $level));
+        $this->context = new TransactionContext($level);
     }
 
     /**
@@ -98,8 +102,12 @@ class TransactionHandler
      */
     protected function handleCommit(): void
     {
-        $this->connection->adapter->commit();
-        $this->events->emit(new TransactionCommitted($this->connection));
+        $connection = $this->connection;
+        $context = $this->getContext();
+        $context->runBeforeCommitCallbacks();
+        $connection->adapter->commit();
+        $this->events->emit(new TransactionCommitted($connection));
+        $context->runAfterCommitCallbacks();
     }
 
     /**
@@ -108,8 +116,10 @@ class TransactionHandler
      */
     protected function rollbackAndThrow(Throwable $throwable): never
     {
-        $this->connection->adapter->rollback();
-        $this->events->emit(new TransactionRolledBack($this->connection, $throwable));
+        $connection = $this->connection;
+        $connection->adapter->rollback();
+        $this->events->emit(new TransactionRolledBack($connection, $throwable));
+        $this->getContext()->runAfterRollbackCallbacks();
         throw $throwable;
     }
 
@@ -122,12 +132,16 @@ class TransactionHandler
         if ($level === null) {
             return;
         }
-        if($level === $this->isolationLevel) {
+
+        $context = $this->getContext();
+
+        if($level === $context->isolationLevel) {
             return;
         }
+
         throw new LogicException('Cannot change Isolation level within the same transaction.', [
             'connection' => $this->connection->name,
-            'current' => $this->isolationLevel,
+            'current' => $context->isolationLevel,
             'given' => $level,
         ]);
     }

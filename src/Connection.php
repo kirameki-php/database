@@ -148,4 +148,34 @@ class Connection
         return $this->getTransactionHandler()->getIsolationLevel()
             ?? $this->adapter->getConnectionConfig()->getIsolationLevel();
     }
+
+    /**
+     * @param Closure(): mixed $callback
+     * @return $this
+     */
+    public function beforeCommit(Closure $callback): static
+    {
+        $this->getTransactionHandler()->getContext()->beforeCommit($callback);
+        return $this;
+    }
+
+    /**
+     * @param Closure(): mixed $callback
+     * @return $this
+     */
+    public function afterCommit(Closure $callback): static
+    {
+        $this->getTransactionHandler()->getContext()->afterCommit($callback);
+        return $this;
+    }
+
+    /**
+     * @param Closure(): mixed $callback
+     * @return $this
+     */
+    public function afterRollback(Closure $callback): static
+    {
+        $this->getTransactionHandler()->getContext()->afterRollback($callback);
+        return $this;
+    }
 }
