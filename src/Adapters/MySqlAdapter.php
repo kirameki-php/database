@@ -27,13 +27,15 @@ class MySqlAdapter extends PdoAdapter
 
     protected string $dateTimeFormat = 'Y-m-d H:i:s.u';
 
+    protected bool $omitDatabaseOnConnect = false;
+
     /**
      * @inheritDoc
      */
     #[Override]
     protected function createPdo(): PDO
     {
-        $config = $this->getConnectionConfig();
+        $config = $this->connectionConfig;
         $parts = [];
 
         if ($config->socket !== null) {
@@ -44,7 +46,7 @@ class MySqlAdapter extends PdoAdapter
             $parts[] = $host;
         }
 
-        if ($config->database !== null) {
+        if (!$this->omitDatabaseOnConnect) {
             $parts[] = "dbname={$config->database}";
         }
 
@@ -118,9 +120,9 @@ class MySqlAdapter extends PdoAdapter
     #[Override]
     public function createDatabase(bool $ifNotExist = false): void
     {
-        $config= $this->connectionConfig;
+        $config = $this->connectionConfig;
         $copy = (clone $this);
-        $copy->connectionConfig->database = null;
+        $copy->omitDatabaseOnConnect = true;
         $copy->runSchema(new RawStatement(implode(' ', array_filter([
             'CREATE DATABASE',
             $ifNotExist ? 'IF NOT EXISTS' : null,
@@ -141,7 +143,7 @@ class MySqlAdapter extends PdoAdapter
         }
 
         $copy = (clone $this);
-        $copy->connectionConfig->database = null;
+        $copy->omitDatabaseOnConnect = true;
         $copy->runSchema(new RawStatement(implode(' ', array_filter([
             'DROP DATABASE',
             $ifExist ? 'IF EXISTS' : null,
@@ -156,7 +158,7 @@ class MySqlAdapter extends PdoAdapter
     public function databaseExists(): bool
     {
         $copy = (clone $this);
-        $copy->connectionConfig->database = null;
+        $copy->omitDatabaseOnConnect = true;
         $statement = new RawQueryStatement(null, "SHOW DATABASES LIKE '{$this->connectionConfig->database}'");
         return $copy->runQuery($statement)->getAffectedRowCount() > 0;
     }

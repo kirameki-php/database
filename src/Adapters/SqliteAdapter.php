@@ -27,7 +27,7 @@ class SqliteAdapter extends PdoAdapter
     #[Override]
     public function createPdo(): PDO
     {
-        $config = $this->getConnectionConfig();
+        $config = $this->connectionConfig;
 
         $dsn = "sqlite:{$config->filename}";
         $options = iterator_to_array($config->options ?? []);

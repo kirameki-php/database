@@ -7,12 +7,16 @@ use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Adapters\Adapter;
 use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Events\ConnectionEstablished;
+use Kirameki\Database\Events\TransactionBegan;
+use Kirameki\Database\Events\TransactionCommitted;
+use Kirameki\Database\Events\TransactionRolledBack;
 use Kirameki\Database\Info\InfoHandler;
 use Kirameki\Database\Query\QueryHandler;
 use Kirameki\Database\Schema\SchemaHandler;
 use Kirameki\Database\Transaction\Support\IsolationLevel;
-use Kirameki\Database\Transaction\TransactionHandler;
+use Kirameki\Database\Transaction\TransactionContext;
 use Kirameki\Event\EventManager;
+use Throwable;
 
 class Connection
 {
@@ -23,7 +27,7 @@ class Connection
      * @param QueryHandler|null $queryHandler
      * @param SchemaHandler|null $schemaHandler
      * @param InfoHandler|null $infoHandler
-     * @param TransactionHandler|null $transactionHandler
+     * @param TransactionContext|null $transactionContext
      */
     public function __construct(
         public readonly string $name,
@@ -32,7 +36,7 @@ class Connection
         protected ?QueryHandler $queryHandler = null,
         protected ?SchemaHandler $schemaHandler = null,
         protected ?InfoHandler $infoHandler = null,
-        protected ?TransactionHandler $transactionHandler = null,
+        protected ?TransactionContext $transactionContext = null,
     )
     {
     }
@@ -113,14 +117,6 @@ class Connection
     }
 
     /**
-     * @return TransactionHandler
-     */
-    protected function getTransactionHandler(): TransactionHandler
-    {
-        return $this->transactionHandler ??= new TransactionHandler($this, $this->events);
-    }
-
-    /**
      * @template TReturn
      * @param Closure(): TReturn $callback
      * @param IsolationLevel|null $level
@@ -128,7 +124,77 @@ class Connection
      */
     public function transaction(Closure $callback, ?IsolationLevel $level = null): mixed
     {
-        return $this->getTransactionHandler()->run($callback, $level);
+        // Already in transaction so just execute callback
+        if ($this->inTransaction()) {
+            $this->getTransactionContext()->ensureValidIsolationLevel($level);
+            return $callback();
+        }
+
+        try {
+            $this->handleBegin($level);
+            $result = $callback();
+            $this->handleCommit();
+            return $result;
+        }
+        catch (Throwable $throwable) {
+            $this->rollbackAndThrow($throwable);
+        }
+        finally {
+            $this->cleanUpTransaction();
+        }
+    }
+
+    protected function getTransactionContext(): TransactionContext
+    {
+        $context = $this->transactionContext;
+        if ($context === null) {
+            throw new LogicException('No transaction in progress.');
+        }
+        return $context;
+    }
+
+    /**
+     * @param IsolationLevel|null $level
+     * @return void
+     */
+    protected function handleBegin(?IsolationLevel $level): void
+    {
+        $this->connectIfNotConnected();
+        $this->adapter->beginTransaction($level);
+        $this->events->emit(new TransactionBegan($this, $level));
+        $this->transactionContext = new TransactionContext($this, $level);
+    }
+
+    /**
+     * @return void
+     */
+    protected function handleCommit(): void
+    {
+        $context = $this->getTransactionContext();
+        $context->runBeforeCommitCallbacks();
+        $this->adapter->commit();
+        $this->events->emit(new TransactionCommitted($this));
+        $context->runAfterCommitCallbacks();
+    }
+
+    /**
+     * @param Throwable $throwable
+     * @return never
+     */
+    protected function rollbackAndThrow(Throwable $throwable): never
+    {
+        $this->adapter->rollback();
+        $this->events->emit(new TransactionRolledBack($this, $throwable));
+        $this->getTransactionContext()->runAfterRollbackCallbacks();
+        throw $throwable;
+    }
+
+    /**
+     * @return void
+     */
+    protected function cleanUpTransaction(): void
+    {
+        $this->transactionContext = null;
     }
 
     /**
@@ -136,7 +202,7 @@ class Connection
      */
     public function inTransaction(): bool
     {
-        return $this->getTransactionHandler()->isActive();
+        return $this->transactionContext !== null;
     }
 
     /**
@@ -144,8 +210,8 @@ class Connection
      */
     public function getTransactionIsolationLevel(): IsolationLevel
     {
-        return $this->getTransactionHandler()->getIsolationLevel()
-            ?? $this->adapter->getConnectionConfig()->getIsolationLevel();
+        return $this->getTransactionContext()->isolationLevel
+            ?? $this->adapter->connectionConfig->getIsolationLevel();
     }
 
     /**
@@ -154,7 +220,7 @@ class Connection
      */
     public function beforeCommit(Closure $callback): static
     {
-        $this->getTransactionHandler()->getContext()->beforeCommit($callback);
+        $this->getTransactionContext()->beforeCommit($callback);
         return $this;
     }
 
@@ -164,7 +230,7 @@ class Connection
      */
     public function afterCommit(Closure $callback): static
     {
-        $this->getTransactionHandler()->getContext()->afterCommit($callback);
+        $this->getTransactionContext()->afterCommit($callback);
         return $this;
     }
 
@@ -174,7 +240,7 @@ class Connection
      */
     public function afterRollback(Closure $callback): static
     {
-        $this->getTransactionHandler()->getContext()->afterRollback($callback);
+        $this->getTransactionContext()->afterRollback($callback);
         return $this;
     }
 }

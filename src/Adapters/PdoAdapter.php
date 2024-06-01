@@ -50,14 +50,6 @@ abstract class PdoAdapter extends Adapter
     }
 
     /**
-     * @return void
-     */
-    public function __clone(): void
-    {
-        $this->connectionConfig = clone $this->connectionConfig;
-    }
-
-    /**
      * @return PDO
      */
     protected function getPdo(): PDO

@@ -3,17 +3,21 @@
 namespace Kirameki\Database\Transaction;
 
 use Closure;
+use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Database\Connection;
 use Kirameki\Database\Transaction\Support\IsolationLevel;
 
 class TransactionContext
 {
     /**
+     * @param Connection $connection
      * @param IsolationLevel|null $isolationLevel
      * @param list<Closure(): mixed>|null $beforeCommitCallbacks
      * @param list<Closure(): mixed>|null $afterCommitCallbacks
      * @param list<Closure(): mixed>|null $afterRollbackCallbacks
      */
     public function __construct(
+        protected readonly Connection $connection,
         public readonly ?IsolationLevel $isolationLevel,
         protected ?array $beforeCommitCallbacks = null,
         protected ?array $afterCommitCallbacks = null,
@@ -90,4 +94,26 @@ class TransactionContext
             $callback();
         }
     }
+
+    /**
+     * @param IsolationLevel|null $level
+     * @return void|never
+     */
+    public function ensureValidIsolationLevel(?IsolationLevel $level): void
+    {
+        if ($level === null) {
+            return;
+        }
+
+        if($level === $this->isolationLevel) {
+            return;
+        }
+
+        throw new LogicException('Cannot change Isolation level within the same transaction.', [
+            'connection' => $this->connection->name,
+            'current' => $this->isolationLevel,
+            'given' => $level,
+        ]);
+    }
+
 }

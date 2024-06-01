@@ -47,21 +47,13 @@ abstract class Adapter
      * @param SchemaSyntax|null $schemaSyntax
      */
     public function __construct(
-        protected readonly DatabaseConfig $databaseConfig,
-        protected ConnectionConfig $connectionConfig,
+        public readonly DatabaseConfig $databaseConfig,
+        public readonly ConnectionConfig $connectionConfig,
         protected ?QuerySyntax $querySyntax = null,
         protected ?SchemaSyntax $schemaSyntax = null,
     )
     {
         $this->readonly = $connectionConfig->isReplica();
-    }
-
-    /**
-     * @return TConfig
-     */
-    public function getConnectionConfig(): ConnectionConfig
-    {
-        return $this->connectionConfig;
     }
 
     /**
