@@ -10,11 +10,13 @@ class SqliteConfig implements ConnectionConfig
     /**
      * @param string $filename
      * @param int $busyTimeoutSeconds
+     * @param iterable<string, string>|null $pragmas
      * @param iterable<string, mixed>|null $options
      */
     public function __construct(
         public string $filename,
         public int $busyTimeoutSeconds = 30,
+        public ?iterable $pragmas = null,
         public ?iterable $options = null,
     )
     {
