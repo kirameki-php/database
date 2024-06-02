@@ -15,7 +15,7 @@ jobs:
       with:
         php_version: 8.3
         memory_limit: 1G
-    - uses: codecov/codecov-action@v3
+    - uses: codecov/codecov-action@v4
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         files: ./coverage.xml
