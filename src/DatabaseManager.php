@@ -49,7 +49,7 @@ class DatabaseManager
      */
     public function use(string $name): Connection
     {
-        return $this->connections[$name] ??= $this->createConnection($name, $this->getConfig($name));
+        return $this->connections[$name] ??= $this->createConnection($name);
     }
 
     /**
@@ -91,11 +91,11 @@ class DatabaseManager
 
     /**
      * @param string $name
-     * @param ConnectionConfig $config
      * @return Connection
      */
-    protected function createConnection(string $name, ConnectionConfig $config): Connection
+    protected function createConnection(string $name): Connection
     {
+        $config = $this->getConfig($name);
         $resolver = $this->getAdapterResolver($config->getAdapterName());
         return new Connection($name, $resolver($config), $this->events);
     }
