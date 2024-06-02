@@ -2,6 +2,7 @@
 
 namespace Kirameki\Database\Adapters;
 
+use Kirameki\Core\Exceptions\InvalidConfigException;
 use Kirameki\Database\Config\MySqlConfig;
 use Kirameki\Database\Exceptions\DropProtectionException;
 use Kirameki\Database\Query\Statements\RawStatement as RawQueryStatement;
@@ -39,6 +40,9 @@ class MySqlAdapter extends PdoAdapter
         $parts = [];
 
         if ($config->socket !== null) {
+            if ($config->host !== null) {
+                throw new InvalidConfigException('Socket and host cannot be used together.');
+            }
             $parts[] = "unix_socket={$config->socket}";
         } else {
             $host = "host={$config->host}";
