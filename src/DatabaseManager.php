@@ -16,7 +16,6 @@ use Kirameki\Database\Config\SqliteConfig;
 use Kirameki\Event\EventManager;
 use function array_key_exists;
 use function array_key_first;
-use function assert;
 use function count;
 
 class DatabaseManager
@@ -32,6 +31,11 @@ class DatabaseManager
     protected array $adapters = [];
 
     /**
+     * @var string
+     */
+    protected readonly string $default;
+
+    /**
      * @param EventManager $events
      * @param DatabaseConfig $config
      */
@@ -40,7 +44,7 @@ class DatabaseManager
         public readonly DatabaseConfig $config,
     )
     {
-        $config->default ??= $this->resolveDefaultConnectionName();
+        $this->default = $this->resolveDefaultConnectionName();
     }
 
     /**
@@ -57,7 +61,7 @@ class DatabaseManager
      */
     public function useDefault(): Connection
     {
-        return $this->use($this->getDefaultConnectionName());
+        return $this->use($this->default);
     }
 
     /**
@@ -80,16 +84,6 @@ class DatabaseManager
     }
 
     /**
-     * @return string
-     */
-    public function getDefaultConnectionName(): string
-    {
-        $default = $this->config->default;
-        assert($default !== null);
-        return $default;
-    }
-
-    /**
      * @param string $name
      * @return Connection
      */
@@ -105,6 +99,10 @@ class DatabaseManager
      */
     protected function resolveDefaultConnectionName(): string
     {
+        $default = $this->config->default;
+        if ($default !== null) {
+            return $default;
+        }
         $connections = $this->config->connections;
         $primaries = Arr::filter($connections, static fn(ConnectionConfig $c) => !$c->isReplica());
         if (count($primaries) === 1) {
