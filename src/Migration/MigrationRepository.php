@@ -6,9 +6,6 @@ use Closure;
 use Kirameki\Database\Config\MigrationConfig;
 use Kirameki\Database\Connection;
 use Kirameki\Database\DatabaseManager;
-use Kirameki\Database\Query\Support\LockOption;
-use Kirameki\Database\Schema\Statements\SchemaResult;
-use Kirameki\Database\Schema\Statements\SchemaStatement;
 
 readonly class MigrationRepository
 {
@@ -28,7 +25,7 @@ readonly class MigrationRepository
      */
     protected function getConnection(): Connection
     {
-        return $this->db->use($this->config->connection ?? $this->db->getDefaultConnectionName());
+        return $this->db->use($this->config->connection ?? $this->db->default);
     }
 
     /**

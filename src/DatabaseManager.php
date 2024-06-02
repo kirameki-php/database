@@ -33,7 +33,7 @@ class DatabaseManager
     /**
      * @var string
      */
-    protected readonly string $default;
+    public readonly string $default;
 
     /**
      * @param EventManager $events

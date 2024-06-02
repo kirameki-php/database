@@ -83,7 +83,7 @@ abstract class Migration
      */
     protected function getConnection(): Connection
     {
-        return $this->db->use($this->connection ?? $this->db->getDefaultConnectionName());
+        return $this->db->use($this->connection ?? $this->db->default);
     }
 
     /**
