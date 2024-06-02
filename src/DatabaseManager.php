@@ -80,17 +80,6 @@ class DatabaseManager
     }
 
     /**
-     * @param string $name
-     * @param Closure(ConnectionConfig): Adapter<ConnectionConfig> $deferred
-     * @return $this
-     */
-    public function addAdapter(string $name, Closure $deferred): static
-    {
-        $this->adapters[$name] = $deferred(...);
-        return $this;
-    }
-
-    /**
      * @return string
      */
     public function getDefaultConnectionName(): string
@@ -107,8 +96,8 @@ class DatabaseManager
      */
     protected function createConnection(string $name, ConnectionConfig $config): Connection
     {
-        $adapter = ($this->getAdapterResolver($config))($config);
-        return new Connection($name, $adapter, $this->events);
+        $resolver = $this->getAdapterResolver($config->getAdapterName());
+        return new Connection($name, $resolver($config), $this->events);
     }
 
     /**
@@ -147,17 +136,25 @@ class DatabaseManager
     }
 
     /**
-     * @template TConnectionConfig of ConnectionConfig
-     * @param TConnectionConfig $config
-     * @return Closure(TConnectionConfig): Adapter<TConnectionConfig>
+     * @param string $name
+     * @param Closure(ConnectionConfig): Adapter<ConnectionConfig> $deferred
+     * @return $this
      */
-    protected function getAdapterResolver(ConnectionConfig $config): Closure
+    public function addAdapter(string $name, Closure $deferred): static
     {
-        $name = $config->getAdapterName();
+        $this->adapters[$name] = $deferred(...);
+        return $this;
+    }
+
+    /**
+     * @param string $name
+     * @return Closure(ConnectionConfig): Adapter<ConnectionConfig>
+     */
+    protected function getAdapterResolver(string $name): Closure
+    {
         if (!array_key_exists($name, $this->adapters)) {
             $this->addAdapter($name, $this->getDefaultAdapterResolver($name));
         }
-        /** @var Closure(TConnectionConfig): Adapter<TConnectionConfig> */
         return $this->adapters[$name];
     }
 
