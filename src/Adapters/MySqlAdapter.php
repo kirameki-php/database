@@ -39,15 +39,20 @@ class MySqlAdapter extends PdoAdapter
         $config = $this->connectionConfig;
         $parts = [];
 
-        if ($config->socket !== null) {
-            if ($config->host !== null) {
-                throw new InvalidConfigException('Socket and host cannot be used together.');
-            }
+        $host = $config->host;
+        $socket = $config->socket;
+        if ($host === null && $socket === null) {
+            throw new InvalidConfigException('Either host or socket must be defined.');
+        }
+        if ($host !== null && $socket !== null) {
+            throw new InvalidConfigException('Host and socket cannot be used together.');
+        }
+        if ($socket !== null) {
             $parts[] = "unix_socket={$config->socket}";
         } else {
-            $host = "host={$config->host}";
-            $host .= $config->port !== null ? "port={$config->port}" : '';
-            $parts[] = $host;
+            $part = "host={$config->host}";
+            $part .= $config->port !== null ? "port={$config->port}" : '';
+            $parts[] = $part;
         }
 
         if (!$this->omitDatabaseOnConnect) {
