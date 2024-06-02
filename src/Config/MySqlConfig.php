@@ -17,9 +17,9 @@ class MySqlConfig implements ConnectionConfig
      * @param string|null $socket
      * @param string|null $username
      * @param string|null $password
-     * @param int $connectTimeoutSeconds
      * @param string|null $charset
      * @param string|null $collation
+     * @param int $connectTimeoutSeconds
      * @param bool $replica
      * @param IsolationLevel $isolationLevel
      * @param array<string, mixed>|null $serverOptions

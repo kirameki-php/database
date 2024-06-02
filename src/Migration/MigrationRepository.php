@@ -50,11 +50,6 @@ readonly class MigrationRepository
         $builder->datetime('createdAt')->currentAsDefault();
         $builder->uniqueIndex('name');
         $builder->execute();
-
-        $this->getConnection()->query()
-            ->insertInto($this->getTableName())
-            ->value(['id' => 0, 'name' => '00000000000000_init'])
-            ->execute();
     }
 
     /**
@@ -80,17 +75,8 @@ readonly class MigrationRepository
      */
     public function withDistributedLock(Closure $callback): mixed
     {
-        $connection = $this->getConnection();
-        return $connection->transaction(function() use ($callback, $connection) {
-            // acquire a lock on the table
-            $connection->query()
-                ->select('id')
-                ->from($this->getTableName())
-                ->forUpdate(LockOption::Nowait)
-                ->execute();
-
-            return $callback();
-        });
+        // TODO Lock migration table
+        return $callback();
     }
 
     /**
