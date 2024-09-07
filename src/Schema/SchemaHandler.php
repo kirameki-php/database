@@ -19,11 +19,11 @@ readonly class SchemaHandler
 {
     /**
      * @param Connection $connection
-     * @param EventManager $events
+     * @param EventManager|null $events
      */
     public function __construct(
         public Connection $connection,
-        protected EventManager $events,
+        protected ?EventManager $events = null,
     )
     {
     }
@@ -138,7 +138,7 @@ readonly class SchemaHandler
      */
     protected function postprocess(SchemaResult $result): SchemaResult
     {
-        $this->events->emit(new SchemaExecuted($this->connection, $result));
+        $this->events?->emit(new SchemaExecuted($this->connection, $result));
         return $result;
     }
 }

@@ -20,12 +20,12 @@ readonly class QueryHandler
 {
     /**
      * @param Connection $connection
-     * @param EventManager $events
+     * @param EventManager|null $events
      * @param Tags|null $tags
      */
     public function __construct(
         public Connection $connection,
-        protected EventManager $events,
+        protected ?EventManager $events = null,
         protected ?Tags $tags = null,
     )
     {
@@ -149,7 +149,7 @@ readonly class QueryHandler
      */
     protected function postprocess(QueryResult $result): QueryResult
     {
-        $this->events->emit(new QueryExecuted($this->connection, $result));
+        $this->events?->emit(new QueryExecuted($this->connection, $result));
         return $result;
     }
 

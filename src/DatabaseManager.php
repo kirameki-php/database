@@ -36,12 +36,12 @@ class DatabaseManager
     public readonly string $default;
 
     /**
-     * @param EventManager $events
      * @param DatabaseConfig $config
+     * @param EventManager|null $events
      */
     public function __construct(
-        protected readonly EventManager $events,
         public readonly DatabaseConfig $config,
+        protected readonly ?EventManager $events = null,
     )
     {
         $this->default = $this->resolveDefaultConnectionName();

@@ -23,7 +23,7 @@ class Connection
     /**
      * @param string $name
      * @param Adapter<ConnectionConfig> $adapter
-     * @param EventManager $events
+     * @param EventManager|null $events
      * @param QueryHandler|null $queryHandler
      * @param SchemaHandler|null $schemaHandler
      * @param InfoHandler|null $infoHandler
@@ -32,7 +32,7 @@ class Connection
     public function __construct(
         public readonly string $name,
         public readonly Adapter $adapter,
-        protected readonly EventManager $events,
+        protected readonly ?EventManager $events = null,
         protected ?QueryHandler $queryHandler = null,
         protected ?SchemaHandler $schemaHandler = null,
         protected ?InfoHandler $infoHandler = null,
@@ -60,7 +60,7 @@ class Connection
             ]);
         }
         $this->adapter->connect();
-        $this->events->emit(new ConnectionEstablished($this));
+        $this->events?->emit(new ConnectionEstablished($this));
         return $this;
     }
 
@@ -161,7 +161,7 @@ class Connection
     {
         $this->connectIfNotConnected();
         $this->adapter->beginTransaction($level);
-        $this->events->emit(new TransactionBegan($this, $level));
+        $this->events?->emit(new TransactionBegan($this, $level));
         $this->transactionContext = new TransactionContext($this, $level);
     }
 
@@ -173,7 +173,7 @@ class Connection
         $context = $this->getTransactionContext();
         $context->runBeforeCommitCallbacks();
         $this->adapter->commit();
-        $this->events->emit(new TransactionCommitted($this));
+        $this->events?->emit(new TransactionCommitted($this));
         $context->runAfterCommitCallbacks();
     }
 
@@ -184,7 +184,7 @@ class Connection
     protected function rollbackAndThrow(Throwable $throwable): never
     {
         $this->adapter->rollback();
-        $this->events->emit(new TransactionRolledBack($this, $throwable));
+        $this->events?->emit(new TransactionRolledBack($this, $throwable));
         $this->getTransactionContext()->runAfterRollbackCallbacks();
         throw $throwable;
     }
