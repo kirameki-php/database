@@ -21,21 +21,12 @@ class ConnectionTest extends DatabaseTestCase
             $schema->bool('exists')->nullable();
             $schema->json('data')->nullable();
 //            $schema->primaryKey(['id', 'name']);
-            $schema->index(['first', 'second'])->unique();
-            $schema->index(['name']);
+            $schema->uniqueIndex('first', 'second');
+            $schema->index('name');
         });
     }
 
     public function test_tableExists(): void
     {
-        $this->createDummyTable('mysql');
-        $info = $this->mysqlConnection()->info()->getTableInfo('Dummy');
-        dump($info);
-//
-//        $this->createDummyTable('mysql');
-//        dump($this->mysqlConnection()->info()->getTable('Dummy'));
-//
-//        $this->sqliteConnection()->query()->select('*')->from('Dummy')->forceIndex('Dummy_name')->execute();
-//        $this->sqliteConnection()->query()->insertInto('Dummy')->execute();
     }
 }

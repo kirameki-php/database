@@ -97,7 +97,7 @@ class ConditionBuilder
             'not' => match (true) {
                 $value instanceof Range => $self->notInRange($value),
                 is_iterable($value) => $self->notIn($value),
-                default => $self->equals($value),
+                default => $self->notEquals($value),
             },
             'gt' => $self->greaterThan($value),
             'gte' => $self->greaterThanOrEqualTo($value),

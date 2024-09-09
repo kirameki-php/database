@@ -9,7 +9,8 @@
     "kirameki/cli": "dev-main",
     "kirameki/collections": "dev-main",
     "kirameki/core": "dev-main",
-    "kirameki/event": "dev-main"
+    "kirameki/event": "dev-main",
+    "kirameki/time": "dev-main"
   },
   "require-dev": {
     "kirameki/dumper": "dev-main",

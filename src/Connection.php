@@ -22,7 +22,7 @@ class Connection
 {
     /**
      * @param string $name
-     * @param Adapter<ConnectionConfig> $adapter
+     * @param Adapter<covariant ConnectionConfig> $adapter
      * @param EventManager|null $events
      * @param QueryHandler|null $queryHandler
      * @param SchemaHandler|null $schemaHandler

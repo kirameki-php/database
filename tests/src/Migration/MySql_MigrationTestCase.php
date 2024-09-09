@@ -2,9 +2,12 @@
 
 namespace Tests\Kirameki\Database\Migration;
 
-use Kirameki\Core\Config;
 use Kirameki\Database\Adapters\MySqlAdapter;
+use Kirameki\Database\Config\DatabaseConfig;
+use Kirameki\Database\Config\MySqlConfig;
 use Kirameki\Database\Connection;
+use Kirameki\Database\DatabaseManager;
+use Kirameki\Event\EventManager;
 use Tests\Kirameki\Database\DatabaseTestCase;
 
 class MySql_MigrationTestCase extends DatabaseTestCase
@@ -14,8 +17,7 @@ class MySql_MigrationTestCase extends DatabaseTestCase
      */
     protected function setUpDatabase(): void
     {
-        $adapter = $this->migrationConnection()->getAdapter();
-        $adapter->dropDatabase();
+        $adapter = $this->migrationConnection()->adapter;
         $adapter->createDatabase();
     }
 
@@ -24,14 +26,14 @@ class MySql_MigrationTestCase extends DatabaseTestCase
      */
     protected function tearDownDatabase(): void
     {
-        $this->migrationConnection()->getAdapter()->dropDatabase();
+        $this->migrationConnection()->adapter->dropDatabase();
     }
 
     protected function migrationConnection(): Connection
     {
-        $adapter = new MySqlAdapter(new Config(['host' => 'mysql', 'database' => 'migration_test']));
-        $connection = new Connection('migration_test', $adapter, event());
-        db()->addConnection($connection);
-        return $connection;
+        $events = new EventManager();
+        $dbConfig = new DatabaseConfig([]);
+        $adapter = new MySqlAdapter($dbConfig, new MySqlConfig('mysql'));
+        return new Connection('migration_test', $adapter, $events);
     }
 }

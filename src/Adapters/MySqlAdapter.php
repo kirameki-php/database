@@ -50,9 +50,10 @@ class MySqlAdapter extends PdoAdapter
         if ($socket !== null) {
             $parts[] = "unix_socket={$config->socket}";
         } else {
-            $part = "host={$config->host}";
-            $part .= $config->port !== null ? "port={$config->port}" : '';
-            $parts[] = $part;
+            $parts[] = "host={$config->host}";
+            if ($config->port !== null) {
+                $parts[] = "port={$config->port}";
+            }
         }
 
         if (!$this->omitDatabaseOnConnect) {

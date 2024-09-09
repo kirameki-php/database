@@ -35,7 +35,7 @@ class MySqlSchemaSyntax extends SchemaSyntax
         $changes = [];
         foreach ($statement->columns as $column) {
             if (is_int($column->autoIncrement)) {
-                $changes[] = "ALTER TABLE {$statement->table} AUTO_INCREMENT = {$column->autoIncrement}";
+                $changes[] = "ALTER TABLE {$this->asIdentifier($statement->table)} AUTO_INCREMENT = {$column->autoIncrement}";
             }
         }
         return $changes;

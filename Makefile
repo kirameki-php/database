@@ -21,7 +21,7 @@ logs:
 
 .PHONY: test
 test:
-	docker compose run --rm app phpunit
+	docker compose run --rm app /app/vendor/bin/phpunit
 
 .PHONY: analyse
 analyze:

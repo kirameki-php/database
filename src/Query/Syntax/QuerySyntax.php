@@ -52,6 +52,7 @@ use function array_merge;
 use function array_push;
 use function count;
 use function current;
+use function dump;
 use function explode;
 use function implode;
 use function is_array;
@@ -129,7 +130,13 @@ abstract class QuerySyntax extends Syntax
      */
     public function prepareParametersForSelect(SelectStatement $statement): array
     {
-        return $this->stringifyValues($this->getParametersForConditions($statement));
+        $parameters = $this->getParametersForConditions($statement);
+
+        foreach ($statement->having ?? [] as $condition) {
+            $this->addParametersForCondition($parameters, $condition);
+        }
+
+        return $this->stringifyValues($parameters);
     }
 
     /**
@@ -147,7 +154,7 @@ abstract class QuerySyntax extends Syntax
             $this->asIdentifier($statement->table),
             $this->formatDatasetColumnsPart($columns),
             'VALUES',
-            $this->formatDatasetValuesPart($statement->dataset, $columns),
+            $this->formatInsertDatasetValuesPart($statement->dataset, $columns),
             $this->formatReturningPart($statement->returning),
         ]));
     }
@@ -173,7 +180,7 @@ abstract class QuerySyntax extends Syntax
             $this->asIdentifier($statement->table),
             $this->formatDatasetColumnsPart($columns),
             'VALUES',
-            $this->formatDatasetValuesPart($statement->dataset, $columns),
+            $this->formatUpsertDatasetValuesPart($statement->dataset, $columns),
             $this->formatUpsertOnConflictPart($statement->onConflict),
             $this->formatUpsertUpdateSet($columns),
             $this->formatReturningPart($statement->returning),
@@ -413,24 +420,6 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param Dataset $dataset
-     * @param list<string> $columns
-     * @return string
-     */
-    protected function formatDatasetValuesPart(Dataset $dataset, array $columns): string
-    {
-        $placeholders = [];
-        foreach ($dataset as $data) {
-            $binders = [];
-            foreach ($columns as $column) {
-                $binders[] = array_key_exists($column, $data) ? '?' : 'DEFAULT';
-            }
-            $placeholders[] = $this->asEnclosedCsv($binders);
-        }
-        return $this->asCsv($placeholders);
-    }
-
-    /**
      * @param QueryStatement $statement
      * @param Dataset $dataset
      * @param list<string> $columns
@@ -457,6 +446,24 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
+     * @param Dataset $dataset
+     * @param list<string> $columns
+     * @return string
+     */
+    protected function formatInsertDatasetValuesPart(Dataset $dataset, array $columns): string
+    {
+        $placeholders = [];
+        foreach ($dataset as $data) {
+            $binders = [];
+            foreach ($columns as $column) {
+                $binders[] = array_key_exists($column, $data) ? '?' : 'DEFAULT';
+            }
+            $placeholders[] = $this->asEnclosedCsv($binders);
+        }
+        return $this->asCsv($placeholders);
+    }
+
+    /**
      * @param UpdateStatement $statement
      * @return string
      */
@@ -466,6 +473,16 @@ abstract class QuerySyntax extends Syntax
         $columns = array_keys($set);
         $assignments = array_map(fn(string $column): string => "{$this->asIdentifier($column)} = ?", $columns);
         return $this->asCsv($assignments);
+    }
+
+    /**
+     * @param Dataset $dataset
+     * @param list<string> $columns
+     * @return string
+     */
+    protected function formatUpsertDatasetValuesPart(Dataset $dataset, array $columns): string
+    {
+        return $this->formatInsertDatasetValuesPart($dataset, $columns);
     }
 
     /**

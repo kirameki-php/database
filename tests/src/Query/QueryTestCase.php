@@ -12,21 +12,21 @@ class QueryTestCase extends DatabaseTestCase
 {
     protected function selectBuilder(): SelectBuilder
     {
-        return new SelectBuilder($this->mysqlConnection());
+        return new SelectBuilder($this->mysqlConnection()->query());
     }
 
-    protected function insertBuilder(): InsertBuilder
+    protected function insertBuilder(string $table): InsertBuilder
     {
-        return new InsertBuilder($this->mysqlConnection());
+        return new InsertBuilder($this->mysqlConnection()->query(), $table);
     }
 
-    protected function updateBuilder(): UpdateBuilder
+    protected function updateBuilder(string $table): UpdateBuilder
     {
-        return new UpdateBuilder($this->mysqlConnection());
+        return new UpdateBuilder($this->mysqlConnection()->query(), $table);
     }
 
-    protected function deleteBuilder(): DeleteBuilder
+    protected function deleteBuilder(string $table): DeleteBuilder
     {
-        return new DeleteBuilder($this->mysqlConnection());
+        return new DeleteBuilder($this->mysqlConnection()->query(), $table);
     }
 }

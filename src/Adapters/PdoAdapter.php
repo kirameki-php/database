@@ -105,7 +105,7 @@ abstract class PdoAdapter extends Adapter
         try {
             $startTime = hrtime(true);
             $executables = $statement->toExecutable($this->getSchemaSyntax());
-            $this->getPdo()->exec(implode('; ', $executables));
+            $this->getPdo()->exec(implode(";\n", $executables));
             return $this->instantiateSchemaExecution($statement, $executables, $startTime);
         } catch (PDOException $e) {
             throw new SchemaException($e->getMessage(), $statement, $e);

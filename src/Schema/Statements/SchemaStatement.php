@@ -17,6 +17,6 @@ abstract class SchemaStatement
      */
     public function toString(SchemaSyntax $syntax): string
     {
-        return implode(';', $this->toExecutable($syntax)) . ';';
+        return implode(";\n", $this->toExecutable($syntax)) . ';';
     }
 }

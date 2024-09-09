@@ -11,6 +11,6 @@ class SchemaTestCase extends DatabaseTestCase
 
     protected function createTableBuilder(string $table): CreateTableBuilder
     {
-        return new CreateTableBuilder($this->mysqlConnection(), $table);
+        return new CreateTableBuilder($this->mysqlConnection()->schema(), $table);
     }
 }
