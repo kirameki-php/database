@@ -48,11 +48,9 @@ use function array_filter;
 use function array_key_exists;
 use function array_keys;
 use function array_map;
-use function array_merge;
 use function array_push;
 use function count;
 use function current;
-use function dump;
 use function explode;
 use function implode;
 use function is_array;
@@ -130,12 +128,10 @@ abstract class QuerySyntax extends Syntax
      */
     public function prepareParametersForSelect(SelectStatement $statement): array
     {
-        $parameters = $this->getParametersForConditions($statement);
-
-        foreach ($statement->having ?? [] as $condition) {
-            $this->addParametersForCondition($parameters, $condition);
-        }
-
+        $parameters = [];
+        $this->addParametersForJoins($parameters, $statement);
+        $this->addParametersForWhere($parameters, $statement);
+        $this->addParametersForHaving($parameters, $statement);
         return $this->stringifyValues($parameters);
     }
 
@@ -220,8 +216,8 @@ abstract class QuerySyntax extends Syntax
      */
     public function prepareParametersForUpdate(UpdateStatement $statement): array
     {
-        $set = $statement->set ?? throw new LogicException('No values to update', ['statement' => $statement]);
-        $parameters = array_merge($set, $this->getParametersForConditions($statement));
+        $parameters = $statement->set ?? throw new LogicException('No values to update', ['statement' => $statement]);
+        $this->addParametersForWhere($parameters, $statement);
         return $this->stringifyValues($parameters);
     }
 
@@ -252,7 +248,9 @@ abstract class QuerySyntax extends Syntax
      */
     public function prepareParametersForDelete(DeleteStatement $statement): array
     {
-        return $this->stringifyValues($this->getParametersForConditions($statement));
+        $parameters = [];
+        $this->addParametersForWhere($parameters, $statement);
+        return $this->stringifyValues($parameters);
     }
 
     /**
@@ -1047,18 +1045,51 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param ConditionsStatement $statement
-     * @return array<mixed>
+     * @param array<int, mixed> $parameters
+     * @param SelectStatement $statement
      */
-    protected function getParametersForConditions(ConditionsStatement $statement): array
+    protected function addParametersForJoins(array &$parameters, SelectStatement $statement): void
     {
-        $parameters = [];
-        if ($statement->where !== null) {
-            foreach ($statement->where as $cond) {
-                $this->addParametersForCondition($parameters, $cond);
-            }
+        if ($statement->joins !== null) {
+            $conditions = array_map(static fn(JoinDefinition $join) => $join->condition, $statement->joins);
+            $this->addParametersForConditions($parameters, $conditions);
         }
-        return $parameters;
+    }
+
+    /**
+     * @param array<int, mixed> $parameters
+     * @param ConditionsStatement $statement
+     * @return void
+     */
+    protected function addParametersForWhere(array &$parameters, ConditionsStatement $statement): void
+    {
+        if ($statement->where !== null) {
+            $this->addParametersForConditions($parameters, $statement->where);
+        }
+    }
+
+    /**
+     * @param array<int, mixed> $parameters
+     * @param SelectStatement $statement
+     * @return void
+     */
+    protected function addParametersForHaving(array &$parameters, SelectStatement $statement): void
+    {
+        if ($statement->having !== null) {
+            $this->addParametersForConditions($parameters, $statement->having);
+        }
+    }
+
+    /**
+     * @param array<int, mixed> $parameters
+     * @param iterable<int, ConditionDefinition> $conditions
+     * @return void
+     */
+    protected function addParametersForConditions(array &$parameters, iterable $conditions): void
+    {
+        foreach ($conditions as $condition) {
+            $this->addParametersForCondition($parameters, $condition);
+        }
     }
 
     /**

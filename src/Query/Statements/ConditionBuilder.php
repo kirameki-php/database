@@ -15,6 +15,7 @@ use Traversable;
 use function array_key_exists;
 use function assert;
 use function count;
+use function dump;
 use function is_iterable;
 use function iterator_to_array;
 

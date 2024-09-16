@@ -76,7 +76,7 @@ class SelectBuilderTest extends QueryTestCase
         $sql = $this->selectBuilder()->from('User AS u')
             ->join('Device AS d', fn(JoinBuilder $join) => $join->on('u.id', 'd.userId')->where('id', [1,2]))
             ->toString();
-        $this->assertSame("SELECT * FROM `User` AS `u` JOIN `Device` AS `d` ON `u`.`id` = `d`.`userId` AND `id` IN (?, ?)", $sql);
+        $this->assertSame("SELECT * FROM `User` AS `u` JOIN `Device` AS `d` ON (`u`.`id` = `d`.`userId` AND `id` IN (1, 2))", $sql);
     }
 
     public function test_joinOn(): void
@@ -126,7 +126,7 @@ class SelectBuilderTest extends QueryTestCase
 
     public function test_where_with_three_args(): void
     {
-        $sql = $this->selectBuilder()->from('User')->where('id', '=', 1)->toString();
+        $sql = $this->selectBuilder()->from('User')->where('id', eq: 1)->toString();
         $this->assertSame("SELECT * FROM `User` WHERE `id` = 1", $sql);
     }
 
