@@ -20,13 +20,9 @@ class ConnectionTest extends DatabaseTestCase
             $schema->string('second', 255)->nullable();
             $schema->bool('exists')->nullable();
             $schema->json('data')->nullable();
-//            $schema->primaryKey(['id', 'name']);
+            $schema->primaryKey(['id', 'name']);
             $schema->uniqueIndex('first', 'second');
             $schema->index('name');
         });
-    }
-
-    public function test_tableExists(): void
-    {
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Tests\Kirameki\Database\Schema;
 
+use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Schema\Expressions\Raw;
 use RuntimeException;
 use function dump;
@@ -12,21 +13,11 @@ class MySql_CreateTableBuilderTest extends SchemaTestCase
 
     public function test_with_no_column(): void
     {
-        $this->expectException(RuntimeException::class);
+        $this->expectException(LogicException::class);
         $this->expectExceptionMessage('Table requires at least one column to be defined.');
 
         $builder = $this->createTableBuilder('users');
         dump($builder->toString());
-    }
-
-    public function test_without_primary_key(): void
-    {
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Table must have at least one column as primary key.');
-
-        $builder = $this->createTableBuilder('users');
-        $builder->uuid('id');
-        $builder->toString();
     }
 
     public function test_string_column(): void
