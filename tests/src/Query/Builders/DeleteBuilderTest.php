@@ -11,18 +11,18 @@ class DeleteBuilderTest extends QueryTestCase
     public function test_deleteAll(): void
     {
         $sql = $this->deleteBuilder('User')->toString();
-        static::assertEquals("DELETE FROM `User`", $sql);
+        $this->assertSame("DELETE FROM `User`", $sql);
     }
 
     public function test_delete_with_where(): void
     {
         $sql = $this->deleteBuilder('User')->where('id', 1)->toString();
-        static::assertEquals("DELETE FROM `User` WHERE `id` = 1", $sql);
+        $this->assertSame("DELETE FROM `User` WHERE `id` = 1", $sql);
     }
 
     public function test_returning(): void
     {
         $sql = $this->deleteBuilder('User')->where('id', 1)->returning('id', 'name')->toString();
-        static::assertEquals("DELETE FROM `User` WHERE `id` = 1 RETURNING `id`, `name`", $sql);
+        $this->assertSame("DELETE FROM `User` WHERE `id` = 1 RETURNING `id`, `name`", $sql);
     }
 }
