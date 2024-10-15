@@ -3,21 +3,19 @@
 namespace Kirameki\Database\Query\Statements;
 
 use Closure;
+use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\InvalidArgumentException;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Value;
-use Kirameki\Database\Query\Expressions\Column;
 use Kirameki\Database\Query\Expressions\Expression;
 use Kirameki\Database\Query\Expressions\Raw;
 use Kirameki\Database\Query\Support\Operator;
 use Kirameki\Database\Query\Support\Range;
-use Traversable;
 use function array_key_exists;
 use function assert;
 use function count;
 use function dump;
 use function is_iterable;
-use function iterator_to_array;
 
 /**
  * @consistent-constructor
@@ -133,9 +131,9 @@ class ConditionBuilder
     }
 
     /**
-     * @param string|Column|null $column
+     * @param string|Expression|null $column
      */
-    protected function __construct(string|Column|null $column = null)
+    protected function __construct(string|Expression|null $column = null)
     {
         $this->root = $this->current = new ConditionDefinition($column);
         $this->defined = false;
@@ -287,7 +285,7 @@ class ConditionBuilder
     }
 
     /**
-     * @param iterable<mixed>|SelectBuilder $values
+     * @param iterable<array-key, mixed>|SelectBuilder $values
      * @return $this
      */
     public function in(iterable|SelectBuilder $values): static
@@ -295,9 +293,8 @@ class ConditionBuilder
         $_values = $this->toValue($values);
 
         if (is_iterable($_values)) {
-            $_values = ($_values instanceof Traversable) ? iterator_to_array($_values) : (array) $_values;
-            $_values = array_filter($_values, static fn($s) => $s !== null);
-            $_values = array_unique($_values);
+            $_values = Arr::without($_values, null);
+            $_values = Arr::unique($_values);
         }
 
         return $this->define(Operator::In, $_values);
@@ -426,8 +423,9 @@ class ConditionBuilder
     }
 
     /**
-     * @param mixed $var
-     * @return mixed
+     * @template TVar
+     * @param TVar|Closure(): TVar $var
+     * @return TVar
      */
     protected function toValue(mixed $var): mixed
     {

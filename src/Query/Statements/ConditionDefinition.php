@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Query\Statements;
 
-use Kirameki\Database\Query\Expressions\Column;
+use Kirameki\Database\Query\Expressions\Expression;
 use Kirameki\Database\Query\Support\Operator;
 
 class ConditionDefinition
@@ -33,10 +33,10 @@ class ConditionDefinition
     public ?self $next = null;
 
     /**
-     * @param string|Column|null $column
+     * @param string|Expression|null $column
      */
     public function __construct(
-        public string|Column|null $column = null,
+        public string|Expression|null $column = null,
     )
     {
     }
