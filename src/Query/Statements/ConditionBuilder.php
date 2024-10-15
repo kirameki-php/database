@@ -113,10 +113,10 @@ class ConditionBuilder
     }
 
     /**
-     * @param string|Expression $column
+     * @param string|iterable<int, string>|Expression $column
      * @return static
      */
-    public static function for(string|Expression $column): static
+    public static function for(string|iterable|Expression $column): static
     {
         return new static($column);
     }
@@ -131,9 +131,9 @@ class ConditionBuilder
     }
 
     /**
-     * @param string|Expression|null $column
+     * @param string|iterable<int, string>|Expression|null $column
      */
-    protected function __construct(string|Expression|null $column = null)
+    protected function __construct(string|iterable|Expression|null $column = null)
     {
         $this->root = $this->current = new ConditionDefinition($column);
         $this->defined = false;

@@ -660,10 +660,11 @@ abstract class QuerySyntax extends Syntax
     protected function formatConditionForOperator(string $column, string $operator, mixed $value): string
     {
         return $column . ' ' . $operator . ' ' . match (true) {
-                $value instanceof QueryStatement => $this->formatSubQuery($value),
-                $value instanceof Expression => $value->generateTemplate($this),
-                default => '?',
-            };
+            $value instanceof QueryStatement => $this->formatSubQuery($value),
+            $value instanceof Expression => $value->generateTemplate($this),
+            is_iterable($value) => $this->asEnclosedCsv(array_fill(0, Arr::count($value), '?')),
+            default => '?',
+        };
     }
 
     /**
@@ -1033,6 +1034,11 @@ abstract class QuerySyntax extends Syntax
 
         if (is_string($column)) {
             return $this->asColumn($column);
+        }
+
+        // for tuple comparison
+        if (is_iterable($column)) {
+            return $this->asCsv(array_map($this->asColumn(...), iterator_to_array($column)));
         }
 
         if ($column instanceof Column) {

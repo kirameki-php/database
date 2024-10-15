@@ -33,10 +33,10 @@ class ConditionDefinition
     public ?self $next = null;
 
     /**
-     * @param string|Expression|null $column
+     * @param string|iterable<int, string>|Expression|null $column
      */
     public function __construct(
-        public string|Expression|null $column = null,
+        public string|iterable|Expression|null $column = null,
     )
     {
     }
