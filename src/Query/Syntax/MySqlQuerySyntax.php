@@ -52,7 +52,7 @@ class MySqlQuerySyntax extends QuerySyntax
     #[Override]
     protected function formatUpsertUpdateSet(array $columns): string
     {
-        $columns = array_map($this->asIdentifier(...), $columns);
+        $columns = $this->asIdentifiers($columns);
         $columns = array_map(static fn(string $column): string => "{$column} = new.{$column}", $columns);
         return 'ON DUPLICATE KEY UPDATE' . implode(', ', $columns);
     }

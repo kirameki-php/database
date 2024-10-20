@@ -2,16 +2,12 @@
 
 namespace Kirameki\Database\Query\Syntax;
 
-use BackedEnum;
-use DateTimeInterface;
 use Iterator;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Exceptions\NotSupportedException;
 use Kirameki\Core\Exceptions\UnreachableException;
-use Kirameki\Core\Json;
 use Kirameki\Core\Value;
-use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Exceptions\DropProtectionException;
 use Kirameki\Database\Info\Statements\ListColumnsStatement;
 use Kirameki\Database\Info\Statements\ListForeignKeysStatement;
@@ -19,7 +15,6 @@ use Kirameki\Database\Info\Statements\ListIndexesStatement;
 use Kirameki\Database\Info\Statements\ListTablesStatement;
 use Kirameki\Database\Info\Statements\TableExistsStatement;
 use Kirameki\Database\Query\Expressions\Aggregate;
-use Kirameki\Database\Query\Expressions\Column;
 use Kirameki\Database\Query\Expressions\Expression;
 use Kirameki\Database\Query\Statements\CompoundDefinition;
 use Kirameki\Database\Query\Statements\ConditionDefinition;
@@ -43,7 +38,6 @@ use Kirameki\Database\Query\Support\Tags;
 use Kirameki\Database\Query\Support\TagsFormat;
 use Kirameki\Database\Syntax;
 use stdClass;
-use function array_fill;
 use function array_filter;
 use function array_key_exists;
 use function array_keys;
@@ -56,6 +50,7 @@ use function implode;
 use function is_array;
 use function is_bool;
 use function is_iterable;
+use function is_null;
 use function is_string;
 use function iterator_to_array;
 use function next;
@@ -78,6 +73,7 @@ abstract class QuerySyntax extends Syntax
     public function interpolate(string $template, array $parameters, ?Tags $tags = null): string
     {
         $parameters = $this->stringifyValues($parameters);
+        $parameters = Arr::flatten($parameters);
         $remains = count($parameters);
 
         $interpolated = (string) preg_replace_callback('/\?\??/', function($matches) use (&$parameters, &$remains) {
@@ -85,13 +81,14 @@ abstract class QuerySyntax extends Syntax
                 return '??';
             }
             if ($remains > 0) {
-                $current = current($parameters);
+                $value = current($parameters);
                 next($parameters);
                 $remains--;
                 return match (true) {
-                    is_bool($current) => $current ? 'TRUE' : 'FALSE',
-                    is_string($current) => $this->asLiteral($current),
-                    default => (string) $current,
+                    is_null($value) => 'NULL',
+                    is_bool($value) => $value ? 'TRUE' : 'FALSE',
+                    is_string($value) => $this->asLiteral($value),
+                    default => (string) $value,
                 };
             }
             throw new UnreachableException('No more parameters to interpolate');
@@ -303,11 +300,7 @@ abstract class QuerySyntax extends Syntax
             return '*';
         }
 
-        return $this->asCsv(array_map(function(string|Expression $column): string {
-            return ($column instanceof Expression)
-                ? $column->generateTemplate($this)
-                : $this->asColumn($column);
-        }, $columns));
+        return $this->asCsv(array_map($this->asColumn(...), $columns));
     }
 
     /**
@@ -493,7 +486,7 @@ abstract class QuerySyntax extends Syntax
         if (count($onConflict) === 0) {
             return $clause;
         }
-        return $clause . $this->asEnclosedCsv(array_map($this->asIdentifier(...), $onConflict));
+        return $clause . $this->asEnclosedCsv($this->asIdentifiers($onConflict));
     }
 
     /**
@@ -502,7 +495,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatUpsertUpdateSet(array $columns): string
     {
-        $columns = array_map($this->asIdentifier(...), $columns);
+        $columns = $this->asIdentifiers($columns);
         $columns = array_map(static fn(string $column): string => "{$column} = EXCLUDED.{$column}", $columns);
         return 'DO UPDATE SET ' . implode(', ', $columns);
     }
@@ -592,7 +585,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForEqual(ConditionDefinition $def): string
     {
-        $column = $this->getDefinedColumn($def);
+        $column = $this->asColumn($def->column);
         $operator = $def->negated ? '!=' : '=';
         $value = $def->value;
 
@@ -609,7 +602,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForLessThanOrEqualTo(ConditionDefinition $def): string
     {
-        $column = $this->getDefinedColumn($def);
+        $column = $this->asColumn($def->column);
         $operator = $def->negated ? '>' : '<=';
         $value = $def->value;
         return $this->formatConditionForOperator($column, $operator, $value);
@@ -621,7 +614,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForLessThan(ConditionDefinition $def): string
     {
-        $column = $this->getDefinedColumn($def);
+        $column = $this->asColumn($def->column);
         $operator = $def->negated ? '>=' : '<';
         $value = $def->value;
         return $this->formatConditionForOperator($column, $operator, $value);
@@ -633,7 +626,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForGreaterThanOrEqualTo(ConditionDefinition $def): string
     {
-        $column = $this->getDefinedColumn($def);
+        $column = $this->asColumn($def->column);
         $operator = $def->negated ? '<' : '>=';
         $value = $def->value;
         return $this->formatConditionForOperator($column, $operator, $value);
@@ -645,7 +638,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForGreaterThan(ConditionDefinition $def): string
     {
-        $column = $this->getDefinedColumn($def);
+        $column = $this->asColumn($def->column);
         $operator = $def->negated ? '<=' : '>';
         $value = $def->value;
         return $this->formatConditionForOperator($column, $operator, $value);
@@ -659,12 +652,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForOperator(string $column, string $operator, mixed $value): string
     {
-        return $column . ' ' . $operator . ' ' . match (true) {
-            $value instanceof QueryStatement => $this->formatSubQuery($value),
-            $value instanceof Expression => $value->generateTemplate($this),
-            is_iterable($value) => $this->asEnclosedCsv(array_fill(0, Arr::count($value), '?')),
-            default => '?',
-        };
+        return $column . ' ' . $operator . ' ' . $this->asPlaceholder($value);
     }
 
     /**
@@ -673,22 +661,22 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForIn(ConditionDefinition $def): string
     {
-        $column = $this->getDefinedColumn($def);
+        $column = $this->asColumn($def->column);
         $operator = $def->negated ? 'NOT IN' : 'IN';
         $value = $def->value;
 
+        if (is_iterable($value)) {
+            $value = iterator_to_array($value);
+        }
+
         if (is_array($value)) {
-            $size = count($value);
-            if ($size > 0) {
-                $enclosedCsv = $this->asEnclosedCsv(array_fill(0, $size, '?'));
-                return "{$column} {$operator} {$enclosedCsv}";
-            }
-            return '1 = 0';
+            return count($value) > 0
+                ? $this->formatConditionForOperator($column, $operator, $value)
+                : '1 = 0';
         }
 
         if ($value instanceof QueryStatement) {
-            $subQuery = $this->formatSubQuery($value);
-            return "{$column} {$operator} {$subQuery}";
+            return "{$column} {$operator} {$this->formatSubQuery($value)}";
         }
 
         throw new NotSupportedException('WHERE ' . $operator . ' value: ' . Value::getType($value), [
@@ -702,9 +690,11 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForBetween(ConditionDefinition $def): string
     {
-        $column = $this->getDefinedColumn($def);
+        $column = $this->asColumn($def->column);
         $operator = $def->negated ? 'NOT BETWEEN' : 'BETWEEN';
-        return "{$column} {$operator} ? AND ?";
+        $min = $this->asPlaceholder($def->value[0]);
+        $max = $this->asPlaceholder($def->value[1]);
+        return "{$column} {$operator} {$min} AND {$max}";
     }
 
     /**
@@ -713,13 +703,12 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForExists(ConditionDefinition $def): string
     {
-        $column = $this->getDefinedColumn($def);
+        $column = $this->asColumn($def->column);
         $operator = $def->negated ? 'NOT EXISTS' : 'EXISTS';
         $value = $def->value;
 
         if ($value instanceof QueryStatement) {
-            $subQuery = $this->formatSubQuery($value);
-            return "{$column} {$operator} {$subQuery}";
+            return "{$column} {$operator} {$this->formatSubQuery($value)}";
         }
 
         throw new NotSupportedException('WHERE ' . $operator . ' value: ' . Value::getType($value), [
@@ -733,9 +722,10 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForLike(ConditionDefinition $def): string
     {
-        $column = $this->getDefinedColumn($def);
+        $column = $this->asColumn($def->column);
         $operator = $def->negated ? 'NOT LIKE' : 'LIKE';
-        return "{$column} {$operator} ?";
+        $value = $def->value;
+        return $this->formatConditionForOperator($column, $operator, $value);
     }
 
     /**
@@ -744,10 +734,9 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForRange(ConditionDefinition $def): string
     {
-        $column = $this->getDefinedColumn($def);
+        $column = $this->asColumn($def->column);
         $negated = $def->negated;
         $value = $def->value;
-
         if ($value instanceof Range) {
             $lowerOperator = $negated
                 ? ($value->lowerClosed ? '<' : '<=')
@@ -862,9 +851,7 @@ abstract class QuerySyntax extends Syntax
             return '';
         }
 
-        $columns = array_map($this->asIdentifier(...), $returning);
-
-        return "RETURNING {$this->asCsv($columns)}";
+        return "RETURNING {$this->asCsv($this->asIdentifiers($returning))}";
     }
 
     /**
@@ -893,7 +880,7 @@ abstract class QuerySyntax extends Syntax
 
         $parts = [];
         if ($aggregate->partitionBy) {
-            $parts[] = 'PARTITION BY ' . $this->asCsv(array_map($this->asIdentifier(...), $aggregate->partitionBy));
+            $parts[] = 'PARTITION BY ' . $this->asCsv($this->asIdentifiers($aggregate->partitionBy));
         }
         if ($aggregate->orderBy !== null) {
             $clauses = [];
@@ -974,7 +961,7 @@ abstract class QuerySyntax extends Syntax
         }
 
         $name = str_contains($name, '.')
-            ? implode('.', array_map($this->asIdentifier(...), explode('.', $name)))
+            ? implode('.', $this->asIdentifiers(explode('.', $name)))
             : $this->asIdentifier($name);
 
         if ($as !== null) {
@@ -984,70 +971,73 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param string $name
+     * @param mixed $name
      * @param bool $withAlias
      * @return string
      */
-    public function asColumn(string $name, bool $withAlias = false): string
+    public function asColumn(mixed $name, bool $withAlias = false): string
     {
-        $table = null;
-        $as = null;
-        if (preg_match('/(\.| as | AS )/', $name)) {
-            $dlm = preg_quote($this->identifierDelimiter);
-            $patterns = [];
-            $patterns[] = '(' . $dlm . '?(?<table>[^\.' . $dlm . ']+)' . $dlm . '?\.)?';
-            $patterns[] = $dlm . '?(?<column>[^ ' . $dlm . ']+)' . $dlm . '?';
-            if ($withAlias) {
-                $patterns[] = '( (AS|as) ' . $dlm . '?(?<as>[^' . $dlm . ']+)' . $dlm . '?)?';
+        if ($name instanceof Expression) {
+            return $name->generateTemplate($this);
+        }
+
+        if (is_iterable($name)) {
+            return $this->asEnclosedCsv(array_map($this->asColumn(...), iterator_to_array($name)));
+        }
+
+        if (is_string($name)) {
+            $table = null;
+            $as = null;
+            if (preg_match('/(\.| as | AS )/', $name)) {
+                $dlm = preg_quote($this->identifierDelimiter);
+                $patterns = [];
+                $patterns[] = '(' . $dlm . '?(?<table>[^\.' . $dlm . ']+)' . $dlm . '?\.)?';
+                $patterns[] = $dlm . '?(?<column>[^ ' . $dlm . ']+)' . $dlm . '?';
+                if ($withAlias) {
+                    $patterns[] = '( (AS|as) ' . $dlm . '?(?<as>[^' . $dlm . ']+)' . $dlm . '?)?';
+                }
+                $pattern = '/^' . implode('', $patterns) . '$/';
+                $match = null;
+                if (preg_match($pattern, $name, $match)) {
+                    $table = $match['table'] !== '' ? $match['table'] : null;
+                    $name = $match['column'];
+                    $as = $match['as'] ?? null;
+                }
             }
-            $pattern = '/^' . implode('', $patterns) . '$/';
-            $match = null;
-            if (preg_match($pattern, $name, $match)) {
-                $table = $match['table'] !== '' ? $match['table'] : null;
-                $name = $match['column'];
-                $as = $match['as'] ?? null;
+            if ($name !== '*') {
+                $name = $this->asIdentifier($name);
             }
+            if ($table !== null) {
+                $name = $this->asIdentifier($table) . '.' . $name;
+            }
+            if ($as !== null) {
+                $name .= ' AS ' . $this->asIdentifier($as);
+            }
+            return $name;
         }
 
-        if ($name !== '*') {
-            $name = $this->asIdentifier($name);
-        }
-
-        if ($table !== null) {
-            $name = $this->asIdentifier($table) . '.' . $name;
-        }
-
-        if ($as !== null) {
-            $name .= ' AS ' . $this->asIdentifier($as);
-        }
-
-        return $name;
+        throw new NotSupportedException('Unknown column type: ' . Value::getType($name));
     }
 
     /**
-     * @param ConditionDefinition $def
+     * @param mixed $value
      * @return string
      */
-    protected function getDefinedColumn(ConditionDefinition $def): string
+    protected function asPlaceholder(mixed $value): string
     {
-        $column = $def->column;
-
-        if (is_string($column)) {
-            return $this->asColumn($column);
+        if ($value instanceof Expression) {
+            return $value->generateTemplate($this);
         }
 
-        // for tuple comparison
-        if (is_iterable($column)) {
-            return $this->asCsv(array_map($this->asColumn(...), iterator_to_array($column)));
+        if ($value instanceof QueryStatement) {
+            return $this->formatSubQuery($value);
         }
 
-        if ($column instanceof Column) {
-            return $column->generateTemplate($this);
+        if (is_iterable($value)) {
+            return $this->asEnclosedCsv(array_map($this->asPlaceholder(...), iterator_to_array($value)));
         }
 
-        throw new NotSupportedException('Unknown column type: ' . Value::getType($column), [
-            'definition' => $def,
-        ]);
+        return '?';
     }
 
     /**
@@ -1115,40 +1105,6 @@ abstract class QuerySyntax extends Syntax
             };
             $def = $def->next;
         }
-    }
-
-    /**
-     * @param iterable<array-key, mixed> $parameters
-     * @return array<mixed>
-     */
-    protected function stringifyValues(iterable $parameters): array
-    {
-        $strings = [];
-        foreach ($parameters as $name => $parameter) {
-            $strings[$name] = $this->stringifyValue($parameter);
-        }
-        return $strings;
-    }
-
-    /**
-     * @param mixed $value
-     * @return mixed
-     */
-    protected function stringifyValue(mixed $value): mixed
-    {
-        if (is_iterable($value)) {
-            return Json::encode(iterator_to_array($value));
-        }
-
-        if ($value instanceof DateTimeInterface) {
-            return $value->format($this->dateTimeFormat);
-        }
-
-        if ($value instanceof BackedEnum) {
-            return $value->value;
-        }
-
-        return $value;
     }
 
     /**

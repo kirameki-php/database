@@ -4,9 +4,9 @@ namespace Kirameki\Database;
 
 use BackedEnum;
 use DateTimeInterface;
-use Kirameki\Core\Json;
 use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
+use function array_map;
 use function implode;
 use function is_iterable;
 use function iterator_to_array;
@@ -42,6 +42,15 @@ abstract class Syntax
     }
 
     /**
+     * @param iterable<int, string> $strings
+     * @return list<string>
+     */
+    public function asIdentifiers(iterable $strings): array
+    {
+        return array_map($this->asIdentifier(...), iterator_to_array($strings));
+    }
+
+    /**
      * @param string $string
      * @return string
      */
@@ -65,18 +74,18 @@ abstract class Syntax
      * @param array<scalar> $values
      * @return string
      */
-    protected function asEnclosedCsv(array $values): string
+    protected function asCsv(array $values): string
     {
-        return '(' . $this->asCsv($values) . ')';
+        return implode(', ', $values);
     }
 
     /**
      * @param array<scalar> $values
      * @return string
      */
-    protected function asCsv(array $values): string
+    protected function asEnclosedCsv(array $values): string
     {
-        return implode(', ', $values);
+        return '(' . $this->asCsv($values) . ')';
     }
 
     /**
@@ -99,7 +108,7 @@ abstract class Syntax
     protected function stringifyValue(mixed $value): mixed
     {
         if (is_iterable($value)) {
-            return Json::encode(iterator_to_array($value));
+            return $this->stringifyValues($value);
         }
 
         if ($value instanceof DateTimeInterface) {

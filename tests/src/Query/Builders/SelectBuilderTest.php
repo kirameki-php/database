@@ -157,6 +157,12 @@ class SelectBuilderTest extends QueryTestCase
         $this->assertSame("SELECT * FROM `User` AS `u`, `Device` AS `d` WHERE `u`.`id` = `d`.`userId`", $sql);
     }
 
+    public function test_where_tuple(): void
+    {
+        $sql = $this->selectBuilder()->from('User')->where(['id', 'status'], [[1, 1], [2, 3]])->toString();
+        $this->assertSame("SELECT * FROM `User` WHERE (`id`, `status`) IN ((1, 1), (2, 3))", $sql);
+    }
+
     public function test_orderBy(): void
     {
         $sql = $this->selectBuilder()->from('User')->where('id', 1)->orderBy('id')->toString();
