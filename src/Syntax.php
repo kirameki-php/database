@@ -89,14 +89,14 @@ abstract class Syntax
     }
 
     /**
-     * @param iterable<array-key, mixed> $parameters
-     * @return array<mixed>
+     * @param iterable<array-key, mixed> $values
+     * @return array<array-key, mixed>
      */
-    protected function stringifyValues(iterable $parameters): array
+    protected function stringifyParameters(iterable $values): array
     {
         $strings = [];
-        foreach ($parameters as $name => $parameter) {
-            $strings[$name] = $this->stringifyValue($parameter);
+        foreach ($values as $name => $value) {
+            $strings[$name] = $this->stringifyParameter($value);
         }
         return $strings;
     }
@@ -105,10 +105,10 @@ abstract class Syntax
      * @param mixed $value
      * @return mixed
      */
-    protected function stringifyValue(mixed $value): mixed
+    protected function stringifyParameter(mixed $value): mixed
     {
         if (is_iterable($value)) {
-            return $this->stringifyValues($value);
+            return $this->stringifyParameters($value);
         }
 
         if ($value instanceof DateTimeInterface) {

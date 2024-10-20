@@ -72,7 +72,7 @@ abstract class QuerySyntax extends Syntax
      */
     public function interpolate(string $template, array $parameters, ?Tags $tags = null): string
     {
-        $parameters = $this->stringifyValues($parameters);
+        $parameters = $this->stringifyParameters($parameters);
         $parameters = Arr::flatten($parameters);
         $remains = count($parameters);
 
@@ -132,7 +132,7 @@ abstract class QuerySyntax extends Syntax
         $this->addParametersForJoins($parameters, $statement);
         $this->addParametersForWhere($parameters, $statement);
         $this->addParametersForHaving($parameters, $statement);
-        return $this->stringifyValues($parameters);
+        return $this->stringifyParameters($parameters);
     }
 
     /**
@@ -218,7 +218,7 @@ abstract class QuerySyntax extends Syntax
     {
         $parameters = $statement->set ?? throw new LogicException('No values to update', ['statement' => $statement]);
         $this->addParametersForWhere($parameters, $statement);
-        return $this->stringifyValues($parameters);
+        return $this->stringifyParameters($parameters);
     }
 
     /**
@@ -250,7 +250,7 @@ abstract class QuerySyntax extends Syntax
     {
         $parameters = [];
         $this->addParametersForWhere($parameters, $statement);
-        return $this->stringifyValues($parameters);
+        return $this->stringifyParameters($parameters);
     }
 
     /**
@@ -318,9 +318,10 @@ abstract class QuerySyntax extends Syntax
             return '';
         }
 
-        return ($type === LockType::Exclusive)
-            ? $type->value . $this->formatSelectLockOptionPart($lock->option)
-            : $type->value;
+        return match($type) {
+            LockType::Exclusive => $type->value . $this->formatSelectLockOptionPart($lock->option),
+            LockType::Shared => $type->value,
+        };
     }
 
     /**
@@ -436,7 +437,7 @@ abstract class QuerySyntax extends Syntax
                 }
             }
         }
-        return $this->stringifyValues($parameters);
+        return $this->stringifyParameters($parameters);
     }
 
     /**
@@ -1039,7 +1040,7 @@ abstract class QuerySyntax extends Syntax
         return match (true) {
             $value instanceof Expression => $value->generateTemplate($this),
             $value instanceof QueryStatement => $this->formatSubQuery($value),
-            is_iterable($value) => $this->asEnclosedCsv($this->asPlaceholders($value)),
+            is_iterable($value) => $this->asEnclosedCsv($this->asParameterPlaceholders($value)),
             default => '?',
         };
     }
@@ -1048,9 +1049,9 @@ abstract class QuerySyntax extends Syntax
      * @param iterable<int, mixed> $values
      * @return list<string>
      */
-    protected function asPlaceHolders(iterable $values): array
+    protected function asParameterPlaceholders(iterable $values): array
     {
-        return array_map($this->asPlaceHolder(...), iterator_to_array($values));
+        return array_map($this->asPlaceholder(...), iterator_to_array($values));
     }
 
     /**
