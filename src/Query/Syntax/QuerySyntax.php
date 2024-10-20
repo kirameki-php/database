@@ -300,7 +300,7 @@ abstract class QuerySyntax extends Syntax
             return '*';
         }
 
-        return $this->asCsv(array_map($this->asColumn(...), $columns));
+        return $this->asCsv($this->asColumns($columns));
     }
 
     /**
@@ -407,7 +407,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatDatasetColumnsPart(array $columns): string
     {
-        return $this->asEnclosedCsv(array_map($this->asColumn(...), $columns));
+        return $this->asEnclosedCsv($this->asColumns($columns));
     }
 
     /**
@@ -585,7 +585,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForEqual(ConditionDefinition $def): string
     {
-        $column = $this->asColumn($def->column);
+        $column = $this->asColumn($def->column, true);
         $operator = $def->negated ? '!=' : '=';
         $value = $def->value;
 
@@ -602,7 +602,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForLessThanOrEqualTo(ConditionDefinition $def): string
     {
-        $column = $this->asColumn($def->column);
+        $column = $this->asColumn($def->column, true);
         $operator = $def->negated ? '>' : '<=';
         $value = $def->value;
         return $this->formatConditionForOperator($column, $operator, $value);
@@ -614,7 +614,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForLessThan(ConditionDefinition $def): string
     {
-        $column = $this->asColumn($def->column);
+        $column = $this->asColumn($def->column, true);
         $operator = $def->negated ? '>=' : '<';
         $value = $def->value;
         return $this->formatConditionForOperator($column, $operator, $value);
@@ -626,7 +626,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForGreaterThanOrEqualTo(ConditionDefinition $def): string
     {
-        $column = $this->asColumn($def->column);
+        $column = $this->asColumn($def->column, true);
         $operator = $def->negated ? '<' : '>=';
         $value = $def->value;
         return $this->formatConditionForOperator($column, $operator, $value);
@@ -638,7 +638,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForGreaterThan(ConditionDefinition $def): string
     {
-        $column = $this->asColumn($def->column);
+        $column = $this->asColumn($def->column, true);
         $operator = $def->negated ? '<=' : '>';
         $value = $def->value;
         return $this->formatConditionForOperator($column, $operator, $value);
@@ -661,7 +661,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForIn(ConditionDefinition $def): string
     {
-        $column = $this->asColumn($def->column);
+        $column = $this->asColumn($def->column, true);
         $operator = $def->negated ? 'NOT IN' : 'IN';
         $value = $def->value;
 
@@ -690,7 +690,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForBetween(ConditionDefinition $def): string
     {
-        $column = $this->asColumn($def->column);
+        $column = $this->asColumn($def->column, true);
         $operator = $def->negated ? 'NOT BETWEEN' : 'BETWEEN';
         $min = $this->asPlaceholder($def->value[0]);
         $max = $this->asPlaceholder($def->value[1]);
@@ -703,7 +703,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForExists(ConditionDefinition $def): string
     {
-        $column = $this->asColumn($def->column);
+        $column = $this->asColumn($def->column, true);
         $operator = $def->negated ? 'NOT EXISTS' : 'EXISTS';
         $value = $def->value;
 
@@ -722,7 +722,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForLike(ConditionDefinition $def): string
     {
-        $column = $this->asColumn($def->column);
+        $column = $this->asColumn($def->column, true);
         $operator = $def->negated ? 'NOT LIKE' : 'LIKE';
         $value = $def->value;
         return $this->formatConditionForOperator($column, $operator, $value);
@@ -734,7 +734,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForRange(ConditionDefinition $def): string
     {
-        $column = $this->asColumn($def->column);
+        $column = $this->asColumn($def->column, true);
         $negated = $def->negated;
         $value = $def->value;
         if ($value instanceof Range) {
@@ -769,10 +769,9 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatGroupByPart(SelectStatement $statement): string
     {
-        if ($statement->groupBy === null) {
-            return '';
-        }
-        return 'GROUP BY ' . $this->asCsv(array_map($this->asColumn(...), $statement->groupBy));
+        return $statement->groupBy !== null
+            ? 'GROUP BY ' . $this->asCsv($this->asColumns($statement->groupBy))
+            : '';
     }
 
     /**
@@ -982,7 +981,7 @@ abstract class QuerySyntax extends Syntax
         }
 
         if (is_iterable($name)) {
-            return $this->asEnclosedCsv(array_map($this->asColumn(...), iterator_to_array($name)));
+            return $this->asEnclosedCsv($this->asColumns($name));
         }
 
         if (is_string($name)) {
@@ -1020,24 +1019,35 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
+     * @param iterable<int, mixed> $columns
+     * @return list<string>
+     */
+    protected function asColumns(iterable $columns): array
+    {
+        return array_map($this->asColumn(...), iterator_to_array($columns));
+    }
+
+    /**
      * @param mixed $value
      * @return string
      */
     protected function asPlaceholder(mixed $value): string
     {
-        if ($value instanceof Expression) {
-            return $value->generateTemplate($this);
-        }
+        return match (true) {
+            $value instanceof Expression => $value->generateTemplate($this),
+            $value instanceof QueryStatement => $this->formatSubQuery($value),
+            is_iterable($value) => $this->asEnclosedCsv($this->asPlaceholders($value)),
+            default => '?',
+        };
+    }
 
-        if ($value instanceof QueryStatement) {
-            return $this->formatSubQuery($value);
-        }
-
-        if (is_iterable($value)) {
-            return $this->asEnclosedCsv(array_map($this->asPlaceholder(...), iterator_to_array($value)));
-        }
-
-        return '?';
+    /**
+     * @param iterable<int, mixed> $values
+     * @return list<string>
+     */
+    protected function asPlaceHolders(iterable $values): array
+    {
+        return array_map($this->asPlaceHolder(...), iterator_to_array($values));
     }
 
     /**
