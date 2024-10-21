@@ -5,6 +5,7 @@ namespace Kirameki\Database\Schema\Syntax;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\InvalidTypeException;
 use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Core\Func;
 use Kirameki\Core\Value;
 use Kirameki\Database\Exceptions\DropProtectionException;
 use Kirameki\Database\Schema\Expressions\DefaultValue;
@@ -62,7 +63,7 @@ abstract class SchemaSyntax extends Syntax
         $subParts[] = $this->formatCreateTablePrimaryKeyPart($statement);
         $subParts[] = $this->formatCreateTableIndexParts($statement);
         $subParts[] = $this->formatCreateTableForeignKeyParts($statement);
-        $parts[] = $this->asEnclosedCsv(array_filter(Arr::flatten($subParts), fn($v) => $v !== null));
+        $parts[] = $this->asEnclosedCsv(array_filter(Arr::flatten($subParts), Func::notNull()));
         return implode(' ', $parts);
     }
 
@@ -143,7 +144,7 @@ abstract class SchemaSyntax extends Syntax
         $parts[] = $this->formatColumnDefinition($action->definition);
         $parts[] = $action->positionType;
         $parts[] = $action->positionColumn;
-        return implode(' ', array_filter($parts));
+        return $this->concat($parts);
     }
 
     /**

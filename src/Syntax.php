@@ -4,13 +4,17 @@ namespace Kirameki\Database;
 
 use BackedEnum;
 use DateTimeInterface;
+use Kirameki\Core\Func;
 use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
+use function array_filter;
 use function array_map;
+use function dump;
 use function implode;
 use function is_iterable;
 use function iterator_to_array;
 use function str_replace;
+use function trim;
 
 abstract class Syntax
 {
@@ -120,5 +124,14 @@ abstract class Syntax
         }
 
         return $value;
+    }
+
+    /**
+     * @param list<string|null> $parts
+     * @return string
+     */
+    protected function concat(array $parts): string
+    {
+        return implode(' ', array_filter($parts, static fn($p): bool => $p !== null && trim($p) !== ''));
     }
 }

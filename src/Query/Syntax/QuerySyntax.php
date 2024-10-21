@@ -38,7 +38,6 @@ use Kirameki\Database\Query\Support\Tags;
 use Kirameki\Database\Query\Support\TagsFormat;
 use Kirameki\Database\Syntax;
 use stdClass;
-use function array_filter;
 use function array_key_exists;
 use function array_keys;
 use function array_map;
@@ -106,7 +105,7 @@ abstract class QuerySyntax extends Syntax
      */
     public function prepareTemplateForSelect(SelectStatement $statement): string
     {
-        $query = implode(' ', array_filter([
+        $query = $this->concat([
             $this->formatWithPart($statement),
             $this->formatSelectPart($statement),
             $this->formatFromPart($statement),
@@ -117,7 +116,7 @@ abstract class QuerySyntax extends Syntax
             $this->formatOrderByPart($statement->orderBy),
             $this->formatLimitPart($statement->limit),
             $this->formatOffsetPart($statement->offset),
-        ]));
+        ]);
 
         return $this->formatCompoundPart($query, $statement->compound);
     }
@@ -146,13 +145,13 @@ abstract class QuerySyntax extends Syntax
             return "INSERT INTO {$this->asIdentifier($statement->table)} DEFAULT VALUES";
         }
 
-        return 'INSERT INTO ' . implode(' ', array_filter([
+        return 'INSERT INTO ' . $this->concat([
             $this->asIdentifier($statement->table),
             $this->formatDatasetColumnsPart($columns),
             'VALUES',
             $this->formatInsertDatasetValuesPart($statement->dataset, $columns),
             $this->formatReturningPart($statement->returning),
-        ]));
+        ]);
     }
 
     /**
@@ -172,7 +171,7 @@ abstract class QuerySyntax extends Syntax
      */
     public function prepareTemplateForUpsert(UpsertStatement $statement, array $columns): string
     {
-        return 'INSERT INTO ' . implode(' ', array_filter([
+        return 'INSERT INTO ' . $this->concat([
             $this->asIdentifier($statement->table),
             $this->formatDatasetColumnsPart($columns),
             'VALUES',
@@ -180,7 +179,7 @@ abstract class QuerySyntax extends Syntax
             $this->formatUpsertOnConflictPart($statement->onConflict),
             $this->formatUpsertUpdateSet($columns),
             $this->formatReturningPart($statement->returning),
-        ]));
+        ]);
     }
 
     /**
@@ -199,7 +198,7 @@ abstract class QuerySyntax extends Syntax
      */
     public function prepareTemplateForUpdate(UpdateStatement $statement): string
     {
-        return implode(' ', array_filter([
+        return $this->concat([
             $this->formatWithPart($statement),
             'UPDATE',
             $this->asIdentifier($statement->table),
@@ -207,7 +206,7 @@ abstract class QuerySyntax extends Syntax
             $this->formatUpdateAssignmentsPart($statement),
             $this->formatConditionsPart($statement),
             $this->formatReturningPart($statement->returning),
-        ]));
+        ]);
     }
 
     /**
@@ -233,13 +232,13 @@ abstract class QuerySyntax extends Syntax
             ]);
         }
 
-        return implode(' ', array_filter([
+        return $this->concat([
             $this->formatWithPart($statement),
             'DELETE FROM',
             $this->asIdentifier($statement->table),
             $this->formatConditionsPart($statement),
             $this->formatReturningPart($statement->returning),
-        ]));
+        ]);
     }
 
     /**
@@ -270,12 +269,12 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatWithDefinition(WithDefinition $with): string
     {
-        return implode(' ', array_filter([
+        return $this->concat([
             $this->asIdentifier($with->name),
             $with->recursive ? 'RECURSIVE' : null,
             'AS',
             $this->formatSubQuery($with->statement),
-        ]));
+        ]);
     }
 
     /**
@@ -284,11 +283,11 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatSelectPart(SelectStatement $statement): string
     {
-        return 'SELECT ' . implode(' ', array_filter([
+        return 'SELECT ' . $this->concat([
             $statement->distinct ? 'DISTINCT' : null,
             $this->formatSelectColumnsPart($statement),
             $this->formatSelectLockPart($statement->lock),
-        ]));
+        ]);
     }
 
     /**
@@ -348,10 +347,10 @@ abstract class QuerySyntax extends Syntax
         if (count($expressions) === 0) {
             return '';
         }
-        return 'FROM ' . implode(' ', array_filter([
+        return 'FROM ' . $this->concat([
             $this->asCsv($expressions),
             $this->formatFromUseIndexPart($statement),
-        ]));
+        ]);
     }
 
     /**
@@ -391,13 +390,13 @@ abstract class QuerySyntax extends Syntax
             return $query;
         }
 
-        return implode(' ', array_filter([
+        return $this->concat([
             $this->formatCompoundTemplate($query),
             $compound->operator->value,
             $this->formatCompoundTemplate($this->prepareTemplateForSelect($compound->query)),
             $this->formatOrderByPart($compound->orderBy),
             $this->formatLimitPart($compound->limit),
-        ]));
+        ]);
     }
 
     protected function formatCompoundTemplate(string $query): string
@@ -510,11 +509,11 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionsPart(ConditionsStatement $statement): string
     {
-        return implode(' ', array_filter([
+        return $this->concat([
             $this->formatWherePart($statement),
             $this->formatOrderByPart($statement->orderBy),
             $this->formatLimitPart($statement->limit),
-        ]));
+        ]);
     }
 
     /**
@@ -800,11 +799,11 @@ abstract class QuerySyntax extends Syntax
         }
         $clauses = [];
         foreach ($orderBy as $column => $ordering) {
-            $clauses[] = implode(' ', array_filter([
+            $clauses[] = $this->concat([
                 $this->asIdentifier($column),
                 $this->formatSortOrderingPart($column, $ordering),
                 $this->formatNullOrderingPart($column, $ordering),
-            ]));
+            ]);
         }
         return 'ORDER BY ' . $this->asCsv($clauses);
     }
@@ -863,12 +862,12 @@ abstract class QuerySyntax extends Syntax
      */
     public function formatAggregate(Aggregate $aggregate): string
     {
-        return implode(' ', array_filter([
+        return $this->concat([
             $aggregate->function,
             $aggregate->column !== null ? $this->asColumn($aggregate->column) : null,
             $this->formatWindowFunction($aggregate),
             $aggregate->as !== null ? 'AS ' . $this->asIdentifier($aggregate->as) : null,
-        ]));
+        ]);
     }
 
     /**
@@ -888,11 +887,11 @@ abstract class QuerySyntax extends Syntax
         if ($aggregate->orderBy !== null) {
             $clauses = [];
             foreach ($aggregate->orderBy as $column => $ordering) {
-                $clauses[] = implode(' ', array_filter([
+                $clauses[] = $this->concat([
                     $this->asIdentifier($column),
                     $this->formatSortOrderingPart($column, $ordering),
                     $this->formatNullOrderingPart($column, $ordering),
-                ]));
+                ]);
             }
             $parts[] = 'ORDER BY ' . $this->asCsv($clauses);
         }

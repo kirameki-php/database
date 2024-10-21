@@ -11,7 +11,6 @@ use Kirameki\Database\Query\Support\Dataset;
 use Kirameki\Database\Query\Support\NullOrder;
 use Kirameki\Database\Query\Support\Ordering;
 use Override;
-use function array_filter;
 use function array_map;
 use function implode;
 
@@ -68,12 +67,12 @@ class MySqlQuerySyntax extends QuerySyntax
         }
         $clauses = [];
         foreach ($orderBy as $column => $ordering) {
-            $clauses[] = implode(' ', array_filter([
+            $clauses[] = $this->concat([
                 $this->asIdentifier($column),
                 // For MySQL, the null ordering has to come before the sort order.
                 $this->formatNullOrderingPart($column, $ordering),
                 $this->formatSortOrderingPart($column, $ordering),
-            ]));
+            ]);
         }
 
         return "ORDER BY {$this->asCsv($clauses)}";
