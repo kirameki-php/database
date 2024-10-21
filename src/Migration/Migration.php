@@ -26,6 +26,8 @@ use function str_replace;
  */
 abstract class Migration
 {
+    protected DatabaseManager $db;
+
     /**
      * @var string|null
      */
@@ -37,12 +39,14 @@ abstract class Migration
     private ?array $schemaResults = null;
 
     /**
+     * @internal For internal use only
      * @param DatabaseManager $db
+     * @return static
      */
-    public function __construct(
-        protected readonly DatabaseManager $db,
-    )
+    public function setDatabaseManager(DatabaseManager $db): static
     {
+        $this->db = $db;
+        return $this;
     }
 
     /**

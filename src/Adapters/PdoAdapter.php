@@ -20,6 +20,7 @@ use Override;
 use PDO;
 use PDOException;
 use PDOStatement;
+use function array_map;
 use function assert;
 use function hrtime;
 use function implode;
@@ -105,7 +106,7 @@ abstract class PdoAdapter extends Adapter
         try {
             $startTime = hrtime(true);
             $executables = $statement->toExecutable($this->getSchemaSyntax());
-            $this->getPdo()->exec(implode(";\n", $executables));
+            array_map($this->getPdo()->exec(...), $executables);
             return $this->instantiateSchemaExecution($statement, $executables, $startTime);
         } catch (PDOException $e) {
             throw new SchemaException($e->getMessage(), $statement, $e);

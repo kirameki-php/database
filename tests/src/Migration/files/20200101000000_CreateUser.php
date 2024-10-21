@@ -3,22 +3,22 @@
 use Kirameki\Database\Migration\Migration;
 use Kirameki\Database\Schema\Statements\CreateTableBuilder;
 
-class CreateUser extends Migration
+return new class extends Migration
 {
+    protected ?string $connection = 'migration_test';
+
     public function forward(): void
     {
-        $this->use('migration_test')
-            ->createTable('User')->tap(function(CreateTableBuilder $t) {
-                $t->uuid('id')->primaryKey()->nullable();
-                $t->string('name', 100)->default('Anonymous');
-                $t->timestamps();
-                $t->index('name')->unique();
-            });
+        $this->createTable('User', function(CreateTableBuilder $t) {
+            $t->uuid('id')->primaryKey()->nullable();
+            $t->string('name', 100)->default('Anonymous');
+            $t->timestamps();
+            $t->uniqueIndex('name');
+        });
     }
 
     public function backward(): void
     {
-        $this->use('migration_test')
-            ->dropTable('User');
+        $this->dropTable('User');
     }
-}
+};

@@ -6,6 +6,7 @@ use Iterator;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\DatabaseManager;
 use Kirameki\Database\Query\Support\SortOrder;
+use function assert;
 use function basename;
 use function glob;
 use function is_a;
@@ -54,9 +55,9 @@ readonly class MigrationScanner
      */
     protected function instantiateClass(string $path): Migration
     {
-        require_once $path;
-        $class = $this->extractClassName($path);
-        return new $class($this->db);
+        $class = require_once $path;
+        assert($class instanceof Migration);
+        return $class->setDatabaseManager($this->db);
     }
 
     /**
