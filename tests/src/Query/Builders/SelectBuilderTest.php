@@ -111,7 +111,7 @@ class SelectBuilderTest extends QueryTestCase
 
     public function test_where_with_two_args(): void
     {
-        $sql = $this->selectBuilder()->from('User')->where('id', fn() => 1)->toString();
+        $sql = $this->selectBuilder()->from('User')->where('id', 1)->toString();
         $this->assertSame("SELECT * FROM `User` WHERE `id` = 1", $sql);
 
         $sql = $this->selectBuilder()->from('User')->where('id', [3, 4])->toString();

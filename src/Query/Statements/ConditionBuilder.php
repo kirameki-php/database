@@ -14,7 +14,6 @@ use Kirameki\Database\Query\Support\Range;
 use function array_key_exists;
 use function assert;
 use function count;
-use function dump;
 use function is_iterable;
 
 /**
@@ -83,7 +82,7 @@ class ConditionBuilder
             ]);
         }
 
-        $self = self::for($column);
+        $self = new static($column);
         $key = key($args);
         $value = $args[$key];
 
@@ -192,8 +191,6 @@ class ConditionBuilder
      */
     public function equals(mixed $value): static
     {
-        $value = $this->toValue($value);
-
         if (is_iterable($value)) {
             throw new LogicException('Iterable should use in(iterable $iterable) method instead', [
                 'root' => $this->root,
@@ -220,7 +217,7 @@ class ConditionBuilder
      */
     public function greaterThanOrEqualTo(mixed $value): static
     {
-        return $this->define(Operator::GreaterThanOrEqualTo, $this->toValue($value));
+        return $this->define(Operator::GreaterThanOrEqualTo, $value);
     }
 
     /**
@@ -229,7 +226,7 @@ class ConditionBuilder
      */
     public function greaterThan(mixed $value): static
     {
-        return $this->define(Operator::GreaterThan, $this->toValue($value));
+        return $this->define(Operator::GreaterThan, $value);
     }
 
     /**
@@ -238,7 +235,7 @@ class ConditionBuilder
      */
     public function lessThanOrEqualTo(mixed $value): static
     {
-        return $this->define(Operator::LessThanOrEqualTo, $this->toValue($value));
+        return $this->define(Operator::LessThanOrEqualTo, $value);
     }
 
     /**
@@ -247,7 +244,7 @@ class ConditionBuilder
      */
     public function lessThan(mixed $value): static
     {
-        return $this->define(Operator::LessThan, $this->toValue($value));
+        return $this->define(Operator::LessThan, $value);
     }
 
     /**
@@ -272,7 +269,7 @@ class ConditionBuilder
      */
     public function like(string $value): static
     {
-        return $this->define(Operator::Like, $this->toValue($value));
+        return $this->define(Operator::Like, $value);
     }
 
     /**
@@ -290,14 +287,12 @@ class ConditionBuilder
      */
     public function in(iterable|SelectBuilder $values): static
     {
-        $_values = $this->toValue($values);
-
-        if (is_iterable($_values)) {
-            $_values = Arr::without($_values, null);
-            $_values = Arr::unique($_values);
+        if (is_iterable($values)) {
+            $values = Arr::without($values, null);
+            $values = Arr::unique($values);
         }
 
-        return $this->define(Operator::In, $_values);
+        return $this->define(Operator::In, $values);
     }
 
     /**
@@ -420,15 +415,5 @@ class ConditionBuilder
         $this->defined = true;
 
         return $this;
-    }
-
-    /**
-     * @template TVar
-     * @param TVar|Closure(): TVar $var
-     * @return TVar
-     */
-    protected function toValue(mixed $var): mixed
-    {
-        return ($var instanceof Closure) ? $var() : $var;
     }
 }
