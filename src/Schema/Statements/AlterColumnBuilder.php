@@ -15,10 +15,10 @@ class AlterColumnBuilder extends ColumnBuilder
     }
 
     /**
-     * @param int $size
+     * @param int|null $size
      * @return ColumnBuilder
      */
-    public function int(int $size = ColumnDefinition::DEFAULT_INT_SIZE): ColumnBuilder
+    public function int(?int $size = null): ColumnBuilder
     {
         return $this->columnType(__FUNCTION__, $size);
     }
@@ -50,19 +50,19 @@ class AlterColumnBuilder extends ColumnBuilder
     }
 
     /**
-     * @param int $precision
+     * @param int|null $precision
      * @return ColumnBuilder
      */
-    public function datetime(int $precision = ColumnDefinition::DEFAULT_TIME_PRECISION): ColumnBuilder
+    public function datetime(?int $precision = null): ColumnBuilder
     {
         return $this->columnType(__FUNCTION__, $precision);
     }
 
     /**
-     * @param int $size
+     * @param int|null $size
      * @return ColumnBuilder
      */
-    public function string(int $size = ColumnDefinition::DEFAULT_STRING_SIZE): ColumnBuilder
+    public function string(?int $size = null): ColumnBuilder
     {
         return $this->columnType(__FUNCTION__, $size);
     }

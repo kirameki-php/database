@@ -4,10 +4,6 @@ namespace Kirameki\Database\Schema\Statements;
 
 class ColumnDefinition
 {
-    public const int DEFAULT_INT_SIZE = 8;
-    public const int DEFAULT_STRING_SIZE = 191;
-    public const int DEFAULT_TIME_PRECISION = 6;
-
     /**
      * @var bool|null
      */

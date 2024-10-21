@@ -14,6 +14,12 @@ use function strtoupper;
 
 class MySqlSchemaSyntax extends SchemaSyntax
 {
+    public const int DEFAULT_INT_SIZE = 8;
+
+    public const int DEFAULT_STRING_SIZE = 191;
+
+    public const int DEFAULT_TIME_PRECISION = 6;
+
     /**
      * @inheritDoc
      */
@@ -51,11 +57,11 @@ class MySqlSchemaSyntax extends SchemaSyntax
         $size = $def->size;
 
         if ($type === 'int') {
-            return match ($size) {
+            return match ($size ?? self::DEFAULT_INT_SIZE) {
                 1 => 'TINYINT',
                 2 => 'SMALLINT',
                 4 => 'INT',
-                8, null => 'BIGINT',
+                8 => 'BIGINT',
                 default => throw new LogicException("Invalid int size: {$size} for {$def->name}", [
                     'column' => $def->name,
                     'size' => $size,
@@ -63,17 +69,17 @@ class MySqlSchemaSyntax extends SchemaSyntax
             };
         }
         if ($type === 'decimal') {
-            $args = array_filter([$size, $def->scale], fn($arg) => $arg !== null);
+            $args = array_filter([$size, $def->scale], static fn($arg) => $arg !== null);
             return 'DECIMAL' . (!empty($args) ? $this->asEnclosedCsv($args) : '');
         }
         if ($type === 'bool') {
             return 'BOOL';
         }
         if ($type === 'datetime') {
-            return 'DATETIME(' . ($size ?? 6) . ')';
+            return 'DATETIME(' . ($size ?? self::DEFAULT_TIME_PRECISION) . ')';
         }
         if ($type === 'string') {
-            return 'VARCHAR(' . ($size ?? 191) . ')';
+            return 'VARCHAR(' . ($size ?? self::DEFAULT_STRING_SIZE) . ')';
         }
         if ($type === 'text') {
             return 'LONGTEXT';
@@ -87,7 +93,7 @@ class MySqlSchemaSyntax extends SchemaSyntax
             ]);
         }
 
-        $args = array_filter([$size, $def->scale], fn($arg) => $arg !== null);
+        $args = array_filter([$size, $def->scale], static fn($arg) => $arg !== null);
         return strtoupper($type) . (!empty($args) ? $this->asEnclosedCsv($args) : '');
     }
 

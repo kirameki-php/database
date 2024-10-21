@@ -49,7 +49,7 @@ class DatabaseTestCase extends TestCase
             default => throw new RuntimeException("Unsupported driver: $driver"),
         };
         $adapter->createDatabase();
-        $this->runAfterTearDown(fn() => $adapter->dropDatabase());
+        $this->runAfterTearDown(static fn() => $adapter->dropDatabase());
 
         return new Connection($name, $adapter, new EventManager());
     }
