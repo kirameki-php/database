@@ -6,7 +6,7 @@ use Closure;
 use DateTimeInterface;
 use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
-use Kirameki\Database\Query\Statements\QueryResult;
+use Kirameki\Database\Query\QueryResult;
 use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Kirameki\Database\Schema\Statements\SchemaResult;

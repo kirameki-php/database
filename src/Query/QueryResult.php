@@ -1,10 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Query\Statements;
+namespace Kirameki\Database\Query;
 
 use Closure;
 use Kirameki\Collections\Vec;
 use Kirameki\Database\Exceptions\QueryException;
+use Kirameki\Database\Query\Statements\QueryStatement as QueryStatement;
 
 /**
  * @template TQueryStatement of QueryStatement
