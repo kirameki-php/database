@@ -67,6 +67,13 @@ class QueryResult extends Vec
      */
     public function instantiate(mixed $items): static
     {
-        return new static($this->statement, $this->template, $this->parameters, $this->elapsedMs, $this->affectedRowCount, $items);
+        return new static(
+            $this->statement,
+            $this->template,
+            $this->parameters,
+            $this->elapsedMs,
+            $this->affectedRowCount,
+            $items,
+        );
     }
 }

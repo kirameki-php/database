@@ -83,9 +83,9 @@ readonly class QueryHandler
      */
     public function execute(QueryStatement $statement): QueryResult
     {
-        $this->preprocess($statement);
+        $this->preProcess($statement);
         $result = $this->connection->adapter->runQuery($statement);
-        return $this->postprocess($result);
+        return $this->postProcess($result);
     }
 
     /**
@@ -106,9 +106,9 @@ readonly class QueryHandler
      */
     public function cursor(QueryStatement $statement): QueryResult
     {
-        $this->preprocess($statement);
+        $this->preProcess($statement);
         $result = $this->connection->adapter->runQueryWithCursor($statement);
-        return $this->postprocess($result);
+        return $this->postProcess($result);
     }
 
     /**
@@ -118,7 +118,7 @@ readonly class QueryHandler
      */
     public function explain(QueryStatement $statement): QueryResult
     {
-        $this->preprocess($statement);
+        $this->preProcess($statement);
         return $this->connection->adapter->explainQuery($statement);
     }
 
@@ -135,7 +135,7 @@ readonly class QueryHandler
      * @param QueryStatement $statement
      * @return void
      */
-    protected function preprocess(QueryStatement $statement): void
+    protected function preProcess(QueryStatement $statement): void
     {
         $this->mergeConnectionTags($statement);
         $this->connection->connectIfNotConnected();
@@ -147,7 +147,7 @@ readonly class QueryHandler
      * @param QueryResult<TQueryStatement, TRow> $result
      * @return QueryResult<TQueryStatement, TRow>
      */
-    protected function postprocess(QueryResult $result): QueryResult
+    protected function postProcess(QueryResult $result): QueryResult
     {
         $this->events?->emit(new QueryExecuted($this->connection, $result));
         return $result;
