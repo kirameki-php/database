@@ -2,45 +2,33 @@
 
 namespace Kirameki\Database\Query\Pagination;
 
-use Closure;
 use Kirameki\Database\Query\QueryResult;
 use Kirameki\Database\Query\Statements\SelectStatement;
 
 /**
  * @template TRow of mixed
  * @extends QueryResult<SelectStatement, TRow>
- * @consistent-constructor
  */
-class Paginator extends QueryResult
+abstract class Paginator extends QueryResult
 {
     /**
-     * @param SelectStatement $statement
-     * @param string $template
-     * @param list<mixed> $parameters
-     * @param float $elapsedMs
-     * @param Closure(): int $affectedRowCount
-     * @param iterable<int, TRow> $rows
-     * @param int $perPage
-     * @param int $currentPage
+     * @param QueryResult<SelectStatement, mixed> $result
+     * @param int $size
+     * @param int $page
      */
     public function __construct(
-        SelectStatement $statement,
-        string $template,
-        array $parameters,
-        float $elapsedMs,
-        int|Closure $affectedRowCount,
-        iterable $rows,
-        public readonly int $perPage,
-        public readonly int $currentPage,
+        QueryResult $result,
+        public readonly int $size,
+        public readonly int $page,
     )
     {
         parent::__construct(
-            $statement,
-            $template,
-            $parameters,
-            $elapsedMs,
-            $affectedRowCount,
-            $rows,
+            $result->statement,
+            $result->template,
+            $result->parameters,
+            $result->elapsedMs,
+            $result->affectedRowCount,
+            $result->items,
         );
     }
 
@@ -49,7 +37,7 @@ class Paginator extends QueryResult
      */
     public function hasMorePages(): bool
     {
-        return $this->count() !== $this->perPage;
+        return $this->count() !== $this->size;
     }
 
     /**
@@ -57,7 +45,7 @@ class Paginator extends QueryResult
      */
     public function isFirstPage(): bool
     {
-        return $this->currentPage === 1;
+        return $this->page === 1;
     }
 
     /**
@@ -65,12 +53,15 @@ class Paginator extends QueryResult
      */
     public function getNextPage(): ?int
     {
-        return $this->hasMorePages() ? $this->currentPage + 1 : null;
+        return $this->hasMorePages() ? $this->page + 1 : null;
     }
 
+    /**
+     * @return int
+     */
     public function getPreviousPage(): ?int
     {
-        return $this->currentPage > 1 ? $this->currentPage - 1 : null;
+        return $this->page > 1 ? $this->page - 1 : null;
     }
 
     /**
@@ -78,7 +69,7 @@ class Paginator extends QueryResult
      */
     public function getStartingOffset(): int
     {
-        return ($this->currentPage - 1) * $this->perPage + 1;
+        return ($this->page - 1) * $this->size + 1;
     }
 
     /**

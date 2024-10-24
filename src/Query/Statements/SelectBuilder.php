@@ -6,6 +6,9 @@ use Closure;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Query\Expressions\Aggregate;
 use Kirameki\Database\Query\Expressions\Expression;
+use Kirameki\Database\Query\Pagination\CursorPaginator;
+use Kirameki\Database\Query\Pagination\OffsetPaginator;
+use Kirameki\Database\Query\Pagination\Paginator;
 use Kirameki\Database\Query\QueryHandler;
 use Kirameki\Database\Query\QueryResult;
 use Kirameki\Database\Query\Support\CompoundOperator;
@@ -415,6 +418,30 @@ class SelectBuilder extends ConditionsBuilder
     public function exactly(int $size): QueryResult
     {
         return $this->copy()->limit($size)->execute()->ensureCountIs($size);
+    }
+
+    /**
+     * @param int $page
+     * @param int $size
+     * @return OffsetPaginator<mixed>
+     */
+    public function offsetPaginate(int $page, int $size = 30): OffsetPaginator
+    {
+        $total = $this->copy()->count();
+        $result = $this->copy()->offset(($page - 1) * $size)->limit($size)->execute();
+        return new OffsetPaginator($result, $size, $page, $total);
+    }
+
+    /**
+     * @param string $cursor
+     * @param int $page
+     * @param int $size
+     * @return CursorPaginator<mixed>
+     */
+    public function cursorPaginate(string $cursor, int $page, int $size = 30): CursorPaginator
+    {
+        $result = $this->copy()->limit($size + 1)->execute();
+        return new CursorPaginator($result, $size, $page, $cursor);
     }
 
     /**
