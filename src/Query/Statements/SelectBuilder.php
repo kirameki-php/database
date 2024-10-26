@@ -9,7 +9,6 @@ use Kirameki\Database\Query\Expressions\Expression;
 use Kirameki\Database\Query\Pagination\CursorConditions;
 use Kirameki\Database\Query\Pagination\CursorPaginator;
 use Kirameki\Database\Query\Pagination\OffsetPaginator;
-use Kirameki\Database\Query\Pagination\Paginator;
 use Kirameki\Database\Query\QueryHandler;
 use Kirameki\Database\Query\QueryResult;
 use Kirameki\Database\Query\Support\CompoundOperator;
@@ -29,6 +28,8 @@ use function is_array;
  */
 class SelectBuilder extends ConditionsBuilder
 {
+    protected const int DEFAULT_PAGE_SIZE = 30;
+
     /**
      * @param QueryHandler $handler
      */
@@ -426,7 +427,7 @@ class SelectBuilder extends ConditionsBuilder
      * @param int $size
      * @return OffsetPaginator<mixed>
      */
-    public function offsetPaginate(int $page, int $size = 30): OffsetPaginator
+    public function offsetPaginate(int $page, int $size = self::DEFAULT_PAGE_SIZE): OffsetPaginator
     {
         $total = $this->copy()->count();
         $result = $this->copy()->offset(($page - 1) * $size)->limit($size)->execute();
@@ -438,7 +439,7 @@ class SelectBuilder extends ConditionsBuilder
      * @param CursorConditions|null $conditions
      * @return CursorPaginator<mixed>
      */
-    public function cursorPaginate(int $size = 30, ?CursorConditions $conditions = null): CursorPaginator
+    public function cursorPaginate(int $size = self::DEFAULT_PAGE_SIZE, ?CursorConditions $conditions = null): CursorPaginator
     {
         $conditions?->apply($this);
 

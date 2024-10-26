@@ -21,7 +21,7 @@ class CursorConditions
      * @param int $page
      */
     public function __construct(
-        public readonly int $page,
+        public readonly int $page = 1,
     )
     {
     }
