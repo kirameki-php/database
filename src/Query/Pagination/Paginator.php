@@ -65,6 +65,22 @@ abstract class Paginator extends QueryResult
     }
 
     /**
+     * @return bool
+     */
+    public function hasNextPage(): bool
+    {
+        return $this->getNextPage() !== null;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasPreviousPage(): bool
+    {
+        return $this->getPreviousPage() !== null;
+    }
+
+    /**
      * @return int
      */
     public function getStartingOffset(): int

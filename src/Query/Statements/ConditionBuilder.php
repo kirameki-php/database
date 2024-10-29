@@ -396,7 +396,7 @@ class ConditionBuilder
      * @param mixed $value
      * @return $this
      */
-    protected function define(Operator $operator, mixed $value): static
+    public function define(Operator $operator, mixed $value): static
     {
         $this->current->operator = $operator;
 

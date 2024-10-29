@@ -3,56 +3,47 @@
 namespace Kirameki\Database\Query\Pagination;
 
 use Kirameki\Core\Json;
+use Kirameki\Database\Query\Statements\ConditionBuilder;
 use Kirameki\Database\Query\Statements\QueryBuilder;
 use Kirameki\Database\Query\Statements\SelectBuilder;
+use Kirameki\Database\Query\Support\Operator;
 use Kirameki\Database\Query\Support\Ordering;
 use Kirameki\Database\Query\Support\SortOrder;
+use Kirameki\Database\Schema\Statements\ColumnDefinition;
+use function array_keys;
 use function compact;
 use function str_replace;
 
 class CursorConditions
 {
     /**
-     * @var list<array{column: string, order: Ordering, value: mixed}>
-     */
-    public array $conditions = [];
-
-    /**
+     * @param array<string, mixed> $columns
+     * @param SortOrder $orderBy
+     * @param int $size
      * @param int $page
      */
     public function __construct(
+        public readonly array $columns,
+        public readonly SortOrder $orderBy,
+        public readonly int $size,
         public readonly int $page = 1,
     )
     {
     }
 
-    /**
-     * @param string $column
-     * @param Ordering $order
-     * @param mixed $value
-     * @return void
-     */
-    public function add(string $column, Ordering $order, mixed $value): void
-    {
-        $this->conditions[] = compact('column', 'order', 'value');
-    }
-
-    /**
-     * @return string
-     */
-    public function urlEncode(): string
-    {
-        return str_replace(['+', '/'], ['-', '_'], base64_encode(Json::encode($this->conditions)));
-    }
-
     public function apply(SelectBuilder $builder): void
     {
-        foreach ($this->conditions as $condition) {
-            $column = $condition['column'];
-            $ordering = $condition['order'];
-            $value = $condition['value'];
-            $builder->where($column, $ordering->sort === SortOrder::Ascending ? '>' : '<', $value);
-            $builder->orderBy($column, $ordering->sort);
+        $columns = array_keys($this->columns);
+        $values = array_values($this->columns);
+        $operator = match ($this->orderBy) {
+            SortOrder::Ascending => Operator::GreaterThan,
+            SortOrder::Descending => Operator::LessThan,
+        };
+        $condition = ConditionBuilder::for($columns)->define($operator, $values);
+
+        $builder->where($condition);
+        foreach ($columns as $column) {
+            $builder->orderBy($column, $this->orderBy);
         }
     }
 }
