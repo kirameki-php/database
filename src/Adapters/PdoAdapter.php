@@ -27,14 +27,14 @@ use function implode;
 use function iterator_to_array;
 
 /**
- * @template TConfig of ConnectionConfig
- * @extends Adapter<TConfig>
+ * @template TConnectionConfig of ConnectionConfig
+ * @extends Adapter<TConnectionConfig>
  */
 abstract class PdoAdapter extends Adapter
 {
     /**
      * @param DatabaseConfig $databaseConfig
-     * @param TConfig $connectionConfig
+     * @param TConnectionConfig $connectionConfig
      * @param QuerySyntax|null $querySyntax
      * @param SchemaSyntax|null $schemaSyntax
      * @param PDO|null $pdo
