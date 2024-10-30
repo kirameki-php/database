@@ -6,7 +6,7 @@ use Closure;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Query\Expressions\Aggregate;
 use Kirameki\Database\Query\Expressions\Expression;
-use Kirameki\Database\Query\Pagination\CursorConditions;
+use Kirameki\Database\Query\Pagination\Cursor;
 use Kirameki\Database\Query\Pagination\CursorPaginator;
 use Kirameki\Database\Query\Pagination\OffsetPaginator;
 use Kirameki\Database\Query\QueryHandler;
@@ -436,16 +436,16 @@ class SelectBuilder extends ConditionsBuilder
 
     /**
      * @param int $size
-     * @param CursorConditions|null $conditions
+     * @param Cursor|null $cursor
      * @return CursorPaginator<mixed>
      */
-    public function cursorPaginate(int $size = self::DEFAULT_PAGE_SIZE, ?CursorConditions $conditions = null): CursorPaginator
+    public function cursorPaginate(int $size = self::DEFAULT_PAGE_SIZE, ?Cursor $cursor = null): CursorPaginator
     {
-        $conditions?->apply($this);
+        $cursor?->apply($this);
+        $cursor ??= Cursor::init($this, $size);
 
         $result = $this->copy()->limit($size + 1)->execute();
-        $page = $conditions?->page ?? 1;
-        return new CursorPaginator($result, $size, $page);
+        return new CursorPaginator($result, $cursor);
     }
 
     /**

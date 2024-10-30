@@ -121,6 +121,17 @@ class ConditionBuilder
     }
 
     /**
+     * @param string|iterable<int, string>|Expression $column
+     * @param Operator $operator
+     * @param mixed $value
+     * @return static
+     */
+    public static function with(string|iterable|Expression $column, Operator $operator, mixed $value): static
+    {
+        return (new static($column))->define($operator, $value);
+    }
+
+    /**
      * @param string $raw
      * @return static
      */
@@ -396,7 +407,7 @@ class ConditionBuilder
      * @param mixed $value
      * @return $this
      */
-    public function define(Operator $operator, mixed $value): static
+    protected function define(Operator $operator, mixed $value): static
     {
         $this->current->operator = $operator;
 
