@@ -9,15 +9,15 @@ use Kirameki\Database\DatabaseManager;
 use Kirameki\Database\Migration\MigrationManager;
 use Kirameki\Database\Migration\MigrationRepository;
 use Kirameki\Database\Migration\MigrationScanner;
-use function dump;
 
 class MigrationManagerTest extends MySql_MigrationTestCase
 {
     public function test_migrate_up(): void
     {
-        $db = new DatabaseManager(new DatabaseConfig([
+        $config = new DatabaseConfig([
             'migration_test' => new MySqlConfig('mysql', 3306),
-        ]));
+        ]);
+        $db = new DatabaseManager($config);
         $migrationRepository = new MigrationRepository($db, new MigrationConfig());
         $migrationRepository->createRepository();
         $migrationScanner = new MigrationScanner($db, [__DIR__.'/files']);

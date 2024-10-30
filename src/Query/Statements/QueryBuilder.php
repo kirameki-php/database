@@ -90,4 +90,27 @@ abstract class QueryBuilder
     {
         return $this->handler->toString($this->statement);
     }
+
+    /**
+     * @param string $column
+     * @param string $type
+     * @return $this
+     */
+    public function cast(string $column, string $type): static
+    {
+        return $this->casts([$column => $type]);
+    }
+
+    /**
+     * @param iterable<string, string> $casts
+     * @return $this
+     */
+    public function casts(iterable $casts): static
+    {
+        $this->statement->casts ??= [];
+        foreach ($casts as $column => $type) {
+            $this->statement->casts[$column] = $type;
+        }
+        return $this;
+    }
 }

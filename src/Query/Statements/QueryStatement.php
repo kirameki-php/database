@@ -8,9 +8,11 @@ use Kirameki\Database\Query\Syntax\QuerySyntax;
 abstract class QueryStatement
 {
     /**
+     * @param array<string, string>|null $casts
      * @param Tags|null $tags
      */
     public function __construct(
+        public ?array $casts = null,
         public ?Tags $tags = null,
     )
     {

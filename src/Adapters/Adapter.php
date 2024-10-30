@@ -13,6 +13,7 @@ use Kirameki\Database\Schema\Statements\SchemaResult;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 use Kirameki\Database\Transaction\Support\IsolationLevel;
+use Kirameki\Database\TypeCastRegistry;
 use function hrtime;
 
 /**
@@ -49,6 +50,7 @@ abstract class Adapter
     public function __construct(
         public readonly DatabaseConfig $databaseConfig,
         public readonly ConnectionConfig $connectionConfig,
+        protected readonly TypeCastRegistry $casters,
         protected ?QuerySyntax $querySyntax = null,
         protected ?SchemaSyntax $schemaSyntax = null,
     )

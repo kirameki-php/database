@@ -37,11 +37,13 @@ class DatabaseManager
 
     /**
      * @param DatabaseConfig $config
+     * @param TypeCastRegistry $casters
      * @param EventManager|null $events
      */
     public function __construct(
         public readonly DatabaseConfig $config,
         protected readonly ?EventManager $events = null,
+        protected ?TypeCastRegistry $casters = null,
     )
     {
         $this->default = $this->resolveDefaultConnectionName();
@@ -174,9 +176,17 @@ class DatabaseManager
     protected function getDefaultAdapterResolver(string $adapter): Closure
     {
         return match ($adapter) {
-            'mysql' => fn(MySqlConfig $cfg) => new MySqlAdapter($this->config, $cfg),
-            'sqlite' => fn(SqliteConfig $cfg) => new SqliteAdapter($this->config, $cfg),
+            'mysql' => fn(MySqlConfig $cfg) => new MySqlAdapter($this->config, $cfg, $this->getTypeCastRegistry()),
+            'sqlite' => fn(SqliteConfig $cfg) => new SqliteAdapter($this->config, $cfg, $this->getTypeCastRegistry()),
             default => throw new LogicException("No adapter resolver exists for: {$adapter}"),
         };
+    }
+
+    /**
+     * @return TypeCastRegistry
+     */
+    protected function getTypeCastRegistry(): TypeCastRegistry
+    {
+        return $this->casters ??= new TypeCastRegistry();
     }
 }

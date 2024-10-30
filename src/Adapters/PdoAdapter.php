@@ -8,6 +8,7 @@ use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
 use Kirameki\Database\Exceptions\QueryException;
 use Kirameki\Database\Exceptions\SchemaException;
+use Kirameki\Database\Query\Casters\TypeCaster;
 use Kirameki\Database\Query\QueryResult;
 use Kirameki\Database\Query\Statements\Normalizable;
 use Kirameki\Database\Query\Statements\QueryStatement;
@@ -16,11 +17,13 @@ use Kirameki\Database\Schema\Statements\SchemaResult;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 use Kirameki\Database\Transaction\Support\IsolationLevel;
+use Kirameki\Database\TypeCastRegistry;
 use Override;
 use PDO;
 use PDOException;
 use PDOStatement;
 use function array_map;
+use function array_walk;
 use function assert;
 use function hrtime;
 use function implode;
@@ -35,6 +38,7 @@ abstract class PdoAdapter extends Adapter
     /**
      * @param DatabaseConfig $databaseConfig
      * @param TConnectionConfig $connectionConfig
+     * @param TypeCastRegistry $casters
      * @param QuerySyntax|null $querySyntax
      * @param SchemaSyntax|null $schemaSyntax
      * @param PDO|null $pdo
@@ -42,12 +46,13 @@ abstract class PdoAdapter extends Adapter
     public function __construct(
         DatabaseConfig $databaseConfig,
         ConnectionConfig $connectionConfig,
+        TypeCastRegistry $casters,
         ?QuerySyntax $querySyntax = null,
         ?SchemaSyntax $schemaSyntax = null,
         protected ?PDO $pdo = null,
     )
     {
-        parent::__construct($databaseConfig, $connectionConfig, $querySyntax, $schemaSyntax);
+        parent::__construct($databaseConfig, $connectionConfig, $casters, $querySyntax, $schemaSyntax);
     }
 
     /**
@@ -120,17 +125,32 @@ abstract class PdoAdapter extends Adapter
     public function runQuery(QueryStatement $statement): QueryResult
     {
         try {
-            $startTime = hrtime(true);
             $syntax = $this->getQuerySyntax();
+            $casters = $this->getColumnCasters($statement);
+
             $template = $statement->generateTemplate($syntax);
             $parameters = $statement->generateParameters($syntax);
+
+            $startTime = hrtime(true);
             $prepared = $this->executeQueryStatement($template, $parameters);
             $rows = $prepared->fetchAll(PDO::FETCH_OBJ);
+
             if ($statement instanceof Normalizable) {
                 $rows = iterator_to_array($statement->normalize($syntax, $rows));
             }
-            $count = $prepared->rowCount(...);
-            return $this->instantiateQueryResult($statement, $template, $parameters, $startTime, $rows, $count);
+
+            if ($casters !== null) {
+                array_walk($rows, fn(object $data) => $this->applyCasts($data, $casters));
+            }
+
+            return $this->instantiateQueryResult(
+                $statement,
+                $template,
+                $parameters,
+                $startTime,
+                $rows,
+                $prepared->rowCount(...),
+            );
         } catch (PDOException $e) {
             throw new QueryException($e->getMessage(), $statement, null, $e);
         }
@@ -143,29 +163,45 @@ abstract class PdoAdapter extends Adapter
     public function runQueryWithCursor(QueryStatement $statement): QueryResult
     {
         try {
-            $startTime = hrtime(true);
             $syntax = $this->getQuerySyntax();
+            $casters = $this->getColumnCasters($statement);
+
             $template = $statement->generateTemplate($syntax);
             $parameters = $statement->generateParameters($syntax);
+
+            $startTime = hrtime(true);
             $prepared = $this->executeQueryStatement($template, $parameters);
-            $iterator = (function() use ($prepared, $statement): Iterator {
+            $iterator = (function() use ($prepared, $statement, $casters): Iterator {
                 while (true) {
                     $data = $prepared->fetch(PDO::FETCH_OBJ);
+
                     if ($data === false) {
                         if ($prepared->errorCode() === '00000') {
                             break;
                         }
                         $this->throwQueryException($prepared, $statement);
                     }
+
+                    if ($casters !== null) {
+                        $this->applyCasts($data, $casters);
+                    }
+
                     yield $data;
                 }
             })();
+
             if ($statement instanceof Normalizable) {
                 $iterator = $statement->normalize($syntax, $iterator);
             }
-            $rows = new LazyIterator($iterator);
-            $count = $prepared->rowCount(...);
-            return $this->instantiateQueryResult($statement, $template, $parameters, $startTime, $rows, $count);
+
+            return $this->instantiateQueryResult(
+                $statement,
+                $template,
+                $parameters,
+                $startTime,
+                new LazyIterator($iterator),
+                $prepared->rowCount(...),
+            );
         } catch (PDOException $e) {
             throw new QueryException($e->getMessage(), $statement, null, $e);
         }
@@ -249,5 +285,34 @@ abstract class PdoAdapter extends Adapter
     protected function throwQueryException(PDOStatement $prepared, QueryStatement $statement): void
     {
         throw new QueryException(implode(' | ', $prepared->errorInfo()), $statement);
+    }
+
+    /**
+     * @param QueryStatement $statement
+     * @return array<string, TypeCaster>|null
+     */
+    protected function getColumnCasters(QueryStatement $statement): ?array
+    {
+        if ($statement->casts === null) {
+            return null;
+        }
+
+        $casts = [];
+        foreach ($statement->casts as $key => $type) {
+            $casts[$key] = $this->casters->getCaster($type);
+        }
+        return $casts;
+    }
+
+    /**
+     * @param object $data
+     * @param array<string, TypeCaster> $casters
+     * @return void
+     */
+    protected function applyCasts(object $data, array $casters): void
+    {
+        foreach ($casters as $key => $caster) {
+            $data->$key = $caster->cast($data->$key);
+        }
     }
 }

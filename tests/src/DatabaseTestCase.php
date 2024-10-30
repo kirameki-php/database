@@ -10,6 +10,7 @@ use Kirameki\Database\Config\MySqlConfig;
 use Kirameki\Database\Config\SqliteConfig;
 use Kirameki\Database\Connection;
 use Kirameki\Database\Schema\Statements\CreateTableBuilder;
+use Kirameki\Database\TypeCastRegistry;
 use Kirameki\Event\EventManager;
 use RuntimeException;
 use function mt_rand;
@@ -43,9 +44,10 @@ class DatabaseTestCase extends TestCase
     {
         $name = 'test_' . mt_rand();
         $dbConfig = new DatabaseConfig([]);
+        $casters = new TypeCastRegistry();
         $adapter = match ($driver) {
-            'mysql' => new MySqlAdapter($dbConfig, new MySqlConfig(host: 'mysql', database: $name)),
-            'sqlite' => new SqliteAdapter($dbConfig, new SqliteConfig(':memory:')),
+            'mysql' => new MySqlAdapter($dbConfig, new MySqlConfig(host: 'mysql', database: $name), $casters),
+            'sqlite' => new SqliteAdapter($dbConfig, new SqliteConfig(':memory:'), $casters),
             default => throw new RuntimeException("Unsupported driver: $driver"),
         };
         $adapter->createDatabase();
