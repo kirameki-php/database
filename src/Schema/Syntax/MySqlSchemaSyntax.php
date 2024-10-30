@@ -132,6 +132,15 @@ class MySqlSchemaSyntax extends SchemaSyntax
      * @inheritDoc
      */
     #[Override]
+    public function formatCurrentTimestamp(?int $size = null): string
+    {
+        return 'CURRENT_TIMESTAMP(' . ($size ?? self::DEFAULT_TIME_PRECISION) . ')';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
     public function supportsDdlTransaction(): bool
     {
         return false;
