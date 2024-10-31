@@ -11,14 +11,15 @@ services:
         source: user
         target: /root
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
   mysql:
     image: mysql:8
     environment:
       MYSQL_ROOT_PASSWORD: root
     healthcheck:
-      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
-      timeout: 20s
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 1s
       retries: 10
 volumes:
   user:
