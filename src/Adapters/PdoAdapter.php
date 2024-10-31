@@ -293,15 +293,18 @@ abstract class PdoAdapter extends Adapter
      */
     protected function getColumnCasters(QueryStatement $statement): ?array
     {
-        if ($statement->casts === null) {
+        $casts = $statement->casts;
+
+        if ($casts === null) {
             return null;
         }
 
-        $casts = [];
-        foreach ($statement->casts as $key => $type) {
-            $casts[$key] = $this->casters->getCaster($type);
+        $mapped = [];
+        $casters = $this->casters;
+        foreach ($casts as $key => $type) {
+            $mapped[$key] = $casters->getCaster($type);
         }
-        return $casts;
+        return $mapped;
     }
 
     /**
