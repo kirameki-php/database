@@ -6,7 +6,7 @@ use Kirameki\Database\Adapters\MySqlAdapter;
 use Kirameki\Database\Config\DatabaseConfig;
 use Kirameki\Database\Config\MySqlConfig;
 use Kirameki\Database\Connection;
-use Kirameki\Database\TypeCastRegistry;
+use Kirameki\Database\Query\TypeCastRegistry;
 use Kirameki\Event\EventManager;
 use Tests\Kirameki\Database\DatabaseTestCase;
 

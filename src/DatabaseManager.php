@@ -13,6 +13,7 @@ use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
 use Kirameki\Database\Config\MySqlConfig;
 use Kirameki\Database\Config\SqliteConfig;
+use Kirameki\Database\Query\TypeCastRegistry;
 use Kirameki\Event\EventManager;
 use function array_key_exists;
 use function array_key_first;

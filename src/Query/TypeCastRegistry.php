@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database;
+namespace Kirameki\Database\Query;
 
 use BackedEnum;
 use Closure;

@@ -22,12 +22,24 @@ use function iterator_to_array;
  */
 class MySqlAdapter extends PdoAdapter
 {
+    /**
+     * @var string
+     */
     protected string $identifierDelimiter = '`';
 
+    /**
+     * @var string
+     */
     protected string $literalDelimiter = '"';
 
+    /**
+     * @var string
+     */
     protected string $dateTimeFormat = 'Y-m-d H:i:s.u';
 
+    /**
+     * @var bool
+     */
     protected bool $omitDatabaseOnConnect = false;
 
     /**
