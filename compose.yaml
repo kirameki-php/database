@@ -16,9 +16,9 @@ services:
   mysql:
     image: mysql:9
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ALLOW_EMPTY_PASSWORD: yes
     healthcheck:
-      test: ["CMD", "mysql", "-uroot", "-proot", "-e", "SELECT 1"]
+      test: ["CMD", "mysql", "-uroot", "-e", "SELECT 1"]
       start_period: 5s
       interval: 5s
 volumes:

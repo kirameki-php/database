@@ -30,7 +30,7 @@ class MySqlConfig implements ConnectionConfig
         public ?string $socket = null,
         public string $database = 'main',
         public ?string $username = 'root',
-        public ?string $password = 'root',
+        public ?string $password = null,
         public ?string $charset = 'utf8mb4',
         public ?string $collation = 'utf8mb4_bin',
         public int $connectTimeoutSeconds = 3,
