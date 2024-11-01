@@ -14,11 +14,11 @@ services:
       mysql:
         condition: service_healthy
   mysql:
-    image: mysql:8
+    image: mysql:9
     environment:
       MYSQL_ROOT_PASSWORD: root
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD", "mysql", "-uroot", "-proot", "-e", "SELECT 1"]
       start_period: 5s
       interval: 5s
 volumes:
