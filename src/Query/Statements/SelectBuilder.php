@@ -449,6 +449,40 @@ class SelectBuilder extends ConditionsBuilder
     }
 
     /**
+     * @param string $column
+     * @return QueryResult<SelectStatement, mixed>
+     */
+    public function pluck(string $column): QueryResult
+    {
+        return $this->copy()->columns($column)->limit(1)->execute();
+    }
+
+    /**
+     * @param string $column
+     * @return mixed
+     */
+    public function value(string $column): mixed
+    {
+        $value = $this->valueOrNull($column);
+        if ($value === null) {
+            throw new LogicException("Expected query to return a row, but none was returned.", [
+                'column' => $column,
+                'statement' => $this->statement,
+            ]);
+        }
+        return $value;
+    }
+
+    /**
+     * @param string $column
+     * @return mixed
+     */
+    public function valueOrNull(string $column): mixed
+    {
+        return $this->copy()->columns($column)->limit(1)->execute()->firstOrNull()?->{$column};
+    }
+
+    /**
      * @return bool
      */
     public function exists(): bool

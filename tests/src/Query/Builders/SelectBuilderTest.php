@@ -7,7 +7,9 @@ use Kirameki\Database\Query\Statements\ConditionBuilder;
 use Kirameki\Database\Query\Statements\JoinBuilder;
 use Kirameki\Database\Query\Support\LockOption;
 use Kirameki\Database\Query\Support\Range;
+use Kirameki\Time\Time;
 use Tests\Kirameki\Database\Query\QueryTestCase;
+use function dump;
 
 class SelectBuilderTest extends QueryTestCase
 {
@@ -214,5 +216,12 @@ class SelectBuilderTest extends QueryTestCase
         $this->assertSame("SELECT * FROM `User` WHERE (`id` = 1 OR `id` = 2 OR `id` IN (3, 4))", $base->toString());
         $this->assertSame("SELECT * FROM `User` WHERE (`id` = 1 OR `id` = 2)", $copy->toString());
         $this->assertNotSame($base->toString(), $copy->toString());
+    }
+
+    public function test_casting_to_int(): void
+    {
+        $sql = $this->selectBuilder()->columns(new Raw('2020-01-01 as c'))->cast('c', Time::class);
+        $sql->single();
+        dump($sql->execute());
     }
 }
