@@ -390,27 +390,11 @@ class SelectBuilder extends ConditionsBuilder
     #region execution --------------------------------------------------------------------------------------------------
 
     /**
-     * @return mixed
+     * @return QueryResult<SelectStatement, mixed>
      */
-    public function first(): mixed
+    public function cursor(): QueryResult
     {
-        return $this->copy()->limit(1)->execute()->first();
-    }
-
-    /**
-     * @return mixed
-     */
-    public function firstOrNull(): mixed
-    {
-        return $this->copy()->limit(1)->execute()->firstOrNull();
-    }
-
-    /**
-     * @return mixed
-     */
-    public function single(): mixed
-    {
-        return $this->copy()->limit(2)->execute()->single();
+        return $this->handler->cursor($this->statement);
     }
 
     /**
@@ -446,6 +430,30 @@ class SelectBuilder extends ConditionsBuilder
 
         $result = $this->copy()->limit($size + 1)->execute();
         return new CursorPaginator($result, $cursor);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function first(): mixed
+    {
+        return $this->copy()->limit(1)->execute()->first();
+    }
+
+    /**
+     * @return mixed
+     */
+    public function firstOrNull(): mixed
+    {
+        return $this->copy()->limit(1)->execute()->firstOrNull();
+    }
+
+    /**
+     * @return mixed
+     */
+    public function single(): mixed
+    {
+        return $this->copy()->limit(2)->execute()->single();
     }
 
     /**
