@@ -26,7 +26,7 @@ class CursorPaginator extends Paginator
     /**
      * @return Cursor
      */
-    protected function getNextCursor(): Cursor
+    public function getNextCursor(): Cursor
     {
         return Cursor::next($this, $this->cursor);
     }

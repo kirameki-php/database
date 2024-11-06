@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Query\Statements;
 
 use Closure;
+use Generator;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Query\Expressions\Aggregate;
 use Kirameki\Database\Query\Expressions\Expression;
@@ -22,6 +23,7 @@ use Kirameki\Database\Query\Support\SortOrder;
 use function array_is_list;
 use function array_values;
 use function is_array;
+use function min;
 
 /**
  * @extends ConditionsBuilder<SelectStatement>
@@ -603,4 +605,51 @@ class SelectBuilder extends ConditionsBuilder
     }
 
     #endregion execution -----------------------------------------------------------------------------------------------
+
+    #region batching ---------------------------------------------------------------------------------------------------
+
+    /**
+     * @param int $size
+     * @return Generator<CursorPaginator<mixed>>
+     */
+    public function batch(int $size = 1_000): Generator
+    {
+        $cursor = null;
+        $limit = $this->statement->limit;
+        $this->statement->limit = null;
+
+        do {
+            $size = min($limit ?? $size, $size);
+            $paginator = $this->cursorPaginate($size, $cursor);
+
+            if ($paginator->isEmpty()) {
+                break;
+            }
+
+            yield $paginator;
+
+            if ($limit !== null) {
+                $limit -= $paginator->count();
+                if ($limit <= 0) {
+                    break;
+                }
+            }
+
+            $cursor = $paginator->getnextCursor();
+        } while ($paginator->hasMorePages());
+    }
+
+    /**
+     * @return Generator<mixed>
+     */
+    public function batchEach(int $chunkSize = 1_000): Generator
+    {
+        foreach ($this->batch($chunkSize) as $paginator) {
+            foreach ($paginator as $row) {
+                yield $row;
+            }
+        }
+    }
+
+    #endregion batching ------------------------------------------------------------------------------------------------
 }
