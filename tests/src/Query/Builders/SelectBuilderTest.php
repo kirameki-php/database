@@ -218,10 +218,14 @@ class SelectBuilderTest extends QueryTestCase
         $this->assertNotSame($base->toString(), $copy->toString());
     }
 
-    public function test_casting_to_int(): void
+    public function test_casting_to_time(): void
     {
-        $sql = $this->selectBuilder()->columns(new Raw('2020-01-01 as c'))->cast('c', Time::class);
-        $sql->single();
-        dump($sql->execute());
+        $result = $this->selectBuilder()
+            ->columns(new Raw('"2020-01-01" as c'))
+            ->cast('c', Time::class)
+            ->execute();
+        $value = $result->single()->c;
+        $this->assertInstanceOf(Time::class, $value);
+        $this->assertSame('2020-01-01 00:00:00', $value->format('Y-m-d H:i:s'));
     }
 }

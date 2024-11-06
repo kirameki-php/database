@@ -8,22 +8,20 @@ use Kirameki\Database\Config\MySqlConfig;
 use Kirameki\Database\Connection;
 use Kirameki\Database\Query\TypeCastRegistry;
 use Kirameki\Event\EventManager;
+use PHPUnit\Framework\Attributes\After;
+use PHPUnit\Framework\Attributes\Before;
 use Tests\Kirameki\Database\DatabaseTestCase;
 
 class MySql_MigrationTestCase extends DatabaseTestCase
 {
-    /**
-     * @before
-     */
+    #[Before]
     protected function setUpDatabase(): void
     {
         $adapter = $this->migrationConnection()->adapter;
         $adapter->createDatabase();
     }
 
-    /**
-     * @after
-     */
+    #[After]
     protected function tearDownDatabase(): void
     {
         $this->migrationConnection()->adapter->dropDatabase();
