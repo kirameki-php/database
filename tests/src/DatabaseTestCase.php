@@ -42,17 +42,40 @@ class DatabaseTestCase extends TestCase
 
     public function createTempConnection(string $driver): Connection
     {
-        $name = 'test_' . mt_rand();
-        $dbConfig = new DatabaseConfig([]);
-        $casters = new TypeCastRegistry();
         $adapter = match ($driver) {
-            'mysql' => new MySqlAdapter($dbConfig, new MySqlConfig(host: 'mysql', database: $name), $casters),
-            'sqlite' => new SqliteAdapter($dbConfig, new SqliteConfig(':memory:'), $casters),
+            'mysql' => $this->createMySqlAdapter(),
+            'sqlite' => $this->createSqliteAdapter(),
             default => throw new RuntimeException("Unsupported driver: $driver"),
         };
         $adapter->createDatabase();
         $this->runAfterTearDown(static fn() => $adapter->dropDatabase());
 
-        return new Connection($name, $adapter, new EventManager());
+        return new Connection('temp', $adapter, new EventManager());
+    }
+
+    public function createMySqlAdapter(
+        ?string $name = null,
+        ?DatabaseConfig $config = null,
+        ?MySqlConfig $connectionConfig = null,
+        ?TypeCastRegistry $casters = null,
+    ): MySqlAdapter
+    {
+        $name ??= 'test_' . mt_rand();
+        $config ??= new DatabaseConfig([]);
+        $connectionConfig ??= new MySqlConfig(host: 'mysql', database: $name);
+        $casters ??= new TypeCastRegistry();
+        return new MySqlAdapter($config, $connectionConfig, $casters);
+    }
+
+    public function createSqliteAdapter(
+        ?DatabaseConfig $config = null,
+        ?SqliteConfig $connectionConfig = null,
+        ?TypeCastRegistry $casters = null,
+    ): SqliteAdapter
+    {
+        $config ??= new DatabaseConfig([]);
+        $connectionConfig ??= new SqliteConfig(':memory:');
+        $casters ??= new TypeCastRegistry();
+        return new SqliteAdapter($config, $connectionConfig, $casters);
     }
 }
