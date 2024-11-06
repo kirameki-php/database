@@ -5,11 +5,7 @@ namespace Kirameki\Database\Query;
 use BackedEnum;
 use Closure;
 use Kirameki\Core\Exceptions\LogicException;
-use Kirameki\Database\Query\Casters\BoolCaster;
 use Kirameki\Database\Query\Casters\EnumCaster;
-use Kirameki\Database\Query\Casters\FloatCaster;
-use Kirameki\Database\Query\Casters\IntCaster;
-use Kirameki\Database\Query\Casters\StringCaster;
 use Kirameki\Database\Query\Casters\TimeCaster;
 use Kirameki\Database\Query\Casters\TypeCaster;
 use Kirameki\Time\Time;
@@ -58,10 +54,6 @@ class TypeCastRegistry
         }
 
         return match (true) {
-            $type === 'int' => new IntCaster(),
-            $type === 'float' => new FloatCaster(),
-            $type === 'bool' => new BoolCaster(),
-            $type === 'string' => new StringCaster(),
             $type === Time::class => new TimeCaster(),
             is_a($type, BackedEnum::class, true) => new EnumCaster($type),
             is_a($type, TypeCaster::class, true) => new $type(),
