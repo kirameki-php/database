@@ -6,7 +6,7 @@ use Kirameki\Database\Query\Support\Dataset;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Override;
 
-class InsertStatement extends QueryStatement
+class InsertStatement extends QueryStatement implements ManipulationStatement
 {
     /**
      * @param string $table
