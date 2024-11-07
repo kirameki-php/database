@@ -8,6 +8,7 @@ use Kirameki\Database\Info\Statements\ListColumnsStatement;
 use Kirameki\Database\Info\Statements\ListForeignKeysStatement;
 use Kirameki\Database\Info\Statements\ListIndexesStatement;
 use Kirameki\Database\Info\Statements\ListTablesStatement;
+use Kirameki\Database\Info\Statements\TableExistsStatement;
 use Kirameki\Database\Query\Statements\SelectStatement;
 use Kirameki\Database\Query\Support\LockOption;
 use Kirameki\Database\Query\Support\NullOrder;
@@ -59,6 +60,16 @@ class SqliteQuerySyntax extends QuerySyntax
     public function prepareTemplateForListTables(ListTablesStatement $statement): string
     {
         return "SELECT \"name\" FROM \"sqlite_master\" WHERE type = 'table'";
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function prepareTemplateForTableExists(TableExistsStatement $statement): string
+    {
+        $table = $this->asLiteral($statement->table);
+        return "SELECT 1 FROM \"sqlite_master\" WHERE type = 'table' AND \"name\" = {$table}";
     }
 
     /**

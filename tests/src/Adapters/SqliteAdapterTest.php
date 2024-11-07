@@ -15,11 +15,11 @@ use stdClass;
 use Tests\Kirameki\Database\DatabaseTestCase;
 use function rand;
 
-class MySqlAdapterTest extends DatabaseTestCase
+class SqliteAdapterTest extends DatabaseTestCase
 {
-    protected function createMySqlConnection(): Connection
+    protected function createSqliteConnection(): Connection
     {
-        $connection = $this->createTempConnection('mysql');
+        $connection = $this->createTempConnection('sqlite');
         $adapter = $connection->adapter;
         $adapter->createDatabase(true);
         $adapter->connect();
@@ -28,7 +28,7 @@ class MySqlAdapterTest extends DatabaseTestCase
 
     public function test_connect(): void
     {
-        $connection = $this->createMySqlConnection();
+        $connection = $this->createSqliteConnection();
         $this->assertTrue($connection->adapter->isConnected());
     }
 
@@ -56,10 +56,10 @@ class MySqlAdapterTest extends DatabaseTestCase
         $this->assertFalse($adapter->isConnected());
     }
 
-    public function test_runSchema(): void
+    public function test_runSchema_with_valid_statement(): void
     {
         $tableName = 'test_table_' . rand(1000, 9999);
-        $connection = $this->createMySqlConnection();
+        $connection = $this->createSqliteConnection();
         $adapter = $connection->adapter;
         $result = $adapter->runSchema(new SchemaRawStatement("CREATE TABLE {$tableName} (id INT PRIMARY KEY)"));
         $this->assertInstanceOf(SchemaResult::class, $result);
@@ -70,15 +70,15 @@ class MySqlAdapterTest extends DatabaseTestCase
 
     public function test_runSchema_invalid_syntax(): void
     {
-        $adapter = $this->createMySqlConnection()->adapter;
+        $adapter = $this->createSqliteConnection()->adapter;
         $this->expectException(SchemaException::class);
-        $this->expectExceptionMessage('SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax;');
+        $this->expectExceptionMessage('SQLSTATE[HY000]: General error: 1 near "HELLO": syntax error');
         $adapter->runSchema(new SchemaRawStatement("HELLO"));
     }
 
-    public function test_runQuery(): void
+    public function test_runQuery_with_valid_statement(): void
     {
-        $adapter = $this->createMySqlConnection()->adapter;
+        $adapter = $this->createSqliteConnection()->adapter;
         $result = $adapter->runQuery(new RawStatement('SELECT ?', [1]));
         $this->assertInstanceOf(QueryResult::class, $result);
         $this->assertInstanceOf(RawStatement::class, $result->statement);
@@ -88,9 +88,9 @@ class MySqlAdapterTest extends DatabaseTestCase
 
     public function test_runQuery_invalid_syntax(): void
     {
-        $adapter = $this->createMySqlConnection()->adapter;
+        $adapter = $this->createSqliteConnection()->adapter;
         $this->expectException(QueryException::class);
-        $this->expectExceptionMessage('SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax;');
+        $this->expectExceptionMessage('SQLSTATE[HY000]: General error: 1 near "HELLO": syntax error');
         $adapter->runQuery(new RawStatement('HELLO'));
     }
 
@@ -103,7 +103,7 @@ class MySqlAdapterTest extends DatabaseTestCase
                 return $row;
             }
         };
-        $adapter = $this->createMySqlConnection()->adapter;
+        $adapter = $this->createSqliteConnection()->adapter;
         $result = $adapter->runQuery($statement);
         $this->assertInstanceOf(QueryResult::class, $result);
         $this->assertSame($statement, $result->statement);
