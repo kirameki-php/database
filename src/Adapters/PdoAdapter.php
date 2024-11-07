@@ -2,6 +2,7 @@
 
 namespace Kirameki\Database\Adapters;
 
+use Closure;
 use Iterator;
 use Kirameki\Collections\LazyIterator;
 use Kirameki\Database\Config\ConnectionConfig;
@@ -12,6 +13,7 @@ use Kirameki\Database\Query\Casters\TypeCaster;
 use Kirameki\Database\Query\QueryResult;
 use Kirameki\Database\Query\Statements\Normalizable;
 use Kirameki\Database\Query\Statements\QueryStatement;
+use Kirameki\Database\Query\Statements\SelectStatement;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Kirameki\Database\Query\TypeCastRegistry;
 use Kirameki\Database\Schema\Statements\SchemaResult;
@@ -27,7 +29,6 @@ use function array_walk;
 use function assert;
 use function hrtime;
 use function implode;
-use function iterator_to_array;
 
 /**
  * @template TConnectionConfig of ConnectionConfig
@@ -134,6 +135,7 @@ abstract class PdoAdapter extends Adapter
             $startTime = hrtime(true);
             $prepared = $this->executeQueryStatement($template, $parameters);
             $rows = $prepared->fetchAll(PDO::FETCH_OBJ);
+            $affectedRowCount = $this->getAffectedRows($statement, $prepared);
 
             if ($statement instanceof Normalizable) {
                 foreach ($rows as $index => $row) {
@@ -151,7 +153,7 @@ abstract class PdoAdapter extends Adapter
                 $parameters,
                 $startTime,
                 $rows,
-                $prepared->rowCount(...),
+                $affectedRowCount,
             );
         } catch (PDOException $e) {
             throw new QueryException($e->getMessage(), $statement, null, $e);
@@ -202,7 +204,7 @@ abstract class PdoAdapter extends Adapter
                 $parameters,
                 $startTime,
                 new LazyIterator($iterator),
-                $prepared->rowCount(...),
+                $this->getAffectedRows($statement, $prepared),
             );
         } catch (PDOException $e) {
             throw new QueryException($e->getMessage(), $statement, null, $e);
@@ -319,5 +321,18 @@ abstract class PdoAdapter extends Adapter
         foreach ($casters as $key => $caster) {
             $data->$key = $caster->cast($data->$key);
         }
+    }
+
+    /**
+     * @param QueryStatement $statement
+     * @param PDOStatement $prepared
+     * @return Closure(): int|int
+     */
+    protected function getAffectedRows(QueryStatement $statement, PDOStatement $prepared): Closure|int
+    {
+        if ($statement instanceof SelectStatement) {
+            return 0;
+        }
+        return $prepared->rowCount(...);
     }
 }

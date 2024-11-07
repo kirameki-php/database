@@ -49,6 +49,24 @@ You can change the isolation level by passing `IsolationLevel` to a `transaction
 | MySQL       | △         | Does not work as expected on tables with multiple unique indexes.<br>Use with caution. Read the docs carefully. ([Docs](https://dev.mysql.com/doc/en/insert-on-duplicate.html)) | `INSERT INTO … ON DUPLICATE KEY UPDATE …`    |
 | MariaDB     | △         | *Same as MySQL* ([Docs](https://mariadb.com/kb/en/insert-on-duplicate-key-update))                                                                                              | *Same as MySQL*                              |
 
+## Affected Row Count
+
+SELECT statements usually return `0` when calling `QueryResult::getAffectedRowCount()`, but when you run a SELECT 
+statement using `RawStatement`, the method will give different results depending on the database you use.
+This is stated in the [PHP PDO documentation](https://www.php.net/manual/en/pdostatement.rowcount.php).
+
+For example, running the following statement will return different results for different databases.
+
+Query:
+```sql
+SELECT 1 as a;
+```
+
+| Database    | Result |
+|-------------|--------|
+| SQLite      | 0      |
+| MySQL       | 1      |
+
 ## License
 
 This is an open-sourced software licensed under the [MIT License](LICENSE).
