@@ -18,7 +18,7 @@ services:
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: yes
     healthcheck:
-      test: ["CMD", "mysql", "-uroot", "-e", "SHOW DATABASES;"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent"]
       start_period: 5s
       interval: 5s
 volumes:
