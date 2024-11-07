@@ -10,16 +10,16 @@ use function iterator_to_array;
 class RawStatement extends QueryStatement
 {
     /**
-     * @param array<string, string>|null $casts
-     * @param Tags|null $tags
      * @param string $template
      * @param iterable<int, mixed> $parameters
+     * @param array<string, string>|null $casts
+     * @param Tags|null $tags
      */
     public function __construct(
-        array|null $casts,
-        ?Tags $tags,
         public readonly string $template,
         public readonly iterable $parameters = [],
+        array|null $casts = null,
+        ?Tags $tags = null,
     )
     {
         parent::__construct($casts, $tags);

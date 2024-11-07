@@ -13,6 +13,7 @@ use Kirameki\Database\Query\Support\LockOption;
 use Kirameki\Database\Query\Support\NullOrder;
 use Kirameki\Database\Query\Support\Ordering;
 use Override;
+use stdClass;
 use function implode;
 
 class SqliteQuerySyntax extends QuerySyntax
@@ -80,26 +81,24 @@ class SqliteQuerySyntax extends QuerySyntax
      * @inheritDoc
      */
     #[Override]
-    public function normalizeListColumns(iterable $rows): Iterator
+    public function normalizeListColumns(stdClass $row): stdClass
     {
-        foreach ($rows as $row) {
-            $row->type = match ($row->type) {
-                'INTEGER' => 'int',
-                'REAL' => 'float',
-                'NUMERIC' => 'decimal',
-                'BOOLEAN' => 'bool',
-                'TEXT' => 'string',
-                'DATETIME' => 'datetime',
-                'UUID_TEXT' => 'uuid',
-                'JSON_TEXT' => 'json',
-                'BLOB' => 'binary',
-                default => throw new LogicException('Unsupported column type: ' . $row->type, [
-                    'type' => $row->type,
-                ]),
-            };
-            $row->nullable = (bool) $row->nullable;
-            yield $row;
-        }
+        $row->type = match ($row->type) {
+            'INTEGER' => 'int',
+            'REAL' => 'float',
+            'NUMERIC' => 'decimal',
+            'BOOLEAN' => 'bool',
+            'TEXT' => 'string',
+            'DATETIME' => 'datetime',
+            'UUID_TEXT' => 'uuid',
+            'JSON_TEXT' => 'json',
+            'BLOB' => 'binary',
+            default => throw new LogicException('Unsupported column type: ' . $row->type, [
+                'type' => $row->type,
+            ]),
+        };
+        $row->nullable = (bool) $row->nullable;
+        return $row;
     }
 
     /**

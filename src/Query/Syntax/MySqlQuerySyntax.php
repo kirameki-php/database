@@ -11,6 +11,7 @@ use Kirameki\Database\Query\Support\Dataset;
 use Kirameki\Database\Query\Support\NullOrder;
 use Kirameki\Database\Query\Support\Ordering;
 use Override;
+use stdClass;
 use function array_map;
 use function implode;
 
@@ -96,24 +97,22 @@ class MySqlQuerySyntax extends QuerySyntax
      * @inheritDoc
      */
     #[Override]
-    public function normalizeListColumns(iterable $rows): Iterator
+    public function normalizeListColumns(stdClass $row): stdClass
     {
-        foreach ($rows as $row) {
-            $row->type = match ($row->type) {
-                'int', 'mediumint', 'tinyint', 'smallint', 'bigint' => 'integer',
-                'decimal', 'float', 'double' => 'float',
-                'bool' => 'bool',
-                'varchar' => 'string',
-                'datetime' => 'datetime',
-                'json' => 'json',
-                'blob' => 'binary',
-                default => throw new LogicException('Unsupported column type: ' . $row->type, [
-                    'type' => $row->type,
-                ]),
-            };
-            $row->nullable = $row->nullable === 'YES';
-            yield $row;
-        }
+        $row->type = match ($row->type) {
+            'int', 'mediumint', 'tinyint', 'smallint', 'bigint' => 'integer',
+            'decimal', 'float', 'double' => 'float',
+            'bool' => 'bool',
+            'varchar' => 'string',
+            'datetime' => 'datetime',
+            'json' => 'json',
+            'blob' => 'binary',
+            default => throw new LogicException('Unsupported column type: ' . $row->type, [
+                'type' => $row->type,
+            ]),
+        };
+        $row->nullable = $row->nullable === 'YES';
+        return $row;
     }
 
     /**

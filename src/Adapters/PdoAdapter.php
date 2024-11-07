@@ -136,7 +136,9 @@ abstract class PdoAdapter extends Adapter
             $rows = $prepared->fetchAll(PDO::FETCH_OBJ);
 
             if ($statement instanceof Normalizable) {
-                $rows = iterator_to_array($statement->normalize($syntax, $rows));
+                foreach ($rows as $index => $row) {
+                    $rows[$index] = $statement->normalize($syntax, $row);
+                }
             }
 
             if ($casters !== null) {
@@ -171,7 +173,7 @@ abstract class PdoAdapter extends Adapter
 
             $startTime = hrtime(true);
             $prepared = $this->executeQueryStatement($template, $parameters);
-            $iterator = (function() use ($prepared, $statement, $casters): Iterator {
+            $iterator = (function() use ($prepared, $statement, $casters, $syntax): Iterator {
                 while (true) {
                     $data = $prepared->fetch(PDO::FETCH_OBJ);
 
@@ -182,6 +184,10 @@ abstract class PdoAdapter extends Adapter
                         $this->throwQueryException($prepared, $statement);
                     }
 
+                    if ($statement instanceof Normalizable) {
+                        $data = $statement->normalize($syntax, $data);
+                    }
+
                     if ($casters !== null) {
                         $this->applyCasts($data, $casters);
                     }
@@ -189,10 +195,6 @@ abstract class PdoAdapter extends Adapter
                     yield $data;
                 }
             })();
-
-            if ($statement instanceof Normalizable) {
-                $iterator = $statement->normalize($syntax, $iterator);
-            }
 
             return $this->instantiateQueryResult(
                 $statement,

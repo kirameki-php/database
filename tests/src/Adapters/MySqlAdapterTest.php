@@ -2,8 +2,11 @@
 
 namespace Tests\Kirameki\Database\Adapters;
 
+use Kirameki\Database\Exceptions\QueryException;
 use Kirameki\Database\Exceptions\SchemaException;
-use Kirameki\Database\Schema\Statements\RawStatement;
+use Kirameki\Database\Query\QueryResult;
+use Kirameki\Database\Query\Statements\RawStatement;
+use Kirameki\Database\Schema\Statements\RawStatement as SchemaRawStatement;
 use Kirameki\Database\Schema\Statements\SchemaResult;
 use Tests\Kirameki\Database\DatabaseTestCase;
 use function rand;
@@ -49,9 +52,10 @@ class MySqlAdapterTest extends DatabaseTestCase
         $adapter = $connection->adapter;
         $adapter->createDatabase(true);
         $adapter->connect();
-        $result = $adapter->runSchema(new RawStatement("CREATE TABLE {$tableName} (id INT PRIMARY KEY)"));
+        $result = $adapter->runSchema(new SchemaRawStatement("CREATE TABLE {$tableName} (id INT PRIMARY KEY)"));
         $this->assertInstanceOf(SchemaResult::class, $result);
-        $this->assertInstanceOf(RawStatement::class, $result->statement);
+        $this->assertInstanceOf(SchemaRawStatement::class, $result->statement);
+        $this->assertSame(["CREATE TABLE {$tableName} (id INT PRIMARY KEY)"], $result->commands);
         $this->assertTrue($connection->info()->tableExists($tableName));
     }
 
@@ -64,6 +68,31 @@ class MySqlAdapterTest extends DatabaseTestCase
 
         $this->expectException(SchemaException::class);
         $this->expectExceptionMessage('SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax;');
-        $adapter->runSchema(new RawStatement("HELLO"));
+        $adapter->runSchema(new SchemaRawStatement("HELLO"));
+    }
+
+    public function test_runQuery(): void
+    {
+        $connection = $this->createTempConnection('mysql');
+        $adapter = $connection->adapter;
+        $adapter->createDatabase(true);
+        $adapter->connect();
+        $result = $adapter->runQuery(new RawStatement('SELECT ?', [1]));
+        $this->assertInstanceOf(QueryResult::class, $result);
+        $this->assertInstanceOf(RawStatement::class, $result->statement);
+        $this->assertSame('SELECT ?', $result->template);
+        $this->assertSame([1], $result->parameters);
+        $this->assertSame(1, $result->getAffectedRowCount());
+    }
+
+    public function test_runQuery_invalid_syntax(): void
+    {
+        $connection = $this->createTempConnection('mysql');
+        $adapter = $connection->adapter;
+        $adapter->createDatabase(true);
+        $adapter->connect();
+        $this->expectException(QueryException::class);
+        $this->expectExceptionMessage('SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax;');
+        $adapter->runQuery(new RawStatement('HELLO'));
     }
 }

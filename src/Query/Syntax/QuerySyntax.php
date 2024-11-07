@@ -1168,10 +1168,10 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param iterable<int, stdClass> $rows
-     * @return Iterator<int, stdClass>
+     * @param stdClass $row
+     * @return stdClass
      */
-    abstract public function normalizeListColumns(iterable $rows): Iterator;
+    abstract public function normalizeListColumns(stdClass $row): stdClass;
 
     /**
      * @param ListIndexesStatement $statement

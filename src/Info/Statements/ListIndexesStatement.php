@@ -7,6 +7,7 @@ use Kirameki\Database\Query\Statements\Normalizable;
 use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Override;
+use stdClass;
 
 class ListIndexesStatement extends QueryStatement implements Normalizable
 {
@@ -42,11 +43,9 @@ class ListIndexesStatement extends QueryStatement implements Normalizable
      * @inheritDoc
      */
     #[Override]
-    public function normalize(QuerySyntax $syntax, iterable $rows): Iterator
+    public function normalize(QuerySyntax $syntax, stdClass $row): stdClass
     {
-        foreach ($rows as $row) {
-            $row->columns = explode(',', $row->columns);
-            yield $row;
-        }
+        $row->columns = explode(',', $row->columns);
+        return $row;
     }
 }
