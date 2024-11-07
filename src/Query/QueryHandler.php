@@ -96,7 +96,7 @@ readonly class QueryHandler
      */
     public function executeRaw(string $query, iterable $parameters = [], ?array $casts = null, ?Tags $tags = null): QueryResult
     {
-        return $this->execute(new RawStatement($casts, $tags, $query, $parameters));
+        return $this->execute(new RawStatement($query, $parameters, $casts, $tags));
     }
 
     /**
