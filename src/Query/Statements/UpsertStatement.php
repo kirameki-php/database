@@ -6,7 +6,7 @@ use Kirameki\Database\Query\Support\Dataset;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Override;
 
-class UpsertStatement extends QueryStatement
+class UpsertStatement extends QueryStatement implements ManipulationStatement
 {
     /**
      * @param Dataset $dataset
