@@ -5,6 +5,7 @@ namespace Kirameki\Database\Adapters;
 use Closure;
 use Iterator;
 use Kirameki\Collections\LazyIterator;
+use Kirameki\Core\Exceptions\UnreachableException;
 use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
 use Kirameki\Database\Exceptions\QueryException;
@@ -183,7 +184,12 @@ abstract class PdoAdapter extends Adapter
                         if ($prepared->errorCode() === '00000') {
                             break;
                         }
-                        $this->throwQueryException($prepared, $statement);
+                        // @codeCoverageIgnoreStart
+                        throw new UnreachableException('Failed to fetch data from cursor.', [
+                            'errorInfo' => $prepared->errorInfo(),
+                            'statement' => $statement,
+                        ]);
+                        // @codeCoverageIgnoreEnd
                     }
 
                     if ($statement instanceof Normalizable) {
