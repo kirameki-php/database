@@ -140,7 +140,7 @@ class MySqlAdapter extends PdoAdapter
      * @inheritDoc
      */
     #[Override]
-    public function createDatabase(bool $ifNotExist = false): void
+    public function createDatabase(bool $ifNotExist = true): void
     {
         $config = $this->connectionConfig;
         $copy = (clone $this);
@@ -152,6 +152,9 @@ class MySqlAdapter extends PdoAdapter
             $config->charset ? 'CHARACTER SET ' . $config->charset : null,
             $config->collation ? 'COLLATE ' . $config->collation : null,
         ]))));
+
+        // attempt to reconnect to the created database
+        $this->getPdo();
     }
 
     /**
