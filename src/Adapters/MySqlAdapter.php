@@ -97,7 +97,7 @@ class MySqlAdapter extends PdoAdapter
         $settings = [
             'SET SESSION TRANSACTION ISOLATION LEVEL ' . $this->connectionConfig->isolationLevel->value,
         ];
-        if ($this->readonly) {
+        if ($this->connectionConfig->isReadOnly()) {
             $settings[] = 'SET SESSION TRANSACTION READ ONLY';
         }
         if ($settings !== []) {

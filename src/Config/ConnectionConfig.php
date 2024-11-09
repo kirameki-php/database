@@ -19,7 +19,7 @@ interface ConnectionConfig
     /**
      * @return bool
      */
-    public function isReplica(): bool;
+    public function isReadOnly(): bool;
 
     /**
      * @return IsolationLevel

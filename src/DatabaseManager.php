@@ -118,7 +118,7 @@ class DatabaseManager
             return $default;
         }
         $connections = $this->config->connections;
-        $primaries = Arr::filter($connections, static fn(ConnectionConfig $c) => !$c->isReplica());
+        $primaries = Arr::filter($connections, static fn(ConnectionConfig $c) => !$c->isReadOnly());
         if (count($primaries) === 1) {
             return array_key_first($primaries);
         }

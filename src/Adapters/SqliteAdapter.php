@@ -37,6 +37,10 @@ class SqliteAdapter extends PdoAdapter
             PDO::ATTR_TIMEOUT => $config->busyTimeoutSeconds,
         ];
 
+        if ($config->isReadOnly()) {
+            $options[PDO::SQLITE_ATTR_OPEN_FLAGS] = PDO::SQLITE_OPEN_READONLY;
+        }
+
         return new PDO($dsn, null, null, $options);
     }
 
@@ -61,7 +65,7 @@ class SqliteAdapter extends PdoAdapter
             'synchronous' => 'NORMAL',
             // The query_only pragma prevents data changes on database files when enabled.
             // https://sqlite.org/pragma.html#pragma_query_only
-            'query_only' => $this->connectionConfig->isReplica() ? 'ON' : 'OFF',
+            'query_only' => $this->connectionConfig->isReadOnly() ? 'ON' : 'OFF',
         ];
 
         $statements = [];

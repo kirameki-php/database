@@ -20,7 +20,7 @@ class MySqlConfig implements ConnectionConfig
      * @param string|null $charset
      * @param string|null $collation
      * @param int $connectTimeoutSeconds
-     * @param bool $replica
+     * @param bool $readOnly
      * @param IsolationLevel $isolationLevel
      * @param array<string, mixed>|null $serverOptions
      */
@@ -34,7 +34,7 @@ class MySqlConfig implements ConnectionConfig
         public ?string $charset = 'utf8mb4',
         public ?string $collation = 'utf8mb4_bin',
         public int $connectTimeoutSeconds = 3,
-        public bool $replica = false,
+        public bool $readOnly = false,
         public IsolationLevel $isolationLevel = IsolationLevel::Serializable,
         public ?array $serverOptions = null,
     )
@@ -63,9 +63,9 @@ class MySqlConfig implements ConnectionConfig
      * @inheritDoc
      */
     #[Override]
-    public function isReplica(): bool
+    public function isReadOnly(): bool
     {
-        return $this->replica;
+        return $this->readOnly;
     }
 
     /**

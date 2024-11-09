@@ -17,15 +17,10 @@ use Kirameki\Database\Transaction\Support\IsolationLevel;
 use function hrtime;
 
 /**
- * @template TConfig of ConnectionConfig
+ * @template TConnectionConfig of ConnectionConfig
  */
 abstract class Adapter
 {
-    /**
-     * @var bool
-     */
-    protected bool $readonly = false;
-
     /**
      * @var string
      */
@@ -43,7 +38,8 @@ abstract class Adapter
 
     /**
      * @param DatabaseConfig $databaseConfig
-     * @param TConfig $connectionConfig
+     * @param TConnectionConfig $connectionConfig
+     * @param TypeCastRegistry $casters
      * @param QuerySyntax|null $querySyntax
      * @param SchemaSyntax|null $schemaSyntax
      */
@@ -55,24 +51,6 @@ abstract class Adapter
         protected ?SchemaSyntax $schemaSyntax = null,
     )
     {
-        $this->readonly = $connectionConfig->isReplica();
-    }
-
-    /**
-     * @param bool $enable
-     * @return void
-     */
-    public function setReadOnlyMode(bool $enable): void
-    {
-        $this->readonly = $enable;
-    }
-
-    /**
-     * @return bool
-     */
-    public function inReadOnlyMode(): bool
-    {
-        return $this->readonly;
     }
 
     /**

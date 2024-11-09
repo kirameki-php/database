@@ -10,12 +10,14 @@ class SqliteConfig implements ConnectionConfig
     /**
      * @param string $filename
      * @param int $busyTimeoutSeconds
+     * @param bool $readOnly
      * @param iterable<string, string>|null $pragmas
      * @param iterable<string, mixed>|null $options
      */
     public function __construct(
         public string $filename,
         public int $busyTimeoutSeconds = 30,
+        public bool $readOnly = false,
         public ?iterable $pragmas = null,
         public ?iterable $options = null,
     )
@@ -44,9 +46,9 @@ class SqliteConfig implements ConnectionConfig
      * @inheritDoc
      */
     #[Override]
-    public function isReplica(): bool
+    public function isReadOnly(): bool
     {
-        return false;
+        return $this->readOnly;
     }
 
     /**
