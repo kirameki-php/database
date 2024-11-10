@@ -8,8 +8,6 @@ use Kirameki\Collections\LazyIterator;
 use Kirameki\Core\Exceptions\UnreachableException;
 use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
-use Kirameki\Database\Exceptions\QueryException;
-use Kirameki\Database\Exceptions\SchemaException;
 use Kirameki\Database\Query\Casters\TypeCaster;
 use Kirameki\Database\Query\QueryResult;
 use Kirameki\Database\Query\Statements\Normalizable;
@@ -29,7 +27,6 @@ use function array_map;
 use function array_walk;
 use function assert;
 use function hrtime;
-use function implode;
 
 /**
  * @template TConnectionConfig of ConnectionConfig
@@ -116,7 +113,7 @@ abstract class PdoAdapter extends Adapter
             array_map($this->getPdo()->exec(...), $executables);
             return $this->instantiateSchemaExecution($statement, $executables, $startTime);
         } catch (PDOException $e) {
-            throw new SchemaException($e->getMessage(), $statement, $e);
+            $this->throwSchemaException($e, $statement);
         }
     }
 
@@ -157,7 +154,7 @@ abstract class PdoAdapter extends Adapter
                 $affectedRowCount,
             );
         } catch (PDOException $e) {
-            throw new QueryException($e->getMessage(), $statement, null, $e);
+            $this->throwQueryException($e, $statement);
         }
     }
 
@@ -213,7 +210,7 @@ abstract class PdoAdapter extends Adapter
                 $this->getAffectedRows($statement, $prepared),
             );
         } catch (PDOException $e) {
-            throw new QueryException($e->getMessage(), $statement, null, $e);
+            $this->throwQueryException($e, $statement);
         }
     }
 
@@ -232,8 +229,17 @@ abstract class PdoAdapter extends Adapter
             $rows = $prepared->fetchAll(PDO::FETCH_OBJ);
             return $this->instantiateQueryResult($statement, $template, $parameters, $startTime, $rows, 0);
         } catch (PDOException $e) {
-            throw new QueryException($e->getMessage(), $statement, null, $e);
+            $this->throwQueryException($e, $statement);
         }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function inTransaction(): bool
+    {
+        return $this->getPdo()->inTransaction();
     }
 
     /**
@@ -267,15 +273,6 @@ abstract class PdoAdapter extends Adapter
     }
 
     /**
-     * @inheritDoc
-     */
-    #[Override]
-    public function inTransaction(): bool
-    {
-        return $this->getPdo()->inTransaction();
-    }
-
-    /**
      * @param string $template
      * @param list<mixed> $parameters
      * @return PDOStatement
@@ -285,16 +282,6 @@ abstract class PdoAdapter extends Adapter
         $prepared = $this->getPdo()->prepare($template);
         $prepared->execute($parameters);
         return $prepared;
-    }
-
-    /**
-     * @param PDOStatement $prepared
-     * @param QueryStatement $statement
-     * @return void
-     */
-    protected function throwQueryException(PDOStatement $prepared, QueryStatement $statement): void
-    {
-        throw new QueryException(implode(' | ', $prepared->errorInfo()), $statement);
     }
 
     /**

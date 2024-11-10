@@ -6,6 +6,8 @@ use Closure;
 use DateTimeInterface;
 use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
+use Kirameki\Database\Exceptions\QueryException;
+use Kirameki\Database\Exceptions\SchemaException;
 use Kirameki\Database\Query\QueryResult;
 use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
@@ -14,6 +16,7 @@ use Kirameki\Database\Schema\Statements\SchemaResult;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 use Kirameki\Database\Transaction\Support\IsolationLevel;
+use Throwable;
 use function hrtime;
 
 /**
@@ -54,11 +57,6 @@ abstract class Adapter
     }
 
     /**
-     * @return bool
-     */
-    abstract public function inTransaction(): bool;
-
-    /**
      * @param bool $ifNotExist
      * @return void
      */
@@ -76,6 +74,11 @@ abstract class Adapter
     abstract public function databaseExists(): bool;
 
     /**
+     * @return bool
+     */
+    abstract public function isConnected(): bool;
+
+    /**
      * @return $this
      */
     abstract public function connect(): static;
@@ -84,6 +87,11 @@ abstract class Adapter
      * @return $this
      */
     abstract public function disconnect(): static;
+
+    /**
+     * @return bool
+     */
+    abstract public function inTransaction(): bool;
 
     /**
      * @param IsolationLevel|null $level
@@ -100,11 +108,6 @@ abstract class Adapter
      * @return void
      */
     abstract public function commit(): void;
-
-    /**
-     * @return bool
-     */
-    abstract public function isConnected(): bool;
 
     /**
      * @template TSchemaStatement of SchemaStatement
@@ -198,5 +201,25 @@ abstract class Adapter
     {
         $elapsedMs = (hrtime(true) - $startTime) / 1_000_000;
         return new QueryResult($statement, $template, $parameters, $elapsedMs, $affectedRowCount, $rows);
+    }
+
+    /**
+     * @param Throwable $e
+     * @param SchemaStatement $statement
+     * @return never
+     */
+    protected function throwSchemaException(Throwable $e, SchemaStatement $statement): never
+    {
+        throw new SchemaException($e->getMessage(), $statement, $e);
+    }
+
+    /**
+     * @param Throwable $e
+     * @param QueryStatement $statement
+     * @return never
+     */
+    protected function throwQueryException(Throwable $e, QueryStatement $statement): never
+    {
+        throw new QueryException($e->getMessage(), $statement, null, $e);
     }
 }

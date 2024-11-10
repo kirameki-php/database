@@ -45,6 +45,17 @@ class PdoAdapterTestAbstract extends DatabaseTestCase
         return $connection;
     }
 
+    public function test_isConnected(): void
+    {
+        $adapter = $this->createAdapter();
+        $this->assertFalse($adapter->isConnected());
+        $adapter->createDatabase();
+        $adapter->connect();
+        $this->assertTrue($adapter->isConnected());
+        $adapter->disconnect();
+        $this->assertFalse($adapter->isConnected());
+    }
+
     public function test_connect(): void
     {
         $connection = $this->createConnection();
@@ -58,17 +69,6 @@ class PdoAdapterTestAbstract extends DatabaseTestCase
         $this->assertTrue($adapter->isConnected());
         $adapter->disconnect();
         $this->assertFalse($adapter->isConnected());
-        $adapter->connect();
-        $this->assertTrue($adapter->isConnected());
-        $adapter->disconnect();
-        $this->assertFalse($adapter->isConnected());
-    }
-
-    public function test_isConnected(): void
-    {
-        $adapter = $this->createAdapter();
-        $this->assertFalse($adapter->isConnected());
-        $adapter->createDatabase();
         $adapter->connect();
         $this->assertTrue($adapter->isConnected());
         $adapter->disconnect();
