@@ -7,6 +7,7 @@ use Kirameki\Database\Adapters\PdoAdapter;
 use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
 use Kirameki\Database\Connection;
+use Kirameki\Database\Exceptions\DropProtectionException;
 use Kirameki\Database\Exceptions\QueryException;
 use Kirameki\Database\Exceptions\SchemaException;
 use Kirameki\Database\Query\QueryResult;
@@ -44,6 +45,36 @@ class PdoAdapterTestAbstract extends DatabaseTestCase
         $adapter->createDatabase();
         $adapter->connect();
         return $connection;
+    }
+
+    public function test_createDatabase_not_existing(): void
+    {
+        $adapter = $this->createAdapter();
+        $adapter->dropDatabase();
+        $this->assertFalse($adapter->databaseExists());
+        $adapter->createDatabase();
+        $this->assertTrue($adapter->databaseExists());
+    }
+
+    public function test_dropDatabase_database_exist(): void
+    {
+        $adapter = $this->createAdapter();
+        $adapter->createDatabase();
+        $this->assertTrue($adapter->databaseExists());
+        $adapter->dropDatabase();
+        $this->assertFalse($adapter->databaseExists());
+        $adapter->dropDatabase();
+        $this->assertFalse($adapter->databaseExists());
+    }
+
+    public function test_dropDatabase_with_dropProtection_enabled(): void
+    {
+        $config = new DatabaseConfig([], dropProtection: true);
+        $adapter = $this->createAdapter($config);
+        $adapter->createDatabase();
+        $this->expectException(DropProtectionException::class);
+        $this->expectExceptionMessage('Dropping databases are prohibited by configuration.');
+        $adapter->dropDatabase();
     }
 
     public function test_isConnected(): void
