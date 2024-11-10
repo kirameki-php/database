@@ -45,7 +45,7 @@ abstract class PdoAdapter extends Adapter
     public function __construct(
         DatabaseConfig $databaseConfig,
         ConnectionConfig $connectionConfig,
-        TypeCastRegistry $casters,
+        ?TypeCastRegistry $casters = null,
         ?QuerySyntax $querySyntax = null,
         ?SchemaSyntax $schemaSyntax = null,
         protected ?PDO $pdo = null,
@@ -297,7 +297,7 @@ abstract class PdoAdapter extends Adapter
         }
 
         $mapped = [];
-        $casters = $this->casters;
+        $casters = $this->getTypeCasterRegistry();
         foreach ($casts as $key => $type) {
             $mapped[$key] = $casters->getCaster($type);
         }

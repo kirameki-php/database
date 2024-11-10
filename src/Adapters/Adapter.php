@@ -42,14 +42,14 @@ abstract class Adapter
     /**
      * @param DatabaseConfig $databaseConfig
      * @param TConnectionConfig $connectionConfig
-     * @param TypeCastRegistry $casters
+     * @param TypeCastRegistry|null $casters
      * @param QuerySyntax|null $querySyntax
      * @param SchemaSyntax|null $schemaSyntax
      */
     public function __construct(
         public readonly DatabaseConfig $databaseConfig,
         public readonly ConnectionConfig $connectionConfig,
-        protected readonly TypeCastRegistry $casters,
+        protected ?TypeCastRegistry $casters = null,
         protected ?QuerySyntax $querySyntax = null,
         protected ?SchemaSyntax $schemaSyntax = null,
     )
@@ -136,6 +136,22 @@ abstract class Adapter
      * @return QueryResult<TQueryStatement, mixed>
      */
     abstract public function explainQuery(QueryStatement $statement): QueryResult;
+
+    /**
+     * @return TypeCastRegistry
+     */
+    public function getTypeCasterRegistry(): TypeCastRegistry
+    {
+        return $this->casters ??= $this->instantiateTypeCasterRegistry();
+    }
+
+    /**
+     * @return TypeCastRegistry
+     */
+    protected function instantiateTypeCasterRegistry(): TypeCastRegistry
+    {
+        return new TypeCastRegistry();
+    }
 
     /**
      * @return QuerySyntax

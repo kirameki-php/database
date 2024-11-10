@@ -161,7 +161,7 @@ class MySqlAdapter extends PdoAdapter
      * @inheritDoc
      */
     #[Override]
-    public function dropDatabase(bool $ifExist = false): void
+    public function dropDatabase(bool $ifExist = true): void
     {
         if ($this->databaseConfig->dropProtection) {
             throw new DropProtectionException('Dropping databases are prohibited by configuration.');

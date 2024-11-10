@@ -5,4 +5,5 @@ namespace Tests\Kirameki\Database\Adapters;
 class SqliteAdapterTest extends PdoAdapterTestAbstract
 {
     protected string $useConnection = 'sqlite';
+
 }

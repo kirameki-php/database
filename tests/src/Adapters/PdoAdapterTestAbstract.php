@@ -5,6 +5,7 @@ namespace Tests\Kirameki\Database\Adapters;
 use Kirameki\Core\Exceptions\NotSupportedException;
 use Kirameki\Database\Adapters\PdoAdapter;
 use Kirameki\Database\Config\ConnectionConfig;
+use Kirameki\Database\Config\DatabaseConfig;
 use Kirameki\Database\Connection;
 use Kirameki\Database\Exceptions\QueryException;
 use Kirameki\Database\Exceptions\SchemaException;
@@ -27,11 +28,11 @@ class PdoAdapterTestAbstract extends DatabaseTestCase
     /**
      * @return PdoAdapter<covariant ConnectionConfig>
      */
-    protected function createAdapter(): PdoAdapter
+    protected function createAdapter(?DatabaseConfig $config = null): PdoAdapter
     {
         return match ($this->useConnection) {
-            'sqlite' => $this->createSqliteAdapter(),
-            'mysql' => $this->createMySqlAdapter(),
+            'sqlite' => $this->createSqliteAdapter($config),
+            'mysql' => $this->createMySqlAdapter(null, $config),
             default => throw new NotSupportedException(),
         };
     }

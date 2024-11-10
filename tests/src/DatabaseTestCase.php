@@ -57,25 +57,21 @@ class DatabaseTestCase extends TestCase
         ?string $name = null,
         ?DatabaseConfig $config = null,
         ?MySqlConfig $connectionConfig = null,
-        ?TypeCastRegistry $casters = null,
     ): MySqlAdapter
     {
         $name ??= 'test_' . mt_rand();
         $config ??= new DatabaseConfig([]);
         $connectionConfig ??= new MySqlConfig(host: 'mysql', database: $name);
-        $casters ??= new TypeCastRegistry();
-        return new MySqlAdapter($config, $connectionConfig, $casters);
+        return new MySqlAdapter($config, $connectionConfig);
     }
 
     public function createSqliteAdapter(
         ?DatabaseConfig $config = null,
         ?SqliteConfig $connectionConfig = null,
-        ?TypeCastRegistry $casters = null,
     ): SqliteAdapter
     {
         $config ??= new DatabaseConfig([]);
         $connectionConfig ??= new SqliteConfig(':memory:');
-        $casters ??= new TypeCastRegistry();
-        return new SqliteAdapter($config, $connectionConfig, $casters);
+        return new SqliteAdapter($config, $connectionConfig);
     }
 }
