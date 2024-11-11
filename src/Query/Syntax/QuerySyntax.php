@@ -422,14 +422,7 @@ abstract class QuerySyntax extends Syntax
     protected function formatDatasetParameters(QueryStatement $statement, Dataset $dataset, array $columns): array
     {
         $parameters = [];
-        foreach ($dataset as $index => $data) {
-            if (!is_array($data)) {
-                throw new LogicException('Data should be an array but ' . Value::getType($data) . ' given.', [
-                    'statement' => $statement,
-                    'dataset' => $dataset,
-                    'index' => $index,
-                ]);
-            }
+        foreach ($dataset as $data) {
             foreach ($columns as $column) {
                 if (array_key_exists($column, $data)) {
                     $parameters[] = $data[$column];
@@ -1027,11 +1020,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function asColumns(iterable $columns): array
     {
-        $formatted = [];
-        foreach ($columns as $column) {
-            $formatted[] = $this->asColumn($column);
-        }
-        return $formatted;
+        return array_map($this->asColumn(...), Arr::values($columns));
     }
 
     /**
@@ -1054,11 +1043,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function asParameterPlaceholders(iterable $values): array
     {
-        $placeholders = [];
-        foreach ($values as $value) {
-            $placeholders[] = $this->asPlaceholder($value);
-        }
-        return $placeholders;
+        return array_map($this->asPlaceholder(...), Arr::values($values));
     }
 
     /**

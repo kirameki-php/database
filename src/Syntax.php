@@ -4,6 +4,7 @@ namespace Kirameki\Database;
 
 use BackedEnum;
 use DateTimeInterface;
+use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Func;
 use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
@@ -51,11 +52,7 @@ abstract class Syntax
      */
     public function asIdentifiers(iterable $strings): array
     {
-        $formatted = [];
-        foreach ($strings as $string) {
-            $formatted[] = $this->asIdentifier($string);
-        }
-        return $formatted;
+        return array_map($this->asIdentifier(...), Arr::values($strings));
     }
 
     /**
@@ -102,11 +99,7 @@ abstract class Syntax
      */
     protected function stringifyParameters(iterable $values): array
     {
-        $strings = [];
-        foreach ($values as $value) {
-            $strings[] = $this->stringifyParameter($value);
-        }
-        return $strings;
+        return array_map($this->stringifyParameter(...), Arr::values($values));
     }
 
     /**
