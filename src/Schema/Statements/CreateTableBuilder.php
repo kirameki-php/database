@@ -2,6 +2,7 @@
 
 namespace Kirameki\Database\Schema\Statements;
 
+use Kirameki\Collections\Utils\Arr;
 use Kirameki\Database\Schema\SchemaHandler;
 use function iterator_to_array;
 
@@ -172,9 +173,9 @@ class CreateTableBuilder extends SchemaBuilder
     public function foreignKey(iterable $columns, string $referencedTable, iterable $referencedColumns): ForeignKeyBuilder
     {
         $constraint = new ForeignKeyConstraint(
-            iterator_to_array($columns),
+            Arr::values($columns),
             $referencedTable,
-            iterator_to_array($referencedColumns),
+            Arr::values($referencedColumns),
         );
         $this->statement->foreignKeys[] = $constraint;
         return new ForeignKeyBuilder($constraint);

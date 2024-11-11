@@ -2,6 +2,7 @@
 
 namespace Kirameki\Database\Query\Statements;
 
+use Kirameki\Collections\Utils\Arr;
 use Kirameki\Database\Query\Support\Tags;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Override;
@@ -40,6 +41,6 @@ class RawStatement extends QueryStatement
     #[Override]
     public function generateParameters(QuerySyntax $syntax): array
     {
-        return iterator_to_array($this->parameters);
+        return Arr::values($this->parameters);
     }
 }

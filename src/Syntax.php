@@ -51,7 +51,11 @@ abstract class Syntax
      */
     public function asIdentifiers(iterable $strings): array
     {
-        return array_map($this->asIdentifier(...), iterator_to_array($strings));
+        $formatted = [];
+        foreach ($strings as $string) {
+            $formatted[] = $this->asIdentifier($string);
+        }
+        return $formatted;
     }
 
     /**
@@ -94,13 +98,13 @@ abstract class Syntax
 
     /**
      * @param iterable<array-key, mixed> $values
-     * @return array<array-key, mixed>
+     * @return list<mixed>
      */
     protected function stringifyParameters(iterable $values): array
     {
         $strings = [];
-        foreach ($values as $name => $value) {
-            $strings[$name] = $this->stringifyParameter($value);
+        foreach ($values as $value) {
+            $strings[] = $this->stringifyParameter($value);
         }
         return $strings;
     }

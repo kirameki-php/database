@@ -2,9 +2,9 @@
 
 namespace Kirameki\Database\Schema\Statements;
 
+use Kirameki\Collections\Utils\Arr;
 use Kirameki\Database\Schema\SchemaHandler;
 use Kirameki\Database\Schema\Support\AlterType;
-use function iterator_to_array;
 
 /**
  * @extends SchemaBuilder<AlterTableStatement>
@@ -114,9 +114,9 @@ class AlterTableBuilder extends SchemaBuilder
     public function addForeignKey(iterable $columns, string $referencedTable, iterable $referencedColumns): ForeignKeyBuilder
     {
         $constraint = new ForeignKeyConstraint(
-            iterator_to_array($columns),
+            Arr::values($columns),
             $referencedTable,
-            iterator_to_array($referencedColumns),
+            Arr::values($referencedColumns),
         );
         $this->statement->addAction($constraint);
         return new ForeignKeyBuilder($constraint);

@@ -2,7 +2,6 @@
 
 namespace Kirameki\Database\Query\Syntax;
 
-use Iterator;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Exceptions\NotSupportedException;
@@ -123,7 +122,7 @@ abstract class QuerySyntax extends Syntax
 
     /**
      * @param SelectStatement $statement
-     * @return array<mixed>
+     * @return list<mixed>
      */
     public function prepareParametersForSelect(SelectStatement $statement): array
     {
@@ -157,7 +156,7 @@ abstract class QuerySyntax extends Syntax
     /**
      * @param InsertStatement $statement
      * @param list<string> $columns
-     * @return array<mixed>
+     * @return list<mixed>
      */
     public function prepareParametersForInsert(InsertStatement $statement, array $columns): array
     {
@@ -185,7 +184,7 @@ abstract class QuerySyntax extends Syntax
     /**
      * @param UpsertStatement $statement
      * @param list<string> $columns
-     * @return array<mixed>
+     * @return list<mixed>
      */
     public function prepareParametersForUpsert(UpsertStatement $statement, array $columns): array
     {
@@ -211,11 +210,12 @@ abstract class QuerySyntax extends Syntax
 
     /**
      * @param UpdateStatement $statement
-     * @return array<mixed>
+     * @return list<mixed>
      */
     public function prepareParametersForUpdate(UpdateStatement $statement): array
     {
         $parameters = $statement->set ?? throw new LogicException('No values to update', ['statement' => $statement]);
+        $parameters = array_values($parameters);
         $this->addParametersForWhere($parameters, $statement);
         return $this->stringifyParameters($parameters);
     }
@@ -243,7 +243,7 @@ abstract class QuerySyntax extends Syntax
 
     /**
      * @param DeleteStatement $statement
-     * @return array<mixed>
+     * @return list<mixed>
      */
     public function prepareParametersForDelete(DeleteStatement $statement): array
     {
@@ -417,7 +417,7 @@ abstract class QuerySyntax extends Syntax
      * @param QueryStatement $statement
      * @param Dataset $dataset
      * @param list<string> $columns
-     * @return array<mixed>
+     * @return list<mixed>
      */
     protected function formatDatasetParameters(QueryStatement $statement, Dataset $dataset, array $columns): array
     {
@@ -1027,7 +1027,11 @@ abstract class QuerySyntax extends Syntax
      */
     protected function asColumns(iterable $columns): array
     {
-        return array_map($this->asColumn(...), iterator_to_array($columns));
+        $formatted = [];
+        foreach ($columns as $column) {
+            $formatted[] = $this->asColumn($column);
+        }
+        return $formatted;
     }
 
     /**
@@ -1050,11 +1054,15 @@ abstract class QuerySyntax extends Syntax
      */
     protected function asParameterPlaceholders(iterable $values): array
     {
-        return array_map($this->asPlaceholder(...), iterator_to_array($values));
+        $placeholders = [];
+        foreach ($values as $value) {
+            $placeholders[] = $this->asPlaceholder($value);
+        }
+        return $placeholders;
     }
 
     /**
-     * @param array<int, mixed> $parameters
+     * @param list<mixed> $parameters
      * @param SelectStatement $statement
      */
     protected function addParametersForJoins(array &$parameters, SelectStatement $statement): void
@@ -1066,7 +1074,7 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param array<int, mixed> $parameters
+     * @param list<mixed> $parameters
      * @param ConditionsStatement $statement
      * @return void
      */
@@ -1078,7 +1086,7 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param array<int, mixed> $parameters
+     * @param list<mixed> $parameters
      * @param SelectStatement $statement
      * @return void
      */
@@ -1090,7 +1098,7 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param array<int, mixed> $parameters
+     * @param list<mixed> $parameters
      * @param iterable<int, ConditionDefinition> $conditions
      * @return void
      */
@@ -1102,7 +1110,7 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param array<int, mixed> $parameters
+     * @param list<mixed> $parameters
      * @param ConditionDefinition $def
      * @return void
      */
