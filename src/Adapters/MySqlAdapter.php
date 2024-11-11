@@ -100,9 +100,7 @@ class MySqlAdapter extends PdoAdapter
         if ($this->connectionConfig->isReadOnly()) {
             $settings[] = 'SET SESSION TRANSACTION READ ONLY';
         }
-        if ($settings !== []) {
-            $this->getPdo()->exec(implode(';', $settings));
-        }
+        $this->getPdo()->exec(implode(';', $settings));
         return $this;
     }
 
