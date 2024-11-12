@@ -172,15 +172,33 @@ class DatabaseManager
 
     /**
      * @param string $adapter
-     * @return Closure(covariant ConnectionConfig): Adapter<ConnectionConfig>
+     * @return Closure(ConnectionConfig): Adapter<ConnectionConfig>
      */
     protected function getDefaultAdapterResolver(string $adapter): Closure
     {
         return match ($adapter) {
-            'mysql' => fn(MySqlConfig $cfg) => new MySqlAdapter($this->config, $cfg, $this->getTypeCastRegistry()),
-            'sqlite' => fn(SqliteConfig $cfg) => new SqliteAdapter($this->config, $cfg, $this->getTypeCastRegistry()),
+            'mysql' => $this->getMySqlAdapter(...),
+            'sqlite' => $this->getSqliteAdapter(...),
             default => throw new LogicException("No adapter resolver exists for: {$adapter}"),
         };
+    }
+
+    /**
+     * @param MySqlConfig $connectionConfig
+     * @return MySqlAdapter
+     */
+    protected function getMySqlAdapter(ConnectionConfig $connectionConfig): MySqlAdapter
+    {
+        return new MySqlAdapter($this->config, $connectionConfig, $this->getTypeCastRegistry());
+    }
+
+    /**
+     * @param SqliteConfig $connectionConfig
+     * @return SqliteAdapter
+     */
+    protected function getSqliteAdapter(SqliteConfig $connectionConfig): SqliteAdapter
+    {
+        return new SqliteAdapter($this->config, $connectionConfig, $this->getTypeCastRegistry());
     }
 
     /**

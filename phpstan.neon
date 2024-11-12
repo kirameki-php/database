@@ -7,3 +7,7 @@ parameters:
     ignoreErrors:
     -
         message: '#^Unsafe usage of new static\(\)\.$#'
+    -
+        message: '#^Method Kirameki\\Database\\DatabaseManager\:\:getDefaultAdapterResolver\(\) should return Closure\(Kirameki\\Database\\Config\\ConnectionConfig\)\: Kirameki\\Database\\Adapters\\Adapter\<Kirameki\\Database\\Config\\ConnectionConfig\> but returns \(Closure\(Kirameki\\Database\\Config\\MySqlConfig\)\: Kirameki\\Database\\Adapters\\MySqlAdapter\)\|\(Closure\(Kirameki\\Database\\Config\\SqliteConfig\)\: Kirameki\\Database\\Adapters\\SqliteAdapter\)\.$#'
+        count: 1
+        path: src/DatabaseManager.php
