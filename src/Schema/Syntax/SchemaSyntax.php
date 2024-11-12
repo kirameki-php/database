@@ -73,8 +73,14 @@ abstract class SchemaSyntax extends Syntax
      */
     protected function formatCreateTablePrimaryKeyPart(CreateTableStatement $statement): ?string
     {
+        $columns = $statement->primaryKey?->columns;
+
+        if ($columns === null) {
+            return null;
+        }
+
         $pkParts = [];
-        foreach ($statement->primaryKey?->columns ?? [] as $column => $order) {
+        foreach ($columns as $column => $order) {
             $pkParts[] = "$column $order";
         }
         if ($pkParts !== []) {
