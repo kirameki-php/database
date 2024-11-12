@@ -4,6 +4,7 @@ namespace Kirameki\Database\Query\Pagination;
 
 use Kirameki\Database\Query\QueryResult;
 use Kirameki\Database\Query\Statements\SelectStatement;
+use Override;
 
 /**
  * @template TRow of mixed
@@ -21,6 +22,15 @@ class CursorPaginator extends Paginator
     )
     {
         parent::__construct($result, $cursor->size, $cursor->page);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function instantiate(mixed $iterable): static
+    {
+        return new static($this, $this->cursor);
     }
 
     /**

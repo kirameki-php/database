@@ -11,7 +11,6 @@ use Kirameki\Database\Query\Statements\QueryStatement as QueryStatement;
  * @template TQueryStatement of QueryStatement
  * @template TRow of mixed
  * @extends Vec<TRow>
- * @consistent-constructor
  */
 class QueryResult extends Vec
 {
@@ -33,6 +32,21 @@ class QueryResult extends Vec
     )
     {
         parent::__construct($rows);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function instantiate(mixed $iterable): static
+    {
+        return new static(
+            $this->statement,
+            $this->template,
+            $this->parameters,
+            $this->elapsedMs,
+            $this->affectedRowCount,
+            $iterable,
+        );
     }
 
     /**
@@ -61,20 +75,5 @@ class QueryResult extends Vec
             ]);
         }
         return $this;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function instantiate(mixed $items): static
-    {
-        return new static(
-            $this->statement,
-            $this->template,
-            $this->parameters,
-            $this->elapsedMs,
-            $this->affectedRowCount,
-            $items,
-        );
     }
 }

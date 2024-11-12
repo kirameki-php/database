@@ -33,6 +33,15 @@ class OffsetPaginator extends Paginator
      * @inheritDoc
      */
     #[Override]
+    public function instantiate(mixed $iterable): static
+    {
+        return new static($this, $this->size, $this->page, $this->total);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
     public function hasMorePages(): bool
     {
         return $this->page < $this->getTotalPages();
