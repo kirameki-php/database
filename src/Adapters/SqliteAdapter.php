@@ -178,7 +178,7 @@ class SqliteAdapter extends PdoAdapter
     public function beginTransaction(?IsolationLevel $level = null): void
     {
         if ($level !== null) {
-            throw new NotSupportedException('Transaction Isolation level changes are not supported in SQLite.');
+            throw new NotSupportedException('Transaction Isolation level cannot be changed in SQLite.');
         }
         $this->getPdo()->beginTransaction();
     }

@@ -20,10 +20,9 @@ use Kirameki\Time\Time;
 use stdClass;
 use Tests\Kirameki\Database\DatabaseTestCase;
 use Tests\Kirameki\Database\Query\Builders\_Support\IntCastEnum;
-use function dump;
 use function rand;
 
-class PdoAdapterTestAbstract extends DatabaseTestCase
+abstract class PdoAdapterTestAbstract extends DatabaseTestCase
 {
     protected string $useConnection;
 
@@ -43,7 +42,6 @@ class PdoAdapterTestAbstract extends DatabaseTestCase
     {
         $connection = $this->createTempConnection($this->useConnection);
         $adapter = $connection->adapter;
-        $adapter->createDatabase();
         $adapter->connect();
         return $connection;
     }
