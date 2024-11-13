@@ -246,18 +246,6 @@ abstract class PdoAdapter extends Adapter
      * @inheritDoc
      */
     #[Override]
-    public function beginTransaction(?IsolationLevel $level = null): void
-    {
-        if ($level !== null) {
-            $this->getPdo()->exec('SET TRANSACTION ISOLATION LEVEL ' . $level->value);
-        }
-        $this->getPdo()->beginTransaction();
-    }
-
-    /**
-     * @inheritDoc
-     */
-    #[Override]
     public function commit(): void
     {
         $this->getPdo()->commit();

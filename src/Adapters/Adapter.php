@@ -97,7 +97,7 @@ abstract class Adapter
      * @param IsolationLevel|null $level
      * @return void
      */
-    abstract public function beginTransaction(?IsolationLevel $level): void;
+    abstract public function beginTransaction(?IsolationLevel $level = null): void;
 
     /**
      * @return void

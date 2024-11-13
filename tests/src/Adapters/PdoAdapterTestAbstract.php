@@ -20,6 +20,7 @@ use Kirameki\Time\Time;
 use stdClass;
 use Tests\Kirameki\Database\DatabaseTestCase;
 use Tests\Kirameki\Database\Query\Builders\_Support\IntCastEnum;
+use function dump;
 use function rand;
 
 class PdoAdapterTestAbstract extends DatabaseTestCase
@@ -105,6 +106,42 @@ class PdoAdapterTestAbstract extends DatabaseTestCase
         $this->assertTrue($adapter->isConnected());
         $adapter->disconnect();
         $this->assertFalse($adapter->isConnected());
+    }
+
+    public function test_inTransaction(): void
+    {
+        $adapter = $this->createConnection()->adapter;
+        $this->assertFalse($adapter->inTransaction());
+        $adapter->beginTransaction();
+        $this->assertTrue($adapter->inTransaction());
+        $adapter->commit();
+        $this->assertFalse($adapter->inTransaction());
+    }
+
+    public function test_beginTransaction(): void
+    {
+        $adapter = $this->createConnection()->adapter;
+        $adapter->runSchema(new SchemaRawStatement('CREATE TABLE test_table (id INT PRIMARY KEY)'));
+        $this->assertFalse($adapter->inTransaction());
+        $adapter->runQuery(new RawStatement('INSERT INTO test_table (id) VALUES (1)'));
+        $adapter->beginTransaction();
+        $adapter->runQuery(new RawStatement('INSERT INTO test_table (id) VALUES (2)'));
+        $this->assertTrue($adapter->inTransaction());
+        $this->assertSame(2, $adapter->runQuery(new RawStatement('SELECT COUNT(*) as count FROM test_table'))->first()->count);
+        $adapter->rollback();
+        $this->assertFalse($adapter->inTransaction());
+        $this->assertSame(1, $adapter->runQuery(new RawStatement('SELECT COUNT(*) as count FROM test_table'))->first()->count);
+    }
+
+    public function test_rollback(): void
+    {
+        $adapter = $this->createConnection()->adapter;
+        $adapter->runSchema(new SchemaRawStatement('CREATE TABLE test_table (id INT PRIMARY KEY)'));
+        $adapter->beginTransaction();
+        $adapter->runQuery(new RawStatement('INSERT INTO test_table (id) VALUES (1)'));
+        $adapter->rollback();
+        $this->assertFalse($adapter->inTransaction());
+        $this->assertSame(0, $adapter->runQuery(new RawStatement('SELECT COUNT(*) as count FROM test_table'))->first()->count);
     }
 
     public function test_runSchema_with_valid_statement(): void
