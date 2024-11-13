@@ -131,6 +131,8 @@ abstract class PdoAdapterTestAbstract extends DatabaseTestCase
         $this->assertSame(1, $adapter->runQuery(new RawStatement('SELECT COUNT(*) as count FROM test_table'))->first()->count);
     }
 
+    abstract public function test_beginTransaction_with_isolation_level(): void;
+
     public function test_rollback(): void
     {
         $adapter = $this->createConnection()->adapter;
