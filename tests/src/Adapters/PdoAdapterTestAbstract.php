@@ -17,6 +17,7 @@ use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Kirameki\Database\Schema\Statements\RawStatement as SchemaRawStatement;
 use Kirameki\Database\Schema\Statements\SchemaResult;
 use Kirameki\Time\Time;
+use LogicException;
 use stdClass;
 use Tests\Kirameki\Database\DatabaseTestCase;
 use Tests\Kirameki\Database\Query\Builders\_Support\IntCastEnum;
@@ -38,12 +39,9 @@ abstract class PdoAdapterTestAbstract extends DatabaseTestCase
         };
     }
 
-    protected function createConnection(): Connection
+    protected function connect(): Connection
     {
-        $connection = $this->createTempConnection($this->useConnection);
-        $adapter = $connection->adapter;
-        $adapter->connect();
-        return $connection;
+        return $this->createTempConnection($this->useConnection);
     }
 
     public function test_createDatabase_not_existing(): void
@@ -81,7 +79,6 @@ abstract class PdoAdapterTestAbstract extends DatabaseTestCase
         $adapter = $this->createAdapter();
         $this->assertFalse($adapter->isConnected());
         $adapter->createDatabase();
-        $adapter->connect();
         $this->assertTrue($adapter->isConnected());
         $adapter->disconnect();
         $this->assertFalse($adapter->isConnected());
@@ -89,9 +86,20 @@ abstract class PdoAdapterTestAbstract extends DatabaseTestCase
 
     public function test_connect(): void
     {
-        $connection = $this->createConnection();
+        $connection = $this->connect();
         $this->assertTrue($connection->adapter->isConnected());
     }
+
+    public function test_connecting_twice(): void
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('Already connected.');
+        $adapter = $this->connect()->adapter;
+        $adapter->connect();
+        $adapter->connect();
+    }
+
+    abstract public function test_connect_as_readOnly(): void;
 
     public function test_disconnect(): void
     {
@@ -108,7 +116,7 @@ abstract class PdoAdapterTestAbstract extends DatabaseTestCase
 
     public function test_inTransaction(): void
     {
-        $adapter = $this->createConnection()->adapter;
+        $adapter = $this->connect()->adapter;
         $this->assertFalse($adapter->inTransaction());
         $adapter->beginTransaction();
         $this->assertTrue($adapter->inTransaction());
@@ -118,7 +126,7 @@ abstract class PdoAdapterTestAbstract extends DatabaseTestCase
 
     public function test_beginTransaction(): void
     {
-        $adapter = $this->createConnection()->adapter;
+        $adapter = $this->connect()->adapter;
         $adapter->runSchema(new SchemaRawStatement('CREATE TABLE test_table (id INT PRIMARY KEY)'));
         $this->assertFalse($adapter->inTransaction());
         $adapter->runQuery(new RawStatement('INSERT INTO test_table (id) VALUES (1)'));
@@ -135,7 +143,7 @@ abstract class PdoAdapterTestAbstract extends DatabaseTestCase
 
     public function test_rollback(): void
     {
-        $adapter = $this->createConnection()->adapter;
+        $adapter = $this->connect()->adapter;
         $adapter->runSchema(new SchemaRawStatement('CREATE TABLE test_table (id INT PRIMARY KEY)'));
         $adapter->beginTransaction();
         $adapter->runQuery(new RawStatement('INSERT INTO test_table (id) VALUES (1)'));
@@ -147,7 +155,7 @@ abstract class PdoAdapterTestAbstract extends DatabaseTestCase
     public function test_runSchema_with_valid_statement(): void
     {
         $tableName = 'test_table_' . rand(1000, 9999);
-        $connection = $this->createConnection();
+        $connection = $this->connect();
         $adapter = $connection->adapter;
         $result = $adapter->runSchema(new SchemaRawStatement("CREATE TABLE {$tableName} (id INT PRIMARY KEY)"));
         $this->assertInstanceOf(SchemaResult::class, $result);
@@ -158,7 +166,7 @@ abstract class PdoAdapterTestAbstract extends DatabaseTestCase
 
     public function test_runSchema_invalid_syntax(): void
     {
-        $adapter = $this->createConnection()->adapter;
+        $adapter = $this->connect()->adapter;
         $this->expectException(SchemaException::class);
         $this->expectExceptionMessage(match ($this->useConnection) {
             'mysql' => 'SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax;',
@@ -170,7 +178,7 @@ abstract class PdoAdapterTestAbstract extends DatabaseTestCase
 
     public function test_runQuery_with_valid_statement(): void
     {
-        $adapter = $this->createConnection()->adapter;
+        $adapter = $this->connect()->adapter;
         $result = $adapter->runQuery(new RawStatement('SELECT ?', [1]));
         $this->assertInstanceOf(QueryResult::class, $result);
         $this->assertInstanceOf(RawStatement::class, $result->statement);
@@ -187,7 +195,7 @@ abstract class PdoAdapterTestAbstract extends DatabaseTestCase
                 return $row;
             }
         };
-        $adapter = $this->createConnection()->adapter;
+        $adapter = $this->connect()->adapter;
         $result = $adapter->runQuery($statement);
         $this->assertInstanceOf(QueryResult::class, $result);
         $this->assertSame($statement, $result->statement);
@@ -198,7 +206,7 @@ abstract class PdoAdapterTestAbstract extends DatabaseTestCase
 
     public function test_runQuery_with_casts(): void
     {
-        $adapter = $this->createConnection()->adapter;
+        $adapter = $this->connect()->adapter;
         $casts = ['a' => Time::class, 'b' => IntCastEnum::class];
         $result = $adapter->runQuery(new RawStatement('SELECT ? as a, 1 as b, 2 as c', ['2024-01-01'], $casts));
         $this->assertInstanceOf(QueryResult::class, $result);
@@ -213,7 +221,7 @@ abstract class PdoAdapterTestAbstract extends DatabaseTestCase
 
     public function test_runQuery_invalid_syntax(): void
     {
-        $adapter = $this->createConnection()->adapter;
+        $adapter = $this->connect()->adapter;
         $this->expectException(QueryException::class);
         $this->expectExceptionMessage(match ($this->useConnection) {
             'mysql' => 'SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax;',
@@ -225,7 +233,7 @@ abstract class PdoAdapterTestAbstract extends DatabaseTestCase
 
     public function test_runQueryWithCursor_with_valid_statement(): void
     {
-        $adapter = $this->createConnection()->adapter;
+        $adapter = $this->connect()->adapter;
         $adapter->runSchema(new SchemaRawStatement('CREATE TABLE test_table (id INT PRIMARY KEY)'));
         $adapter->runQuery(new RawStatement('INSERT INTO test_table (id) VALUES (1), (2), (3)'));
         $result = $adapter->runQueryWithCursor(new RawStatement('SELECT * FROM test_table'));
@@ -244,7 +252,7 @@ abstract class PdoAdapterTestAbstract extends DatabaseTestCase
                 return $row;
             }
         };
-        $adapter = $this->createConnection()->adapter;
+        $adapter = $this->connect()->adapter;
         $result = $adapter->runQueryWithCursor($statement);
         $this->assertInstanceOf(QueryResult::class, $result);
         $this->assertSame($statement, $result->statement);
@@ -255,7 +263,7 @@ abstract class PdoAdapterTestAbstract extends DatabaseTestCase
 
     public function test_runQueryWithCursor_with_casts(): void
     {
-        $adapter = $this->createConnection()->adapter;
+        $adapter = $this->connect()->adapter;
         $casts = ['a' => Time::class, 'b' => IntCastEnum::class];
         $result = $adapter->runQueryWithCursor(new RawStatement('SELECT ? as a, 1 as b, 2 as c', ['2024-01-01'], $casts));
         $this->assertInstanceOf(QueryResult::class, $result);
@@ -270,7 +278,7 @@ abstract class PdoAdapterTestAbstract extends DatabaseTestCase
 
     public function test_runQueryWithCursor_with_invalid_syntax(): void
     {
-        $adapter = $this->createConnection()->adapter;
+        $adapter = $this->connect()->adapter;
         $this->expectException(QueryException::class);
         $this->expectExceptionMessage(match ($this->useConnection) {
             'mysql' => 'SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax;',

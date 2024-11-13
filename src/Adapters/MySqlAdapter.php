@@ -94,13 +94,15 @@ class MySqlAdapter extends PdoAdapter
     public function connect(): static
     {
         parent::connect();
-        $settings = [
-            'SET SESSION TRANSACTION ISOLATION LEVEL ' . $this->connectionConfig->isolationLevel->value,
-        ];
-        if ($this->connectionConfig->isReadOnly()) {
-            $settings[] = 'SET SESSION TRANSACTION READ ONLY';
-        }
-        $this->getPdo()->exec(implode(';', $settings));
+
+        $connectionConfig = $this->connectionConfig;
+
+        $setTransaction = 'SET SESSION TRANSACTION ISOLATION LEVEL '
+            . $connectionConfig->isolationLevel->value
+            . ($connectionConfig->isReadOnly() ? ', READ ONLY' : '');
+
+        $this->getPdo()->exec($setTransaction);
+
         return $this;
     }
 

@@ -12,6 +12,7 @@ use Kirameki\Database\Transaction\Support\IsolationLevel;
 use Override;
 use PDO;
 use function file_exists;
+use function glob;
 use function implode;
 use function iterator_to_array;
 use function unlink;
@@ -116,8 +117,10 @@ class SqliteAdapter extends PdoAdapter
             return;
         }
 
-        $this->getPdo()->exec('CREATE TABLE _setup (id INTEGER PRIMARY KEY AUTOINCREMENT)');
-        $this->getPdo()->exec('DROP TABLE _setup');
+        // TODO: catch PDOException and throw dedicated exception
+        $pdo = $this->getPdo();
+        $pdo->exec('CREATE TABLE _setup (id INTEGER PRIMARY KEY AUTOINCREMENT)');
+        $pdo->exec('DROP TABLE _setup');
     }
 
     /**
@@ -132,7 +135,11 @@ class SqliteAdapter extends PdoAdapter
 
         if ($this->databaseExists()) {
             if ($this->isPersistentDatabase()) {
-                unlink($this->connectionConfig->filename);
+                // remove all related files ({name}.db / {name}.db-shm / {name}.db-wal)
+                $files = glob($this->connectionConfig->filename . '*') ?: [];
+                foreach ($files as $file) {
+                    unlink($file);
+                }
             }
         } elseif (!$ifExist) {
             throw new DatabaseNotFoundException($this->connectionConfig->filename, $this->connectionConfig);

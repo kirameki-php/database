@@ -5,6 +5,7 @@ namespace Kirameki\Database\Adapters;
 use Closure;
 use Iterator;
 use Kirameki\Collections\LazyIterator;
+use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Exceptions\UnreachableException;
 use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
@@ -18,7 +19,6 @@ use Kirameki\Database\Query\TypeCastRegistry;
 use Kirameki\Database\Schema\Statements\SchemaResult;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
-use Kirameki\Database\Transaction\Support\IsolationLevel;
 use Override;
 use PDO;
 use PDOException;
@@ -78,7 +78,14 @@ abstract class PdoAdapter extends Adapter
     #[Override]
     public function connect(): static
     {
+        if ($this->pdo !== null) {
+            throw new LogicException('Already connected.', [
+                'connectionConfig' => $this->connectionConfig,
+            ]);
+        }
+
         $this->pdo = $this->createPdo();
+
         return $this;
     }
 
