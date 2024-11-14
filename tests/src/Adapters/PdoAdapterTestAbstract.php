@@ -53,6 +53,17 @@ abstract class PdoAdapterTestAbstract extends DatabaseTestCase
         $this->assertTrue($adapter->databaseExists());
     }
 
+    public function test_createDatabase_existing(): void
+    {
+        $adapter = $this->createAdapter();
+        $adapter->dropDatabase();
+        $this->assertFalse($adapter->databaseExists());
+        $adapter->createDatabase();
+        $this->assertTrue($adapter->databaseExists());
+        $adapter->createDatabase();
+        $this->assertTrue($adapter->databaseExists());
+    }
+
     public function test_dropDatabase_database_exist(): void
     {
         $adapter = $this->createAdapter();

@@ -12,6 +12,7 @@ use Kirameki\Database\Query\Statements\RawStatement;
 use Kirameki\Database\Schema\Statements\RawStatement as SchemaRawStatement;
 use Kirameki\Database\Transaction\Support\IsolationLevel;
 use Override;
+use PDOException;
 
 class MySqlAdapterTest extends PdoAdapterTestAbstract
 {
@@ -29,6 +30,13 @@ class MySqlAdapterTest extends PdoAdapterTestAbstract
         $this->expectException(InvalidConfigException::class);
         $this->expectExceptionMessage('Host and socket cannot be used together.');
         (new MySqlAdapter(new DatabaseConfig([]), new MySqlConfig(host: 'abc', socket: '123')))->connect();
+    }
+
+    public function test_connect_try_with_socket(): void
+    {
+        $this->expectException(PDOException::class);
+        $this->expectExceptionMessage('SQLSTATE[HY000] [2002] No such file or directory');
+        (new MySqlAdapter(new DatabaseConfig([]), new MySqlConfig(socket: '/run/mysql.sock')))->connect();
     }
 
     #[Override]
