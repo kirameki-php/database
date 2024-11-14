@@ -168,16 +168,16 @@ abstract class PdoAdapterTestAbstract extends DatabaseTestCase
     public function test_beginTransaction(): void
     {
         $adapter = $this->connect()->adapter;
-        $adapter->runSchema(new SchemaRawStatement('CREATE TABLE test_table (id INT PRIMARY KEY)'));
+        $adapter->runSchema(new SchemaRawStatement('CREATE TABLE test (id INT PRIMARY KEY)'));
         $this->assertFalse($adapter->inTransaction());
-        $adapter->runQuery(new RawStatement('INSERT INTO test_table (id) VALUES (1)'));
+        $adapter->runQuery(new RawStatement('INSERT INTO test (id) VALUES (1)'));
         $adapter->beginTransaction();
-        $adapter->runQuery(new RawStatement('INSERT INTO test_table (id) VALUES (2)'));
+        $adapter->runQuery(new RawStatement('INSERT INTO test (id) VALUES (2)'));
         $this->assertTrue($adapter->inTransaction());
-        $this->assertSame(2, $adapter->runQuery(new RawStatement('SELECT COUNT(*) as count FROM test_table'))->first()->count);
+        $this->assertSame(2, $adapter->runQuery(new RawStatement('SELECT COUNT(*) as count FROM test'))->first()->count);
         $adapter->rollback();
         $this->assertFalse($adapter->inTransaction());
-        $this->assertSame(1, $adapter->runQuery(new RawStatement('SELECT COUNT(*) as count FROM test_table'))->first()->count);
+        $this->assertSame(1, $adapter->runQuery(new RawStatement('SELECT COUNT(*) as count FROM test'))->first()->count);
     }
 
     abstract public function test_beginTransaction_with_isolation_level(): void;
@@ -185,17 +185,17 @@ abstract class PdoAdapterTestAbstract extends DatabaseTestCase
     public function test_rollback(): void
     {
         $adapter = $this->connect()->adapter;
-        $adapter->runSchema(new SchemaRawStatement('CREATE TABLE test_table (id INT PRIMARY KEY)'));
+        $adapter->runSchema(new SchemaRawStatement('CREATE TABLE test (id INT PRIMARY KEY)'));
         $adapter->beginTransaction();
-        $adapter->runQuery(new RawStatement('INSERT INTO test_table (id) VALUES (1)'));
+        $adapter->runQuery(new RawStatement('INSERT INTO test (id) VALUES (1)'));
         $adapter->rollback();
         $this->assertFalse($adapter->inTransaction());
-        $this->assertSame(0, $adapter->runQuery(new RawStatement('SELECT COUNT(*) as count FROM test_table'))->first()->count);
+        $this->assertSame(0, $adapter->runQuery(new RawStatement('SELECT COUNT(*) as count FROM test'))->first()->count);
     }
 
     public function test_runSchema_with_valid_statement(): void
     {
-        $tableName = 'test_table_' . rand(1000, 9999);
+        $tableName = 'test__' . rand(1000, 9999);
         $connection = $this->connect();
         $adapter = $connection->adapter;
         $result = $adapter->runSchema(new SchemaRawStatement("CREATE TABLE {$tableName} (id INT PRIMARY KEY)"));
@@ -275,9 +275,9 @@ abstract class PdoAdapterTestAbstract extends DatabaseTestCase
     public function test_runQueryWithCursor_with_valid_statement(): void
     {
         $adapter = $this->connect()->adapter;
-        $adapter->runSchema(new SchemaRawStatement('CREATE TABLE test_table (id INT PRIMARY KEY)'));
-        $adapter->runQuery(new RawStatement('INSERT INTO test_table (id) VALUES (1), (2), (3)'));
-        $result = $adapter->runQueryWithCursor(new RawStatement('SELECT * FROM test_table'));
+        $adapter->runSchema(new SchemaRawStatement('CREATE TABLE test (id INT PRIMARY KEY)'));
+        $adapter->runQuery(new RawStatement('INSERT INTO test (id) VALUES (1), (2), (3)'));
+        $result = $adapter->runQueryWithCursor(new RawStatement('SELECT * FROM test'));
         $this->assertInstanceOf(QueryResult::class, $result);
         foreach ($result as $index => $row) {
             $this->assertSame($index + 1, $row->id);
@@ -327,5 +327,27 @@ abstract class PdoAdapterTestAbstract extends DatabaseTestCase
             default => throw new NotSupportedException(),
         });
         $adapter->runQueryWithCursor(new RawStatement('HELLO'));
+    }
+
+    public function test_explainQuery_with_valid_query(): void
+    {
+        $adapter = $this->connect()->adapter;
+        $adapter->runSchema(new SchemaRawStatement('CREATE TABLE test (id INT PRIMARY KEY)'));
+        $adapter->runQuery(new RawStatement('INSERT INTO test (id) VALUES (1), (2), (3)'));
+        $result = $adapter->explainQuery(new RawStatement('SELECT * FROM test'));
+        $this->assertSame("EXPLAIN SELECT * FROM test", $result->template);
+        $this->assertTrue($result->isNotEmpty());
+    }
+
+    public function test_explainQuery_with_invalid_syntax(): void
+    {
+        $adapter = $this->connect()->adapter;
+        $this->expectException(QueryException::class);
+        $this->expectExceptionMessage(match ($this->useConnection) {
+            'mysql' => 'SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax;',
+            'sqlite' => 'SQLSTATE[HY000]: General error: 1 unrecognized token: "!"',
+            default => throw new NotSupportedException(),
+        });
+        $adapter->explainQuery(new RawStatement('!'));
     }
 }
