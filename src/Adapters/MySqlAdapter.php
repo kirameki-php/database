@@ -5,6 +5,7 @@ namespace Kirameki\Database\Adapters;
 use Kirameki\Core\Exceptions\InvalidConfigException;
 use Kirameki\Database\Config\MySqlConfig;
 use Kirameki\Database\Exceptions\DatabaseExistsException;
+use Kirameki\Database\Exceptions\DatabaseNotFoundException;
 use Kirameki\Database\Exceptions\DropProtectionException;
 use Kirameki\Database\Exceptions\SchemaException;
 use Kirameki\Database\Query\Statements\RawStatement as RawQueryStatement;
@@ -159,8 +160,8 @@ class MySqlAdapter extends PdoAdapter
                 'CREATE DATABASE',
                 $ifNotExist ? 'IF NOT EXISTS' : null,
                 $database,
-                $config->charset ? 'CHARACTER SET ' . $config->charset : null,
-                $config->collation ? 'COLLATE ' . $config->collation : null,
+                $config->charset ? "CHARACTER SET {$config->charset}" : null,
+                $config->collation ? "COLLATE {$config->collation}"  : null,
             ]))));
         } catch (SchemaException $e) {
             if (str_ends_with($e->getMessage(), "1007 Can't create database '{$database}'; database exists")) {
@@ -187,11 +188,19 @@ class MySqlAdapter extends PdoAdapter
 
         $copy = (clone $this);
         $copy->omitDatabaseOnConnect = true;
-        $copy->runSchema(new RawStatement(implode(' ', array_filter([
-            'DROP DATABASE',
-            $ifExist ? 'IF EXISTS' : null,
-            $this->connectionConfig->database,
-        ]))));
+        $database = $this->connectionConfig->database;
+
+        try {
+            $copy->runSchema(new RawStatement(implode(' ', array_filter([
+                'DROP DATABASE',
+                $ifExist ? 'IF EXISTS' : null,
+                $database,
+            ]))));
+        } catch (SchemaException $e) {
+            if (str_ends_with($e->getMessage(), "1008 Can't drop database '{$database}'; database doesn't exist")) {
+                throw new DatabaseNotFoundException($database, ['adapter' => $this]);
+            }
+        }
     }
 
     /**
@@ -213,7 +222,7 @@ class MySqlAdapter extends PdoAdapter
     public function beginTransaction(?IsolationLevel $level = null): void
     {
         if ($level !== null) {
-            $this->getPdo()->exec('SET TRANSACTION ISOLATION LEVEL ' . $level->value);
+            $this->getPdo()->exec("SET TRANSACTION ISOLATION LEVEL {$level->value}");
         }
         $this->getPdo()->beginTransaction();
     }

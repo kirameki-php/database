@@ -52,19 +52,6 @@ class MySqlAdapterTest extends PdoAdapterTestAbstract
         $adapter->runQuery(new RawStatement('INSERT INTO test (id, name) VALUES (1, "a")'));
     }
 
-    public function test_dropDatabase_database_ifExists_disabled(): void
-    {
-        $adapter = $this->createAdapter();
-        $adapter->createDatabase();
-        $this->assertTrue($adapter->databaseExists());
-        $adapter->dropDatabase(false);
-
-        $database = $adapter->connectionConfig->getTableSchema();
-        $this->expectException(SchemaException::class);
-        $this->expectExceptionMessage("General error: 1008 Can't drop database '{$database}'; database doesn't exist");
-        $adapter->dropDatabase(false);
-    }
-
     #[Override]
     public function test_beginTransaction_with_isolation_level(): void
     {

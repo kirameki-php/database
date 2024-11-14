@@ -8,6 +8,7 @@ use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
 use Kirameki\Database\Connection;
 use Kirameki\Database\Exceptions\DatabaseExistsException;
+use Kirameki\Database\Exceptions\DatabaseNotFoundException;
 use Kirameki\Database\Exceptions\DropProtectionException;
 use Kirameki\Database\Exceptions\QueryException;
 use Kirameki\Database\Exceptions\SchemaException;
@@ -89,6 +90,19 @@ abstract class PdoAdapterTestAbstract extends DatabaseTestCase
         $this->assertFalse($adapter->databaseExists());
         $adapter->dropDatabase();
         $this->assertFalse($adapter->databaseExists());
+    }
+
+    public function test_dropDatabase_database_ifExists_disabled(): void
+    {
+        $adapter = $this->createAdapter();
+        $adapter->createDatabase();
+        $this->assertTrue($adapter->databaseExists());
+        $adapter->dropDatabase(false);
+
+        $database = $adapter->connectionConfig->getDatabaseName();
+        $this->expectException(DatabaseNotFoundException::class);
+        $this->expectExceptionMessage("'{$database}' does not exist.");
+        $adapter->dropDatabase(false);
     }
 
     public function test_dropDatabase_with_dropProtection_enabled(): void
