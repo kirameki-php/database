@@ -2,10 +2,10 @@
 
 namespace Kirameki\Database\Exceptions;
 
-class DatabaseNotFoundException extends DatabaseException
+class DatabaseExistsException extends DatabaseException
 {
     public function __construct(string $name, ?iterable $context = null)
     {
-        parent::__construct("'$name' does not exist.", $context);
+        parent::__construct("'$name' already exists.", $context);
     }
 }

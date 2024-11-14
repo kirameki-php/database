@@ -37,6 +37,15 @@ class SqliteConfig implements ConnectionConfig
      * @inheritDoc
      */
     #[Override]
+    public function getDatabaseName(): string
+    {
+        return $this->filename;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
     public function getTableSchema(): string
     {
         return 'sqlite';

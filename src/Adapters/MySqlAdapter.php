@@ -4,7 +4,9 @@ namespace Kirameki\Database\Adapters;
 
 use Kirameki\Core\Exceptions\InvalidConfigException;
 use Kirameki\Database\Config\MySqlConfig;
+use Kirameki\Database\Exceptions\DatabaseExistsException;
 use Kirameki\Database\Exceptions\DropProtectionException;
+use Kirameki\Database\Exceptions\SchemaException;
 use Kirameki\Database\Query\Statements\RawStatement as RawQueryStatement;
 use Kirameki\Database\Query\Syntax\MySqlQuerySyntax;
 use Kirameki\Database\Schema\Statements\RawStatement;
@@ -16,6 +18,7 @@ use PDO;
 use function array_filter;
 use function implode;
 use function iterator_to_array;
+use function str_ends_with;
 
 /**
  * @extends PdoAdapter<MySqlConfig>
@@ -54,10 +57,14 @@ class MySqlAdapter extends PdoAdapter
         $host = $config->host;
         $socket = $config->socket;
         if ($host === null && $socket === null) {
-            throw new InvalidConfigException('Either host or socket must be defined.');
+            throw new InvalidConfigException('Either host or socket must be defined.', [
+                'adapter' => $this,
+            ]);
         }
         if ($host !== null && $socket !== null) {
-            throw new InvalidConfigException('Host and socket cannot be used together.');
+            throw new InvalidConfigException('Host and socket cannot be used together.', [
+                'adapter' => $this,
+            ]);
         }
         if ($socket !== null) {
             $parts[] = "unix_socket={$config->socket}";
@@ -145,13 +152,21 @@ class MySqlAdapter extends PdoAdapter
         $config = $this->connectionConfig;
         $copy = (clone $this);
         $copy->omitDatabaseOnConnect = true;
-        $copy->runSchema(new RawStatement(implode(' ', array_filter([
-            'CREATE DATABASE',
-            $ifNotExist ? 'IF NOT EXISTS' : null,
-            $config->database,
-            $config->charset ? 'CHARACTER SET ' . $config->charset : null,
-            $config->collation ? 'COLLATE ' . $config->collation : null,
-        ]))));
+        $database = $config->database;
+
+        try {
+            $copy->runSchema(new RawStatement(implode(' ', array_filter([
+                'CREATE DATABASE',
+                $ifNotExist ? 'IF NOT EXISTS' : null,
+                $database,
+                $config->charset ? 'CHARACTER SET ' . $config->charset : null,
+                $config->collation ? 'COLLATE ' . $config->collation : null,
+            ]))));
+        } catch (SchemaException $e) {
+            if (str_ends_with($e->getMessage(), "1007 Can't create database '{$database}'; database exists")) {
+                throw new DatabaseExistsException($database, ['adapter' => $this]);
+            }
+        }
 
         // attempt to reconnect to the created database
         $this->getPdo();
@@ -164,7 +179,10 @@ class MySqlAdapter extends PdoAdapter
     public function dropDatabase(bool $ifExist = true): void
     {
         if ($this->databaseConfig->dropProtection) {
-            throw new DropProtectionException('Dropping databases are prohibited by configuration.');
+            $database = $this->connectionConfig->database;
+            throw new DropProtectionException("Dropping database '{$database}' is prohibited.", [
+                'adapter' => $this,
+            ]);
         }
 
         $copy = (clone $this);

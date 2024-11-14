@@ -4,6 +4,8 @@ namespace Kirameki\Database\Adapters;
 
 use Kirameki\Core\Exceptions\NotSupportedException;
 use Kirameki\Database\Config\SqliteConfig;
+use Kirameki\Database\Exceptions\DatabaseException;
+use Kirameki\Database\Exceptions\DatabaseExistsException;
 use Kirameki\Database\Exceptions\DatabaseNotFoundException;
 use Kirameki\Database\Exceptions\DropProtectionException;
 use Kirameki\Database\Query\Syntax\SqliteQuerySyntax;
@@ -113,8 +115,13 @@ class SqliteAdapter extends PdoAdapter
     #[Override]
     public function createDatabase(bool $ifNotExist = true): void
     {
-        if ($ifNotExist && $this->databaseExists()) {
-            return;
+        if ($this->databaseExists()) {
+            if ($ifNotExist) {
+                return;
+            }
+            throw new DatabaseExistsException($this->connectionConfig->filename, [
+                'adapter' => $this,
+            ]);
         }
 
         // TODO: catch PDOException and throw dedicated exception
@@ -130,7 +137,10 @@ class SqliteAdapter extends PdoAdapter
     public function dropDatabase(bool $ifExist = true): void
     {
         if ($this->databaseConfig->dropProtection) {
-            throw new DropProtectionException('Dropping databases are prohibited by configuration.');
+            $database = $this->connectionConfig->filename;
+            throw new DropProtectionException("Dropping database '{$database}' is prohibited.", [
+                'adapter' => $this,
+            ]);
         }
 
         if ($this->databaseExists()) {
@@ -142,7 +152,9 @@ class SqliteAdapter extends PdoAdapter
                 }
             }
         } elseif (!$ifExist) {
-            throw new DatabaseNotFoundException($this->connectionConfig->filename, $this->connectionConfig);
+            throw new DatabaseNotFoundException($this->connectionConfig->filename, [
+                'adapter' => $this,
+            ]);
         }
 
         $this->disconnect();
@@ -185,7 +197,10 @@ class SqliteAdapter extends PdoAdapter
     public function beginTransaction(?IsolationLevel $level = null): void
     {
         if ($level !== null) {
-            throw new NotSupportedException('Transaction Isolation level cannot be changed in SQLite.');
+            throw new NotSupportedException('Transaction Isolation level cannot be changed in SQLite.', [
+                'adapter' => $this,
+                'level' => $level,
+            ]);
         }
         $this->getPdo()->beginTransaction();
     }

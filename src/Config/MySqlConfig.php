@@ -54,9 +54,18 @@ class MySqlConfig implements ConnectionConfig
      * @inheritDoc
      */
     #[Override]
+    public function getDatabaseName(): string
+    {
+        return $this->database;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
     public function getTableSchema(): string
     {
-        return $this->database ?? '';
+        return $this->database;
     }
 
     /**

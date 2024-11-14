@@ -52,21 +52,6 @@ class MySqlAdapterTest extends PdoAdapterTestAbstract
         $adapter->runQuery(new RawStatement('INSERT INTO test (id, name) VALUES (1, "a")'));
     }
 
-    public function test_createDatabase_with_ifNotExist_disabled(): void
-    {
-        $adapter = $this->createAdapter();
-        $adapter->dropDatabase();
-        $this->assertFalse($adapter->databaseExists());
-        $adapter->createDatabase(false);
-        $this->assertTrue($adapter->databaseExists());
-
-        $database = $adapter->connectionConfig->getTableSchema();
-        $this->expectException(SchemaException::class);
-        $this->expectExceptionMessage("SQLSTATE[HY000]: General error: 1007 Can't create database '{$database}'; database exists");
-        $adapter->createDatabase(false);
-        $this->assertTrue($adapter->databaseExists());
-    }
-
     public function test_dropDatabase_database_ifExists_disabled(): void
     {
         $adapter = $this->createAdapter();

@@ -160,7 +160,8 @@ abstract class SchemaSyntax extends Syntax
     protected function formatDropColumnAction(AlterDropColumnAction $action): string
     {
         if ($this->databaseConfig->dropProtection) {
-            throw new DropProtectionException('Dropping columns are prohibited by configuration.', [
+            $database = $this->connectionConfig->getDatabaseName();
+            throw new DropProtectionException("Dropping columns is prohibited in database '{$database}'.", [
                 'action' => $action,
             ]);
         }
@@ -203,7 +204,7 @@ abstract class SchemaSyntax extends Syntax
     public function compileDropTable(DropTableStatement $statement): array
     {
         if ($this->databaseConfig->dropProtection) {
-            throw new DropProtectionException('Dropping tables are prohibited by configuration.', [
+            throw new DropProtectionException("Dropping tables are prohibited.", [
                 'statement' => $statement,
             ]);
         }
@@ -392,7 +393,8 @@ abstract class SchemaSyntax extends Syntax
     public function compileTruncateTable(TruncateTableStatement $statement): array
     {
         if ($this->databaseConfig->dropProtection) {
-            throw new DropProtectionException('TRUNCATE are prohibited by configuration.', [
+            $database = $this->connectionConfig->getDatabaseName();
+            throw new DropProtectionException("TRUNCATE is prohibited in database '{$database}'.", [
                 'statement' => $statement,
             ]);
         }

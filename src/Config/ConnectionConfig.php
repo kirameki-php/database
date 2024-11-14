@@ -14,6 +14,11 @@ interface ConnectionConfig
     /**
      * @return string
      */
+    public function getDatabaseName(): string;
+
+    /**
+     * @return string
+     */
     public function getTableSchema(): string;
 
     /**
