@@ -76,13 +76,4 @@ class MySqlConfig implements ConnectionConfig
     {
         return $this->readOnly;
     }
-
-    /**
-     * @inheritDoc
-     */
-    #[Override]
-    public function getIsolationLevel(): IsolationLevel
-    {
-        return $this->isolationLevel;
-    }
 }

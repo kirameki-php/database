@@ -25,9 +25,4 @@ interface ConnectionConfig
      * @return bool
      */
     public function isReadOnly(): bool;
-
-    /**
-     * @return IsolationLevel
-     */
-    public function getIsolationLevel(): IsolationLevel;
 }
