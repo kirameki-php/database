@@ -2,6 +2,7 @@
 
 namespace Kirameki\Database\Schema\Statements;
 
+use Closure;
 use Kirameki\Database\Schema\SchemaHandler;
 
 /**
@@ -25,6 +26,16 @@ abstract class SchemaBuilder
     public function getStatement(): SchemaStatement
     {
         return $this->statement;
+    }
+
+    /**
+     * @param Closure($this): mixed $callback
+     * @return SchemaResult<TSchemaStatement>
+     */
+    public function run(Closure $callback): SchemaResult
+    {
+        $callback($this);
+        return $this->execute();
     }
 
     /**

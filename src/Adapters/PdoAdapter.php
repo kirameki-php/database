@@ -143,9 +143,14 @@ abstract class PdoAdapter extends Adapter
             $affectedRowCount = $this->getAffectedRows($statement, $prepared);
 
             if ($statement instanceof Normalizable) {
-                foreach ($rows as $index => $row) {
-                    $rows[$index] = $statement->normalize($syntax, $row);
+                $normalized = [];
+                foreach ($rows as $row) {
+                    $data = $statement->normalize($syntax, $row);
+                    if ($data !== null) {
+                        $normalized[] = $data;
+                    }
                 }
+                $rows = $normalized;
             }
 
             if ($casters !== null) {
@@ -198,6 +203,9 @@ abstract class PdoAdapter extends Adapter
 
                     if ($statement instanceof Normalizable) {
                         $data = $statement->normalize($syntax, $data);
+                        if ($data === null) {
+                            continue;
+                        }
                     }
 
                     if ($casters !== null) {

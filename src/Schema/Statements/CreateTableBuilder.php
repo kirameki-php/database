@@ -4,7 +4,6 @@ namespace Kirameki\Database\Schema\Statements;
 
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Database\Schema\SchemaHandler;
-use function iterator_to_array;
 
 /**
  * @extends SchemaBuilder<CreateTableStatement>

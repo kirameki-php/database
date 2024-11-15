@@ -1120,7 +1120,7 @@ abstract class QuerySyntax extends Syntax
     public function prepareTemplateForListTables(ListTablesStatement $statement): string
     {
         $database = $this->asLiteral($this->connectionConfig->getTableSchema());
-        return "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = {$database}";
+        return "SELECT TABLE_NAME as `name` FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = {$database}";
     }
 
     /**
@@ -1162,9 +1162,15 @@ abstract class QuerySyntax extends Syntax
 
     /**
      * @param stdClass $row
-     * @return stdClass
+     * @return stdClass|null
      */
-    abstract public function normalizeListColumns(stdClass $row): stdClass;
+    abstract public function normalizeListTables(stdClass $row): ?stdClass;
+
+    /**
+     * @param stdClass $row
+     * @return stdClass|null
+     */
+    abstract public function normalizeListColumns(stdClass $row): ?stdClass;
 
     /**
      * @param ListIndexesStatement $statement

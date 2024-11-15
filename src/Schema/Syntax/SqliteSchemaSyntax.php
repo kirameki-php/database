@@ -3,10 +3,8 @@
 namespace Kirameki\Database\Schema\Syntax;
 
 use Kirameki\Core\Exceptions\LogicException;
-use Kirameki\Core\Exceptions\RuntimeException;
 use Kirameki\Database\Schema\Statements\ColumnDefinition;
 use Kirameki\Database\Schema\Statements\CreateTableStatement;
-use Kirameki\Database\Schema\Statements\PrimaryKeyConstraint;
 use Kirameki\Database\Schema\Statements\TruncateTableStatement;
 use Override;
 use function array_keys;
@@ -90,17 +88,17 @@ class SqliteSchemaSyntax extends SchemaSyntax
      * @inheritDoc
      */
     #[Override]
-    public function formatCreateTablePrimaryKeyPart(CreateTableStatement $statement): string
+    public function formatCreateTablePrimaryKeyPart(CreateTableStatement $statement): ?string
     {
         if ($statement->primaryKey?->columns === null) {
-            return '';
+            return null;
         }
 
         $pkParts = array_keys($statement->primaryKey->columns);
         if ($pkParts !== []) {
             return 'PRIMARY KEY (' . implode(', ', $pkParts) . ')';
         }
-        return '';
+        return null;
     }
 
     /**

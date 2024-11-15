@@ -2,7 +2,6 @@
 
 namespace Kirameki\Database\Query\Syntax;
 
-use Iterator;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Info\Statements\ListForeignKeysStatement;
 use Kirameki\Database\Info\Statements\ListIndexesStatement;
@@ -97,7 +96,16 @@ class MySqlQuerySyntax extends QuerySyntax
      * @inheritDoc
      */
     #[Override]
-    public function normalizeListColumns(stdClass $row): stdClass
+    public function normalizeListTables(stdClass $row): ?stdClass
+    {
+        return $row;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function normalizeListColumns(stdClass $row): ?stdClass
     {
         $row->type = match ($row->type) {
             'int', 'mediumint', 'tinyint', 'smallint', 'bigint' => 'integer',

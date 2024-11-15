@@ -2,7 +2,6 @@
 
 namespace Kirameki\Database\Query\Syntax;
 
-use Iterator;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Info\Statements\ListColumnsStatement;
 use Kirameki\Database\Info\Statements\ListForeignKeysStatement;
@@ -92,7 +91,18 @@ class SqliteQuerySyntax extends QuerySyntax
      * @inheritDoc
      */
     #[Override]
-    public function normalizeListColumns(stdClass $row): stdClass
+    public function normalizeListTables(stdClass $row): ?stdClass
+    {
+        return $row->name !== 'sqlite_sequence'
+            ? $row
+            : null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function normalizeListColumns(stdClass $row): ?stdClass
     {
         $row->type = match ($row->type) {
             'INTEGER' => 'int',

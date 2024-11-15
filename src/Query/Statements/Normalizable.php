@@ -10,7 +10,7 @@ interface Normalizable
     /**
      * @param QuerySyntax $syntax
      * @param stdClass $row
-     * @return stdClass
+     * @return stdClass|null
      */
-    public function normalize(QuerySyntax $syntax, stdClass $row): stdClass;
+    public function normalize(QuerySyntax $syntax, stdClass $row): ?stdClass;
 }

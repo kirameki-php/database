@@ -2,7 +2,6 @@
 
 namespace Kirameki\Database\Info\Statements;
 
-use Iterator;
 use Kirameki\Database\Query\Statements\Normalizable;
 use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
@@ -43,7 +42,7 @@ class ListColumnsStatement extends QueryStatement implements Normalizable
      * @inheritDoc
      */
     #[Override]
-    public function normalize(QuerySyntax $syntax, stdClass $row): stdClass
+    public function normalize(QuerySyntax $syntax, stdClass $row): ?stdClass
     {
         return $syntax->normalizeListColumns($row);
     }
