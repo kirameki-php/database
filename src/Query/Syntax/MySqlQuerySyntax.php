@@ -108,7 +108,7 @@ class MySqlQuerySyntax extends QuerySyntax
     public function normalizeListColumns(stdClass $row): ?stdClass
     {
         $row->type = match ($row->type) {
-            'int', 'mediumint', 'tinyint', 'smallint', 'bigint' => 'integer',
+            'int', 'mediumint', 'tinyint', 'smallint', 'bigint' => 'int',
             'decimal', 'float', 'double' => 'float',
             'bool' => 'bool',
             'varchar' => 'string',
