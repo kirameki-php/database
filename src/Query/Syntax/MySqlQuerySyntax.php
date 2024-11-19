@@ -153,17 +153,21 @@ class MySqlQuerySyntax extends QuerySyntax
         $database = $this->asLiteral($this->connectionConfig->getTableSchema());
         $table = $this->asLiteral($statement->table);
         $columns = implode(', ', [
-            "CONSTRAINT_NAME AS `name`",
-            "GROUP_CONCAT(COLUMN_NAME ORDER BY ORDINAL_POSITION) AS `columns`",
-            "REFERENCED_TABLE_NAME AS `referencedTable`",
-            "GROUP_CONCAT(REFERENCED_COLUMN_NAME ORDER BY ORDINAL_POSITION) AS `referencedColumns`",
+            "t1.CONSTRAINT_NAME AS `name`",
+            "GROUP_CONCAT(t1.COLUMN_NAME ORDER BY ORDINAL_POSITION) AS `columns`",
+            "t1.REFERENCED_TABLE_NAME AS `referencedTable`",
+            "GROUP_CONCAT(t1.REFERENCED_COLUMN_NAME ORDER BY ORDINAL_POSITION) AS `referencedColumns`",
+            "t2.UPDATE_RULE AS `onUpdate`",
+            "t2.DELETE_RULE AS `onDelete`",
         ]);
         return implode(' ', [
-            "SELECT {$columns} FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE",
-            "WHERE TABLE_SCHEMA = {$database}",
-            "AND TABLE_NAME = {$table}",
-            "AND REFERENCED_TABLE_NAME IS NOT NULL",
-            "GROUP BY CONSTRAINT_NAME, REFERENCED_TABLE_NAME",
+            "SELECT {$columns}",
+            "FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS t1",
+            "INNER JOIN INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS t2 USING (CONSTRAINT_NAME)",
+            "WHERE t1.TABLE_SCHEMA = {$database}",
+            "AND t1.TABLE_NAME = {$table}",
+            "AND t1.REFERENCED_TABLE_NAME IS NOT NULL",
+            "GROUP BY t1.CONSTRAINT_NAME, t1.REFERENCED_TABLE_NAME, t2.UPDATE_RULE, t2.DELETE_RULE",
         ]);
     }
 }

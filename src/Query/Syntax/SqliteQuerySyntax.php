@@ -141,17 +141,25 @@ class SqliteQuerySyntax extends QuerySyntax
     }
 
     /**
-     * TODO unconfirmed query
-     *
      * @inheritDoc
      */
     #[Override]
     public function prepareTemplateForListForeignKeys(ListForeignKeysStatement $statement): string
     {
         $table = $this->asLiteral($statement->table);
+        $columns = implode(', ', [
+            'cast(id as text) as "name"',
+            'group_concat("from") AS "columns"',
+            '"table" AS "referencedTable"',
+            'group_concat("to") AS "referencedColumns"',
+            'on_update AS "onUpdate"',
+            'on_delete AS "onDelete"',
+        ]);
         return implode(' ', [
-            'SELECT "from" AS "table", "to" AS "foreignTable", "from_column" AS "column", "to_column" AS "foreignColumn", "name" AS "name"',
+            'SELECT ' . $columns,
             'FROM pragma_foreign_key_list(' . $table . ')',
+            'GROUP BY id',
+            'ORDER BY id ASC, seq ASC',
         ]);
     }
 }

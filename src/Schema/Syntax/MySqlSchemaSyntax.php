@@ -118,14 +118,7 @@ class MySqlSchemaSyntax extends SchemaSyntax
      */
     public function formatCreateTableForeignKeyParts(CreateTableStatement $statement): array
     {
-        $foreignKeys = $statement->foreignKeys;
-        foreach ($statement->columns as $column) {
-            if ($column->references !== null) {
-                $foreignKeys[] = $column->references;
-            }
-        }
-
-        return array_map($this->formatForeignKeyConstraint(...), $foreignKeys);
+        return array_map($this->formatForeignKeyConstraint(...), $statement->foreignKeys);
     }
 
     /**
