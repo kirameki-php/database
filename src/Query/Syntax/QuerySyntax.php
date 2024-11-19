@@ -860,9 +860,13 @@ abstract class QuerySyntax extends Syntax
      */
     public function formatAggregate(Aggregate $aggregate): string
     {
+        $function = $aggregate->function;
+        if ($aggregate->column !== null) {
+            $function .= '(' . $this->asColumn($aggregate->column) . ')';
+        }
+
         return $this->concat([
-            $aggregate->function,
-            $aggregate->column !== null ? $this->asColumn($aggregate->column) : null,
+            $function,
             $this->formatWindowFunction($aggregate),
             $aggregate->as !== null ? 'AS ' . $this->asIdentifier($aggregate->as) : null,
         ]);

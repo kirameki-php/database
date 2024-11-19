@@ -5,6 +5,7 @@ namespace Kirameki\Database\Query\Statements;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Query\Expressions\Column;
 use Kirameki\Database\Query\Support\JoinType;
+use function array_is_list;
 use function array_values;
 use function assert;
 use function func_num_args;
@@ -39,7 +40,7 @@ class JoinBuilder
      */
     public function using(string ...$columns): static
     {
-        $this->definition->using = array_values($columns);
+        $this->definition->using = array_is_list($columns) ? $columns : array_values($columns);
         return $this;
     }
 

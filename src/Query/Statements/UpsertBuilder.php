@@ -4,6 +4,7 @@ namespace Kirameki\Database\Query\Statements;
 
 use Kirameki\Database\Query\QueryHandler;
 use Kirameki\Database\Query\Support\Dataset;
+use function array_is_list;
 use function array_values;
 
 /**
@@ -45,7 +46,7 @@ class UpsertBuilder extends QueryBuilder
      */
     public function onConflict(string ...$columns): static
     {
-        $this->statement->onConflict = array_values($columns);
+        $this->statement->onConflict = array_is_list($columns) ? $columns : array_values($columns);
         return $this;
     }
 
@@ -55,7 +56,7 @@ class UpsertBuilder extends QueryBuilder
      */
     public function returning(string ...$columns): static
     {
-        $this->statement->returning = array_values($columns);
+        $this->statement->returning = array_is_list($columns) ? $columns : array_values($columns);
         return $this;
     }
 }

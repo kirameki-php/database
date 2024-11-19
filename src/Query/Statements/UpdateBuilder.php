@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Query\Statements;
 
 use Kirameki\Database\Query\QueryHandler;
+use function array_is_list;
 use function array_values;
 use function iterator_to_array;
 
@@ -36,7 +37,7 @@ class UpdateBuilder extends ConditionsBuilder
      */
     public function returning(string ...$columns): static
     {
-        $this->statement->returning = array_values($columns);
+        $this->statement->returning = array_is_list($columns) ? $columns : array_values($columns);
         return $this;
     }
 }

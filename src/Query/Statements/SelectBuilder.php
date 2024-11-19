@@ -489,7 +489,7 @@ class SelectBuilder extends ConditionsBuilder
      */
     public function valueOrNull(string $column): mixed
     {
-        return $this->copy()->columns($column)->limit(1)->execute()->firstOrNull()?->{$column};
+        return $this->copy()->limit(1)->execute()->firstOrNull()?->{$column};
     }
 
     /**

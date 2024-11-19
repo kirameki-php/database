@@ -13,70 +13,50 @@ class Aggregate extends Expression
 {
     /**
      * @param string $column
-     * @param string|null $as
+     * @param string $as
      * @return static
      */
-    public static function first(string $column, string $as = null): static
-    {
-        return new static('FIRST', $column, $as);
-    }
-
-    /**
-     * @param string $column
-     * @param string|null $as
-     * @return static
-     */
-    public static function last(string $column, string $as = null): static
-    {
-        return new static('LAST', $column, $as);
-    }
-
-    /**
-     * @param string $column
-     * @param string|null $as
-     * @return static
-     */
-    public static function min(string $column, string $as = null): static
+    public static function min(string $column, string $as = 'min'): static
     {
         return new static('MIN', $column, $as);
     }
 
     /**
      * @param string $column
-     * @param string|null $as
+     * @param string $as
      * @return static
      */
-    public static function max(string $column, string $as = null): static
+    public static function max(string $column, string $as = 'max'): static
     {
         return new static('MAX', $column, $as);
     }
 
     /**
      * @param string $column
-     * @param string|null $as
+     * @param string $as
      * @return static
      */
-    public static function count(string $column, string $as = null): static
+    public static function count(string $column, string $as = 'count'): static
     {
         return new static('COUNT', $column, $as);
     }
 
     /**
      * @param string $column
-     * @param string|null $as
+     * @param string $as
      * @return static
      */
-    public static function avg(string $column, string $as = null): static
+    public static function avg(string $column, string $as = 'avg'): static
     {
         return new static('AVG', $column, $as);
     }
 
     /**
      * @param string $column
-     * @param string|null $as
+     * @param string $as
      * @return static
      */
-    public static function sum(string $column, string $as = null): static
+    public static function sum(string $column, string $as = 'sum'): static
     {
         return new static('SUM', $column, $as);
     }
