@@ -10,7 +10,7 @@ use Override;
 class SelectStatement extends ConditionsStatement
 {
     /**
-     * @param list<string|Expression> $tables
+     * @param list<string|Expression>|null $tables
      * @param list<string|Expression>|null $columns
      * @param list<JoinDefinition>|null $joins
      * @param list<string>|null $groupBy

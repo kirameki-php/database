@@ -373,8 +373,13 @@ abstract class QuerySyntax extends Syntax
 
         return implode(' ', array_map(function(JoinDefinition $def): string {
             $expr = $def->type->value . ' ';
-            $expr .= $this->asTable($def->table) . ' ';
-            $expr .= 'ON ' . $this->formatConditionDefinition($def->condition);
+            $expr .= $this->asTable($def->table);
+            if ($def->using !== null) {
+                $expr .= ' USING ' . $this->asEnclosedCsv($this->asColumns($def->using));
+            }
+            if ($def->condition !== null) {
+                $expr .= ' ON ' . $this->formatConditionDefinition($def->condition);
+            }
             return $expr;
         }, $joins));
     }

@@ -5,6 +5,7 @@ namespace Kirameki\Database\Query\Statements;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Query\Expressions\Column;
 use Kirameki\Database\Query\Support\JoinType;
+use function array_values;
 use function assert;
 use function func_num_args;
 
@@ -33,6 +34,16 @@ class JoinBuilder
     }
 
     /**
+     * @param string ...$columns
+     * @return $this
+     */
+    public function using(string ...$columns): static
+    {
+        $this->definition->using = array_values($columns);
+        return $this;
+    }
+
+    /**
      * @param mixed ...$args
      * @return $this
      */
@@ -45,27 +56,9 @@ class JoinBuilder
      * @param mixed ...$args
      * @return $this
      */
-    public function where(mixed ...$args): static
-    {
-        return $this->applyAndCondition($this->buildCondition(...$args));
-    }
-
-    /**
-     * @param mixed ...$args
-     * @return $this
-     */
     public function orOn(mixed ...$args): static
     {
         return $this->applyOrCondition($this->buildOnColumnCondition(...$args));
-    }
-
-    /**
-     * @param mixed ...$args
-     * @return $this
-     */
-    public function orWhere(mixed ...$args): static
-    {
-        return $this->applyOrCondition($this->buildCondition(...$args));
     }
 
     /**
@@ -108,17 +101,6 @@ class JoinBuilder
         assert(func_num_args() >= 2 && func_num_args() <= 3);
 
         array_splice($args, -1, 1, [new Column(end($args))]);
-
-        return ConditionBuilder::fromArgs(...$args);
-    }
-
-    /**
-     * @param mixed ...$args
-     * @return ConditionBuilder
-     */
-    protected function buildCondition(mixed ...$args): ConditionBuilder
-    {
-        assert(func_num_args() >= 1 && func_num_args() <= 3);
 
         return ConditionBuilder::fromArgs(...$args);
     }

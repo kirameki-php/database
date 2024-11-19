@@ -16,7 +16,7 @@ abstract class ConditionsBuilder extends QueryBuilder
     /**
      * @var ConditionBuilder|null
      */
-    protected ConditionBuilder|null $lastWhereCondition = null;
+    protected ?ConditionBuilder $lastWhereCondition = null;
 
     /**
      * @param string $name
