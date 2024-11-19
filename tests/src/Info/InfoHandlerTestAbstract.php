@@ -5,7 +5,6 @@ namespace Tests\Kirameki\Database\Info;
 use Kirameki\Database\Connection;
 use Kirameki\Database\Schema\Statements\CreateTableBuilder;
 use Tests\Kirameki\Database\Query\QueryTestCase;
-use function dump;
 
 class InfoHandlerTestAbstract extends QueryTestCase
 {

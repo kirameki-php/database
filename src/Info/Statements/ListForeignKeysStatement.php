@@ -5,6 +5,7 @@ namespace Kirameki\Database\Info\Statements;
 use Kirameki\Database\Query\Statements\Normalizable;
 use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
+use Kirameki\Database\Schema\Support\ReferenceOption;
 use Override;
 use stdClass;
 use function explode;
@@ -47,6 +48,8 @@ class ListForeignKeysStatement extends QueryStatement implements Normalizable
     {
         $row->columns = explode(',', $row->columns);
         $row->referencedColumns = explode(',', $row->referencedColumns);
+        $row->onUpdate = ReferenceOption::from($row->onUpdate);
+        $row->onDelete = ReferenceOption::from($row->onDelete);
         return $row;
     }
 }
