@@ -76,9 +76,10 @@ class SelectBuilderTest extends QueryTestCase
     public function test_join_using_on_and_where(): void
     {
         $sql = $this->selectBuilder()->from('User AS u')
-            ->join('Device AS d', fn(JoinBuilder $join) => $join->on('u.id', 'd.userId')->where('id', [1,2]))
+            ->join('Device AS d', fn(JoinBuilder $join) => $join->on('u.id', 'd.userId'))
+            ->where('id', [1,2])
             ->toString();
-        $this->assertSame("SELECT * FROM `User` AS `u` JOIN `Device` AS `d` ON (`u`.`id` = `d`.`userId` AND `id` IN (1, 2))", $sql);
+        $this->assertSame("SELECT * FROM `User` AS `u` JOIN `Device` AS `d` ON `u`.`id` = `d`.`userId` WHERE `id` IN (1, 2)", $sql);
     }
 
     public function test_joinOn(): void
