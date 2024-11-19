@@ -11,11 +11,11 @@ class SchemaExecuted extends DatabaseEvent
     /**
      * @template TSchemaStatement of SchemaStatement
      * @param Connection $connection
-     * @param SchemaResult<TSchemaStatement> $execution
+     * @param SchemaResult<TSchemaStatement> $result
      */
     public function __construct(
         Connection $connection,
-        public readonly SchemaResult $execution,
+        public readonly SchemaResult $result,
     )
     {
         parent::__construct($connection);
