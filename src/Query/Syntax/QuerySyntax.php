@@ -32,7 +32,7 @@ use Kirameki\Database\Query\Support\LockOption;
 use Kirameki\Database\Query\Support\LockType;
 use Kirameki\Database\Query\Support\Operator;
 use Kirameki\Database\Query\Support\Ordering;
-use Kirameki\Database\Query\Support\Range;
+use Kirameki\Database\Query\Support\Bounds;
 use Kirameki\Database\Query\Support\Tags;
 use Kirameki\Database\Query\Support\TagsFormat;
 use Kirameki\Database\Syntax;
@@ -739,13 +739,9 @@ abstract class QuerySyntax extends Syntax
         $column = $this->asColumn($def->column, true);
         $negated = $def->negated;
         $value = $def->value;
-        if ($value instanceof Range) {
-            $lowerOperator = $negated
-                ? ($value->lowerClosed ? '<' : '<=')
-                : ($value->lowerClosed ? '>=' : '>');
-            $upperOperator = $negated
-                ? ($value->upperClosed ? '>' : '>=')
-                : ($value->upperClosed ? '<=' : '<');
+        if ($value instanceof Bounds) {
+            $lowerOperator = $value->getLowerOperator($negated);
+            $upperOperator = $value->getUpperOperator($negated);
             return $negated
                 ? "{$column} {$lowerOperator} ? OR {$column} {$upperOperator} ?"
                 : "{$column} {$lowerOperator} ? AND {$column} {$upperOperator} ?";

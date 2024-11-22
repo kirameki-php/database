@@ -8,11 +8,11 @@ use Traversable;
 /**
  * @implements IteratorAggregate<int, mixed>
  */
-final readonly class Range implements IteratorAggregate
+final readonly class Bounds implements IteratorAggregate
 {
-    public mixed $lowerBound;
+    public mixed $lower;
     public bool $lowerClosed;
-    public mixed $upperBound;
+    public mixed $upper;
     public bool $upperClosed;
 
     /**
@@ -79,16 +79,16 @@ final readonly class Range implements IteratorAggregate
     }
 
     /**
-     * @param mixed $lowerBound
+     * @param mixed $lower
      * @param bool $lowerClosed
-     * @param mixed $upperBound
+     * @param mixed $upper
      * @param bool $upperClosed
      */
-    public function __construct(mixed $lowerBound, bool $lowerClosed, mixed $upperBound, bool $upperClosed)
+    public function __construct(mixed $lower, bool $lowerClosed, mixed $upper, bool $upperClosed)
     {
-        $this->lowerBound = $lowerBound;
+        $this->lower = $lower;
         $this->lowerClosed = $lowerClosed;
-        $this->upperBound = $upperBound;
+        $this->upper = $upper;
         $this->upperClosed = $upperClosed;
     }
 
@@ -97,7 +97,29 @@ final readonly class Range implements IteratorAggregate
      */
     public function getIterator(): Traversable
     {
-        yield 0 => $this->lowerBound;
-        yield 1 => $this->upperBound;
+        yield 0 => $this->lower;
+        yield 1 => $this->upper;
+    }
+
+    /**
+     * @param bool $negated
+     * @return string
+     */
+    public function getLowerOperator(bool $negated = false): string
+    {
+        return $negated
+            ? ($this->lowerClosed ? '<' : '<=')
+            : ($this->lowerClosed ? '>=' : '>');
+    }
+
+    /**
+     * @param bool $negated
+     * @return string
+     */
+    public function getUpperOperator(bool $negated = false): string
+    {
+        return $negated
+            ? ($this->upperClosed ? '>' : '>=')
+            : ($this->upperClosed ? '<=' : '<');
     }
 }

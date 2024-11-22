@@ -10,7 +10,7 @@ use Kirameki\Core\Value;
 use Kirameki\Database\Query\Expressions\Expression;
 use Kirameki\Database\Query\Expressions\Raw;
 use Kirameki\Database\Query\Support\Operator;
-use Kirameki\Database\Query\Support\Range;
+use Kirameki\Database\Query\Support\Bounds;
 use function array_key_exists;
 use function assert;
 use function count;
@@ -88,12 +88,12 @@ class ConditionBuilder
 
         return match ($key) {
             1, 'eq' => match (true) {
-                $value instanceof Range => $self->inRange($value),
+                $value instanceof Bounds => $self->inRange($value),
                 is_iterable($value) => $self->in($value),
                 default => $self->equals($value),
             },
             'not' => match (true) {
-                $value instanceof Range => $self->notInRange($value),
+                $value instanceof Bounds => $self->notInRange($value),
                 is_iterable($value) => $self->notIn($value),
                 default => $self->notEquals($value),
             },
@@ -336,21 +336,21 @@ class ConditionBuilder
     }
 
     /**
-     * @param Range $range
+     * @param Bounds $bounds
      * @return $this
      */
-    public function inRange(Range $range): static
+    public function inRange(Bounds $bounds): static
     {
-        return $this->define(Operator::Range, $range);
+        return $this->define(Operator::Range, $bounds);
     }
 
     /**
-     * @param Range $range
+     * @param Bounds $bounds
      * @return $this
      */
-    public function notInRange(Range $range): static
+    public function notInRange(Bounds $bounds): static
     {
-        return $this->inRange($range)->negate();
+        return $this->inRange($bounds)->negate();
     }
 
     /**

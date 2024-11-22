@@ -6,7 +6,7 @@ use Kirameki\Database\Query\Expressions\Raw;
 use Kirameki\Database\Query\Statements\ConditionBuilder;
 use Kirameki\Database\Query\Statements\JoinBuilder;
 use Kirameki\Database\Query\Support\LockOption;
-use Kirameki\Database\Query\Support\Range;
+use Kirameki\Database\Query\Support\Bounds;
 use Kirameki\Time\Time;
 use Tests\Kirameki\Database\Query\Builders\_Support\IntCastEnum;
 use Tests\Kirameki\Database\Query\QueryTestCase;
@@ -120,7 +120,7 @@ class SelectBuilderTest extends QueryTestCase
         $sql = $this->selectBuilder()->from('User')->where('id', [3, 4])->toString();
         $this->assertSame("SELECT * FROM `User` WHERE `id` IN (3, 4)", $sql);
 
-        $sql = $this->selectBuilder()->from('User')->where('id', Range::closed(1, 2))->toString();
+        $sql = $this->selectBuilder()->from('User')->where('id', Bounds::closed(1, 2))->toString();
         $this->assertSame("SELECT * FROM `User` WHERE `id` >= 1 AND `id` <= 2", $sql);
 
         $sql = $this->selectBuilder()->from('User')->where('id', 1)->toString();
