@@ -68,7 +68,8 @@ class QueryResult extends Vec
     {
         $affectedRowCount = $this->getAffectedRowCount();
         if ($affectedRowCount !== $expected) {
-            throw new QueryException('Unexpected affected row count.', $this->statement, [
+            $message = "Unexpected affected row count. Expected: {$expected}. Got {$affectedRowCount}.";
+            throw new QueryException($message, $this->statement, [
                 'result' => $this,
                 'expected' => $expected,
                 'actual' => $affectedRowCount,
