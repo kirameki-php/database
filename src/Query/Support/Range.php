@@ -6,10 +6,9 @@ use IteratorAggregate;
 use Traversable;
 
 /**
- * @consistent-constructor
  * @implements IteratorAggregate<int, mixed>
  */
-readonly class Range implements IteratorAggregate
+final readonly class Range implements IteratorAggregate
 {
     public mixed $lowerBound;
     public bool $lowerClosed;
@@ -19,64 +18,64 @@ readonly class Range implements IteratorAggregate
     /**
      * @param mixed $lower
      * @param mixed $upper
-     * @return static
+     * @return self
      */
-    public static function closed(mixed $lower, mixed $upper): static
+    public static function closed(mixed $lower, mixed $upper): self
     {
-        return new static($lower, true, $upper, true);
+        return new self($lower, true, $upper, true);
     }
 
     /**
      * @param mixed $lower
      * @param mixed $upper
-     * @return static
+     * @return self
      */
-    public static function open(mixed $lower, mixed $upper): static
+    public static function open(mixed $lower, mixed $upper): self
     {
-        return new static($lower, false, $upper, false);
+        return new self($lower, false, $upper, false);
     }
 
     /**
      * @param mixed $lower
      * @param mixed $upper
-     * @return static
+     * @return self
      */
-    public static function halfOpen(mixed $lower, mixed $upper): static
+    public static function halfOpen(mixed $lower, mixed $upper): self
     {
-        return new static($lower, true, $upper, false);
+        return new self($lower, true, $upper, false);
     }
 
     /**
      * @see closed()
      * @param mixed $lower
      * @param mixed $upper
-     * @return static
+     * @return self
      */
-    public static function included(mixed $lower, mixed $upper): static
+    public static function included(mixed $lower, mixed $upper): self
     {
-        return static::closed($lower, $upper);
+        return self::closed($lower, $upper);
     }
 
     /**
      * @see open()
      * @param mixed $lower
      * @param mixed $upper
-     * @return static
+     * @return self
      */
-    public static function excluded(mixed $lower, mixed $upper): static
+    public static function excluded(mixed $lower, mixed $upper): self
     {
-        return static::open($lower, $upper);
+        return self::open($lower, $upper);
     }
 
     /**
      * @see halfOpen()
      * @param mixed $lower
      * @param mixed $upper
-     * @return static
+     * @return self
      */
-    public static function endExcluded(mixed $lower, mixed $upper): static
+    public static function endExcluded(mixed $lower, mixed $upper): self
     {
-        return static::halfOpen($lower, $upper);
+        return self::halfOpen($lower, $upper);
     }
 
     /**

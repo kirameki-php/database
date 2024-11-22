@@ -37,6 +37,7 @@ use Kirameki\Database\Query\Support\Tags;
 use Kirameki\Database\Query\Support\TagsFormat;
 use Kirameki\Database\Syntax;
 use stdClass;
+use function array_filter;
 use function array_key_exists;
 use function array_keys;
 use function array_map;
@@ -1063,6 +1064,7 @@ abstract class QuerySyntax extends Syntax
     {
         if ($statement->joins !== null) {
             $conditions = array_map(static fn(JoinDefinition $join) => $join->condition, $statement->joins);
+            $conditions = array_filter($conditions, static fn($def) => $def !== null);
             $this->addParametersForConditions($parameters, $conditions);
         }
     }
