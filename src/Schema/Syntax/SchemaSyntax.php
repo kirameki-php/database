@@ -375,7 +375,7 @@ abstract class SchemaSyntax extends Syntax
      */
     public function formatCurrentTimestamp(?int $size = null): string
     {
-        return 'CURRENT_TIMESTAMP' . ($size ? '(' . $size . ')' : '');
+        return 'CURRENT_TIMESTAMP(' . $size . ')';
     }
 
     /**

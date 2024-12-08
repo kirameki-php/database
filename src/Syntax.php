@@ -5,7 +5,6 @@ namespace Kirameki\Database;
 use BackedEnum;
 use DateTimeInterface;
 use Kirameki\Collections\Utils\Arr;
-use Kirameki\Core\Func;
 use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
 use function array_filter;
@@ -13,7 +12,6 @@ use function array_map;
 use function dump;
 use function implode;
 use function is_iterable;
-use function iterator_to_array;
 use function str_replace;
 use function trim;
 

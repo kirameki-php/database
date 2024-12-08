@@ -180,6 +180,15 @@ class SqliteSchemaSyntax extends SchemaSyntax
     }
 
     /**
+     * @param int|null $size
+     * @return string
+     */
+    public function formatCurrentTimestamp(?int $size = null): string
+    {
+        return 'DATETIME("now", "localtime")';
+    }
+
+    /**
      * @inheritDoc
      */
     #[Override]

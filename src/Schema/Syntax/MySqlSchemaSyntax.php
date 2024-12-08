@@ -127,7 +127,7 @@ class MySqlSchemaSyntax extends SchemaSyntax
     #[Override]
     public function formatCurrentTimestamp(?int $size = null): string
     {
-        return 'CURRENT_TIMESTAMP(' . ($size ?? self::DEFAULT_TIME_PRECISION) . ')';
+        return parent::formatCurrentTimestamp($size ?? self::DEFAULT_TIME_PRECISION);
     }
 
     /**

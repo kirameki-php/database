@@ -67,6 +67,13 @@ SELECT 1 as a;
 | SQLite      | 0      |
 | MySQL       | 1      |
 
+## CURRENT_TIMESTAMP
+
+SQLite's `CURRENT_TIMESTAMP` returns the time in UTC, while MySQL and PostgreSQL return the time in the server's timezone.
+This library uses `DATETIME('now', 'localtime')` for SQLite to get the time in the system timezone instead. This is 
+still not perfect because the system timezone is not always the same as the PHP's and `date_default_timezone_set()` 
+does not affect the timezone for SQLite.
+
 ## License
 
 This is an open-sourced software licensed under the [MIT License](LICENSE).
