@@ -342,7 +342,7 @@ abstract class QuerySyntax extends Syntax
         $expressions = [];
         foreach ($statement->tables ?? [] as $table) {
             $expressions[] = ($table instanceof Expression)
-                ? $table->generateTemplate($this)
+                ? $table->toValue($this)
                 : $this->asTable($table);
         }
         if (count($expressions) === 0) {
@@ -575,7 +575,7 @@ abstract class QuerySyntax extends Syntax
     protected function formatConditionForRaw(ConditionDefinition $def): string
     {
         if ($def->value instanceof Expression) {
-            return $def->value->generateTemplate($this);
+            return $def->value->toValue($this);
         }
 
         throw new NotSupportedException('Condition: ' . Value::getType($def->value));
@@ -979,7 +979,7 @@ abstract class QuerySyntax extends Syntax
     public function asColumn(mixed $name, bool $withAlias = false): string
     {
         if ($name instanceof Expression) {
-            return $name->generateTemplate($this);
+            return $name->toValue($this);
         }
 
         if (is_iterable($name)) {
@@ -1036,7 +1036,7 @@ abstract class QuerySyntax extends Syntax
     protected function asPlaceholder(mixed $value): string
     {
         return match (true) {
-            $value instanceof Expression => $value->generateTemplate($this),
+            $value instanceof Expression => $value->toValue($this),
             $value instanceof QueryStatement => $this->formatSubQuery($value),
             is_iterable($value) => $this->asEnclosedCsv($this->asParameterPlaceholders($value)),
             default => '?',
@@ -1112,7 +1112,6 @@ abstract class QuerySyntax extends Syntax
             $value = $def->value;
             match (true) {
                 is_iterable($value) => array_push($parameters, ...iterator_to_array($value)),
-                $value instanceof Expression => array_push($parameters, ...$value->generateParameters($this)),
                 $value instanceof QueryStatement => array_push($parameters, ...$value->generateParameters($this)),
                 default => $parameters[] = $value,
             };

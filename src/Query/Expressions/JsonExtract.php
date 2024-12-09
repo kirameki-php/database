@@ -5,7 +5,7 @@ namespace Kirameki\Database\Query\Expressions;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Override;
 
-class JsonExtract extends Expression
+class JsonExtract implements Expression
 {
     /**
      * @var string
@@ -28,7 +28,7 @@ class JsonExtract extends Expression
      * @inheritDoc
      */
     #[Override]
-    public function generateTemplate(QuerySyntax $syntax): string
+    public function toValue(QuerySyntax $syntax): string
     {
         return $syntax->formatJsonExtract($this->column, $this->path);
     }

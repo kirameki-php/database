@@ -9,7 +9,7 @@ use Override;
 /**
  * @consistent-constructor
  */
-class Aggregate extends Expression
+class Aggregate implements Expression
 {
     /**
      * @param string $column
@@ -89,7 +89,7 @@ class Aggregate extends Expression
      * @inheritDoc
      */
     #[Override]
-    public function generateTemplate(QuerySyntax $syntax): string
+    public function toValue(QuerySyntax $syntax): string
     {
         return $syntax->formatAggregate($this);
     }

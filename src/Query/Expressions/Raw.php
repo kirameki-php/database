@@ -5,7 +5,7 @@ namespace Kirameki\Database\Query\Expressions;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Override;
 
-class Raw extends Expression
+class Raw implements Expression
 {
     /**
      * @param string $value
@@ -20,7 +20,7 @@ class Raw extends Expression
      * @inheritDoc
      */
     #[Override]
-    public function generateTemplate(QuerySyntax $syntax): string
+    public function toValue(QuerySyntax $syntax): string
     {
         return $this->value;
     }
