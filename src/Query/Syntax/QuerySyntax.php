@@ -75,7 +75,7 @@ abstract class QuerySyntax extends Syntax
         $parameters = $this->stringifyParameters($parameters);
         $parameters = Arr::flatten($parameters);
         $remains = count($parameters);
-dump($parameters);
+
         $interpolated = (string) preg_replace_callback('/\?\??/', function($matches) use ($template, &$parameters, &$remains) {
             if ($matches[0] === '??') {
                 return '??';
@@ -1114,6 +1114,7 @@ dump($parameters);
             match (true) {
                 is_iterable($value) => array_push($parameters, ...iterator_to_array($value)),
                 $value instanceof QueryStatement => array_push($parameters, ...$value->generateParameters($this)),
+                $value instanceof Expression => null, // already converted to string in `self::asPlaceholder`.
                 default => $parameters[] = $value,
             };
             $def = $def->next;

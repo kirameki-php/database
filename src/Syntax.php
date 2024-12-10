@@ -7,6 +7,7 @@ use DateTimeInterface;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
+use Kirameki\Database\Query\Expressions\Expression;
 use function array_filter;
 use function array_map;
 use function dump;
