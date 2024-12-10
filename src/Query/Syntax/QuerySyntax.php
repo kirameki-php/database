@@ -44,6 +44,7 @@ use function array_map;
 use function array_push;
 use function count;
 use function current;
+use function dump;
 use function explode;
 use function implode;
 use function is_array;
@@ -74,7 +75,7 @@ abstract class QuerySyntax extends Syntax
         $parameters = $this->stringifyParameters($parameters);
         $parameters = Arr::flatten($parameters);
         $remains = count($parameters);
-
+dump($parameters);
         $interpolated = (string) preg_replace_callback('/\?\??/', function($matches) use ($template, &$parameters, &$remains) {
             if ($matches[0] === '??') {
                 return '??';
