@@ -5,7 +5,7 @@ namespace Kirameki\Database\Schema\Expressions;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 use Override;
 
-class Uuid extends DefaultValue
+class Uuid implements DefaultValue
 {
     /**
      * @inheritDoc

@@ -5,7 +5,7 @@ namespace Kirameki\Database\Schema\Expressions;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 use Override;
 
-class Raw extends DefaultValue
+class RawDefaultValue implements DefaultValue
 {
     /**
      * @param string $value

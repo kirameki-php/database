@@ -3,7 +3,7 @@
 namespace Tests\Kirameki\Database\Schema;
 
 use Kirameki\Core\Exceptions\LogicException;
-use Kirameki\Database\Schema\Expressions\Raw;
+use Kirameki\Database\Schema\Expressions\RawDefaultValue;
 use RuntimeException;
 use function dump;
 
@@ -108,7 +108,7 @@ class MySql_CreateTableBuilderTest extends SchemaTestCase
     {
         $builder = $this->createTableBuilder('users');
         $builder->int('id')->nullable()->primaryKey();
-        $builder->datetime('loginAt')->nullable()->default(new Raw('CURRENT_TIMESTAMP'));
+        $builder->datetime('loginAt')->nullable()->default(new RawDefaultValue('CURRENT_TIMESTAMP'));
         $schema = $builder->toString();
         $this->assertSame('CREATE TABLE `users` (`id` BIGINT PRIMARY KEY, `loginAt` DATETIME(6) DEFAULT CURRENT_TIMESTAMP);', $schema);
     }

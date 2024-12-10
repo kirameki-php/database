@@ -4,11 +4,11 @@ namespace Kirameki\Database\Schema\Expressions;
 
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 
-abstract class DefaultValue
+interface DefaultValue
 {
     /**
      * @param SchemaSyntax $syntax
      * @return string
      */
-    abstract public function toString(SchemaSyntax $syntax): string;
+    public function toString(SchemaSyntax $syntax): string;
 }
