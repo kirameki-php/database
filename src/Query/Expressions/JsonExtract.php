@@ -2,9 +2,14 @@
 
 namespace Kirameki\Database\Query\Expressions;
 
+use Kirameki\Database\Expressions\Expression;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
+use Kirameki\Database\Syntax;
 use Override;
 
+/**
+ * @implements Expression<QuerySyntax>
+ */
 class JsonExtract implements Expression
 {
     /**
@@ -28,7 +33,7 @@ class JsonExtract implements Expression
      * @inheritDoc
      */
     #[Override]
-    public function toValue(QuerySyntax $syntax): string
+    public function toValue(Syntax $syntax): string
     {
         return $syntax->formatJsonExtract($this->column, $this->path);
     }

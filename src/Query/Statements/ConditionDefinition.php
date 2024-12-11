@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Query\Statements;
 
-use Kirameki\Database\Query\Expressions\Expression;
+use Kirameki\Database\Expressions\Expression;
 use Kirameki\Database\Query\Support\Operator;
 
 class ConditionDefinition

@@ -2,12 +2,15 @@
 
 namespace Kirameki\Database\Query\Expressions;
 
+use Kirameki\Database\Expressions\Expression;
 use Kirameki\Database\Query\Support\Ordering;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
+use Kirameki\Database\Syntax;
 use Override;
 
 /**
  * @consistent-constructor
+ * @implements Expression<QuerySyntax>
  */
 class Aggregate implements Expression
 {
@@ -89,7 +92,7 @@ class Aggregate implements Expression
      * @inheritDoc
      */
     #[Override]
-    public function toValue(QuerySyntax $syntax): string
+    public function toValue(Syntax $syntax): string
     {
         return $syntax->formatAggregate($this);
     }

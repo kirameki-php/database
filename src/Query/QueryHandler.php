@@ -4,7 +4,7 @@ namespace Kirameki\Database\Query;
 
 use Kirameki\Database\Connection;
 use Kirameki\Database\Events\QueryExecuted;
-use Kirameki\Database\Query\Expressions\Expression;
+use Kirameki\Database\Expressions\Expression;
 use Kirameki\Database\Query\Statements\DeleteBuilder;
 use Kirameki\Database\Query\Statements\InsertBuilder;
 use Kirameki\Database\Query\Statements\QueryStatement;

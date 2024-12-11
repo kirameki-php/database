@@ -1,12 +1,16 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Schema\Expressions;
+namespace Kirameki\Database\Expressions;
 
 use Kirameki\Database\Schema\Statements\ColumnDefinition;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
+use Kirameki\Database\Syntax;
 use Override;
 
-class CurrentTimestamp implements DefaultValue
+/**
+ * @implements Expression<SchemaSyntax>
+ */
+class CurrentTimestamp implements Expression
 {
     /**
      * @param ColumnDefinition $definition
@@ -21,7 +25,7 @@ class CurrentTimestamp implements DefaultValue
      * @inheritDoc
      */
     #[Override]
-    public function toString(SchemaSyntax $syntax): string
+    public function toValue(Syntax $syntax): string
     {
         return $syntax->formatCurrentTimestamp($this->definition->size);
     }

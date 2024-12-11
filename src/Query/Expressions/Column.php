@@ -2,9 +2,14 @@
 
 namespace Kirameki\Database\Query\Expressions;
 
+use Kirameki\Database\Expressions\Expression;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
+use Kirameki\Database\Syntax;
 use Override;
 
+/**
+ * @implements Expression<QuerySyntax>
+ */
 class Column implements Expression
 {
     /**
@@ -20,7 +25,7 @@ class Column implements Expression
      * @inheritDoc
      */
     #[Override]
-    public function toValue(QuerySyntax $syntax): string
+    public function toValue(Syntax $syntax): string
     {
         return $syntax->asColumn($this->column);
     }

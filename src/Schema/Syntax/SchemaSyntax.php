@@ -8,7 +8,7 @@ use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Func;
 use Kirameki\Core\Value;
 use Kirameki\Database\Exceptions\DropProtectionException;
-use Kirameki\Database\Schema\Expressions\DefaultValue;
+use Kirameki\Database\Expressions\Expression;
 use Kirameki\Database\Schema\Statements\AlterColumnAction;
 use Kirameki\Database\Schema\Statements\AlterDropColumnAction;
 use Kirameki\Database\Schema\Statements\AlterDropForeignKeyAction;
@@ -310,8 +310,8 @@ abstract class SchemaSyntax extends Syntax
             return $this->asLiteral($value);
         }
 
-        if ($value instanceof DefaultValue) {
-            return $value->toString($this);
+        if ($value instanceof Expression) {
+            return $value->toValue($this);
         }
 
         throw new LogicException('Unknown default value type: ' . Value::getType($value), [

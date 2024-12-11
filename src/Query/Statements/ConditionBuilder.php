@@ -2,15 +2,14 @@
 
 namespace Kirameki\Database\Query\Statements;
 
-use Closure;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\InvalidArgumentException;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Value;
-use Kirameki\Database\Query\Expressions\Expression;
-use Kirameki\Database\Query\Expressions\Raw;
-use Kirameki\Database\Query\Support\Operator;
+use Kirameki\Database\Expressions\Expression;
+use Kirameki\Database\Expressions\Raw;
 use Kirameki\Database\Query\Support\Bounds;
+use Kirameki\Database\Query\Support\Operator;
 use function array_key_exists;
 use function assert;
 use function count;

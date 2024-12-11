@@ -1,11 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Schema\Expressions;
+namespace Kirameki\Database\Expressions;
 
-use Kirameki\Database\Schema\Syntax\SchemaSyntax;
+use Kirameki\Database\Syntax;
 use Override;
 
-class RawDefaultValue implements DefaultValue
+class Raw implements Expression
 {
     /**
      * @param string $value
@@ -20,7 +20,7 @@ class RawDefaultValue implements DefaultValue
      * @inheritDoc
      */
     #[Override]
-    public function toString(SchemaSyntax $syntax): string
+    public function toValue(Syntax $syntax): string
     {
         return $this->value;
     }

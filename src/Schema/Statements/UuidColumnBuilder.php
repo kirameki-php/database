@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Schema\Statements;
 
-use Kirameki\Database\Schema\Expressions\Uuid;
+use Kirameki\Database\Expressions\Uuid;
 
 class UuidColumnBuilder extends ColumnBuilder
 {
