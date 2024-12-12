@@ -63,8 +63,8 @@ class ColumnBuilder
     public function references(
         string $table,
         string $column,
-        ReferenceOption $onDelete = null,
-        ReferenceOption $onUpdate = null,
+        ?ReferenceOption $onDelete = null,
+        ?ReferenceOption $onUpdate = null,
     ): static
     {
         $this->definition->references = new ForeignKeyConstraint(
