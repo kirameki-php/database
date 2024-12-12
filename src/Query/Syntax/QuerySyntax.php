@@ -1180,4 +1180,19 @@ abstract class QuerySyntax extends Syntax
      * @return string
      */
     abstract public function prepareTemplateForListForeignKeys(ListForeignKeysStatement $statement): string;
+
+    /**
+     * @param string $target
+     * @param string $path
+     * @return string
+     */
+    public function formatJsonExtract(string|Expression $target, string $path): string
+    {
+        {
+            if ($target instanceof Expression) {
+                $target = $target->toValue($this);
+            }
+            return "{$target} -> \"$path\"";
+        }
+    }
 }

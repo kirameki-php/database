@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Query\Syntax;
 
 use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Database\Expression;
 use Kirameki\Database\Functions\Syntax\MySqlFunctionSyntax;
 use Kirameki\Database\Info\Statements\ListForeignKeysStatement;
 use Kirameki\Database\Info\Statements\ListIndexesStatement;

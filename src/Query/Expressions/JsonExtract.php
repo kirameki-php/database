@@ -8,6 +8,7 @@ use Kirameki\Database\Syntax;
 use Override;
 
 /**
+ * @consistent-constructor
  * @implements Expression<QuerySyntax>
  */
 class JsonExtract implements Expression
@@ -17,9 +18,24 @@ class JsonExtract implements Expression
      */
     public readonly string $path;
 
+    /**
+     * @param string $column
+     * @param string $path
+     * @return static
+     */
     public static function column(string $column, string $path): static
     {
         return new static(new Column($column), $path);
+    }
+
+    /**
+     * @param string $target
+     * @param string $path
+     * @return static
+     */
+    public static function raw(string $target, string $path): static
+    {
+        return new static($target, $path);
     }
 
     /**

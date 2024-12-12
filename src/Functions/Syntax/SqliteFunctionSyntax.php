@@ -20,17 +20,17 @@ trait SqliteFunctionSyntax
      * @inheritDoc
      */
     #[Override]
-    public function formatUuid(): string
+    public function formatRand(): string
     {
-        return 'UUID()';
+        return 'RANDOM()';
     }
 
     /**
      * @inheritDoc
      */
     #[Override]
-    public function formatJsonExtract(string|Expression $target, string $path): string
+    public function formatUuid(): string
     {
-        return "{$target} -> \"$path\"";
+        return 'UUID()';
     }
 }

@@ -138,12 +138,11 @@ abstract class Syntax
     /**
      * @return string
      */
-    abstract public function formatUuid(): string;
+    abstract public function formatRand(): string;
 
     /**
-     * @param string $target
-     * @param string $path
      * @return string
      */
-    abstract public function formatJsonExtract(string|Expression $target, string $path): string;
+    abstract public function formatUuid(): string;
+
 }
