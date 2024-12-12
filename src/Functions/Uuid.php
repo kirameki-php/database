@@ -1,15 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Expressions;
+namespace Kirameki\Database\Functions;
 
 use Kirameki\Database\Expression;
-use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 use Kirameki\Database\Syntax;
 use Override;
 
-/**
- * @implements Expression<SchemaSyntax>
- */
 class Uuid implements Expression
 {
     /**

@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Schema\Syntax;
 
 use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Database\Functions\Syntax\MySqlFunctionSyntax;
 use Kirameki\Database\Schema\Statements\ColumnDefinition;
 use Kirameki\Database\Schema\Statements\CreateTableStatement;
 use Override;
@@ -14,6 +15,8 @@ use function strtoupper;
 
 class MySqlSchemaSyntax extends SchemaSyntax
 {
+    use MySqlFunctionSyntax;
+
     public const int DEFAULT_INT_SIZE = 8;
 
     public const int DEFAULT_STRING_SIZE = 191;
@@ -119,15 +122,6 @@ class MySqlSchemaSyntax extends SchemaSyntax
     public function formatCreateTableForeignKeyParts(CreateTableStatement $statement): array
     {
         return array_map($this->formatForeignKeyConstraint(...), $statement->foreignKeys);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    #[Override]
-    public function formatCurrentTimestamp(?int $size = null): string
-    {
-        return parent::formatCurrentTimestamp($size ?? self::DEFAULT_TIME_PRECISION);
     }
 
     /**

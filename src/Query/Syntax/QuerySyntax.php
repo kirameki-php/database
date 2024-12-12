@@ -898,16 +898,6 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param string $column
-     * @param string $path
-     * @return string
-     */
-    public function formatJsonExtract(string $column, string $path): string
-    {
-        return "{$this->asColumn($column)} -> \"$path\"";
-    }
-
-    /**
      * @param Tags|null $tags
      * @return string
      */

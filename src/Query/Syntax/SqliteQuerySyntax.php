@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Query\Syntax;
 
 use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Database\Functions\Syntax\SqliteFunctionSyntax;
 use Kirameki\Database\Info\Statements\ListColumnsStatement;
 use Kirameki\Database\Info\Statements\ListForeignKeysStatement;
 use Kirameki\Database\Info\Statements\ListIndexesStatement;
@@ -18,6 +19,8 @@ use function implode;
 
 class SqliteQuerySyntax extends QuerySyntax
 {
+    use SqliteFunctionSyntax;
+
     /**
      * @inheritDoc
      */

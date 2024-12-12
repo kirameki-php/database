@@ -370,23 +370,6 @@ abstract class SchemaSyntax extends Syntax
     }
 
     /**
-     * @param int|null $size
-     * @return string
-     */
-    public function formatCurrentTimestamp(?int $size = null): string
-    {
-        return 'CURRENT_TIMESTAMP(' . $size . ')';
-    }
-
-    /**
-     * @return string
-     */
-    public function formatUuid(): string
-    {
-        return 'UUID()';
-    }
-
-    /**
      * @param TruncateTableStatement $statement
      * @return list<string>
      */

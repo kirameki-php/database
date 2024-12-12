@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Schema\Statements;
 
-use Kirameki\Database\Expressions\CurrentTimestamp;
+use Kirameki\Database\Functions\CurrentTimestamp;
 
 class TimestampColumnBuilder extends ColumnBuilder
 {

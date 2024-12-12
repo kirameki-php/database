@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Schema\Syntax;
 
 use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Database\Functions\Syntax\SqliteFunctionSyntax;
 use Kirameki\Database\Schema\Statements\ColumnDefinition;
 use Kirameki\Database\Schema\Statements\CreateTableStatement;
 use Kirameki\Database\Schema\Statements\TruncateTableStatement;
@@ -15,6 +16,8 @@ use function pow;
 
 class SqliteSchemaSyntax extends SchemaSyntax
 {
+    use SqliteFunctionSyntax;
+
     /**
      * @inheritDoc
      */
@@ -177,15 +180,6 @@ class SqliteSchemaSyntax extends SchemaSyntax
         $statements[] = 'DELETE FROM "sqlite_sequence" WHERE "name" = ' . $this->asLiteral($statement->table);
         $statements[] = "DELETE FROM {$this->asIdentifier($statement->table)}";
         return $statements;
-    }
-
-    /**
-     * @param int|null $size
-     * @return string
-     */
-    public function formatCurrentTimestamp(?int $size = null): string
-    {
-        return 'DATETIME("now", "localtime")';
     }
 
     /**

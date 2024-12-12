@@ -4,7 +4,6 @@ namespace Kirameki\Database\Adapters;
 
 use Kirameki\Core\Exceptions\NotSupportedException;
 use Kirameki\Database\Config\SqliteConfig;
-use Kirameki\Database\Exceptions\DatabaseException;
 use Kirameki\Database\Exceptions\DatabaseExistsException;
 use Kirameki\Database\Exceptions\DatabaseNotFoundException;
 use Kirameki\Database\Exceptions\DropProtectionException;

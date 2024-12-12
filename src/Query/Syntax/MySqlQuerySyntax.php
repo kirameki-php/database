@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Query\Syntax;
 
 use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Database\Functions\Syntax\MySqlFunctionSyntax;
 use Kirameki\Database\Info\Statements\ListForeignKeysStatement;
 use Kirameki\Database\Info\Statements\ListIndexesStatement;
 use Kirameki\Database\Query\Statements\SelectStatement;
@@ -16,6 +17,8 @@ use function implode;
 
 class MySqlQuerySyntax extends QuerySyntax
 {
+    use MySqlFunctionSyntax;
+
     /**
      * @inheritDoc
      */

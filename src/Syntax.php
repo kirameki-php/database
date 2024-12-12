@@ -128,4 +128,22 @@ abstract class Syntax
     {
         return implode(' ', array_filter($parts, static fn($p): bool => $p !== null && trim($p) !== ''));
     }
+
+    /**
+     * @param int|null $size
+     * @return string
+     */
+    abstract public function formatCurrentTimestamp(?int $size = null): string;
+
+    /**
+     * @return string
+     */
+    abstract public function formatUuid(): string;
+
+    /**
+     * @param string $target
+     * @param string $path
+     * @return string
+     */
+    abstract public function formatJsonExtract(string|Expression $target, string $path): string;
 }

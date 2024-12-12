@@ -17,12 +17,17 @@ class JsonExtract implements Expression
      */
     public readonly string $path;
 
+    public static function column(string $column, string $path): static
+    {
+        return new static(new Column($column), $path);
+    }
+
     /**
-     * @param string $column
+     * @param string|Expression $target
      * @param string $path
      */
-    public function __construct(
-        public readonly string $column,
+    protected function __construct(
+        public readonly string|Expression $target,
         string $path,
     )
     {
@@ -35,6 +40,6 @@ class JsonExtract implements Expression
     #[Override]
     public function toValue(Syntax $syntax): string
     {
-        return $syntax->formatJsonExtract($this->column, $this->path);
+        return $syntax->formatJsonExtract($this->target, $this->path);
     }
 }
