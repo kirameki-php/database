@@ -2,6 +2,7 @@
 
 namespace Kirameki\Database\Expressions;
 
+use Kirameki\Database\Expression;
 use Kirameki\Database\Schema\Statements\ColumnDefinition;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 use Kirameki\Database\Syntax;

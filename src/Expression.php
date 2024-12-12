@@ -1,8 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Expressions;
-
-use Kirameki\Database\Syntax;
+namespace Kirameki\Database;
 
 /**
  * @template TSyntax of Syntax = Syntax

@@ -2,11 +2,11 @@
 
 namespace Tests\Kirameki\Database\Query\Builders;
 
-use Kirameki\Database\Expressions\Raw;
 use Kirameki\Database\Query\Statements\ConditionBuilder;
 use Kirameki\Database\Query\Statements\JoinBuilder;
 use Kirameki\Database\Query\Support\Bounds;
 use Kirameki\Database\Query\Support\LockOption;
+use Kirameki\Database\Raw;
 use Kirameki\Time\Time;
 use Tests\Kirameki\Database\Query\Builders\_Support\IntCastEnum;
 use Tests\Kirameki\Database\Query\QueryTestCase;

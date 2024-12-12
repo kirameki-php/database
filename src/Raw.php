@@ -1,8 +1,7 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Expressions;
+namespace Kirameki\Database;
 
-use Kirameki\Database\Syntax;
 use Override;
 
 class Raw implements Expression

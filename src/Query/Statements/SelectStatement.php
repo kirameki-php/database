@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Query\Statements;
 
-use Kirameki\Database\Expressions\Expression;
+use Kirameki\Database\Expression;
 use Kirameki\Database\Query\Support\Lock;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Override;

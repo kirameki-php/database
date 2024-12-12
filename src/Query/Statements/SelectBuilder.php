@@ -5,7 +5,7 @@ namespace Kirameki\Database\Query\Statements;
 use Closure;
 use Generator;
 use Kirameki\Core\Exceptions\LogicException;
-use Kirameki\Database\Expressions\Expression;
+use Kirameki\Database\Expression;
 use Kirameki\Database\Query\Expressions\Aggregate;
 use Kirameki\Database\Query\Pagination\Cursor;
 use Kirameki\Database\Query\Pagination\CursorPaginator;

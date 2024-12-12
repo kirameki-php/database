@@ -8,7 +8,7 @@ use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Func;
 use Kirameki\Core\Value;
 use Kirameki\Database\Exceptions\DropProtectionException;
-use Kirameki\Database\Expressions\Expression;
+use Kirameki\Database\Expression;
 use Kirameki\Database\Schema\Statements\AlterColumnAction;
 use Kirameki\Database\Schema\Statements\AlterDropColumnAction;
 use Kirameki\Database\Schema\Statements\AlterDropForeignKeyAction;

@@ -3,9 +3,8 @@
 namespace Tests\Kirameki\Database\Schema;
 
 use Kirameki\Core\Exceptions\LogicException;
-use Kirameki\Database\Expressions\Raw;
+use Kirameki\Database\Raw;
 use Kirameki\Database\Schema\Expressions\RawDefaultValue;
-use RuntimeException;
 use function dump;
 
 class MySql_CreateTableBuilderTest extends SchemaTestCase
