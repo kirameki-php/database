@@ -7,7 +7,7 @@ use Kirameki\Database\Schema\Statements\ColumnDefinition;
 use Kirameki\Database\Syntax;
 use Override;
 
-class CurrentTimestamp implements Expression
+final class CurrentTimestamp implements Expression
 {
     /**
      * @param ColumnDefinition $definition

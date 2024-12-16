@@ -6,7 +6,7 @@ use Kirameki\Database\Expression;
 use Kirameki\Database\Syntax;
 use Override;
 
-class Uuid implements Expression
+final class Uuid implements Expression
 {
     /**
      * @inheritDoc

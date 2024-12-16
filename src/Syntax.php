@@ -5,12 +5,17 @@ namespace Kirameki\Database;
 use BackedEnum;
 use DateTimeInterface;
 use Kirameki\Collections\Utils\Arr;
+use Kirameki\Core\Exceptions\NotSupportedException;
+use Kirameki\Core\Value;
 use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
 use function array_filter;
 use function array_map;
 use function implode;
 use function is_iterable;
+use function is_string;
+use function preg_match;
+use function preg_quote;
 use function str_replace;
 use function trim;
 
@@ -91,10 +96,89 @@ abstract class Syntax
     }
 
     /**
+     * @param iterable<int, mixed> $columns
+     * @return list<string>
+     */
+    public function asColumns(iterable $columns): array
+    {
+        return array_map($this->asColumn(...), Arr::values($columns));
+    }
+
+    /**
+     * @param mixed $name
+     * @param bool $withAlias
+     * @return string
+     */
+    public function asColumn(mixed $name, bool $withAlias = false): string
+    {
+        if ($name instanceof Expression) {
+            return $name->toValue($this);
+        }
+
+        if (is_iterable($name)) {
+            return $this->asEnclosedCsv($this->asColumns($name));
+        }
+
+        if (is_string($name)) {
+            $table = null;
+            $as = null;
+            if (preg_match('/(\.| as | AS )/', $name)) {
+                $dlm = preg_quote($this->identifierDelimiter);
+                $patterns = [];
+                $patterns[] = '(' . $dlm . '?(?<table>[^\.' . $dlm . ']+)' . $dlm . '?\.)?';
+                $patterns[] = $dlm . '?(?<column>[^ ' . $dlm . ']+)' . $dlm . '?';
+                if ($withAlias) {
+                    $patterns[] = '( (AS|as) ' . $dlm . '?(?<as>[^' . $dlm . ']+)' . $dlm . '?)?';
+                }
+                $pattern = '/^' . implode('', $patterns) . '$/';
+                $match = null;
+                if (preg_match($pattern, $name, $match)) {
+                    $table = $match['table'] !== '' ? $match['table'] : null;
+                    $name = $match['column'];
+                    $as = $match['as'] ?? null;
+                }
+            }
+            if ($name !== '*') {
+                $name = $this->asIdentifier($name);
+            }
+            if ($table !== null) {
+                $name = $this->asIdentifier($table) . '.' . $name;
+            }
+            if ($as !== null) {
+                $name .= ' AS ' . $this->asIdentifier($as);
+            }
+            return $name;
+        }
+
+        throw new NotSupportedException('Unknown column type: ' . Value::getType($name));
+    }
+
+    /**
+     * @param iterable<int, string|Expression> $values
+     * @return list<string>
+     */
+    public function stringifyExpressions(iterable $values): array
+    {
+        return array_map($this->stringifyExpression(...), func_get_args());
+    }
+
+    /**
+     * @param string|Expression $expression
+     * @return string
+     */
+    public function stringifyExpression(string|Expression $expression): string
+    {
+        if ($expression instanceof Expression) {
+            return $expression->toValue($this);
+        }
+        return $expression;
+    }
+
+    /**
      * @param iterable<array-key, mixed> $values
      * @return list<mixed>
      */
-    protected function stringifyParameters(iterable $values): array
+    public function stringifyParameters(iterable $values): array
     {
         return array_map($this->stringifyParameter(...), Arr::values($values));
     }
@@ -103,7 +187,7 @@ abstract class Syntax
      * @param mixed $value
      * @return mixed
      */
-    protected function stringifyParameter(mixed $value): mixed
+    public function stringifyParameter(mixed $value): mixed
     {
         if (is_iterable($value)) {
             return $this->stringifyParameters($value);
@@ -130,10 +214,23 @@ abstract class Syntax
     }
 
     /**
+     * @param list<string|Expression> $values
+     * @return string
+     */
+    abstract public function formatCoalesce(array $values): string;
+
+    /**
      * @param int|null $size
      * @return string
      */
     abstract public function formatCurrentTimestamp(?int $size = null): string;
+
+    /**
+     * @param string $target
+     * @param string $path
+     * @return string
+     */
+    abstract public function formatJsonExtract(string|Expression $target, string $path): string;
 
     /**
      * @return string

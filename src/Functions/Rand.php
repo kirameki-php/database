@@ -6,7 +6,7 @@ use Kirameki\Database\Expression;
 use Kirameki\Database\Syntax;
 use Override;
 
-class Rand implements Expression
+final class Rand implements Expression
 {
     /**
      * @inheritDoc

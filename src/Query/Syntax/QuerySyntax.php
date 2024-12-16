@@ -962,64 +962,6 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param mixed $name
-     * @param bool $withAlias
-     * @return string
-     */
-    public function asColumn(mixed $name, bool $withAlias = false): string
-    {
-        if ($name instanceof Expression) {
-            return $name->toValue($this);
-        }
-
-        if (is_iterable($name)) {
-            return $this->asEnclosedCsv($this->asColumns($name));
-        }
-
-        if (is_string($name)) {
-            $table = null;
-            $as = null;
-            if (preg_match('/(\.| as | AS )/', $name)) {
-                $dlm = preg_quote($this->identifierDelimiter);
-                $patterns = [];
-                $patterns[] = '(' . $dlm . '?(?<table>[^\.' . $dlm . ']+)' . $dlm . '?\.)?';
-                $patterns[] = $dlm . '?(?<column>[^ ' . $dlm . ']+)' . $dlm . '?';
-                if ($withAlias) {
-                    $patterns[] = '( (AS|as) ' . $dlm . '?(?<as>[^' . $dlm . ']+)' . $dlm . '?)?';
-                }
-                $pattern = '/^' . implode('', $patterns) . '$/';
-                $match = null;
-                if (preg_match($pattern, $name, $match)) {
-                    $table = $match['table'] !== '' ? $match['table'] : null;
-                    $name = $match['column'];
-                    $as = $match['as'] ?? null;
-                }
-            }
-            if ($name !== '*') {
-                $name = $this->asIdentifier($name);
-            }
-            if ($table !== null) {
-                $name = $this->asIdentifier($table) . '.' . $name;
-            }
-            if ($as !== null) {
-                $name .= ' AS ' . $this->asIdentifier($as);
-            }
-            return $name;
-        }
-
-        throw new NotSupportedException('Unknown column type: ' . Value::getType($name));
-    }
-
-    /**
-     * @param iterable<int, mixed> $columns
-     * @return list<string>
-     */
-    protected function asColumns(iterable $columns): array
-    {
-        return array_map($this->asColumn(...), Arr::values($columns));
-    }
-
-    /**
      * @param mixed $value
      * @return string
      */
@@ -1180,19 +1122,4 @@ abstract class QuerySyntax extends Syntax
      * @return string
      */
     abstract public function prepareTemplateForListForeignKeys(ListForeignKeysStatement $statement): string;
-
-    /**
-     * @param string $target
-     * @param string $path
-     * @return string
-     */
-    public function formatJsonExtract(string|Expression $target, string $path): string
-    {
-        {
-            if ($target instanceof Expression) {
-                $target = $target->toValue($this);
-            }
-            return "{$target} -> \"$path\"";
-        }
-    }
 }
