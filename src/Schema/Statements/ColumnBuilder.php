@@ -17,20 +17,22 @@ class ColumnBuilder
     }
 
     /**
+     * @param bool $toggle
      * @return $this
      */
-    public function primaryKey(): static
+    public function primaryKey(bool $toggle = true): static
     {
-        $this->definition->primaryKey = true;
+        $this->definition->primaryKey = $toggle;
         return $this;
     }
 
     /**
+     * @param bool $toggle
      * @return $this
      */
-    public function nullable(): static
+    public function nullable(bool $toggle = true): static
     {
-        $this->definition->nullable = true;
+        $this->definition->nullable = $toggle;
         return $this;
     }
 
