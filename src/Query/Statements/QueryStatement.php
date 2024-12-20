@@ -2,7 +2,6 @@
 
 namespace Kirameki\Database\Query\Statements;
 
-use Kirameki\Database\Query\Support\Tags;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 
 abstract class QueryStatement

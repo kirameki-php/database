@@ -15,7 +15,6 @@ use Kirameki\Database\Schema\Statements\ForeignKey\ForeignKeyConstraint;
 use Kirameki\Database\Schema\Statements\Index\CreateIndexBuilder;
 use Kirameki\Database\Schema\Statements\Index\DropIndexBuilder;
 use Kirameki\Database\Schema\Statements\SchemaBuilder;
-use Kirameki\Database\Schema\Support\AlterType;
 
 /**
  * @extends SchemaBuilder<AlterTableStatement>

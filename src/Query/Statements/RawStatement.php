@@ -3,10 +3,8 @@
 namespace Kirameki\Database\Query\Statements;
 
 use Kirameki\Collections\Utils\Arr;
-use Kirameki\Database\Query\Support\Tags;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Override;
-use function iterator_to_array;
 
 class RawStatement extends QueryStatement
 {

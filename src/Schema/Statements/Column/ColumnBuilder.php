@@ -3,7 +3,7 @@
 namespace Kirameki\Database\Schema\Statements\Column;
 
 use Kirameki\Database\Schema\Statements\ForeignKey\ForeignKeyConstraint;
-use Kirameki\Database\Schema\Support\ReferenceOption;
+use Kirameki\Database\Schema\Statements\ForeignKey\ReferenceOption;
 
 class ColumnBuilder
 {

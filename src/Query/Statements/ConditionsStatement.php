@@ -2,8 +2,6 @@
 
 namespace Kirameki\Database\Query\Statements;
 
-use Kirameki\Database\Query\Support\Ordering;
-
 abstract class ConditionsStatement extends QueryStatement
 {
     /**

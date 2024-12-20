@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Schema\Statements\Column;
 
-use Kirameki\Database\Schema\Support\AlterType;
+use Kirameki\Database\Schema\Statements\Table\AlterType;
 
 class AlterColumnAction
 {

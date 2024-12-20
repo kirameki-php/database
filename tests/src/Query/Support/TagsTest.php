@@ -2,7 +2,7 @@
 
 namespace Tests\Kirameki\Database\Query\Support;
 
-use Kirameki\Database\Query\Support\Tags;
+use Kirameki\Database\Query\Statements\Tags;
 use Tests\Kirameki\Database\Query\QueryTestCase;
 use function iterator_to_array;
 

@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Schema\Statements\Table;
 
-use Kirameki\Database\Query\Support\SortOrder;
+use Kirameki\Database\Query\Statements\SortOrder;
 
 class PrimaryKeyConstraint
 {

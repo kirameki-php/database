@@ -2,9 +2,12 @@
 
 namespace Kirameki\Database\Schema\Statements\Index;
 
-use Kirameki\Database\Query\Support\SortOrder;
+use Kirameki\Core\Exceptions\UnreachableException;
+use Kirameki\Database\Query\Statements\SortOrder;
 use Kirameki\Database\Schema\SchemaHandler;
 use Kirameki\Database\Schema\Statements\SchemaBuilder;
+use function is_string;
+use function PHPUnit\Framework\isInt;
 
 /**
  * @extends SchemaBuilder<CreateIndexStatement>
@@ -27,25 +30,29 @@ class CreateIndexBuilder extends SchemaBuilder
 
     /**
      * @param string $column
-     * @param string|null $order
+     * @param SortOrder|null $order
      * @return $this
      */
-    public function column(string $column, ?string $order = null): static
+    public function column(string $column, ?SortOrder $order = null): static
     {
         $this->statement->columns[$column] = $order ?? SortOrder::Ascending;
         return $this;
     }
 
     /**
-     * @param iterable<array-key, string> $columns
+     * @param iterable<int, string>|iterable<string, SortOrder> $columns
      * @return $this
      */
     public function columns(iterable $columns): static
     {
         foreach ($columns as $column => $order) {
-            is_string($column)
-                ? $this->column($column, $order)
-                : $this->column($order);
+            if (is_string($column) && $order instanceof SortOrder) {
+                $this->column($column, $order);
+            }
+            elseif (is_string($order)) {
+                $this->column($order);
+            }
+            throw new UnreachableException('Invalid primary key column definition.');
         }
         return $this;
     }

@@ -5,9 +5,9 @@ namespace Kirameki\Database\Query\Pagination;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Query\Statements\ConditionBuilder;
-use Kirameki\Database\Query\Statements\SelectBuilder;
-use Kirameki\Database\Query\Support\Operator;
-use Kirameki\Database\Query\Support\SortOrder;
+use Kirameki\Database\Query\Statements\Operator;
+use Kirameki\Database\Query\Statements\Select\SelectBuilder;
+use Kirameki\Database\Query\Statements\SortOrder;
 use function array_keys;
 
 /**

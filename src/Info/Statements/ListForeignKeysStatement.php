@@ -5,7 +5,7 @@ namespace Kirameki\Database\Info\Statements;
 use Kirameki\Database\Query\Statements\Normalizable;
 use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
-use Kirameki\Database\Schema\Support\ReferenceOption;
+use Kirameki\Database\Schema\Statements\ForeignKey\ReferenceOption;
 use Override;
 use stdClass;
 use function explode;

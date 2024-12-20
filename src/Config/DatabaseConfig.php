@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Config;
 
-use Kirameki\Database\Query\Support\TagsFormat;
+use Kirameki\Database\Query\Statements\TagsFormat;
 
 class DatabaseConfig
 {

@@ -2,7 +2,7 @@
 
 namespace Tests\Kirameki\Database\Query\Support;
 
-use Kirameki\Database\Query\Support\Bounds;
+use Kirameki\Database\Query\Statements\Bounds;
 use Tests\Kirameki\Database\Query\QueryTestCase;
 
 class BoundsTest extends QueryTestCase

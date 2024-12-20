@@ -2,8 +2,6 @@
 
 namespace Kirameki\Database\Schema\Statements\ForeignKey;
 
-use Kirameki\Database\Schema\Support\ReferenceOption;
-
 readonly class ForeignKeyBuilder
 {
     public function __construct(

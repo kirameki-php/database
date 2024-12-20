@@ -2,9 +2,9 @@
 
 namespace Kirameki\Database\Query\Expressions;
 
-use Kirameki\Database\Query\Support\NullOrder;
-use Kirameki\Database\Query\Support\Ordering;
-use Kirameki\Database\Query\Support\SortOrder;
+use Kirameki\Database\Query\Statements\NullOrder;
+use Kirameki\Database\Query\Statements\Ordering;
+use Kirameki\Database\Query\Statements\SortOrder;
 use function array_is_list;
 use function array_values;
 

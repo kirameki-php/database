@@ -5,7 +5,7 @@ namespace Kirameki\Database\Migration;
 use Iterator;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\DatabaseManager;
-use Kirameki\Database\Query\Support\SortOrder;
+use Kirameki\Database\Query\Statements\SortOrder;
 use function assert;
 use function basename;
 use function glob;

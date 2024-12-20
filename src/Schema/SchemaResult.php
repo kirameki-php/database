@@ -10,7 +10,7 @@ use Kirameki\Database\Schema\Statements\SchemaStatement;
 readonly class SchemaResult
 {
     /**
-     * @param SchemaStatement $statement
+     * @param TSchemaStatement $statement
      * @param list<string> $commands
      * @param float $elapsedMs
      */

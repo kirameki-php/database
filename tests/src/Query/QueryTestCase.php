@@ -2,10 +2,10 @@
 
 namespace Tests\Kirameki\Database\Query;
 
-use Kirameki\Database\Query\Statements\DeleteBuilder;
-use Kirameki\Database\Query\Statements\InsertBuilder;
-use Kirameki\Database\Query\Statements\SelectBuilder;
-use Kirameki\Database\Query\Statements\UpdateBuilder;
+use Kirameki\Database\Query\Statements\Delete\DeleteBuilder;
+use Kirameki\Database\Query\Statements\Insert\InsertBuilder;
+use Kirameki\Database\Query\Statements\Select\SelectBuilder;
+use Kirameki\Database\Query\Statements\Update\UpdateBuilder;
 use Tests\Kirameki\Database\DatabaseTestCase;
 
 class QueryTestCase extends DatabaseTestCase

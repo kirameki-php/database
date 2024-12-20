@@ -3,7 +3,6 @@
 namespace Kirameki\Database\Query\Statements;
 
 use Kirameki\Database\Expression;
-use Kirameki\Database\Query\Support\Operator;
 
 class ConditionDefinition
 {

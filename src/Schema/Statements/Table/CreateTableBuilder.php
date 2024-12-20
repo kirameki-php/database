@@ -4,7 +4,7 @@ namespace Kirameki\Database\Schema\Statements\Table;
 
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\UnreachableException;
-use Kirameki\Database\Query\Support\SortOrder;
+use Kirameki\Database\Query\Statements\SortOrder;
 use Kirameki\Database\Schema\SchemaHandler;
 use Kirameki\Database\Schema\Statements\Column\ColumnBuilder;
 use Kirameki\Database\Schema\Statements\Column\ColumnBuilderAggregate;
@@ -153,14 +153,10 @@ class CreateTableBuilder extends SchemaBuilder
         foreach ($columns as $column => $order) {
             if (is_string($column) && $order instanceof SortOrder) {
                 $this->statement->primaryKey->columns[$column] = $order;
-                continue;
             }
-
-            if (is_int($column) && is_string($order)) {
+            elseif (is_string($order)) {
                 $this->statement->primaryKey->columns[$order] = SortOrder::Ascending;
-                continue;
             }
-
             throw new UnreachableException('Invalid primary key column definition.');
         }
     }

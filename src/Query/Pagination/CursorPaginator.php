@@ -3,7 +3,7 @@
 namespace Kirameki\Database\Query\Pagination;
 
 use Kirameki\Database\Query\QueryResult;
-use Kirameki\Database\Query\Statements\SelectStatement;
+use Kirameki\Database\Query\Statements\Select\SelectStatement;
 use Override;
 
 /**
