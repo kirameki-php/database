@@ -8,7 +8,7 @@ use Kirameki\Collections\Vec;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\DatabaseManager;
 use Kirameki\Database\Query\Support\SortOrder;
-use Kirameki\Database\Schema\Statements\SchemaResult;
+use Kirameki\Database\Schema\SchemaResult;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
 use function strstr;
 use const PHP_INT_MAX;

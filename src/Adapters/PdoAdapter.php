@@ -16,7 +16,7 @@ use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Statements\SelectStatement;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Kirameki\Database\Query\TypeCastRegistry;
-use Kirameki\Database\Schema\Statements\SchemaResult;
+use Kirameki\Database\Schema\SchemaResult;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 use Override;

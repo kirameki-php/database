@@ -6,7 +6,6 @@ use Kirameki\Database\Connection;
 use Kirameki\Database\Events\SchemaExecuted;
 use Kirameki\Database\Schema\Statements\Index\CreateIndexBuilder;
 use Kirameki\Database\Schema\Statements\Index\DropIndexBuilder;
-use Kirameki\Database\Schema\Statements\SchemaResult;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
 use Kirameki\Database\Schema\Statements\Table\AlterTableBuilder;
 use Kirameki\Database\Schema\Statements\Table\CreateTableBuilder;

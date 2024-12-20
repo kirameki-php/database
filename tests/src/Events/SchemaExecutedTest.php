@@ -3,8 +3,8 @@
 namespace Tests\Kirameki\Database\Events;
 
 use Kirameki\Database\Events\SchemaExecuted;
+use Kirameki\Database\Schema\SchemaResult;
 use Kirameki\Database\Schema\Statements\RawStatement;
-use Kirameki\Database\Schema\Statements\SchemaResult;
 use Tests\Kirameki\Database\DatabaseTestCase;
 
 class SchemaExecutedTest extends DatabaseTestCase

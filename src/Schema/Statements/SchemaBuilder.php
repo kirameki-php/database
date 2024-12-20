@@ -4,6 +4,7 @@ namespace Kirameki\Database\Schema\Statements;
 
 use Closure;
 use Kirameki\Database\Schema\SchemaHandler;
+use Kirameki\Database\Schema\SchemaResult;
 
 /**
  * @template TSchemaStatement of SchemaStatement

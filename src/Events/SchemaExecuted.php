@@ -3,7 +3,7 @@
 namespace Kirameki\Database\Events;
 
 use Kirameki\Database\Connection;
-use Kirameki\Database\Schema\Statements\SchemaResult;
+use Kirameki\Database\Schema\SchemaResult;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
 
 class SchemaExecuted extends DatabaseEvent
