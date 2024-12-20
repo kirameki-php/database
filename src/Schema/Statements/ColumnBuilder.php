@@ -41,7 +41,7 @@ class ColumnBuilder
      */
     public function autoIncrement(?int $startFrom = null): static
     {
-        $this->definition->autoIncrement = $startFrom ?? random_int(1, 1000);
+        $this->definition->autoIncrement = $startFrom ?? random_int(1, 10_000);
         return $this;
     }
 
