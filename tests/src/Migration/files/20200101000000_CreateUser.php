@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 use Kirameki\Database\Migration\Migration;
-use Kirameki\Database\Schema\Statements\CreateTableBuilder;
+use Kirameki\Database\Schema\Statements\Table\CreateTableBuilder;
 
 return new class extends Migration
 {

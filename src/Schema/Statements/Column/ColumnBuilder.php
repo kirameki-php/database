@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Schema\Statements;
+namespace Kirameki\Database\Schema\Statements\Column;
 
+use Kirameki\Database\Schema\Statements\ForeignKey\ForeignKeyConstraint;
 use Kirameki\Database\Schema\Support\ReferenceOption;
-use function random_int;
 
 class ColumnBuilder
 {
@@ -33,15 +33,6 @@ class ColumnBuilder
     public function nullable(bool $toggle = true): static
     {
         $this->definition->nullable = $toggle;
-        return $this;
-    }
-
-    /**
-     * @return $this
-     */
-    public function autoIncrement(?int $startFrom = null): static
-    {
-        $this->definition->autoIncrement = $startFrom ?? random_int(1, 10_000);
         return $this;
     }
 

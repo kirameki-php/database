@@ -1,9 +1,20 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Schema\Statements;
+namespace Kirameki\Database\Schema\Statements\Table;
 
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Database\Schema\SchemaHandler;
+use Kirameki\Database\Schema\Statements\Column\AlterColumnAction;
+use Kirameki\Database\Schema\Statements\Column\AlterColumnBuilder;
+use Kirameki\Database\Schema\Statements\Column\AlterDropColumnAction;
+use Kirameki\Database\Schema\Statements\Column\AlterRenameColumnAction;
+use Kirameki\Database\Schema\Statements\Column\ColumnBuilder;
+use Kirameki\Database\Schema\Statements\ForeignKey\AlterDropForeignKeyAction;
+use Kirameki\Database\Schema\Statements\ForeignKey\ForeignKeyBuilder;
+use Kirameki\Database\Schema\Statements\ForeignKey\ForeignKeyConstraint;
+use Kirameki\Database\Schema\Statements\Index\CreateIndexBuilder;
+use Kirameki\Database\Schema\Statements\Index\DropIndexBuilder;
+use Kirameki\Database\Schema\Statements\SchemaBuilder;
 use Kirameki\Database\Schema\Support\AlterType;
 
 /**

@@ -4,8 +4,8 @@ namespace Kirameki\Database\Schema\Syntax;
 
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Functions\Syntax\MySqlFunctionSyntax;
-use Kirameki\Database\Schema\Statements\ColumnDefinition;
-use Kirameki\Database\Schema\Statements\CreateTableStatement;
+use Kirameki\Database\Schema\Statements\Column\ColumnDefinition;
+use Kirameki\Database\Schema\Statements\Table\CreateTableStatement;
 use Override;
 use function array_filter;
 use function array_map;

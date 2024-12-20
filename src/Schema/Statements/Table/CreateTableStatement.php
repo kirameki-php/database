@@ -1,9 +1,13 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Schema\Statements;
+namespace Kirameki\Database\Schema\Statements\Table;
 
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Database\Schema\Statements\Column\ColumnDefinition;
+use Kirameki\Database\Schema\Statements\ForeignKey\ForeignKeyConstraint;
+use Kirameki\Database\Schema\Statements\Index\CreateIndexStatement;
+use Kirameki\Database\Schema\Statements\SchemaStatement;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 use Override;
 

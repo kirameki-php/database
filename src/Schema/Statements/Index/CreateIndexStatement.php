@@ -1,8 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Schema\Statements;
+namespace Kirameki\Database\Schema\Statements\Index;
 
 use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Database\Query\Support\SortOrder;
+use Kirameki\Database\Schema\Statements\SchemaStatement;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 use Override;
 
@@ -11,7 +13,7 @@ class CreateIndexStatement extends SchemaStatement
     /**
      * @param string $table
      * @param string|null $name
-     * @param array<array-key, string> $columns
+     * @param array<array-key, SortOrder> $columns
      * @param bool|null $unique
      */
     public function __construct(

@@ -1,6 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Schema\Statements;
+namespace Kirameki\Database\Schema\Statements\Column;
+
+use Kirameki\Database\Schema\Statements\ForeignKey\ForeignKeyConstraint;
 
 class ColumnDefinition
 {

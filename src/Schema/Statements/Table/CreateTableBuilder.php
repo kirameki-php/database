@@ -1,9 +1,21 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Schema\Statements;
+namespace Kirameki\Database\Schema\Statements\Table;
 
 use Kirameki\Collections\Utils\Arr;
+use Kirameki\Core\Exceptions\UnreachableException;
+use Kirameki\Database\Query\Support\SortOrder;
 use Kirameki\Database\Schema\SchemaHandler;
+use Kirameki\Database\Schema\Statements\Column\ColumnBuilder;
+use Kirameki\Database\Schema\Statements\Column\ColumnBuilderAggregate;
+use Kirameki\Database\Schema\Statements\Column\ColumnDefinition;
+use Kirameki\Database\Schema\Statements\Column\IntColumnBuilder;
+use Kirameki\Database\Schema\Statements\Column\TimestampColumnBuilder;
+use Kirameki\Database\Schema\Statements\Column\UuidColumnBuilder;
+use Kirameki\Database\Schema\Statements\ForeignKey\ForeignKeyBuilder;
+use Kirameki\Database\Schema\Statements\ForeignKey\ForeignKeyConstraint;
+use Kirameki\Database\Schema\Statements\Index\CreateIndexBuilder;
+use Kirameki\Database\Schema\Statements\SchemaBuilder;
 
 /**
  * @extends SchemaBuilder<CreateTableStatement>
@@ -27,11 +39,11 @@ class CreateTableBuilder extends SchemaBuilder
     /**
      * @param string $column
      * @param int|null $size
-     * @return ColumnBuilder
+     * @return IntColumnBuilder
      */
-    public function int(string $column, ?int $size = null): ColumnBuilder
+    public function int(string $column, ?int $size = null): IntColumnBuilder
     {
-        return $this->column($column, __FUNCTION__, $size);
+        return new IntColumnBuilder($this->addDefinition($column, __FUNCTION__, $size));
     }
 
     /**
@@ -112,11 +124,11 @@ class CreateTableBuilder extends SchemaBuilder
 
     /**
      * @param string $column
-     * @return ColumnBuilder
+     * @return UuidColumnBuilder
      */
-    public function uuid(string $column): ColumnBuilder
+    public function uuid(string $column): UuidColumnBuilder
     {
-        return $this->column($column, __FUNCTION__);
+        return new UuidColumnBuilder($this->addDefinition($column, __FUNCTION__));
     }
 
     /**
@@ -132,16 +144,24 @@ class CreateTableBuilder extends SchemaBuilder
     }
 
     /**
-     * @param iterable<array-key, string> $columns
+     * @param iterable<int, string>|iterable<string, SortOrder> $columns
      * @return void
      */
     public function primaryKey(iterable $columns): void
     {
         $this->statement->primaryKey ??= new PrimaryKeyConstraint();
         foreach ($columns as $column => $order) {
-            is_string($column)
-                ? $this->statement->primaryKey->columns[$column] = $order
-                : $this->statement->primaryKey->columns[$order] = 'ASC';
+            if (is_string($column) && $order instanceof SortOrder) {
+                $this->statement->primaryKey->columns[$column] = $order;
+                continue;
+            }
+
+            if (is_int($column) && is_string($order)) {
+                $this->statement->primaryKey->columns[$order] = SortOrder::Ascending;
+                continue;
+            }
+
+            throw new UnreachableException('Invalid primary key column definition.');
         }
     }
 

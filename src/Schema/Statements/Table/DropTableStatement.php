@@ -1,19 +1,18 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Schema\Statements;
+namespace Kirameki\Database\Schema\Statements\Table;
 
+use Kirameki\Database\Schema\Statements\SchemaStatement;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 use Override;
 
-class RenameTableStatement extends SchemaStatement
+class DropTableStatement extends SchemaStatement
 {
     /**
-     * @param string $from
-     * @param string $to
+     * @param string $table
      */
     public function __construct(
-        public readonly string $from,
-        public readonly string $to,
+        public readonly string $table,
     )
     {
     }
@@ -24,6 +23,6 @@ class RenameTableStatement extends SchemaStatement
     #[Override]
     public function toExecutable(SchemaSyntax $syntax): array
     {
-        return $syntax->compileRenameTable($this);
+        return $syntax->compileDropTable($this);
     }
 }

@@ -3,7 +3,7 @@
 namespace Tests\Kirameki\Database\Info;
 
 use Kirameki\Database\Connection;
-use Kirameki\Database\Schema\Statements\CreateTableBuilder;
+use Kirameki\Database\Schema\Statements\Table\CreateTableBuilder;
 use Tests\Kirameki\Database\Query\QueryTestCase;
 
 class InfoHandlerTestAbstract extends QueryTestCase

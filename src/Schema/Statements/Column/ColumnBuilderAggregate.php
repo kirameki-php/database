@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Schema\Statements;
+namespace Kirameki\Database\Schema\Statements\Column;
 
 readonly class ColumnBuilderAggregate
 {
@@ -16,10 +16,10 @@ readonly class ColumnBuilderAggregate
     /**
      * @return $this
      */
-    public function nullable(): static
+    public function nullable(bool $toggle = true): static
     {
         foreach ($this->columns as $column) {
-            $column->nullable();
+            $column->nullable($toggle);
         }
         return $this;
     }

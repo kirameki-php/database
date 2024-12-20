@@ -1,8 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Schema\Statements;
+namespace Kirameki\Database\Schema\Statements\Index;
 
+use Kirameki\Database\Query\Support\SortOrder;
 use Kirameki\Database\Schema\SchemaHandler;
+use Kirameki\Database\Schema\Statements\SchemaBuilder;
 
 /**
  * @extends SchemaBuilder<CreateIndexStatement>
@@ -30,7 +32,7 @@ class CreateIndexBuilder extends SchemaBuilder
      */
     public function column(string $column, ?string $order = null): static
     {
-        $this->statement->columns[$column] = $order ?? 'ASC';
+        $this->statement->columns[$column] = $order ?? SortOrder::Ascending;
         return $this;
     }
 

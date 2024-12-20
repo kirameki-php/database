@@ -4,15 +4,15 @@ namespace Kirameki\Database\Schema;
 
 use Kirameki\Database\Connection;
 use Kirameki\Database\Events\SchemaExecuted;
-use Kirameki\Database\Schema\Statements\AlterTableBuilder;
-use Kirameki\Database\Schema\Statements\CreateIndexBuilder;
-use Kirameki\Database\Schema\Statements\CreateTableBuilder;
-use Kirameki\Database\Schema\Statements\DropIndexBuilder;
-use Kirameki\Database\Schema\Statements\DropTableBuilder;
-use Kirameki\Database\Schema\Statements\RenameTableBuilder;
+use Kirameki\Database\Schema\Statements\Index\CreateIndexBuilder;
+use Kirameki\Database\Schema\Statements\Index\DropIndexBuilder;
 use Kirameki\Database\Schema\Statements\SchemaResult;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
-use Kirameki\Database\Schema\Statements\TruncateTableStatement;
+use Kirameki\Database\Schema\Statements\Table\AlterTableBuilder;
+use Kirameki\Database\Schema\Statements\Table\CreateTableBuilder;
+use Kirameki\Database\Schema\Statements\Table\DropTableBuilder;
+use Kirameki\Database\Schema\Statements\Table\RenameTableBuilder;
+use Kirameki\Database\Schema\Statements\Table\TruncateTableStatement;
 use Kirameki\Event\EventManager;
 
 readonly class SchemaHandler

@@ -9,19 +9,19 @@ use Kirameki\Core\Func;
 use Kirameki\Core\Value;
 use Kirameki\Database\Exceptions\DropProtectionException;
 use Kirameki\Database\Expression;
-use Kirameki\Database\Schema\Statements\AlterColumnAction;
-use Kirameki\Database\Schema\Statements\AlterDropColumnAction;
-use Kirameki\Database\Schema\Statements\AlterDropForeignKeyAction;
-use Kirameki\Database\Schema\Statements\AlterRenameColumnAction;
-use Kirameki\Database\Schema\Statements\AlterTableStatement;
-use Kirameki\Database\Schema\Statements\ColumnDefinition;
-use Kirameki\Database\Schema\Statements\CreateIndexStatement;
-use Kirameki\Database\Schema\Statements\CreateTableStatement;
-use Kirameki\Database\Schema\Statements\DropIndexStatement;
-use Kirameki\Database\Schema\Statements\DropTableStatement;
-use Kirameki\Database\Schema\Statements\ForeignKeyConstraint;
-use Kirameki\Database\Schema\Statements\RenameTableStatement;
-use Kirameki\Database\Schema\Statements\TruncateTableStatement;
+use Kirameki\Database\Schema\Statements\Column\AlterColumnAction;
+use Kirameki\Database\Schema\Statements\Column\AlterDropColumnAction;
+use Kirameki\Database\Schema\Statements\Column\AlterRenameColumnAction;
+use Kirameki\Database\Schema\Statements\Column\ColumnDefinition;
+use Kirameki\Database\Schema\Statements\ForeignKey\AlterDropForeignKeyAction;
+use Kirameki\Database\Schema\Statements\ForeignKey\ForeignKeyConstraint;
+use Kirameki\Database\Schema\Statements\Index\CreateIndexStatement;
+use Kirameki\Database\Schema\Statements\Index\DropIndexStatement;
+use Kirameki\Database\Schema\Statements\Table\AlterTableStatement;
+use Kirameki\Database\Schema\Statements\Table\CreateTableStatement;
+use Kirameki\Database\Schema\Statements\Table\DropTableStatement;
+use Kirameki\Database\Schema\Statements\Table\RenameTableStatement;
+use Kirameki\Database\Schema\Statements\Table\TruncateTableStatement;
 use Kirameki\Database\Syntax;
 use function array_filter;
 use function array_keys;
@@ -81,7 +81,7 @@ abstract class SchemaSyntax extends Syntax
 
         $pkParts = [];
         foreach ($columns as $column => $order) {
-            $pkParts[] = "$column $order";
+            $pkParts[] = "$column {$order->value}";
         }
         if ($pkParts !== []) {
             return 'PRIMARY KEY (' . implode(', ', $pkParts) . ')';
@@ -103,7 +103,7 @@ abstract class SchemaSyntax extends Syntax
             $parts[] = 'INDEX';
             $columnParts = [];
             foreach ($index->columns as $column => $order) {
-                $columnParts[] = "$column $order";
+                $columnParts[] = "$column {$order->value}";
             }
             $parts[] = $this->asEnclosedCsv($columnParts);
             return implode(' ', $parts);
@@ -242,7 +242,7 @@ abstract class SchemaSyntax extends Syntax
         $parts[] = $statement->table;
         $columnParts = [];
         foreach ($statement->columns as $column => $order) {
-            $columnParts[] = "$column $order";
+            $columnParts[] = "$column {$order->value}";
         }
         $parts[] = $this->asEnclosedCsv($columnParts);
         return implode(' ', $parts);

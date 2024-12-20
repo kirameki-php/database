@@ -3,7 +3,7 @@
 namespace Kirameki\Database\Functions;
 
 use Kirameki\Database\Expression;
-use Kirameki\Database\Schema\Statements\ColumnDefinition;
+use Kirameki\Database\Schema\Statements\Column\ColumnDefinition;
 use Kirameki\Database\Syntax;
 use Override;
 
