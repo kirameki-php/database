@@ -9,8 +9,9 @@ class SchemaTestCase extends DatabaseTestCase
 {
     protected string $connection;
 
-    protected function createTableBuilder(string $table): CreateTableBuilder
+    protected function createTableBuilder(string $table, bool $temporary = false): CreateTableBuilder
     {
-        return new CreateTableBuilder($this->mysqlConnection()->schema(), $table);
+        $schema = $this->connection($this->connection)->schema();
+        return new CreateTableBuilder($schema, $table, $temporary);
     }
 }

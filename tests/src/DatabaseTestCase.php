@@ -21,6 +21,11 @@ class DatabaseTestCase extends TestCase
      */
     protected array $connections = [];
 
+    public function connection(string $driver): Connection
+    {
+        return $this->connections[$driver] ??= $this->createTempConnection($driver);
+    }
+
     public function mysqlConnection(): Connection
     {
         return $this->connections['mysql'] ??= $this->createTempConnection('mysql');
