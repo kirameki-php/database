@@ -52,7 +52,9 @@ class CreateIndexBuilder extends SchemaBuilder
             elseif (is_string($order)) {
                 $this->column($order);
             }
-            throw new UnreachableException('Invalid primary key column definition.');
+            else {
+                throw new UnreachableException('Invalid primary key column definition.');
+            }
         }
         return $this;
     }
