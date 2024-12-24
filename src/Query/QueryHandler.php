@@ -5,14 +5,14 @@ namespace Kirameki\Database\Query;
 use Kirameki\Database\Connection;
 use Kirameki\Database\Events\QueryExecuted;
 use Kirameki\Database\Expression;
-use Kirameki\Database\Query\Statements\Delete\DeleteBuilder;
-use Kirameki\Database\Query\Statements\Insert\InsertBuilder;
+use Kirameki\Database\Query\Statements\DeleteBuilder;
+use Kirameki\Database\Query\Statements\InsertBuilder;
 use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Statements\RawStatement;
-use Kirameki\Database\Query\Statements\Select\SelectBuilder;
+use Kirameki\Database\Query\Statements\SelectBuilder;
 use Kirameki\Database\Query\Statements\Tags;
-use Kirameki\Database\Query\Statements\Update\UpdateBuilder;
-use Kirameki\Database\Query\Statements\Upsert\UpsertBuilder;
+use Kirameki\Database\Query\Statements\UpdateBuilder;
+use Kirameki\Database\Query\Statements\UpsertBuilder;
 use Kirameki\Event\EventManager;
 
 readonly class QueryHandler

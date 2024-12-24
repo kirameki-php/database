@@ -4,8 +4,8 @@ namespace Tests\Kirameki\Database\Query\Builders;
 
 use Kirameki\Database\Query\Statements\Bounds;
 use Kirameki\Database\Query\Statements\ConditionBuilder;
-use Kirameki\Database\Query\Statements\Select\JoinBuilder;
-use Kirameki\Database\Query\Statements\Select\LockOption;
+use Kirameki\Database\Query\Statements\JoinBuilder;
+use Kirameki\Database\Query\Statements\LockOption;
 use Kirameki\Database\Raw;
 use Kirameki\Time\Time;
 use Tests\Kirameki\Database\Query\Builders\_Support\IntCastEnum;

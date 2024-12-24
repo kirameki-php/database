@@ -1,25 +1,20 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Query\Statements\Upsert;
+namespace Kirameki\Database\Query\Statements;
 
-use Kirameki\Database\Query\Statements\Dataset;
-use Kirameki\Database\Query\Statements\ManipulationStatement;
-use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Override;
 
-class UpsertStatement extends QueryStatement implements ManipulationStatement
+class InsertStatement extends QueryStatement
 {
     /**
-     * @param Dataset $dataset
-     * @param list<string> $onConflict
-     * @param list<string>|null $returning
      * @param string $table
+     * @param Dataset $dataset
+     * @param list<string>|null $returning
      */
     public function __construct(
         public readonly string $table,
         public Dataset $dataset,
-        public array $onConflict = [],
         public ?array $returning = null,
     )
     {
@@ -32,7 +27,7 @@ class UpsertStatement extends QueryStatement implements ManipulationStatement
     #[Override]
     public function generateTemplate(QuerySyntax $syntax): string
     {
-        return $syntax->prepareTemplateForUpsert($this, $this->dataset->getColumns());
+        return $syntax->prepareTemplateForInsert($this, $this->dataset->getColumns());
     }
 
     /**
@@ -41,6 +36,6 @@ class UpsertStatement extends QueryStatement implements ManipulationStatement
     #[Override]
     public function generateParameters(QuerySyntax $syntax): array
     {
-        return $syntax->prepareParametersForUpsert($this, $this->dataset->getColumns());
+        return $syntax->prepareParametersForInsert($this, $this->dataset->getColumns());
     }
 }

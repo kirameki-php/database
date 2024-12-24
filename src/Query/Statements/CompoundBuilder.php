@@ -1,10 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Query\Statements\Select;
-
-use Kirameki\Database\Query\Statements\NullOrder;
-use Kirameki\Database\Query\Statements\Ordering;
-use Kirameki\Database\Query\Statements\SortOrder;
+namespace Kirameki\Database\Query\Statements;
 
 class CompoundBuilder
 {

@@ -1,10 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Query\Statements\Select;
+namespace Kirameki\Database\Query\Statements;
 
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Query\Expressions\Column;
-use Kirameki\Database\Query\Statements\ConditionBuilder;
 use function array_is_list;
 use function array_values;
 use function assert;

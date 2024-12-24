@@ -7,7 +7,6 @@ use Kirameki\Core\Exceptions\InvalidArgumentException;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Value;
 use Kirameki\Database\Expression;
-use Kirameki\Database\Query\Statements\Select\SelectBuilder;
 use Kirameki\Database\Raw;
 use function array_key_exists;
 use function assert;

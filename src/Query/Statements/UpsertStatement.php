@@ -1,22 +1,22 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Query\Statements\Update;
+namespace Kirameki\Database\Query\Statements;
 
-use Kirameki\Database\Query\Statements\ConditionsStatement;
-use Kirameki\Database\Query\Statements\ManipulationStatement;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Override;
 
-class UpdateStatement extends ConditionsStatement implements ManipulationStatement
+class UpsertStatement extends QueryStatement
 {
     /**
-     * @param string $table
-     * @param array<string, mixed>|null $set
+     * @param Dataset $dataset
+     * @param list<string> $onConflict
      * @param list<string>|null $returning
+     * @param string $table
      */
     public function __construct(
         public readonly string $table,
-        public ?array $set = null,
+        public Dataset $dataset,
+        public array $onConflict = [],
         public ?array $returning = null,
     )
     {
@@ -29,7 +29,7 @@ class UpdateStatement extends ConditionsStatement implements ManipulationStateme
     #[Override]
     public function generateTemplate(QuerySyntax $syntax): string
     {
-        return $syntax->prepareTemplateForUpdate($this);
+        return $syntax->prepareTemplateForUpsert($this, $this->dataset->getColumns());
     }
 
     /**
@@ -38,6 +38,6 @@ class UpdateStatement extends ConditionsStatement implements ManipulationStateme
     #[Override]
     public function generateParameters(QuerySyntax $syntax): array
     {
-        return $syntax->prepareParametersForUpdate($this);
+        return $syntax->prepareParametersForUpsert($this, $this->dataset->getColumns());
     }
 }

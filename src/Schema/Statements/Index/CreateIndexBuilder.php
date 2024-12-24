@@ -7,7 +7,6 @@ use Kirameki\Database\Query\Statements\SortOrder;
 use Kirameki\Database\Schema\SchemaHandler;
 use Kirameki\Database\Schema\Statements\SchemaBuilder;
 use function is_string;
-use function PHPUnit\Framework\isInt;
 
 /**
  * @extends SchemaBuilder<CreateIndexStatement>

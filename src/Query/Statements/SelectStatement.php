@@ -1,10 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Query\Statements\Select;
+namespace Kirameki\Database\Query\Statements;
 
 use Kirameki\Database\Expression;
-use Kirameki\Database\Query\Statements\ConditionDefinition;
-use Kirameki\Database\Query\Statements\ConditionsStatement;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Override;
 

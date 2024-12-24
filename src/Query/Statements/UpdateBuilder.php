@@ -1,9 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Query\Statements\Update;
+namespace Kirameki\Database\Query\Statements;
 
 use Kirameki\Database\Query\QueryHandler;
-use Kirameki\Database\Query\Statements\ConditionsBuilder;
 use function array_is_list;
 use function array_values;
 use function iterator_to_array;

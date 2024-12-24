@@ -1,20 +1,20 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Query\Statements\Delete;
+namespace Kirameki\Database\Query\Statements;
 
-use Kirameki\Database\Query\Statements\ConditionsStatement;
-use Kirameki\Database\Query\Statements\ManipulationStatement;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Override;
 
-class DeleteStatement extends ConditionsStatement implements ManipulationStatement
+class UpdateStatement extends ConditionsStatement
 {
     /**
      * @param string $table
+     * @param array<string, mixed>|null $set
      * @param list<string>|null $returning
      */
     public function __construct(
         public readonly string $table,
+        public ?array $set = null,
         public ?array $returning = null,
     )
     {
@@ -27,7 +27,7 @@ class DeleteStatement extends ConditionsStatement implements ManipulationStateme
     #[Override]
     public function generateTemplate(QuerySyntax $syntax): string
     {
-        return $syntax->prepareTemplateForDelete($this);
+        return $syntax->prepareTemplateForUpdate($this);
     }
 
     /**
@@ -36,6 +36,6 @@ class DeleteStatement extends ConditionsStatement implements ManipulationStateme
     #[Override]
     public function generateParameters(QuerySyntax $syntax): array
     {
-        return $syntax->prepareParametersForDelete($this);
+        return $syntax->prepareParametersForUpdate($this);
     }
 }

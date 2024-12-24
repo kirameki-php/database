@@ -1,8 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Query\Statements\Select;
-
-use Kirameki\Database\Query\Statements\ConditionDefinition;
+namespace Kirameki\Database\Query\Statements;
 
 class JoinDefinition
 {

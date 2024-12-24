@@ -4,8 +4,6 @@ namespace Kirameki\Database\Query\Statements;
 
 use Closure;
 use Kirameki\Database\Query\QueryHandler;
-use Kirameki\Database\Query\Statements\Select\SelectBuilder;
-use Kirameki\Database\Query\Statements\Select\SelectStatement;
 
 readonly class WithBuilder
 {

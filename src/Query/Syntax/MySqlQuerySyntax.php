@@ -9,7 +9,7 @@ use Kirameki\Database\Info\Statements\ListIndexesStatement;
 use Kirameki\Database\Query\Statements\Dataset;
 use Kirameki\Database\Query\Statements\NullOrder;
 use Kirameki\Database\Query\Statements\Ordering;
-use Kirameki\Database\Query\Statements\Select\SelectStatement;
+use Kirameki\Database\Query\Statements\SelectStatement;
 use Override;
 use stdClass;
 use function array_map;

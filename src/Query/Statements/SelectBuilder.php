@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Query\Statements\Select;
+namespace Kirameki\Database\Query\Statements;
 
 use Closure;
 use Generator;
@@ -12,10 +12,6 @@ use Kirameki\Database\Query\Pagination\CursorPaginator;
 use Kirameki\Database\Query\Pagination\OffsetPaginator;
 use Kirameki\Database\Query\QueryHandler;
 use Kirameki\Database\Query\QueryResult;
-use Kirameki\Database\Query\Statements\ConditionsBuilder;
-use Kirameki\Database\Query\Statements\NullOrder;
-use Kirameki\Database\Query\Statements\Ordering;
-use Kirameki\Database\Query\Statements\SortOrder;
 use function array_is_list;
 use function array_values;
 use function is_array;

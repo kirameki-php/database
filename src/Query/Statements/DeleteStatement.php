@@ -1,23 +1,18 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Query\Statements\Insert;
+namespace Kirameki\Database\Query\Statements;
 
-use Kirameki\Database\Query\Statements\Dataset;
-use Kirameki\Database\Query\Statements\ManipulationStatement;
-use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Override;
 
-class InsertStatement extends QueryStatement implements ManipulationStatement
+class DeleteStatement extends ConditionsStatement
 {
     /**
      * @param string $table
-     * @param Dataset $dataset
      * @param list<string>|null $returning
      */
     public function __construct(
         public readonly string $table,
-        public Dataset $dataset,
         public ?array $returning = null,
     )
     {
@@ -30,7 +25,7 @@ class InsertStatement extends QueryStatement implements ManipulationStatement
     #[Override]
     public function generateTemplate(QuerySyntax $syntax): string
     {
-        return $syntax->prepareTemplateForInsert($this, $this->dataset->getColumns());
+        return $syntax->prepareTemplateForDelete($this);
     }
 
     /**
@@ -39,6 +34,6 @@ class InsertStatement extends QueryStatement implements ManipulationStatement
     #[Override]
     public function generateParameters(QuerySyntax $syntax): array
     {
-        return $syntax->prepareParametersForInsert($this, $this->dataset->getColumns());
+        return $syntax->prepareParametersForDelete($this);
     }
 }
