@@ -53,5 +53,11 @@ class InfoHandlerTestAbstract extends QueryTestCase
         $this->assertSame('PRIMARY', $index->name);
         $this->assertSame(['id'], $index->columns);
         $this->assertSame('primary', $index->type);
+
+        $foreignKey = $tableInfo->foreignKeys->offsetGet(0);
+        $this->assertIsString($foreignKey->name);
+        $this->assertSame('TestA', $foreignKey->referencedTable);
+        $this->assertSame(['id'], $foreignKey->referencedColumns);
+        $this->assertSame(['testAId'], $foreignKey->columns);
     }
 }
