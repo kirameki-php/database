@@ -84,7 +84,7 @@ class ConditionBuilder
         $value = $args[$key];
 
         return match ($key) {
-            1, 'eq' => match (true) {
+            1 => match (true) {
                 $value instanceof Bounds => $self->inRange($value),
                 is_iterable($value) => $self->in($value),
                 default => $self->equals($value),
@@ -94,6 +94,8 @@ class ConditionBuilder
                 is_iterable($value) => $self->notIn($value),
                 default => $self->notEquals($value),
             },
+            'eq' => $self->equals($value),
+            'ne' => $self->notEquals($value),
             'gt' => $self->greaterThan($value),
             'gte' => $self->greaterThanOrEqualTo($value),
             'lt' => $self->lessThan($value),
