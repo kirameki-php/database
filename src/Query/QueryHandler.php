@@ -36,7 +36,7 @@ readonly class QueryHandler
      */
     public function select(string|Expression ...$columns): SelectBuilder
     {
-        return (new SelectBuilder($this))->columns(...$columns);
+        return new SelectBuilder($this)->columns(...$columns);
     }
 
     /**

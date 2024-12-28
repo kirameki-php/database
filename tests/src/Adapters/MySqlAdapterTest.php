@@ -22,21 +22,21 @@ class MySqlAdapterTest extends PdoAdapterTestAbstract
     {
         $this->expectException(InvalidConfigException::class);
         $this->expectExceptionMessage('Either host or socket must be defined.');
-        (new MySqlAdapter(new DatabaseConfig([]), new MySqlConfig()))->connect();
+        new MySqlAdapter(new DatabaseConfig([]), new MySqlConfig())->connect();
     }
 
     public function test_connect_with_both_host_and_socket(): void
     {
         $this->expectException(InvalidConfigException::class);
         $this->expectExceptionMessage('Host and socket cannot be used together.');
-        (new MySqlAdapter(new DatabaseConfig([]), new MySqlConfig(host: 'abc', socket: '123')))->connect();
+        new MySqlAdapter(new DatabaseConfig([]), new MySqlConfig(host: 'abc', socket: '123'))->connect();
     }
 
     public function test_connect_try_with_socket(): void
     {
         $this->expectException(PDOException::class);
         $this->expectExceptionMessage('SQLSTATE[HY000] [2002] No such file or directory');
-        (new MySqlAdapter(new DatabaseConfig([]), new MySqlConfig(socket: '/run/mysql.sock')))->connect();
+        new MySqlAdapter(new DatabaseConfig([]), new MySqlConfig(socket: '/run/mysql.sock'))->connect();
     }
 
     #[Override]

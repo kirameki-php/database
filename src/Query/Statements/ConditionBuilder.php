@@ -127,7 +127,7 @@ class ConditionBuilder
      */
     public static function with(string|iterable|Expression $column, Operator $operator, mixed $value): static
     {
-        return (new static($column))->define($operator, $value);
+        return new static($column)->define($operator, $value);
     }
 
     /**
@@ -136,7 +136,7 @@ class ConditionBuilder
      */
     public static function raw(string $raw): static
     {
-        return (new static())->expr(new Raw($raw));
+        return new static()->expr(new Raw($raw));
     }
 
     /**
