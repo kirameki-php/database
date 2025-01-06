@@ -5,8 +5,6 @@ use Kirameki\Database\Schema\Statements\Table\CreateTableBuilder;
 
 return new class extends Migration
 {
-    protected ?string $connection = 'migration_test';
-
     public function forward(): void
     {
         $this->createTable('User', function(CreateTableBuilder $t) {

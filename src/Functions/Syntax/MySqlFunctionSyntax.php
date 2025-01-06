@@ -23,7 +23,7 @@ trait MySqlFunctionSyntax
     #[Override]
     public function formatCurrentTimestamp(?int $size = null): string
     {
-        return 'CURRENT_TIMESTAMP(' . ($size ?? MySqlSchemaSyntax::DEFAULT_TIME_PRECISION) . ')';
+        return 'CURRENT_TIMESTAMP(' . ($size) . ')';
     }
 
     /**

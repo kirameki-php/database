@@ -2,16 +2,20 @@
 
 namespace Kirameki\Database\Schema\Statements\Column;
 
+use Kirameki\Database\Connection;
+
 class AlterColumnBuilder extends ColumnBuilder
 {
     /**
+     * @param Connection $connection
      * @param AlterColumnAction $action
      */
     public function __construct(
+        Connection $connection,
         protected AlterColumnAction $action,
     )
     {
-        parent::__construct($action->definition);
+        parent::__construct($connection, $action->definition);
     }
 
     /**

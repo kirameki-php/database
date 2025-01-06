@@ -3,17 +3,16 @@
 namespace Kirameki\Database\Functions;
 
 use Kirameki\Database\Expression;
-use Kirameki\Database\Schema\Statements\Column\ColumnDefinition;
 use Kirameki\Database\Syntax;
 use Override;
 
 final class CurrentTimestamp implements Expression
 {
     /**
-     * @param ColumnDefinition $definition
+     * @param int|null $size
      */
     public function __construct(
-        protected ColumnDefinition $definition,
+        protected ?int $size = null,
     )
     {
     }
@@ -24,6 +23,6 @@ final class CurrentTimestamp implements Expression
     #[Override]
     public function toValue(Syntax $syntax): string
     {
-        return $syntax->formatCurrentTimestamp($this->definition->size);
+        return $syntax->formatCurrentTimestamp($this->size);
     }
 }

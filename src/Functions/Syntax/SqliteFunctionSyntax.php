@@ -22,7 +22,9 @@ trait SqliteFunctionSyntax
     #[Override]
     public function formatCurrentTimestamp(?int $size = null): string
     {
-        return 'DATETIME("now", "localtime")';
+        return $size !== null
+            ? 'STRFTIME("%Y-%m-%d %H:%M:%f", DATETIME("now", "localtime"))'
+            : 'DATETIME("now", "localtime")';
     }
 
     /**
