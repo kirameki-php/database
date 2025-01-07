@@ -159,7 +159,11 @@ abstract class Syntax
      */
     public function stringifyExpressions(iterable $values): array
     {
-        return array_map($this->stringifyExpression(...), $values);
+        $strings = [];
+        foreach ($values as $value) {
+            $strings[] = $this->stringifyExpression($value);
+        }
+        return $strings;
     }
 
     /**
