@@ -104,6 +104,8 @@ class ConditionBuilder
             'notIn' => $self->notIn($value),
             'between' => $self->between($value[0], $value[1]),
             'notBetween' => $self->notBetween($value[0], $value[1]),
+            'exists' => $self->exists($value),
+            'notExists' => $self->notExists($value),
             'like' => $self->like($value),
             'notLike' => $self->notLike($value),
             default => throw new InvalidArgumentException('Unknown operator: ' . $key),
@@ -335,6 +337,24 @@ class ConditionBuilder
     }
 
     /**
+     * @param SelectBuilder $builder
+     * @return $this
+     */
+    public function exists(SelectBuilder $builder): static
+    {
+        return $this->define(Operator::Exists, $builder);
+    }
+
+    /**
+     * @param SelectBuilder $builder
+     * @return $this
+     */
+    public function notExists(SelectBuilder $builder): static
+    {
+        return $this->exists($builder)->negate();
+    }
+
+    /**
      * @param Bounds $bounds
      * @return $this
      */
@@ -359,15 +379,6 @@ class ConditionBuilder
     public function expr(Expression $expr): static
     {
         return $this->define(Operator::Raw, $expr);
-    }
-
-    /**
-     * @param SelectBuilder $builder
-     * @return $this
-     */
-    public function exists(SelectBuilder $builder): static
-    {
-        return $this->define(Operator::Exists, $builder);
     }
 
     /**
