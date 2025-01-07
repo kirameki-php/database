@@ -591,14 +591,12 @@ abstract class QuerySyntax extends Syntax
     protected function formatConditionForEqual(ConditionDefinition $def): string
     {
         $column = $this->asColumn($def->column, true);
-        $operator = $def->negated ? '!=' : '=';
+        $negated = $def->negated;
         $value = $def->value;
 
-        if ($value === null) {
-            return $column . ' IS ' . ($def->negated ? Logic::Not->value : '') . 'NULL';
-        }
-
-        return $this->formatConditionForOperator($column, $operator, $value);
+        return $value !== null
+            ? $this->formatConditionForOperator($column, $negated ? '!=' : '=', $value)
+            : $this->formatConditionForNull($column, $negated);
     }
 
     /**
@@ -647,17 +645,6 @@ abstract class QuerySyntax extends Syntax
         $operator = $def->negated ? '<=' : '>';
         $value = $def->value;
         return $this->formatConditionForOperator($column, $operator, $value);
-    }
-
-    /**
-     * @param string $column
-     * @param string $operator
-     * @param mixed $value
-     * @return string
-     */
-    protected function formatConditionForOperator(string $column, string $operator, mixed $value): string
-    {
-        return $column . ' ' . $operator . ' ' . $this->asPlaceholder($value);
     }
 
     /**
@@ -759,6 +746,27 @@ abstract class QuerySyntax extends Syntax
         throw new NotSupportedException('WHERE ranged value: ' . Value::getType($value), [
             'definition' => $def,
         ]);
+    }
+
+    /**
+     * @param string $column
+     * @param string $operator
+     * @param mixed $value
+     * @return string
+     */
+    protected function formatConditionForOperator(string $column, string $operator, mixed $value): string
+    {
+        return $column . ' ' . $operator . ' ' . $this->asPlaceholder($value);
+    }
+
+    /**
+     * @param string $column
+     * @param bool $negated
+     * @return string
+     */
+    protected function formatConditionForNull(string $column, bool $negated): string
+    {
+        return $column . ' IS ' . ($negated ? Logic::Not->value : '') . 'NULL';
     }
 
     /**
