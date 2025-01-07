@@ -170,7 +170,7 @@ class ConditionBuilder
      */
     public function and(?string $column = null): static
     {
-        $this->current->nextLogic = 'AND';
+        $this->current->nextLogic = Logic::And;
         $this->current->next = new ConditionDefinition($column ?? $this->current->column);
         return $this->setCurrent($this->current->next);
     }
@@ -181,7 +181,7 @@ class ConditionBuilder
      */
     public function or(?string $column = null): static
     {
-        $this->current->nextLogic = 'OR';
+        $this->current->nextLogic = Logic::Or;
         $this->current->next = new ConditionDefinition($column ?? $this->current->column);
         return $this->setCurrent($this->current->next);
     }

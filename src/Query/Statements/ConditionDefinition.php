@@ -7,9 +7,9 @@ use Kirameki\Database\Expression;
 class ConditionDefinition
 {
     /**
-     * @var Operator|null
+     * @var Operator
      */
-    public ?Operator $operator = null;
+    public Operator $operator;
 
     /**
      * @var bool
@@ -22,9 +22,9 @@ class ConditionDefinition
     public mixed $value = null;
 
     /**
-     * @var string|null
+     * @var Logic|null
      */
-    public ?string $nextLogic = null;
+    public ?Logic $nextLogic = null;
 
     /**
      * @var static|null
