@@ -686,7 +686,7 @@ abstract class QuerySyntax extends Syntax
         $operator = ($def->negated ? Logic::Not->value : '') . $def->operator->value;
         $min = $this->asPlaceholder($def->value[0]);
         $max = $this->asPlaceholder($def->value[1]);
-        $logic = $def->nextLogic->value ?? throw new UnreachableException('Missing next logic', ['definition' => $def]);
+        $logic = Logic::And->value;
         return "{$column} {$operator} {$min} {$logic} {$max}";
     }
 
