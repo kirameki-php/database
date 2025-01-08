@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Query\Statements;
 
-enum Logic: string
+enum LogicType: string
 {
     case And = 'AND';
     case Or = 'OR';

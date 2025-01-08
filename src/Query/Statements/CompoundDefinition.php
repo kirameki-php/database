@@ -5,13 +5,13 @@ namespace Kirameki\Database\Query\Statements;
 class CompoundDefinition
 {
     /**
-     * @param CompoundOperator $operator
+     * @param CompoundType $operator
      * @param SelectStatement $query
      * @param array<string, Ordering>|null $orderBy
      * @param int|null $limit
      */
     public function __construct(
-        public readonly CompoundOperator $operator,
+        public readonly CompoundType $operator,
         public readonly SelectStatement $query,
         public ?array $orderBy = null,
         public ?int $limit = null,

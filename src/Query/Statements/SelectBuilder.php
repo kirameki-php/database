@@ -337,7 +337,7 @@ class SelectBuilder extends ConditionsBuilder
      */
     public function union(SelectBuilder $query): CompoundBuilder
     {
-        return $this->setCompoundOperator(CompoundOperator::Union, $query);
+        return $this->setCompoundOperator(CompoundType::Union, $query);
     }
 
     /**
@@ -346,7 +346,7 @@ class SelectBuilder extends ConditionsBuilder
      */
     public function unionAll(SelectBuilder $query): CompoundBuilder
     {
-        return $this->setCompoundOperator(CompoundOperator::UnionAll, $query);
+        return $this->setCompoundOperator(CompoundType::UnionAll, $query);
     }
 
     /**
@@ -355,7 +355,7 @@ class SelectBuilder extends ConditionsBuilder
      */
     public function intersect(SelectBuilder $query): CompoundBuilder
     {
-        return $this->setCompoundOperator(CompoundOperator::Intersect, $query);
+        return $this->setCompoundOperator(CompoundType::Intersect, $query);
     }
 
     /**
@@ -364,15 +364,15 @@ class SelectBuilder extends ConditionsBuilder
      */
     public function except(SelectBuilder $query): CompoundBuilder
     {
-        return $this->setCompoundOperator(CompoundOperator::Except, $query);
+        return $this->setCompoundOperator(CompoundType::Except, $query);
     }
 
     /**
-     * @param CompoundOperator $operator
+     * @param CompoundType $operator
      * @param SelectBuilder $query
      * @return CompoundBuilder
      */
-    protected function setCompoundOperator(CompoundOperator $operator, SelectBuilder $query): CompoundBuilder
+    protected function setCompoundOperator(CompoundType $operator, SelectBuilder $query): CompoundBuilder
     {
         $builder =  new CompoundBuilder($operator, $query->getStatement());
         $this->statement->compound = $builder->getDefinition();

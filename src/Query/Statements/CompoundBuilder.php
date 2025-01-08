@@ -7,11 +7,11 @@ class CompoundBuilder
     protected CompoundDefinition $definition;
 
     /**
-     * @param CompoundOperator $operator
+     * @param CompoundType $operator
      * @param SelectStatement $query
      */
     public function __construct(
-        CompoundOperator $operator,
+        CompoundType $operator,
         SelectStatement $query,
     )
     {

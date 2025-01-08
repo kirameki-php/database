@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Query\Statements;
 
-enum CompoundOperator: string
+enum CompoundType: string
 {
     case Union = 'UNION';
     case UnionAll = 'UNION ALL';
