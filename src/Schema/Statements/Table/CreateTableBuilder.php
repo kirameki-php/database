@@ -38,7 +38,7 @@ class CreateTableBuilder extends SchemaBuilder
 
     /**
      * @param string|null $column
-     * @return IntColumnBuilder
+     * @return void
      */
     public function id(?string $column = null): void
     {
