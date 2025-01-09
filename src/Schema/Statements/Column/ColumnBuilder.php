@@ -2,19 +2,19 @@
 
 namespace Kirameki\Database\Schema\Statements\Column;
 
-use Kirameki\Database\Connection;
+use Kirameki\Database\Schema\SchemaHandler;
 use Kirameki\Database\Schema\Statements\ForeignKey\ForeignKeyConstraint;
 use Kirameki\Database\Schema\Statements\ForeignKey\ReferenceOption;
 
 class ColumnBuilder
 {
     /**
-     * @param Connection $connection
+     * @param SchemaHandler $handler
      * @param ColumnDefinition $definition
      */
     public function __construct(
-        protected Connection $connection,
-        protected ColumnDefinition $definition,
+        protected readonly SchemaHandler $handler,
+        protected readonly ColumnDefinition $definition,
     )
     {
     }

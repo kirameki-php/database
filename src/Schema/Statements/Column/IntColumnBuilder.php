@@ -2,8 +2,6 @@
 
 namespace Kirameki\Database\Schema\Statements\Column;
 
-use function random_int;
-
 class IntColumnBuilder extends ColumnBuilder
 {
     /**
@@ -11,7 +9,12 @@ class IntColumnBuilder extends ColumnBuilder
      */
     public function autoIncrement(?int $startFrom = null): static
     {
-        $this->definition->autoIncrement = $startFrom ?? random_int(1, 10_000);
+        $this->definition->autoIncrement = $startFrom ?? $this->getRandomStartValue();
         return $this;
+    }
+
+    protected function getRandomStartValue(): int
+    {
+        return $this->handler->getRandomizer()->getInt(1_000_000, 9_999_999);
     }
 }

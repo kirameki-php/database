@@ -16,6 +16,7 @@ use Kirameki\Database\Schema\SchemaHandler;
 use Kirameki\Database\Transaction\Support\IsolationLevel;
 use Kirameki\Database\Transaction\TransactionContext;
 use Kirameki\Event\EventManager;
+use Random\Randomizer;
 use Throwable;
 
 class Connection
@@ -37,6 +38,7 @@ class Connection
         protected ?SchemaHandler $schemaHandler = null,
         protected ?InfoHandler $infoHandler = null,
         protected ?TransactionContext $transactionContext = null,
+        protected ?Randomizer $randomizer = null,
     )
     {
     }
@@ -108,7 +110,7 @@ class Connection
      */
     public function schema(): SchemaHandler
     {
-        return $this->schemaHandler ??= new SchemaHandler($this, $this->events);
+        return $this->schemaHandler ??= new SchemaHandler($this, $this->events, $this->randomizer);
     }
 
     public function info(): InfoHandler

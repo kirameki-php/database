@@ -13,16 +13,19 @@ use Kirameki\Database\Schema\Statements\Table\DropTableBuilder;
 use Kirameki\Database\Schema\Statements\Table\RenameTableBuilder;
 use Kirameki\Database\Schema\Statements\Table\TruncateTableStatement;
 use Kirameki\Event\EventManager;
+use Random\Randomizer;
 
-readonly class SchemaHandler
+class SchemaHandler
 {
     /**
      * @param Connection $connection
      * @param EventManager|null $events
+     * @param Randomizer|null $randomizer
      */
     public function __construct(
-        public Connection $connection,
-        protected ?EventManager $events = null,
+        public readonly Connection $connection,
+        protected readonly ?EventManager $events = null,
+        protected ?Randomizer $randomizer = null,
     )
     {
     }
@@ -139,5 +142,13 @@ readonly class SchemaHandler
     {
         $this->events?->emit(new SchemaExecuted($this->connection, $result));
         return $result;
+    }
+
+    /**
+     * @return Randomizer
+     */
+    public function getRandomizer(): Randomizer
+    {
+        return $this->randomizer ??= new Randomizer();
     }
 }

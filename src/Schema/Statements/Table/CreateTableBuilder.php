@@ -43,10 +43,7 @@ class CreateTableBuilder extends SchemaBuilder
      */
     public function int(string $column, ?int $size = null): IntColumnBuilder
     {
-        return new IntColumnBuilder(
-            $this->handler->connection,
-            $this->addDefinition($column, __FUNCTION__, $size),
-        );
+        return new IntColumnBuilder($this->handler, $this->addDefinition($column, __FUNCTION__, $size));
     }
 
     /**
@@ -85,10 +82,7 @@ class CreateTableBuilder extends SchemaBuilder
      */
     public function datetime(string $column, ?int $precision = null): ColumnBuilder
     {
-        return new TimestampColumnBuilder(
-            $this->handler->connection,
-            $this->addDefinition($column, __FUNCTION__, $precision),
-        );
+        return new TimestampColumnBuilder($this->handler, $this->addDefinition($column, __FUNCTION__, $precision));
     }
 
     /**
@@ -134,10 +128,7 @@ class CreateTableBuilder extends SchemaBuilder
      */
     public function uuid(string $column): UuidColumnBuilder
     {
-        return new UuidColumnBuilder(
-            $this->handler->connection,
-            $this->addDefinition($column, __FUNCTION__),
-        );
+        return new UuidColumnBuilder($this->handler, $this->addDefinition($column, __FUNCTION__));
     }
 
     /**
@@ -214,10 +205,7 @@ class CreateTableBuilder extends SchemaBuilder
      */
     protected function column(string $name, string $type, ?int $size = null, ?int $scale = null): ColumnBuilder
     {
-        return new ColumnBuilder(
-            $this->handler->connection,
-            $this->addDefinition($name, $type, $size, $scale),
-        );
+        return new ColumnBuilder($this->handler, $this->addDefinition($name, $type, $size, $scale));
     }
 
     /**

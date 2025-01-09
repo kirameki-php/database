@@ -7,16 +7,6 @@ use Kirameki\Database\Schema\Statements\ForeignKey\ForeignKeyConstraint;
 class ColumnDefinition
 {
     /**
-     * @var bool|null
-     */
-    public ?bool $primaryKey = null;
-
-    /**
-     * @var int|null
-     */
-    public ?int $autoIncrement = null;
-
-    /**
      * @param string $name
      * @param string|null $type
      * @param int|null $size
@@ -24,6 +14,8 @@ class ColumnDefinition
      * @param bool|null $nullable
      * @param mixed|null $default
      * @param ForeignKeyConstraint|null $references
+     * @param bool|null $primaryKey
+     * @param int|null $autoIncrement
      */
     public function __construct(
         public readonly string $name,
@@ -33,6 +25,8 @@ class ColumnDefinition
         public ?bool $nullable = null,
         public mixed $default = null,
         public ?ForeignKeyConstraint $references = null,
+        public ?bool $primaryKey = null,
+        public ?int $autoIncrement = null,
     )
     {
     }
