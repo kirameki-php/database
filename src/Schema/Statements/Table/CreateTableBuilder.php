@@ -37,6 +37,15 @@ class CreateTableBuilder extends SchemaBuilder
     }
 
     /**
+     * @param string|null $column
+     * @return IntColumnBuilder
+     */
+    public function id(?string $column = null): void
+    {
+        $this->int($column ?? 'id')->autoIncrement()->primaryKey();
+    }
+
+    /**
      * @param string $column
      * @param int|null $size
      * @return IntColumnBuilder

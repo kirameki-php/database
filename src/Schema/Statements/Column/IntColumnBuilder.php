@@ -13,6 +13,9 @@ class IntColumnBuilder extends ColumnBuilder
         return $this;
     }
 
+    /**
+     * @return int
+     */
     protected function getRandomStartValue(): int
     {
         return $this->handler->getRandomizer()->getInt(1_000_000, 9_999_999);
