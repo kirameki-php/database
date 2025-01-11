@@ -21,15 +21,6 @@ trait MySqlFunctionSyntax
      * @inheritDoc
      */
     #[Override]
-    public function formatRand(): string
-    {
-        return 'RAND()';
-    }
-
-    /**
-     * @inheritDoc
-     */
-    #[Override]
     public function formatUuid(): string
     {
         return 'UUID()';

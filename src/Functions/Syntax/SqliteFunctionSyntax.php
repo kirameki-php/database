@@ -23,15 +23,6 @@ trait SqliteFunctionSyntax
      * @inheritDoc
      */
     #[Override]
-    public function formatRand(): string
-    {
-        return 'RANDOM()';
-    }
-
-    /**
-     * @inheritDoc
-     */
-    #[Override]
     public function formatUuid(): string
     {
         return 'PRINTF' . $this->asEnclosedCsv([
