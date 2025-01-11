@@ -4,18 +4,17 @@ namespace Tests\Kirameki\Database\Functions;
 
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Database\Functions\CurrentTimestamp;
-use function dump;
 
-class MySqlCurrentTimestampTest extends CurrentTimestampTestAbstract
+class CurrentTimestampSqliteTest extends CurrentTimestampTestAbstract
 {
-    protected string $useConnection = 'mysql';
+    protected string $useConnection = 'sqlite';
 
     public function test_no_size(): void
     {
         $connection = $this->getConnection();
 
         $q = $connection->query()->select(new CurrentTimestamp());
-        $this->assertSame('SELECT CURRENT_TIMESTAMP()', $q->toString());
+        $this->assertSame('SELECT DATETIME("now", "localtime")', $q->toString());
         $result = Arr::first((array)$q->execute()->first());
         $this->assertStringMatchesFormat('%d-%d-%d %d:%d:%d', $result);
     }
@@ -25,7 +24,7 @@ class MySqlCurrentTimestampTest extends CurrentTimestampTestAbstract
         $connection = $this->getConnection();
 
         $q = $connection->query()->select(new CurrentTimestamp(6));
-        $this->assertSame('SELECT CURRENT_TIMESTAMP(6)', $q->toString());
+        $this->assertSame('SELECT STRFTIME("%Y-%m-%d %H:%M:%f", DATETIME("now", "localtime"))', $q->toString());
         $result = Arr::first((array)$q->execute()->first());
         $this->assertStringMatchesFormat('%d-%d-%d %d:%d:%d.%d', $result);
     }

@@ -2,7 +2,7 @@
 
 namespace Tests\Kirameki\Database\Info;
 
-class MySqlInfoHandlerTest extends InfoHandlerTestAbstract
+class InfoHandlerMySqlTest extends InfoHandlerTestAbstract
 {
     protected string $useConnection = 'mysql';
 }

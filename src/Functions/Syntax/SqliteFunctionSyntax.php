@@ -28,13 +28,16 @@ trait SqliteFunctionSyntax
     }
 
     /**
-     * @param string|Expression $target
-     * @param string $path
-     * @return string
+     * @inheritDoc
      */
-    public function formatJsonExtract(string|Expression $target, string $path): string
+    public function formatJsonExtract(string|Expression $target, string $path, ?string $as): string
     {
-        return "{$this->stringifyExpression($target)} -> \"$path\"";
+        return $this->concat([
+            $this->stringifyExpression($target),
+            '->',
+            $this->asLiteral($path),
+            $as !== null ? "AS {$this->asColumn($as)}" : null,
+        ]);
     }
 
     /**

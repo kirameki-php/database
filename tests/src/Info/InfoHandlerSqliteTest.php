@@ -2,7 +2,7 @@
 
 namespace Tests\Kirameki\Database\Info;
 
-class SqliteInfoHandlerTest extends InfoHandlerTestAbstract
+class InfoHandlerSqliteTest extends InfoHandlerTestAbstract
 {
     protected string $useConnection = 'sqlite';
 }

@@ -5,9 +5,9 @@ namespace Tests\Kirameki\Database\Functions;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Database\Functions\Coalesce;
 
-class SqliteCoalesceTest extends CoalesceTestAbstract
+class CoalesceMySqlTest extends CoalesceTestAbstract
 {
-    protected string $useConnection = 'sqlite';
+    protected string $useConnection = 'mysql';
 
     public function test_values_construct(): void
     {
@@ -17,7 +17,7 @@ class SqliteCoalesceTest extends CoalesceTestAbstract
         $this->assertSame('SELECT COALESCE(NULL, 1, 1.1)', $q->toString());
 
         $result = Arr::first((array)$q->execute()->first());
-        $this->assertSame(1, $result);
+        $this->assertSame('1.0', $result);
     }
 
     public function test_columns_construct(): void
@@ -25,6 +25,6 @@ class SqliteCoalesceTest extends CoalesceTestAbstract
         $connection = $this->getConnection();
 
         $q = $connection->query()->select(Coalesce::columns('a', 'b'));
-        $this->assertSame('SELECT COALESCE("a", "b")', $q->toString());
+        $this->assertSame('SELECT COALESCE(`a`, `b`)', $q->toString());
     }
 }
