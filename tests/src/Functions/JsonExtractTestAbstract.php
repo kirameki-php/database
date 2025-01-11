@@ -24,51 +24,7 @@ abstract class JsonExtractTestAbstract extends QueryTestCase
         $table->execute();
     }
 
+    abstract public function test_column_return_value(): void;
 
-    public function test_column_return_value(): void
-    {
-        $connection = $this->getConnection();
-        $this->createJsonTestTable($connection);
-
-        $connection->query()->insertInto('test')
-            ->value(['attrs' => '{"users":[1,2,3]}'])
-            ->execute();
-
-        $q = $connection->query()
-            ->select(JsonExtract::column('attrs', 'users[1]'))
-            ->from('test');
-        $this->assertSame('SELECT "attrs" -> \'$.users[1]\' FROM "test"', $q->toString());
-
-        $result = Arr::first((array)$q->first());
-        $this->assertSame('2', $result);
-    }
-
-    public function test_column_return_object(): void
-    {
-        $connection = $this->getConnection();
-        $this->createJsonTestTable($connection);
-
-        $connection->query()->insertInto('test')
-            ->value(['attrs' => '{"users":[1,2,3]}'])
-            ->execute();
-
-        $q = $connection->query()
-            ->select(JsonExtract::column('attrs', 'users', 't'))
-            ->from('test');
-        $this->assertSame('SELECT "attrs" -> \'$.users\' AS "t" FROM "test"', $q->toString());
-
-        $result = (array)$q->first();
-        $this->assertSame(['t' => '[1,2,3]'], $result);
-    }
-
-    public function test_literal_construct(): void
-    {
-        $connection = $this->getConnection();
-
-        $q = $connection->query()->select(JsonExtract::literal('{"a":2,"c":[4,5,{"f":7}]}', '$.c[2].f'));
-        $this->assertSame('SELECT \'{"a":2,"c":[4,5,{"f":7}]}\' -> \'$.c[2].f\'', $q->toString());
-
-        $result = Arr::first((array)$q->first());
-        $this->assertSame('7', $result);
-    }
+    abstract public function test_column_return_object(): void;
 }

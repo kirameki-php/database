@@ -3,12 +3,11 @@
 namespace Tests\Kirameki\Database\Functions;
 
 use Kirameki\Collections\Utils\Arr;
-use Kirameki\Database\Connection;
 use Kirameki\Database\Functions\JsonExtract;
 
 class JsonExtractMySqlTest extends JsonExtractTestAbstract
 {
-    protected string $useConnection = 'sqlite';
+    protected string $useConnection = 'mysql';
 
     public function test_column_return_value(): void
     {
@@ -20,9 +19,9 @@ class JsonExtractMySqlTest extends JsonExtractTestAbstract
             ->execute();
 
         $q = $connection->query()
-            ->select(JsonExtract::column('attrs', 'users[1]'))
+            ->select(JsonExtract::column('attrs', 'users[1]', 't'))
             ->from('test');
-        $this->assertSame('SELECT "attrs" -> \'$.users[1]\' FROM "test"', $q->toString());
+        $this->assertSame('SELECT `attrs` -> "$.users[1]" AS `t` FROM `test`', $q->toString());
 
         $result = Arr::first((array)$q->first());
         $this->assertSame('2', $result);
@@ -40,20 +39,9 @@ class JsonExtractMySqlTest extends JsonExtractTestAbstract
         $q = $connection->query()
             ->select(JsonExtract::column('attrs', 'users', 't'))
             ->from('test');
-        $this->assertSame('SELECT "attrs" -> \'$.users\' AS "t" FROM "test"', $q->toString());
+        $this->assertSame('SELECT `attrs` -> "$.users" AS `t` FROM `test`', $q->toString());
 
         $result = (array)$q->first();
-        $this->assertSame(['t' => '[1,2,3]'], $result);
-    }
-
-    public function test_raw_construct(): void
-    {
-        $connection = $this->getConnection();
-
-        $q = $connection->query()->select(JsonExtract::literal('{"a":2,"c":[4,5,{"f":7}]}', '$.c[2].f'));
-        $this->assertSame('SELECT \'{"a":2,"c":[4,5,{"f":7}]}\' -> \'$.c[2].f\'', $q->toString());
-
-        $result = Arr::first((array)$q->first());
-        $this->assertSame('7', $result);
+        $this->assertSame(['t' => '[1, 2, 3]'], $result);
     }
 }

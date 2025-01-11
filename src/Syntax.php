@@ -74,7 +74,7 @@ abstract class Syntax
      */
     protected function escape(string $string, string $escaping): string
     {
-        return str_replace($escaping, $escaping . $escaping, $string);
+        return str_replace($escaping, '\\' . $escaping, $string);
     }
 
     /**
