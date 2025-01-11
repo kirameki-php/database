@@ -232,6 +232,7 @@ abstract class Syntax
     /**
      * @param string $target
      * @param string $path
+     * @param string|null $as
      * @return string
      */
     abstract public function formatJsonExtract(string|Expression $target, string $path, ?string $as): string;

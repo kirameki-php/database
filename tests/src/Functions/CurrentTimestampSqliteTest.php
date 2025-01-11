@@ -15,7 +15,7 @@ class CurrentTimestampSqliteTest extends CurrentTimestampTestAbstract
 
         $q = $connection->query()->select(new CurrentTimestamp());
         $this->assertSame('SELECT DATETIME("now", "localtime")', $q->toString());
-        $result = Arr::first((array)$q->execute()->first());
+        $result = Arr::first((array)$q->first());
         $this->assertStringMatchesFormat('%d-%d-%d %d:%d:%d', $result);
     }
 
@@ -25,7 +25,7 @@ class CurrentTimestampSqliteTest extends CurrentTimestampTestAbstract
 
         $q = $connection->query()->select(new CurrentTimestamp(6));
         $this->assertSame('SELECT STRFTIME("%Y-%m-%d %H:%M:%f", DATETIME("now", "localtime"))', $q->toString());
-        $result = Arr::first((array)$q->execute()->first());
+        $result = Arr::first((array)$q->first());
         $this->assertStringMatchesFormat('%d-%d-%d %d:%d:%d.%d', $result);
     }
 }
