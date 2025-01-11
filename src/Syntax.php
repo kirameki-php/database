@@ -239,10 +239,5 @@ abstract class Syntax
     /**
      * @return string
      */
-    abstract public function formatRand(): string;
-
-    /**
-     * @return string
-     */
     abstract public function formatUuid(): string;
 }
