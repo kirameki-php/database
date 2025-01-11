@@ -26,16 +26,6 @@ final class JsonExtract implements Expression
     }
 
     /**
-     * @param string $target
-     * @param string $path
-     * @return self
-     */
-    public static function literal(string $target, string $path): self
-    {
-        return new self($target, $path);
-    }
-
-    /**
      * @param string|Expression $target
      * @param string $path
      * @param string|null $as
@@ -55,10 +45,6 @@ final class JsonExtract implements Expression
     #[Override]
     public function toValue(Syntax $syntax): string
     {
-        $target = $this->target instanceof Expression
-            ? $this->target->toValue($syntax)
-            : $syntax->asLiteral($this->target);
-
-        return $syntax->formatJsonExtract($target, $this->path, $this->as);
+        return $syntax->formatJsonExtract($this->target, $this->path, $this->as);
     }
 }
