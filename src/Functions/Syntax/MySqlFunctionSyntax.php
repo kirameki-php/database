@@ -2,7 +2,6 @@
 
 namespace Kirameki\Database\Functions\Syntax;
 
-use Kirameki\Database\Expression;
 use Override;
 
 trait MySqlFunctionSyntax
