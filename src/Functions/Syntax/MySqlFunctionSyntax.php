@@ -7,14 +7,7 @@ use Override;
 
 trait MySqlFunctionSyntax
 {
-    /**
-     * @inheritDoc
-     */
-    #[Override]
-    public function formatCoalesce(array $values): string
-    {
-        return "COALESCE({$this->asCsv($this->stringifyExpressions($values))})";
-    }
+    use SharedFunctionSyntax;
 
     /**
      * @inheritDoc
@@ -23,19 +16,6 @@ trait MySqlFunctionSyntax
     public function formatCurrentTimestamp(?int $size = null): string
     {
         return 'CURRENT_TIMESTAMP(' . ($size) . ')';
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function formatJsonExtract(string|Expression $target, string $path, ?string $as): string
-    {
-        return $this->concat([
-            $this->stringifyExpression($target),
-            '->',
-            $this->asLiteral($path),
-            $as !== null ? "AS {$this->asColumn($as)}" : null,
-        ]);
     }
 
     /**
