@@ -34,6 +34,13 @@ trait SqliteFunctionSyntax
     #[Override]
     public function formatUuid(): string
     {
-        return 'UUID()';
+        return 'PRINTF' . $this->asEnclosedCsv([
+            "'{%s-%s-%s-%s-%s}'",
+            'LOWER(HEX(RANDOMBLOB(4)))',
+            'LOWER(HEX(RANDOMBLOB(2)))',
+            'LOWER(HEX(RANDOMBLOB(2)))',
+            'LOWER(HEX(RANDOMBLOB(2)))',
+            'LOWER(HEX(RANDOMBLOB(6)))',
+        ]);
     }
 }

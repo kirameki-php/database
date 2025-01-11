@@ -245,5 +245,4 @@ abstract class Syntax
      * @return string
      */
     abstract public function formatUuid(): string;
-
 }
