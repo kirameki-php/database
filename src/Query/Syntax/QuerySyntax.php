@@ -26,7 +26,7 @@ use Kirameki\Database\Query\Statements\JoinDefinition;
 use Kirameki\Database\Query\Statements\Lock;
 use Kirameki\Database\Query\Statements\LockOption;
 use Kirameki\Database\Query\Statements\LockType;
-use Kirameki\Database\Query\Statements\LogicType;
+use Kirameki\Database\Query\Statements\Logic;
 use Kirameki\Database\Query\Statements\Operator;
 use Kirameki\Database\Query\Statements\Ordering;
 use Kirameki\Database\Query\Statements\QueryStatement;
@@ -522,7 +522,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatWherePart(ConditionsStatement $statement): string
     {
-        $glue = ' ' . LogicType::And->value . ' ';
+        $glue = ' ' . Logic::And->value . ' ';
         $conditions = $statement->where;
 
         return $conditions !== null
@@ -654,7 +654,7 @@ abstract class QuerySyntax extends Syntax
     protected function formatConditionForIn(ConditionDefinition $def): string
     {
         $column = $this->asColumn($def->column, true);
-        $operator = ($def->negated ? LogicType::Not->value : '') . $def->operator->value;
+        $operator = ($def->negated ? Logic::Not->value : '') . $def->operator->value;
         $value = $def->value;
 
         if (is_iterable($value)) {
@@ -683,10 +683,10 @@ abstract class QuerySyntax extends Syntax
     protected function formatConditionForBetween(ConditionDefinition $def): string
     {
         $column = $this->asColumn($def->column, true);
-        $operator = ($def->negated ? LogicType::Not->value : '') . $def->operator->value;
+        $operator = ($def->negated ? Logic::Not->value : '') . $def->operator->value;
         $min = $this->asPlaceholder($def->value[0]);
         $max = $this->asPlaceholder($def->value[1]);
-        $logic = LogicType::And->value;
+        $logic = Logic::And->value;
         return "{$column} {$operator} {$min} {$logic} {$max}";
     }
 
@@ -697,7 +697,7 @@ abstract class QuerySyntax extends Syntax
     protected function formatConditionForExists(ConditionDefinition $def): string
     {
         $column = $this->asColumn($def->column, true);
-        $operator = ($def->negated ? LogicType::Not->value : '') . $def->operator->value;
+        $operator = ($def->negated ? Logic::Not->value : '') . $def->operator->value;
         $value = $def->value;
 
         if ($value instanceof QueryStatement) {
@@ -716,7 +716,7 @@ abstract class QuerySyntax extends Syntax
     protected function formatConditionForLike(ConditionDefinition $def): string
     {
         $column = $this->asColumn($def->column, true);
-        $operator = ($def->negated ? LogicType::Not->value : '') . $def->operator->value;
+        $operator = ($def->negated ? Logic::Not->value : '') . $def->operator->value;
         $value = $def->value;
         return $this->formatConditionForOperator($column, $operator, $value);
     }
@@ -729,7 +729,7 @@ abstract class QuerySyntax extends Syntax
     {
         $column = $this->asColumn($def->column, true);
         $negated = $def->negated;
-        $logic = $negated ? LogicType::Or : LogicType::And;
+        $logic = $negated ? Logic::Or : Logic::And;
         $value = $def->value;
         if ($value instanceof Bounds) {
             return implode(' ', [
@@ -766,7 +766,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForNull(string $column, bool $negated): string
     {
-        return $column . ' IS ' . ($negated ? LogicType::Not->value : '') . 'NULL';
+        return $column . ' IS ' . ($negated ? Logic::Not->value : '') . 'NULL';
     }
 
     /**
@@ -795,7 +795,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatHavingPart(SelectStatement $statement): string
     {
-        $glue = ' ' . LogicType::And->value . ' ';
+        $glue = ' ' . Logic::And->value . ' ';
         $conditions = $statement->having;
 
         return $conditions !== null

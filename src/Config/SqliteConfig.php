@@ -2,7 +2,6 @@
 
 namespace Kirameki\Database\Config;
 
-use Kirameki\Database\Transaction\Support\IsolationLevel;
 use Override;
 
 class SqliteConfig implements ConnectionConfig

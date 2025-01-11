@@ -22,9 +22,9 @@ class ConditionDefinition
     public mixed $value = null;
 
     /**
-     * @var LogicType|null
+     * @var Logic|null
      */
-    public ?LogicType $nextLogic = null;
+    public ?Logic $nextLogic = null;
 
     /**
      * @var static|null
