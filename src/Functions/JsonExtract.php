@@ -6,14 +6,10 @@ use Kirameki\Database\Expression;
 use Kirameki\Database\Query\Expressions\Column;
 use Kirameki\Database\Syntax;
 use Override;
+use function str_starts_with;
 
 final class JsonExtract implements Expression
 {
-    /**
-     * @var string
-     */
-    public readonly string $path;
-
     /**
      * @param string $column
      * @param string $path
@@ -32,11 +28,10 @@ final class JsonExtract implements Expression
      */
     private function __construct(
         public readonly string|Expression $target,
-        string $path,
+        public readonly string $path,
         public readonly ?string $as = null,
     )
     {
-        $this->path = str_starts_with($path, '$.') ? $path : '$.' . $path;
     }
 
     /**

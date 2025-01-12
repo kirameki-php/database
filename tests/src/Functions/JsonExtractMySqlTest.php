@@ -19,7 +19,7 @@ class JsonExtractMySqlTest extends JsonExtractTestAbstract
             ->execute();
 
         $q = $connection->query()
-            ->select(JsonExtract::column('attrs', 'users[1]', 't'))
+            ->select(JsonExtract::column('attrs', '$.users[1]', 't'))
             ->from('test');
         $this->assertSame('SELECT `attrs` -> "$.users[1]" AS `t` FROM `test`', $q->toString());
 
@@ -37,7 +37,7 @@ class JsonExtractMySqlTest extends JsonExtractTestAbstract
             ->execute();
 
         $q = $connection->query()
-            ->select(JsonExtract::column('attrs', 'users', 't'))
+            ->select(JsonExtract::column('attrs', '$.users', 't'))
             ->from('test');
         $this->assertSame('SELECT `attrs` -> "$.users" AS `t` FROM `test`', $q->toString());
 
