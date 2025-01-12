@@ -38,11 +38,12 @@ class CreateTableBuilder extends SchemaBuilder
 
     /**
      * @param string|null $column
+     * @param int|null $startFrom
      * @return void
      */
-    public function id(?string $column = null): void
+    public function id(?string $column = null, ?int $startFrom = null): void
     {
-        $this->int($column ?? 'id')->autoIncrement()->primaryKey();
+        $this->int($column ?? 'id')->autoIncrement($startFrom)->primaryKey();
     }
 
     /**

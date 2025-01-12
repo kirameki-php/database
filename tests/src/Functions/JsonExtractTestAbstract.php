@@ -2,9 +2,7 @@
 
 namespace Tests\Kirameki\Database\Functions;
 
-use Kirameki\Collections\Utils\Arr;
 use Kirameki\Database\Connection;
-use Kirameki\Database\Functions\JsonExtract;
 use Tests\Kirameki\Database\Query\QueryTestCase;
 
 abstract class JsonExtractTestAbstract extends QueryTestCase

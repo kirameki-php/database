@@ -12,6 +12,7 @@ use Kirameki\Database\Events\TransactionCommitted;
 use Kirameki\Database\Events\TransactionRolledBack;
 use Kirameki\Database\Info\InfoHandler;
 use Kirameki\Database\Query\QueryHandler;
+use Kirameki\Database\Query\Statements\Tags;
 use Kirameki\Database\Schema\SchemaHandler;
 use Kirameki\Database\Transaction\Support\IsolationLevel;
 use Kirameki\Database\Transaction\TransactionContext;
@@ -29,6 +30,7 @@ class Connection
      * @param SchemaHandler|null $schemaHandler
      * @param InfoHandler|null $infoHandler
      * @param TransactionContext|null $transactionContext
+     * @param Randomizer|null $randomizer
      */
     public function __construct(
         public readonly string $name,
@@ -38,6 +40,7 @@ class Connection
         protected ?SchemaHandler $schemaHandler = null,
         protected ?InfoHandler $infoHandler = null,
         protected ?TransactionContext $transactionContext = null,
+        protected ?Tags $tags = null,
         protected ?Randomizer $randomizer = null,
     )
     {
@@ -102,7 +105,7 @@ class Connection
      */
     public function query(): QueryHandler
     {
-        return $this->queryHandler ??= new QueryHandler($this, $this->events);
+        return $this->queryHandler ??= new QueryHandler($this, $this->events, $this->getTags());
     }
 
     /**
@@ -113,9 +116,17 @@ class Connection
         return $this->schemaHandler ??= new SchemaHandler($this, $this->events, $this->randomizer);
     }
 
+    /**
+     * @return InfoHandler
+     */
     public function info(): InfoHandler
     {
         return $this->infoHandler ??= new InfoHandler($this);
+    }
+
+    protected function getTags(): Tags
+    {
+        return $this->tags ??= new Tags();
     }
 
     /**

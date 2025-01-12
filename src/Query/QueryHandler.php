@@ -119,7 +119,8 @@ readonly class QueryHandler
     public function explain(QueryStatement $statement): QueryResult
     {
         $this->preProcess($statement);
-        return $this->connection->adapter->explainQuery($statement);
+        $result = $this->connection->adapter->explainQuery($statement);
+        return $this->postProcess($result);
     }
 
     /**
@@ -165,5 +166,4 @@ readonly class QueryHandler
                 : $statement->tags = $this->tags;
         }
     }
-
 }
