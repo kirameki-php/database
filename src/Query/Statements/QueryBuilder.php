@@ -51,10 +51,10 @@ abstract class QueryBuilder
      * @param mixed $value
      * @return $this
      */
-    public function addTag(string $key, mixed $value): static
+    public function setTag(string $key, mixed $value): static
     {
         $tags = $this->statement->tags ??= new Tags();
-        $tags->add($key, $value);
+        $tags->set($key, $value);
         return $this;
     }
 

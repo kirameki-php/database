@@ -2,13 +2,14 @@
 
 namespace Kirameki\Database\Query\Statements;
 
+use Countable;
 use IteratorAggregate;
 use Traversable;
 
 /**
  * @implements IteratorAggregate<string, scalar>
  */
-final class Tags implements IteratorAggregate
+final class Tags implements IteratorAggregate, Countable
 {
     /**
      * @param array<string, scalar> $pairs
@@ -28,11 +29,19 @@ final class Tags implements IteratorAggregate
     }
 
     /**
+     * @return int
+     */
+    public function count(): int
+    {
+        return count($this->pairs);
+    }
+
+    /**
      * @param string $key
      * @param scalar $value
      * @return $this
      */
-    public function add(string $key, mixed $value): static
+    public function set(string $key, mixed $value): static
     {
         $this->pairs[$key] = $value;
         return $this;

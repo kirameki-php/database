@@ -7,6 +7,7 @@ use Kirameki\Database\Query\Statements\DeleteBuilder;
 use Kirameki\Database\Query\Statements\InsertBuilder;
 use Kirameki\Database\Query\Statements\RawStatement;
 use Kirameki\Database\Query\Statements\SelectBuilder;
+use Kirameki\Database\Query\Statements\Tags;
 use Kirameki\Database\Query\Statements\UpdateBuilder;
 use Kirameki\Database\Query\Statements\UpsertBuilder;
 use Kirameki\Event\Event;
@@ -72,9 +73,12 @@ class QueryHandlerTest extends QueryTestCase
         $this->listenToQueryExecuted();
 
         $statement = new RawStatement('SELECT * FROM users');
+        $connection->getTags()->set('a', 1);
+        $statement->tags = new Tags(['b' => 2]);
         $handler = $connection->query();
-        $result = (array) $handler->execute($statement)->first();
-        $this->assertSame(['id' => 1], $result);
+        $result = $handler->execute($statement);
+        $this->assertSame('SELECT * FROM users /* b=2,a=1 */', $result->template);
+        $this->assertSame(['id' => 1], (array) $result->first());
         $this->assertCount(1, $this->eventTriggers);
     }
 
@@ -92,9 +96,69 @@ class QueryHandlerTest extends QueryTestCase
         $this->listenToQueryExecuted();
 
         $handler = $connection->query();
-        $result = (array) $handler->executeRaw('SELECT * FROM users')->first();
-        $this->assertSame(['id' => 1], $result);
+        $connection->getTags()->set('a', 1);
+        $result = $handler->executeRaw('SELECT * FROM users');
+        $this->assertSame('SELECT * FROM users /* a=1 */', $result->template);
+        $this->assertSame([], $result->parameters);
+        $this->assertSame(['id' => 1], (array) $result->first());
         $this->assertCount(1, $this->eventTriggers);
+    }
+
+    public function test_executeRaw_with_parameters(): void
+    {
+        $connection = $this->sqliteConnection();
+        $table = $connection->schema()->createTable('users');
+        $table->id();
+        $table->execute();
+
+        $connection->query()->insertInto('users')
+            ->value(['id' => 1])
+            ->execute();
+
+        $handler = $connection->query();
+        $connection->getTags()->set('a', 1);
+        $result = $handler->executeRaw('SELECT * FROM users WHERE id = ?', [1]);
+        $this->assertSame('SELECT * FROM users WHERE id = ? /* a=1 */', $result->template);
+        $this->assertSame([1], $result->parameters);
+        $this->assertSame(['id' => 1], (array) $result->first());
+    }
+
+    public function test_executeRaw_with_casts(): void
+    {
+        $connection = $this->sqliteConnection();
+        $table = $connection->schema()->createTable('users');
+        $table->id();
+        $table->datetime('time');
+        $table->execute();
+
+        $connection->query()->insertInto('users')
+            ->value(['id' => 1, 'time' => '2021-01-01 00:00:00.000'])
+            ->execute();
+
+        $handler = $connection->query();
+        $result = $handler->executeRaw('SELECT * FROM users');
+        $this->assertSame('SELECT * FROM users', $result->template);
+        $this->assertSame([], $result->parameters);
+        $this->assertSame(['id' => 1, 'time' => '2021-01-01 00:00:00.000'], (array) $result->first());
+    }
+
+    public function test_executeRaw_with_tags(): void
+    {
+        $connection = $this->sqliteConnection();
+        $table = $connection->schema()->createTable('users');
+        $table->id();
+        $table->execute();
+
+        $connection->query()->insertInto('users')
+            ->value(['id' => 1])
+            ->execute();
+
+        $handler = $connection->query();
+        $connection->getTags()->set('a', 1);
+        $result = $handler->executeRaw('SELECT * FROM users', tags: new Tags(['b' => 2]));
+        $this->assertSame('SELECT * FROM users /* b=2,a=1 */', $result->template);
+        $this->assertSame([], $result->parameters);
+        $this->assertSame(['id' => 1], (array) $result->first());
     }
 
     public function test_cursor(): void
@@ -136,8 +200,8 @@ class QueryHandlerTest extends QueryTestCase
 
         $statement = new RawStatement('SELECT * FROM users');
         $handler = $connection->query();
-        $result = $handler->explain($statement)->all();
-        $this->assertSame((array) $result[0], [
+        $result = $handler->explain($statement);
+        $this->assertSame((array) $result->first(), [
             'id' => 1,
             'select_type' => 'SIMPLE',
             'table' => 'users',

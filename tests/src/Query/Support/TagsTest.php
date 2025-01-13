@@ -11,8 +11,8 @@ class TagsTest extends QueryTestCase
     public function test_add(): void
     {
         $tags = new Tags();
-        $tags->add('k1', 'v1');
-        $tags->add('k2', 'v2');
+        $tags->set('k1', 'v1');
+        $tags->set('k2', 'v2');
         $this->assertSame(['k1' => 'v1', 'k2' => 'v2'], iterator_to_array($tags));
     }
 

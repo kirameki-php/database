@@ -124,7 +124,10 @@ class Connection
         return $this->infoHandler ??= new InfoHandler($this);
     }
 
-    protected function getTags(): Tags
+    /**
+     * @return Tags
+     */
+    public function getTags(): Tags
     {
         return $this->tags ??= new Tags();
     }

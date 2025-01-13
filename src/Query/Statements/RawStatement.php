@@ -30,7 +30,7 @@ class RawStatement extends QueryStatement
     #[Override]
     public function generateTemplate(QuerySyntax $syntax): string
     {
-        return $this->template;
+        return $syntax->prepareTemplateForRaw($this);
     }
 
     /**
@@ -39,6 +39,6 @@ class RawStatement extends QueryStatement
     #[Override]
     public function generateParameters(QuerySyntax $syntax): array
     {
-        return Arr::values($this->parameters);
+        return $syntax->prepareParametersForRaw($this);
     }
 }

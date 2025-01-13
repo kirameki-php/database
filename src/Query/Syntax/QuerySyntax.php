@@ -30,6 +30,7 @@ use Kirameki\Database\Query\Statements\Logic;
 use Kirameki\Database\Query\Statements\Operator;
 use Kirameki\Database\Query\Statements\Ordering;
 use Kirameki\Database\Query\Statements\QueryStatement;
+use Kirameki\Database\Query\Statements\RawStatement;
 use Kirameki\Database\Query\Statements\SelectStatement;
 use Kirameki\Database\Query\Statements\Tags;
 use Kirameki\Database\Query\Statements\TagsFormat;
@@ -119,7 +120,10 @@ abstract class QuerySyntax extends Syntax
             $this->formatOffsetPart($statement->offset),
         ]);
 
-        return $this->formatCompoundPart($query, $statement->compound);
+        return $this->concat([
+            $this->formatCompoundPart($query, $statement->compound),
+            $this->formatTags($statement->tags),
+        ]);
     }
 
     /**
@@ -152,6 +156,7 @@ abstract class QuerySyntax extends Syntax
             'VALUES',
             $this->formatInsertDatasetValuesPart($statement->dataset, $columns),
             $this->formatReturningPart($statement->returning),
+            $this->formatTags($statement->tags),
         ]);
     }
 
@@ -180,6 +185,7 @@ abstract class QuerySyntax extends Syntax
             $this->formatUpsertOnConflictPart($statement->onConflict),
             $this->formatUpsertUpdateSet($columns),
             $this->formatReturningPart($statement->returning),
+            $this->formatTags($statement->tags),
         ]);
     }
 
@@ -207,6 +213,7 @@ abstract class QuerySyntax extends Syntax
             $this->formatUpdateAssignmentsPart($statement),
             $this->formatConditionsPart($statement),
             $this->formatReturningPart($statement->returning),
+            $this->formatTags($statement->tags),
         ]);
     }
 
@@ -240,6 +247,7 @@ abstract class QuerySyntax extends Syntax
             $this->asIdentifier($statement->table),
             $this->formatConditionsPart($statement),
             $this->formatReturningPart($statement->returning),
+            $this->formatTags($statement->tags),
         ]);
     }
 
@@ -252,6 +260,27 @@ abstract class QuerySyntax extends Syntax
         $parameters = [];
         $this->addParametersForWhere($parameters, $statement);
         return $this->stringifyParameters($parameters);
+    }
+
+    /**
+     * @param RawStatement $statement
+     * @return string
+     */
+    public function prepareTemplateForRaw(RawStatement $statement): string
+    {
+        return $this->concat([
+            $statement->template,
+            $this->formatTags($statement->tags),
+        ]);
+    }
+
+    /**
+     * @param RawStatement $statement
+     * @return list<mixed>
+     */
+    public function prepareParametersForRaw(RawStatement $statement): array
+    {
+        return $this->stringifyParameters($statement->parameters);
     }
 
     /**
@@ -923,7 +952,7 @@ abstract class QuerySyntax extends Syntax
      */
     public function formatTags(?Tags $tags): string
     {
-        if ($tags === null) {
+        if ($tags === null || count($tags) === 0) {
             return '';
         }
         return match($this->databaseConfig->tagsFormat) {
@@ -939,7 +968,7 @@ abstract class QuerySyntax extends Syntax
     protected function formatTagsForLogs(Tags $tags): string
     {
         $fields = Arr::map($tags, static fn(mixed $v, string $k) => rawurlencode($k) . '=' . rawurlencode((string) $v));
-        return ' ' . $this->asBlockComment(implode(',', $fields));
+        return $this->asBlockComment(implode(',', $fields));
     }
 
     /**
@@ -949,7 +978,7 @@ abstract class QuerySyntax extends Syntax
     protected function formatTagsForOpenTelemetry(Tags $tags): string
     {
         $fields = Arr::map($tags, static fn(mixed $v, string $k) => rawurlencode($k) . "='" . rawurlencode((string) $v) . "'");
-        return ' ' . $this->asBlockComment(implode(',', $fields));
+        return $this->asBlockComment(implode(',', $fields));
     }
 
     /**

@@ -155,6 +155,9 @@ class SqliteSchemaSyntax extends SchemaSyntax
         if ($type === 'json') {
             return 'JSON_TEXT CHECK (json_valid(' . $this->asIdentifier($name) . '))';
         }
+        if ($type === 'datetime') {
+            return 'DATETIME CHECK (datetime(' . $this->asIdentifier($name) . ') IS NOT NULL)';
+        }
         if ($type === 'binary') {
             return 'BLOB';
         }
