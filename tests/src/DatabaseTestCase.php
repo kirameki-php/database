@@ -21,6 +21,8 @@ class DatabaseTestCase extends TestCase
      */
     protected array $connections = [];
 
+    protected ?EventManager $eventManager = null;
+
     public function connection(string $driver): Connection
     {
         return $this->connections[$driver] ??= $this->createTempConnection($driver);
@@ -54,7 +56,7 @@ class DatabaseTestCase extends TestCase
         $adapter->createDatabase();
         $this->runAfterTearDown(static fn() => $adapter->dropDatabase());
 
-        return new Connection('temp', $adapter, new EventManager());
+        return new Connection('temp', $adapter, $this->getEventManager());
     }
 
     public function createMySqlAdapter(
@@ -77,5 +79,10 @@ class DatabaseTestCase extends TestCase
         $config ??= new DatabaseConfig([]);
         $connectionConfig ??= new SqliteConfig(':memory:');
         return new SqliteAdapter($config, $connectionConfig);
+    }
+
+    protected function getEventManager(): EventManager
+    {
+        return $this->eventManager ??= new EventManager();
     }
 }

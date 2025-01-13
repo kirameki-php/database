@@ -2,16 +2,27 @@
 
 namespace Tests\Kirameki\Database\Query;
 
+use Kirameki\Database\Events\QueryExecuted;
 use Kirameki\Database\Query\Statements\DeleteBuilder;
 use Kirameki\Database\Query\Statements\InsertBuilder;
 use Kirameki\Database\Query\Statements\RawStatement;
 use Kirameki\Database\Query\Statements\SelectBuilder;
 use Kirameki\Database\Query\Statements\UpdateBuilder;
 use Kirameki\Database\Query\Statements\UpsertBuilder;
-use function dump;
+use Kirameki\Event\Event;
 
 class QueryHandlerTest extends QueryTestCase
 {
+    /**
+     * @var array<int, Event>
+     */
+    protected array $eventTriggers = [];
+
+    protected function listenToQueryExecuted(): void
+    {
+        $this->getEventManager()->on(fn (QueryExecuted $e) => $this->eventTriggers[] = $e);
+    }
+
     public function test_select(): void
     {
         $handler = $this->sqliteConnection()->query();
@@ -58,10 +69,13 @@ class QueryHandlerTest extends QueryTestCase
             ->value(['id' => 1])
             ->execute();
 
+        $this->listenToQueryExecuted();
+
         $statement = new RawStatement('SELECT * FROM users');
         $handler = $connection->query();
         $result = (array) $handler->execute($statement)->first();
-        $this->assertEquals(['id' => 1], $result);
+        $this->assertSame(['id' => 1], $result);
+        $this->assertCount(1, $this->eventTriggers);
     }
 
     public function test_executeRaw(): void
@@ -75,9 +89,12 @@ class QueryHandlerTest extends QueryTestCase
             ->value(['id' => 1])
             ->execute();
 
+        $this->listenToQueryExecuted();
+
         $handler = $connection->query();
         $result = (array) $handler->executeRaw('SELECT * FROM users')->first();
-        $this->assertEquals(['id' => 1], $result);
+        $this->assertSame(['id' => 1], $result);
+        $this->assertCount(1, $this->eventTriggers);
     }
 
     public function test_cursor(): void
@@ -91,6 +108,8 @@ class QueryHandlerTest extends QueryTestCase
             ->values([['id' => 1], ['id' => 2]])
             ->execute();
 
+        $this->listenToQueryExecuted();
+
         $statement = new RawStatement('SELECT * FROM users');
         $handler = $connection->query();
         $cursor = $handler->cursor($statement);
@@ -98,7 +117,8 @@ class QueryHandlerTest extends QueryTestCase
         foreach ($cursor as $result) {
             $results[] = (array) $result;
         }
-        $this->assertEquals([['id' => 1], ['id' => 2]], $results);
+        $this->assertSame([['id' => 1], ['id' => 2]], $results);
+        $this->assertCount(1, $this->eventTriggers);
     }
 
     public function test_explain_mysql(): void
@@ -111,6 +131,8 @@ class QueryHandlerTest extends QueryTestCase
         $connection->query()->insertInto('users')
             ->value(['id' => 1])
             ->execute();
+
+        $this->listenToQueryExecuted();
 
         $statement = new RawStatement('SELECT * FROM users');
         $handler = $connection->query();
@@ -129,6 +151,7 @@ class QueryHandlerTest extends QueryTestCase
             'filtered' => 100.0,
             'Extra' => 'Using index',
         ]);
+        $this->assertCount(1, $this->eventTriggers);
     }
 
     public function test_explain_sqlite(): void
@@ -141,6 +164,8 @@ class QueryHandlerTest extends QueryTestCase
         $connection->query()->insertInto('users')
             ->value(['id' => 1])
             ->execute();
+
+        $this->listenToQueryExecuted();
 
         $statement = new RawStatement('SELECT * FROM users');
         $handler = $connection->query();
@@ -155,6 +180,7 @@ class QueryHandlerTest extends QueryTestCase
             'p5' => 0,
             'comment' => null,
         ]);
+        $this->assertCount(1, $this->eventTriggers);
     }
 
     public function test_toString(): void
