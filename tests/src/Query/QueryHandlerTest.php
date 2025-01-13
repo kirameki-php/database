@@ -250,8 +250,10 @@ class QueryHandlerTest extends QueryTestCase
     public function test_toString(): void
     {
         $connection = $this->sqliteConnection();
+        $connection->getTags()->set('a', 1);
         $statement = new RawStatement('SELECT * FROM users');
+        $statement->tags = new Tags(['b' => 2]);
         $result = $connection->query()->toString($statement);
-        $this->assertSame('SELECT * FROM users', $result);
+        $this->assertSame('SELECT * FROM users /* b=2 */', $result);
     }
 }

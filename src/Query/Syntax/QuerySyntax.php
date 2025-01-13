@@ -77,7 +77,7 @@ abstract class QuerySyntax extends Syntax
         $parameters = Arr::flatten($parameters);
         $remains = count($parameters);
 
-        $interpolated = (string) preg_replace_callback('/\?\??/', function($matches) use ($template, &$parameters, &$remains) {
+        return (string) preg_replace_callback('/\?\??/', function($matches) use ($template, &$parameters, &$remains) {
             if ($matches[0] === '??') {
                 return '??';
             }
@@ -97,8 +97,6 @@ abstract class QuerySyntax extends Syntax
                 'parameters' => $parameters,
             ]);
         }, $template);
-
-        return $interpolated . $this->formatTags($tags);
     }
 
     /**
