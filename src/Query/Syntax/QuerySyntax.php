@@ -939,7 +939,7 @@ abstract class QuerySyntax extends Syntax
     protected function formatTagsForLogs(Tags $tags): string
     {
         $fields = Arr::map($tags, static fn(mixed $v, string $k) => rawurlencode($k) . '=' . rawurlencode((string) $v));
-        return Arr::join($fields, ',', ' /* ', ' */');
+        return ' ' . $this->asBlockComment(implode(',', $fields));
     }
 
     /**
@@ -949,7 +949,7 @@ abstract class QuerySyntax extends Syntax
     protected function formatTagsForOpenTelemetry(Tags $tags): string
     {
         $fields = Arr::map($tags, static fn(mixed $v, string $k) => rawurlencode($k) . "='" . rawurlencode((string) $v) . "'");
-        return Arr::join($fields, ',', ' /*', '*/');
+        return ' ' . $this->asBlockComment(implode(',', $fields));
     }
 
     /**

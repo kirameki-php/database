@@ -153,6 +153,11 @@ abstract class Syntax
         throw new NotSupportedException('Unknown column type: ' . Value::getType($name));
     }
 
+    public function asBlockComment(string $comment): string
+    {
+        return "/* {$comment} */";
+    }
+
     /**
      * @param iterable<int, string|Expression> $values
      * @return list<string>
