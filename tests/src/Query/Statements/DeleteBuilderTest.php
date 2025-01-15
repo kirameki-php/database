@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Tests\Kirameki\Database\Query\Builders;
+namespace Tests\Kirameki\Database\Query\Statements;
 
 use Tests\Kirameki\Database\Query\QueryTestCase;
 

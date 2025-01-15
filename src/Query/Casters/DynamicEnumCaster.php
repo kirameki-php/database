@@ -6,12 +6,12 @@ use BackedEnum;
 use Override;
 
 /**
- * @template T of BackedEnum
+ * @template TEnumClass of BackedEnum
  */
-final class EnumCaster implements TypeCaster
+final class DynamicEnumCaster implements TypeCaster
 {
     /**
-     * @param class-string<T> $class
+     * @param class-string<TEnumClass> $class
      */
     public function __construct(
         public readonly string $class,
@@ -21,10 +21,14 @@ final class EnumCaster implements TypeCaster
 
     /**
      * @inheritDoc
+     * @return TEnumClass|null
      */
     #[Override]
-    public function cast(mixed $value): BackedEnum
+    public function cast(mixed $value): ?BackedEnum
     {
+        if ($value === null) {
+            return null;
+        }
         return $this->class::from($value);
     }
 }

@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Tests\Kirameki\Database\Query\Builders;
+namespace Tests\Kirameki\Database\Query\Statements;
 
 use Kirameki\Database\Query\Statements\Bounds;
 use Kirameki\Database\Query\Statements\ConditionBuilder;
@@ -8,7 +8,7 @@ use Kirameki\Database\Query\Statements\JoinBuilder;
 use Kirameki\Database\Query\Statements\LockOption;
 use Kirameki\Database\Raw;
 use Kirameki\Time\Time;
-use Tests\Kirameki\Database\Query\Builders\_Support\IntCastEnum;
+use Tests\Kirameki\Database\Query\Statements\_Support\IntCastEnum;
 use Tests\Kirameki\Database\Query\QueryTestCase;
 
 class SelectBuilderTest extends QueryTestCase
@@ -226,24 +226,6 @@ class SelectBuilderTest extends QueryTestCase
         $value = $result->single()->c;
         $this->assertInstanceOf(Time::class, $value);
         $this->assertSame('2020-01-01 00:00:00', $value->format('Y-m-d H:i:s'));
-    }
-
-    public function test_cast_to_time_from_int(): void
-    {
-        $casting = new Raw('0 as c');
-        $result = $this->selectBuilder()->columns($casting)->cast('c', Time::class)->execute();
-        $value = $result->single()->c;
-        $this->assertInstanceOf(Time::class, $value);
-        $this->assertSame('1970-01-01 00:00:00', $value->format('Y-m-d H:i:s'));
-    }
-
-    public function test_cast_to_time_from_float(): void
-    {
-        $casting = new Raw('CAST(0.0 AS FLOAT) as c');
-        $result = $this->selectBuilder()->columns($casting)->cast('c', Time::class)->execute();
-        $value = $result->single()->c;
-        $this->assertInstanceOf(Time::class, $value);
-        $this->assertSame('1970-01-01 00:00:00', $value->format('Y-m-d H:i:s'));
     }
 
     public function test_cast_to_int_backed_enum(): void

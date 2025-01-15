@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Kirameki\Database\Query\Builders\_Support;
+namespace Tests\Kirameki\Database\Query\Statements\_Support;
 
 enum IntCastEnum: int
 {

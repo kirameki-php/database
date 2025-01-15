@@ -4,8 +4,8 @@ namespace Kirameki\Database\Query;
 
 use BackedEnum;
 use Kirameki\Core\Exceptions\LogicException;
-use Kirameki\Database\Query\Casters\EnumCaster;
-use Kirameki\Database\Query\Casters\TimeCaster;
+use Kirameki\Database\Query\Casters\DynamicEnumCaster;
+use Kirameki\Database\Query\Casters\StringAsTime;
 use Kirameki\Database\Query\Casters\TypeCaster;
 use Kirameki\Time\Time;
 use function is_a;
@@ -37,8 +37,8 @@ class TypeCastRegistry
     protected function resolve(string $type): TypeCaster
     {
         return match (true) {
-            $type === Time::class => new TimeCaster(),
-            is_a($type, BackedEnum::class, true) => new EnumCaster($type),
+            $type === Time::class => new StringAsTime(),
+            is_a($type, BackedEnum::class, true) => new DynamicEnumCaster($type),
             is_a($type, TypeCaster::class, true) => new $type(),
             default => throw new LogicException("No caster found for type: $type", [
                 'type' => $type,

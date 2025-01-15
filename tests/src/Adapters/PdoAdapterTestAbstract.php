@@ -22,7 +22,7 @@ use Kirameki\Time\Time;
 use LogicException;
 use stdClass;
 use Tests\Kirameki\Database\DatabaseTestCase;
-use Tests\Kirameki\Database\Query\Builders\_Support\IntCastEnum;
+use Tests\Kirameki\Database\Query\Statements\_Support\IntCastEnum;
 use function rand;
 
 abstract class PdoAdapterTestAbstract extends DatabaseTestCase
