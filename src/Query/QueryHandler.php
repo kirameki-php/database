@@ -13,18 +13,18 @@ use Kirameki\Database\Query\Statements\SelectBuilder;
 use Kirameki\Database\Query\Statements\Tags;
 use Kirameki\Database\Query\Statements\UpdateBuilder;
 use Kirameki\Database\Query\Statements\UpsertBuilder;
-use Kirameki\Event\EventManager;
+use Kirameki\Event\EventEmitter;
 
 readonly class QueryHandler
 {
     /**
      * @param Connection $connection
-     * @param EventManager|null $events
+     * @param EventEmitter|null $events
      * @param Tags|null $tags
      */
     public function __construct(
         public Connection $connection,
-        protected ?EventManager $events = null,
+        protected ?EventEmitter $events = null,
         protected ?Tags $tags = null,
     )
     {

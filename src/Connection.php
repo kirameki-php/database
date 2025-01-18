@@ -16,7 +16,7 @@ use Kirameki\Database\Query\Statements\Tags;
 use Kirameki\Database\Schema\SchemaHandler;
 use Kirameki\Database\Transaction\Support\IsolationLevel;
 use Kirameki\Database\Transaction\TransactionContext;
-use Kirameki\Event\EventManager;
+use Kirameki\Event\EventEmitter;
 use Random\Randomizer;
 use Throwable;
 
@@ -25,17 +25,18 @@ class Connection
     /**
      * @param string $name
      * @param Adapter<covariant ConnectionConfig> $adapter
-     * @param EventManager|null $events
+     * @param EventEmitter|null $events
      * @param QueryHandler|null $queryHandler
      * @param SchemaHandler|null $schemaHandler
      * @param InfoHandler|null $infoHandler
      * @param TransactionContext|null $transactionContext
+     * @param Tags|null $tags
      * @param Randomizer|null $randomizer
      */
     public function __construct(
         public readonly string $name,
         public readonly Adapter $adapter,
-        protected readonly ?EventManager $events = null,
+        protected readonly ?EventEmitter $events = null,
         protected ?QueryHandler $queryHandler = null,
         protected ?SchemaHandler $schemaHandler = null,
         protected ?InfoHandler $infoHandler = null,

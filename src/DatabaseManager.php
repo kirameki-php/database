@@ -14,7 +14,7 @@ use Kirameki\Database\Config\DatabaseConfig;
 use Kirameki\Database\Config\MySqlConfig;
 use Kirameki\Database\Config\SqliteConfig;
 use Kirameki\Database\Query\TypeCastRegistry;
-use Kirameki\Event\EventManager;
+use Kirameki\Event\EventEmitter;
 use function array_key_exists;
 use function array_key_first;
 use function count;
@@ -38,12 +38,12 @@ class DatabaseManager
 
     /**
      * @param DatabaseConfig $config
+     * @param EventEmitter|null $events
      * @param TypeCastRegistry $casters
-     * @param EventManager|null $events
      */
     public function __construct(
         public readonly DatabaseConfig $config,
-        protected readonly ?EventManager $events = null,
+        protected readonly ?EventEmitter $events = null,
         protected ?TypeCastRegistry $casters = null,
     )
     {
