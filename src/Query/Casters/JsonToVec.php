@@ -10,7 +10,7 @@ use Kirameki\Core\Json;
 use function array_is_list;
 use function is_array;
 
-class JsonAsVec implements TypeCaster
+class JsonToVec implements TypeCaster
 {
     /**
      * @inheritDoc

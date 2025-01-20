@@ -8,7 +8,7 @@ use Override;
 use function is_null;
 use function is_string;
 
-final class StringAsTime implements TypeCaster
+final class StringToTime implements TypeCaster
 {
     /**
      * @inheritDoc

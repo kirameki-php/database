@@ -21,7 +21,10 @@ class QueryHandlerTest extends QueryTestCase
 
     protected function listenToQueryExecuted(): void
     {
-        $this->getEventManager()->on(QueryExecuted::class, fn (QueryExecuted $e) => $this->eventTriggers[] = $e);
+        $this->getEventManager()->on(
+            QueryExecuted::class,
+            fn (QueryExecuted $e) => $this->eventTriggers[] = $e
+        );
     }
 
     public function test_select(): void

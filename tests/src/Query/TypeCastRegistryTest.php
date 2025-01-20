@@ -5,8 +5,8 @@ namespace Tests\Kirameki\Database\Query;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Query\Casters\DynamicEnumCaster;
-use Kirameki\Database\Query\Casters\JsonAsVec;
-use Kirameki\Database\Query\Casters\StringAsTime;
+use Kirameki\Database\Query\Casters\JsonToVec;
+use Kirameki\Database\Query\Casters\StringToTime;
 use Kirameki\Database\Query\TypeCastRegistry;
 use Kirameki\Time\Time;
 use Tests\Kirameki\Database\Query\Casters\_Support\IntCastEnum;
@@ -24,14 +24,14 @@ class TypeCastRegistryTest extends QueryTestCase
     {
         $registry = new TypeCastRegistry();
         $caster = $registry->getCaster(Time::class);
-        $this->assertInstanceOf(StringAsTime::class, $caster);
+        $this->assertInstanceOf(StringToTime::class, $caster);
     }
 
     public function test_getCaster_with_TypeCaster_class(): void
     {
         $registry = new TypeCastRegistry();
-        $caster = $registry->getCaster(JsonAsVec::class);
-        $this->assertInstanceOf(JsonAsVec::class, $caster);
+        $caster = $registry->getCaster(JsonToVec::class);
+        $this->assertInstanceOf(JsonToVec::class, $caster);
     }
 
     public function test_getCaster_with_fail_on_invalid_class(): void
