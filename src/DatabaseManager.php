@@ -5,6 +5,7 @@ namespace Kirameki\Database;
 use Closure;
 use Kirameki\Collections\Map;
 use Kirameki\Collections\Utils\Arr;
+use Kirameki\Core\Exceptions\InvalidConfigException;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Adapters\Adapter;
 use Kirameki\Database\Adapters\MySqlAdapter;
@@ -34,7 +35,11 @@ class DatabaseManager
     /**
      * @var string
      */
-    public readonly string $default;
+    public string $default {
+        get {
+            return $this->default ??= $this->resolveDefaultConnectionName();
+        }
+    }
 
     /**
      * @param DatabaseConfig $config
@@ -47,7 +52,11 @@ class DatabaseManager
         protected ?TypeCastRegistry $casters = null,
     )
     {
-        $this->default = $this->resolveDefaultConnectionName();
+        if ($config->connections === []) {
+            throw new InvalidConfigException('At least one connection configuration is required.', [
+                'config' => $config,
+            ]);
+        }
     }
 
     /**
@@ -69,21 +78,35 @@ class DatabaseManager
 
     /**
      * @param string $name
-     * @return $this
+     * @return bool
      */
-    public function purge(string $name): static
+    public function purge(string $name): bool
     {
-        unset($this->connections[$name]);
-        return $this;
+        $connection = $this->connections[$name] ?? null;
+        if ($connection !== null) {
+            $connection->disconnect();
+            unset($this->connections[$name]);
+            return true;
+        }
+
+        if (!array_key_exists($name, $this->config->connections)) {
+            throw new LogicException("Failed to purge connection: \"{$name}\". No such name.", [
+                'name' => $name,
+                'config' => $this->config,
+            ]);
+        }
+
+        return false;
     }
 
     /**
-     * @return $this
+     * @return Map<string, Connection>
      */
-    public function purgeAll(): static
+    public function purgeAll(): Map
     {
-        $this->connections = [];
-        return $this;
+        $connections = $this->resolvedConnections();
+        $connections->keys()->each($this->purge(...));
+        return $connections;
     }
 
     /**
@@ -115,16 +138,30 @@ class DatabaseManager
     {
         $default = $this->config->default;
         if ($default !== null) {
-            return $default;
+            return $this->ensureDefaultExists($default);
         }
+
         $connections = $this->config->connections;
         $primaries = Arr::filter($connections, static fn(ConnectionConfig $c) => !$c->isReadOnly());
         if (count($primaries) === 1) {
-            return array_key_first($primaries);
+            $default = array_key_first($primaries);
+            return $this->ensureDefaultExists($default);
         }
-        throw new LogicException('No default connection could be resolved', [
+
+        throw new InvalidConfigException('Default connection could not be resolved automatically.', [
             'config' => $this->config,
         ]);
+    }
+
+    protected function ensureDefaultExists(string $default): string
+    {
+        if (!array_key_exists($default, $this->config->connections)) {
+            throw new InvalidConfigException("Default connection: \"{$default}\" does not exist.", [
+                'config' => $this->config,
+                'default' => $default,
+            ]);
+        }
+        return $default;
     }
 
     /**
@@ -141,7 +178,7 @@ class DatabaseManager
      */
     public function getConfig(string $name): ConnectionConfig
     {
-        return $this->config->connections[$name] ?? throw new LogicException("Database: {$name} does not exist", [
+        return $this->config->connections[$name] ?? throw new LogicException("Failed to get config for connection: \"{$name}\". No such name.", [
             'name' => $name,
             'config' => $this->config,
         ]);
@@ -154,7 +191,7 @@ class DatabaseManager
      */
     public function addAdapter(string $name, Closure $deferred): static
     {
-        $this->adapters[$name] = $deferred(...);
+        $this->adapters[$name] = $deferred;
         return $this;
     }
 
