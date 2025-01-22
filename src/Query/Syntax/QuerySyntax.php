@@ -15,6 +15,7 @@ use Kirameki\Database\Info\Statements\ListIndexesStatement;
 use Kirameki\Database\Info\Statements\ListTablesStatement;
 use Kirameki\Database\Info\Statements\TableExistsStatement;
 use Kirameki\Database\Query\Expressions\Aggregate;
+use Kirameki\Database\Query\Expressions\CastType;
 use Kirameki\Database\Query\Statements\Bounds;
 use Kirameki\Database\Query\Statements\CompoundDefinition;
 use Kirameki\Database\Query\Statements\ConditionDefinition;
@@ -904,16 +905,20 @@ abstract class QuerySyntax extends Syntax
      */
     public function formatAggregate(Aggregate $aggregate): string
     {
-        $function = $aggregate->function;
-        if ($aggregate->column !== null) {
-            $function .= '(' . $this->asColumn($aggregate->column) . ')';
-        }
-
         return $this->concat([
-            $function,
+            $this->formatAggregateFunction($aggregate),
             $this->formatWindowFunction($aggregate),
             $aggregate->as !== null ? 'AS ' . $this->asIdentifier($aggregate->as) : null,
         ]);
+    }
+
+    /**
+     * @param Aggregate $aggregate
+     * @return string
+     */
+    public function formatAggregateFunction(Aggregate $aggregate): string
+    {
+        return $aggregate::$function . '(' . $this->asColumn($aggregate->column) . ')';
     }
 
     /**

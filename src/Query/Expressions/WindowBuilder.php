@@ -8,13 +8,13 @@ use Kirameki\Database\Query\Statements\SortOrder;
 use function array_is_list;
 use function array_values;
 
-readonly class WindowBuilder
+class WindowBuilder
 {
     /**
      * @param Aggregate $aggregate
      */
     public function __construct(
-        protected Aggregate $aggregate,
+        protected readonly Aggregate $aggregate,
     )
     {
         $aggregate->isWindowFunction = true;

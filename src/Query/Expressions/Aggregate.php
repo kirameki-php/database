@@ -12,69 +12,40 @@ use Override;
  * @consistent-constructor
  * @implements Expression<QuerySyntax>
  */
-class Aggregate implements Expression
+abstract class Aggregate implements Expression
 {
+    public static string $function;
+
+    protected static string $defaultAlias;
+
     /**
      * @param string $column
-     * @param string $as
+     * @param string|null $as
      * @return static
      */
-    public static function min(string $column, string $as = 'min'): static
+    public static function column(string $column, ?string $as = null): static
     {
-        return new static('MIN', $column, $as);
+        return new static($column, $as ?? static::$defaultAlias);
+    }
+
+    /**
+     * @param string|null $as
+     * @return static
+     */
+    public static function all(?string $as = null): static
+    {
+        return static::column('*', $as);
     }
 
     /**
      * @param string $column
-     * @param string $as
-     * @return static
-     */
-    public static function max(string $column, string $as = 'max'): static
-    {
-        return new static('MAX', $column, $as);
-    }
-
-    /**
-     * @param string $column
-     * @param string $as
-     * @return static
-     */
-    public static function count(string $column, string $as = 'count'): static
-    {
-        return new static('COUNT', $column, $as);
-    }
-
-    /**
-     * @param string $column
-     * @param string $as
-     * @return static
-     */
-    public static function avg(string $column, string $as = 'avg'): static
-    {
-        return new static('AVG', $column, $as);
-    }
-
-    /**
-     * @param string $column
-     * @param string $as
-     * @return static
-     */
-    public static function sum(string $column, string $as = 'sum'): static
-    {
-        return new static('SUM', $column, $as);
-    }
-
-    /**
-     * @param string $function
-     * @param string|null $column
      * @param string|null $as
      * @param bool $isWindowFunction
      * @param list<string>|null $partitionBy
      * @param array<string, Ordering>|null $orderBy
      */
     public function __construct(
-        public readonly string $function,
-        public readonly ?string $column = null,
+        public readonly string $column,
         public readonly ?string $as = null,
         public bool $isWindowFunction = false,
         public ?array $partitionBy = null,
@@ -83,6 +54,9 @@ class Aggregate implements Expression
     {
     }
 
+    /**
+     * @return WindowBuilder
+     */
     public function over(): WindowBuilder
     {
         return new WindowBuilder($this);

@@ -74,6 +74,14 @@ This library uses `DATETIME('now', 'localtime')` for SQLite to get the time in t
 still not perfect because the system timezone is not always the same as the PHP's and `date_default_timezone_set()` 
 does not affect the timezone for SQLite.
 
+## SUM() function
+
+MySQL will return the sum as DECIMAL represented as string. This is because SUM can be larger than PHP's integer limit.
+In SQLite the sum is returned as an integer/float and will return an error if integer overflows.
+
+> [!NOTE]
+> On a related note, SUM will return NULL if no rows are found. This is the same for all databases.
+
 ## License
 
 This is an open-sourced software licensed under the [MIT License](LICENSE).
