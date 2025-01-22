@@ -7,6 +7,11 @@ use Generator;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Expression;
 use Kirameki\Database\Query\Expressions\Aggregate;
+use Kirameki\Database\Query\Expressions\Avg;
+use Kirameki\Database\Query\Expressions\Count;
+use Kirameki\Database\Query\Expressions\Max;
+use Kirameki\Database\Query\Expressions\Min;
+use Kirameki\Database\Query\Expressions\Sum;
 use Kirameki\Database\Query\Pagination\Cursor;
 use Kirameki\Database\Query\Pagination\CursorPaginator;
 use Kirameki\Database\Query\Pagination\OffsetPaginator;
@@ -504,15 +509,9 @@ class SelectBuilder extends ConditionsBuilder
             ]);
         }
 
-        $results = $this->copy()
-            ->addToSelect(new Aggregate('count', '*', 'total'))
-            ->execute();
-
-        if ($results->isEmpty()) {
-            return 0;
-        }
-
-        return (int) $results->first()['total'];
+        return $this->copy()
+            ->addToSelect(Count::all('total'))
+            ->valueOrNull('total') ?? 0;
     }
 
     /**
@@ -534,7 +533,7 @@ class SelectBuilder extends ConditionsBuilder
         }
 
         $results = $this->copy()
-            ->addToSelect(new Aggregate('count', '*', 'total'))
+            ->addToSelect(Count::all('total'))
             ->execute();
 
         // when GROUP BY is defined, return in [columnValue => count] format
@@ -554,7 +553,7 @@ class SelectBuilder extends ConditionsBuilder
      */
     public function sum(string $column): float|int
     {
-        return $this->aggregate($column, 'SUM');
+        return $this->copy()->columns(Sum::all($column))->value(Sum::$defaultAlias);
     }
 
     /**
@@ -563,7 +562,7 @@ class SelectBuilder extends ConditionsBuilder
      */
     public function avg(string $column): float|int
     {
-        return $this->aggregate($column, 'AVG');
+        return $this->copy()->columns(Avg::all($column))->value(Avg::$defaultAlias);
     }
 
     /**
@@ -572,7 +571,7 @@ class SelectBuilder extends ConditionsBuilder
      */
     public function min(string $column): int
     {
-        return $this->aggregate($column, 'MIN');
+        return $this->copy()->columns(Min::all($column))->value(Min::$defaultAlias);
     }
 
     /**
@@ -581,19 +580,7 @@ class SelectBuilder extends ConditionsBuilder
      */
     public function max(string $column): int
     {
-        return $this->aggregate($column, 'MAX');
-    }
-
-    /**
-     * @param string $function
-     * @param string $column
-     * @return int
-     */
-    protected function aggregate(string $function, string $column): int
-    {
-        $alias = 'aggregate';
-        $aggregate = new Aggregate($function, $column, $alias);
-        return $this->copy()->columns($aggregate)->execute()->first()[$alias];
+        return $this->copy()->columns(Max::all($column))->value(Max::$defaultAlias);
     }
 
     #endregion execution -----------------------------------------------------------------------------------------------
