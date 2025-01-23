@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Kirameki\Database\Transaction\Support;
+namespace Kirameki\Database\Transaction;
 
 enum IsolationLevel: string
 {

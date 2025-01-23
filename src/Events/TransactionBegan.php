@@ -3,7 +3,7 @@
 namespace Kirameki\Database\Events;
 
 use Kirameki\Database\Connection;
-use Kirameki\Database\Transaction\Support\IsolationLevel;
+use Kirameki\Database\Transaction\IsolationLevel;
 
 class TransactionBegan extends DatabaseEvent
 {

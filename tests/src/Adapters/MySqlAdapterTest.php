@@ -7,10 +7,9 @@ use Kirameki\Database\Adapters\MySqlAdapter;
 use Kirameki\Database\Config\DatabaseConfig;
 use Kirameki\Database\Config\MySqlConfig;
 use Kirameki\Database\Exceptions\QueryException;
-use Kirameki\Database\Exceptions\SchemaException;
 use Kirameki\Database\Query\Statements\RawStatement;
 use Kirameki\Database\Schema\Statements\RawStatement as SchemaRawStatement;
-use Kirameki\Database\Transaction\Support\IsolationLevel;
+use Kirameki\Database\Transaction\IsolationLevel;
 use Override;
 use PDOException;
 

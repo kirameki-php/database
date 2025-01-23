@@ -14,7 +14,7 @@ use Kirameki\Database\Info\InfoHandler;
 use Kirameki\Database\Query\QueryHandler;
 use Kirameki\Database\Query\Statements\Tags;
 use Kirameki\Database\Schema\SchemaHandler;
-use Kirameki\Database\Transaction\Support\IsolationLevel;
+use Kirameki\Database\Transaction\IsolationLevel;
 use Kirameki\Database\Transaction\TransactionContext;
 use Kirameki\Event\EventEmitter;
 use Random\Randomizer;
@@ -52,7 +52,8 @@ class Connection
      */
     public function reconnect(): static
     {
-        return $this->disconnect()->connect();
+        $this->disconnectIfConnected();
+        return $this->connect();
     }
 
     /**
@@ -61,7 +62,7 @@ class Connection
     public function connect(): static
     {
         if ($this->isConnected()) {
-            throw new LogicException("Connection: {$this->name} is already established.", [
+            throw new LogicException("Connection: \"{$this->name}\" is already established.", [
                 'name' => $this->name,
             ]);
         }
@@ -89,8 +90,26 @@ class Connection
      */
     public function disconnect(): static
     {
+        if (!$this->isConnected()) {
+            throw new LogicException("Connection: \"{$this->name}\" is not established.", [
+                'name' => $this->name,
+            ]);
+        }
+
         $this->adapter->disconnect();
         return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function disconnectIfConnected(): bool
+    {
+        if ($this->isConnected()) {
+            $this->disconnect();
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -135,7 +154,7 @@ class Connection
 
     /**
      * @template TReturn
-     * @param Closure(): TReturn $callback
+     * @param Closure(TransactionContext): TReturn $callback
      * @param IsolationLevel|null $level
      * @return TReturn
      */
@@ -143,13 +162,14 @@ class Connection
     {
         // Already in transaction so just execute callback
         if ($this->inTransaction()) {
-            $this->getTransactionContext()->ensureValidIsolationLevel($level);
-            return $callback();
+            $txContext = $this->getTransactionContext();
+            $txContext->ensureValidIsolationLevel($level);
+            return $callback($txContext);
         }
 
         try {
             $this->handleBegin($level);
-            $result = $callback();
+            $result = $callback($this->getTransactionContext());
             $this->handleCommit();
             return $result;
         }

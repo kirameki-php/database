@@ -7,7 +7,7 @@ use Kirameki\Database\Config\SqliteConfig;
 use Kirameki\Database\Exceptions\QueryException;
 use Kirameki\Database\Query\Statements\RawStatement;
 use Kirameki\Database\Schema\Statements\RawStatement as SchemaRawStatement;
-use Kirameki\Database\Transaction\Support\IsolationLevel;
+use Kirameki\Database\Transaction\IsolationLevel;
 use Override;
 
 class SqliteAdapterTest extends PdoAdapterTestAbstract

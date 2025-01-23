@@ -13,7 +13,7 @@ use Kirameki\Database\Query\Syntax\MySqlQuerySyntax;
 use Kirameki\Database\Schema\Statements\RawStatement;
 use Kirameki\Database\Schema\Syntax\MySqlSchemaSyntax;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
-use Kirameki\Database\Transaction\Support\IsolationLevel;
+use Kirameki\Database\Transaction\IsolationLevel;
 use Override;
 use PDO;
 use function array_filter;

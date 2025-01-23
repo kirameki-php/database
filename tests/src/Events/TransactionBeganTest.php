@@ -3,7 +3,7 @@
 namespace Tests\Kirameki\Database\Events;
 
 use Kirameki\Database\Events\TransactionBegan;
-use Kirameki\Database\Transaction\Support\IsolationLevel;
+use Kirameki\Database\Transaction\IsolationLevel;
 use Tests\Kirameki\Database\DatabaseTestCase;
 
 class TransactionBeganTest extends DatabaseTestCase

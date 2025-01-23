@@ -9,7 +9,7 @@ use Kirameki\Database\Exceptions\DatabaseNotFoundException;
 use Kirameki\Database\Exceptions\DropProtectionException;
 use Kirameki\Database\Query\Syntax\SqliteQuerySyntax;
 use Kirameki\Database\Schema\Syntax\SqliteSchemaSyntax;
-use Kirameki\Database\Transaction\Support\IsolationLevel;
+use Kirameki\Database\Transaction\IsolationLevel;
 use Override;
 use PDO;
 use function file_exists;

@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Config;
 
-use Kirameki\Database\Transaction\Support\IsolationLevel;
+use Kirameki\Database\Transaction\IsolationLevel;
 use Override;
 
 class MySqlConfig implements ConnectionConfig

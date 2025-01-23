@@ -84,7 +84,7 @@ class DatabaseManager
     {
         $connection = $this->connections[$name] ?? null;
         if ($connection !== null) {
-            $connection->disconnect();
+            $connection->disconnectIfConnected();
             unset($this->connections[$name]);
             return true;
         }

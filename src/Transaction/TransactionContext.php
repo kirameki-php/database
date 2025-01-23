@@ -5,7 +5,6 @@ namespace Kirameki\Database\Transaction;
 use Closure;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Connection;
-use Kirameki\Database\Transaction\Support\IsolationLevel;
 
 class TransactionContext
 {
