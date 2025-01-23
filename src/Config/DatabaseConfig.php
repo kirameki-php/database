@@ -8,20 +8,21 @@ class DatabaseConfig
 {
     /**
      * @param array<string, ConnectionConfig> $connections
+     * The connection configurations.
      * @param string|null $default
+     * The default connection name.
      * @param MigrationConfig|null $migration
+     * Configurations for migrations.
      * @param bool $dropProtection
+     * Prevents destructive operations (DROP DATABASE, DROP TABLE, DROP COLUMN, TRUNCATE).
      * @param TagsFormat $tagsFormat
+     * The format for tags used in queries.
      */
     public function __construct(
         public array $connections,
-        // The default connection name.
         public ?string $default = null,
-        // Prevents destructive operations (DROP DATABASE, DROP TABLE, DROP COLUMN, TRUNCATE).
         public bool $dropProtection = false,
-        // The format for tags used in queries.
         public TagsFormat $tagsFormat = TagsFormat::Log,
-        // Configurations for migrations.
         public ?MigrationConfig $migration = null,
     )
     {
