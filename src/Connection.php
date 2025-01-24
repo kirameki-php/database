@@ -28,7 +28,7 @@ use Throwable;
 class Connection
 {
     /**
-     * @var array<class-string<Event>, EventHandler<Event>>
+     * @var array<class-string<Event>, EventHandler<Event>|null>
      */
     protected array $eventHandlers = [];
 
@@ -193,19 +193,20 @@ class Connection
     {
         // Already in transaction so just execute callback
         if ($this->inTransaction()) {
-            $txContext = $this->getTransactionContext();
-            $txContext->ensureValidIsolationLevel($level);
-            return $callback($txContext);
+            $context = $this->getTransactionContext();
+            $context->ensureValidIsolationLevel($level);
+            return $callback($context);
         }
 
+        $context = $this->initTransactionContext($level);
         try {
-            $this->handleBegin($level);
-            $result = $callback($this->getTransactionContext());
-            $this->handleCommit();
+            $this->handleBegin($context);
+            $result = $callback($context);
+            $this->handleCommit($context);
             return $result;
         }
         catch (Throwable $throwable) {
-            $this->rollbackAndThrow($throwable);
+            $this->rollbackAndThrow($context, $throwable);
         }
         finally {
             $this->cleanUpTransaction();
@@ -230,40 +231,47 @@ class Connection
 
     /**
      * @param IsolationLevel|null $level
-     * @return void
+     * @return TransactionContext
      */
-    protected function handleBegin(?IsolationLevel $level): void
+    protected function initTransactionContext(?IsolationLevel $level): TransactionContext
     {
-        $this->connectIfNotConnected();
-        $this->adapter->beginTransaction($level);
-        $context = $this->transactionContext = new TransactionContext($this, $level);
-        $this->events?->emit(new TransactionBegan($context));
+        return $this->transactionContext = new TransactionContext($this, $level);
     }
 
     /**
+     * @param TransactionContext $context
      * @return void
      */
-    protected function handleCommit(): void
+    protected function handleBegin(TransactionContext $context): void
     {
-        $events = $this->events;
-        $context = $this->getTransactionContext();
+        $this->connectIfNotConnected();
+        $this->adapter->beginTransaction($context->isolationLevel);
+        $this->emitEvent(new TransactionBegan($context));
+    }
 
+    /**
+     * @param TransactionContext $context
+     * @return void
+     */
+    protected function handleCommit(TransactionContext $context): void
+    {
         $context->runBeforeCommitCallbacks();
-        $events?->emit(new TransactionCommitting($context));
+        $this->emitEvent(new TransactionCommitting($context));
         $this->adapter->commit();
-        $events?->emit(new TransactionCommitted($this));
+        $this->emitEvent(new TransactionCommitted($this));
         $context->runAfterCommitCallbacks();
     }
 
     /**
+     * @param TransactionContext $context
      * @param Throwable $throwable
      * @return never
      */
-    protected function rollbackAndThrow(Throwable $throwable): never
+    protected function rollbackAndThrow(TransactionContext $context, Throwable $throwable): never
     {
         $this->adapter->rollback();
-        $this->events?->emit(new TransactionRolledBack($this, $throwable));
-        $this->getTransactionContext()->runAfterRollbackCallbacks();
+        $this->emitEvent(new TransactionRolledBack($this, $throwable));
+        $context->runAfterRollbackCallbacks();
         throw $throwable;
     }
 
@@ -292,5 +300,15 @@ class Connection
     {
         /** @var EventHandler<TEvent> */
         return $this->eventHandlers[$class] ??= new EventHandler($class);
+    }
+
+    /**
+     * @param Event $event
+     * @return void
+     */
+    protected function emitEvent(Event $event): void
+    {
+        ($this->eventHandlers[$event::class] ?? null)?->emit($event);
+        $this->events?->emit($event);
     }
 }

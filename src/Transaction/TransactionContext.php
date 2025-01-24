@@ -8,7 +8,14 @@ use Kirameki\Database\Connection;
 
 class TransactionContext implements TransactionInfo
 {
+    /**
+     * @var Connection
+     */
     public protected(set) Connection $connection;
+
+    /**
+     * @var ?IsolationLevel
+     */
     public protected(set) ?IsolationLevel $isolationLevel;
 
     /**
