@@ -36,9 +36,7 @@ class DatabaseManager
      * @var string
      */
     public string $default {
-        get {
-            return $this->default ??= $this->resolveDefaultConnectionName();
-        }
+        get => $this->default ??= $this->resolveDefaultConnectionName();
     }
 
     /**

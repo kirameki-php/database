@@ -4,11 +4,13 @@ namespace Kirameki\Database;
 
 use Closure;
 use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Core\Exceptions\UnreachableException;
 use Kirameki\Database\Adapters\Adapter;
 use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Events\ConnectionEstablished;
 use Kirameki\Database\Events\TransactionBegan;
 use Kirameki\Database\Events\TransactionCommitted;
+use Kirameki\Database\Events\TransactionCommitting;
 use Kirameki\Database\Events\TransactionRolledBack;
 use Kirameki\Database\Info\InfoHandler;
 use Kirameki\Database\Query\QueryHandler;
@@ -16,12 +18,41 @@ use Kirameki\Database\Query\Statements\Tags;
 use Kirameki\Database\Schema\SchemaHandler;
 use Kirameki\Database\Transaction\IsolationLevel;
 use Kirameki\Database\Transaction\TransactionContext;
+use Kirameki\Database\Transaction\TransactionInfo;
+use Kirameki\Event\Event;
 use Kirameki\Event\EventEmitter;
+use Kirameki\Event\EventHandler;
 use Random\Randomizer;
 use Throwable;
 
 class Connection
 {
+    /**
+     * @var array<class-string<Event>, EventHandler<Event>>
+     */
+    protected array $eventHandlers = [];
+
+    /**
+     * @var EventHandler<TransactionCommitting>
+     */
+    protected EventHandler $beforeCommit {
+        get => $this->getEventHandler(TransactionCommitting::class);
+    }
+
+    /**
+     * @var EventHandler<TransactionCommitted>
+     */
+    protected EventHandler $afterCommit {
+        get => $this->getEventHandler(TransactionCommitted::class);
+    }
+
+    /**
+     * @var EventHandler<TransactionRolledBack>
+     */
+    protected EventHandler $afterRollback {
+        get => $this->getEventHandler(TransactionRolledBack::class);
+    }
+
     /**
      * @param string $name
      * @param Adapter<covariant ConnectionConfig> $adapter
@@ -154,7 +185,7 @@ class Connection
 
     /**
      * @template TReturn
-     * @param Closure(TransactionContext): TReturn $callback
+     * @param Closure(TransactionInfo): TReturn $callback
      * @param IsolationLevel|null $level
      * @return TReturn
      */
@@ -181,13 +212,20 @@ class Connection
         }
     }
 
+    /**
+     * @return TransactionInfo
+     */
+    public function tryGetTransactionInfo(): ?TransactionInfo
+    {
+        return $this->transactionContext;
+    }
+
+    /**
+     * @return TransactionContext
+     */
     protected function getTransactionContext(): TransactionContext
     {
-        $context = $this->transactionContext;
-        if ($context === null) {
-            throw new LogicException('No transaction in progress.');
-        }
-        return $context;
+        return $this->transactionContext ?? throw new UnreachableException();
     }
 
     /**
@@ -198,8 +236,8 @@ class Connection
     {
         $this->connectIfNotConnected();
         $this->adapter->beginTransaction($level);
-        $this->events?->emit(new TransactionBegan($this, $level));
-        $this->transactionContext = new TransactionContext($this, $level);
+        $context = $this->transactionContext = new TransactionContext($this, $level);
+        $this->events?->emit(new TransactionBegan($context));
     }
 
     /**
@@ -207,10 +245,13 @@ class Connection
      */
     protected function handleCommit(): void
     {
+        $events = $this->events;
         $context = $this->getTransactionContext();
+
         $context->runBeforeCommitCallbacks();
+        $events?->emit(new TransactionCommitting($context));
         $this->adapter->commit();
-        $this->events?->emit(new TransactionCommitted($this));
+        $events?->emit(new TransactionCommitted($this));
         $context->runAfterCommitCallbacks();
     }
 
@@ -243,32 +284,13 @@ class Connection
     }
 
     /**
-     * @param Closure(): mixed $callback
-     * @return $this
+     * @template TEvent of Event
+     * @param class-string<TEvent> $class
+     * @return EventHandler<TEvent>
      */
-    public function beforeCommit(Closure $callback): static
+    protected function getEventHandler(string $class): EventHandler
     {
-        $this->getTransactionContext()->beforeCommit($callback);
-        return $this;
-    }
-
-    /**
-     * @param Closure(): mixed $callback
-     * @return $this
-     */
-    public function afterCommit(Closure $callback): static
-    {
-        $this->getTransactionContext()->afterCommit($callback);
-        return $this;
-    }
-
-    /**
-     * @param Closure(): mixed $callback
-     * @return $this
-     */
-    public function afterRollback(Closure $callback): static
-    {
-        $this->getTransactionContext()->afterRollback($callback);
-        return $this;
+        /** @var EventHandler<TEvent> */
+        return $this->eventHandlers[$class] ??= new EventHandler($class);
     }
 }

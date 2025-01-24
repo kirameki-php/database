@@ -4,6 +4,7 @@ namespace Tests\Kirameki\Database\Events;
 
 use Kirameki\Database\Events\TransactionBegan;
 use Kirameki\Database\Transaction\IsolationLevel;
+use Kirameki\Database\Transaction\TransactionContext;
 use Tests\Kirameki\Database\DatabaseTestCase;
 
 class TransactionBeganTest extends DatabaseTestCase
@@ -11,8 +12,9 @@ class TransactionBeganTest extends DatabaseTestCase
     public function test_initialization(): void
     {
         $connection = $this->sqliteConnection();
-        $event = new TransactionBegan($connection, IsolationLevel::Serializable);
+        $txInfo = new TransactionContext($connection, IsolationLevel::Serializable);
+        $event = new TransactionBegan($txInfo);
         $this->assertSame($connection, $event->connection);
-        $this->assertSame(IsolationLevel::Serializable, $event->isolationLevel);
+        $this->assertSame($txInfo, $event->info);
     }
 }

@@ -2,9 +2,10 @@
 
 namespace Kirameki\Database\Events;
 
+use Kirameki\Database\Connection;
 use Kirameki\Database\Transaction\TransactionInfo;
 
-class TransactionBegan extends DatabaseEvent
+class TransactionCommitting extends DatabaseEvent
 {
     /**
      * @param TransactionInfo $info

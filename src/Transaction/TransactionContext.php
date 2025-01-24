@@ -6,8 +6,11 @@ use Closure;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Connection;
 
-class TransactionContext
+class TransactionContext implements TransactionInfo
 {
+    public protected(set) Connection $connection;
+    public protected(set) ?IsolationLevel $isolationLevel;
+
     /**
      * @param Connection $connection
      * @param IsolationLevel|null $isolationLevel
@@ -16,13 +19,15 @@ class TransactionContext
      * @param list<Closure(): mixed>|null $afterRollbackCallbacks
      */
     public function __construct(
-        protected readonly Connection $connection,
-        public readonly ?IsolationLevel $isolationLevel,
+        Connection $connection,
+        ?IsolationLevel $isolationLevel,
         protected ?array $beforeCommitCallbacks = null,
         protected ?array $afterCommitCallbacks = null,
         protected ?array $afterRollbackCallbacks = null,
     )
     {
+        $this->connection = $connection;
+        $this->isolationLevel = $isolationLevel;
     }
 
     /**
@@ -56,6 +61,7 @@ class TransactionContext
     }
 
     /**
+     * @internal
      * @return void
      */
     public function runBeforeCommitCallbacks(): void
@@ -64,6 +70,7 @@ class TransactionContext
     }
 
     /**
+     * @internal
      * @return void
      */
     public function runAfterCommitCallbacks(): void
@@ -72,6 +79,7 @@ class TransactionContext
     }
 
     /**
+     * @internal
      * @return void
      */
     public function runAfterRollbackCallbacks(): void
@@ -95,6 +103,7 @@ class TransactionContext
     }
 
     /**
+     * @internal
      * @param IsolationLevel|null $level
      * @return void|never
      */
@@ -114,5 +123,4 @@ class TransactionContext
             'given' => $level,
         ]);
     }
-
 }
