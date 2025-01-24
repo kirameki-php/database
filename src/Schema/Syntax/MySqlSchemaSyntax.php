@@ -6,6 +6,7 @@ use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Functions\Syntax\MySqlFunctionSyntax;
 use Kirameki\Database\Schema\Statements\Column\ColumnDefinition;
 use Kirameki\Database\Schema\Statements\Table\CreateTableStatement;
+use Kirameki\Database\Schema\Statements\Table\RenameTableStatement;
 use Override;
 use function array_filter;
 use function array_map;
@@ -119,9 +120,27 @@ class MySqlSchemaSyntax extends SchemaSyntax
     /**
      * @inheritDoc
      */
+    #[Override]
     public function formatCreateTableForeignKeyParts(CreateTableStatement $statement): array
     {
         return array_map($this->formatForeignKeyConstraint(...), $statement->foreignKeys);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function compileRenameTable(RenameTableStatement $statement): array
+    {
+        $parts = [];
+        foreach ($statement->definitions as $def) {
+            $from = $this->asIdentifier($def->from);
+            $to = $this->asIdentifier($def->to);
+            $parts[] = "{$from} TO {$to}";
+        }
+        return [
+            "RENAME TABLE {$this->asCsv($parts)}",
+        ];
     }
 
     /**

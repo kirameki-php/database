@@ -20,6 +20,7 @@ use Kirameki\Database\Schema\Statements\Index\DropIndexStatement;
 use Kirameki\Database\Schema\Statements\Table\AlterTableStatement;
 use Kirameki\Database\Schema\Statements\Table\CreateTableStatement;
 use Kirameki\Database\Schema\Statements\Table\DropTableStatement;
+use Kirameki\Database\Schema\Statements\Table\RenameDefinition;
 use Kirameki\Database\Schema\Statements\Table\RenameTableStatement;
 use Kirameki\Database\Schema\Statements\Table\TruncateTableStatement;
 use Kirameki\Database\Syntax;
@@ -192,9 +193,13 @@ abstract class SchemaSyntax extends Syntax
      */
     public function compileRenameTable(RenameTableStatement $statement): array
     {
-        return [
-            "ALTER TABLE {$this->asIdentifier($statement->from)} RENAME TO {$this->asIdentifier($statement->to)}",
-        ];
+        $renames = [];
+        foreach ($statement->definitions as $definition) {
+            $from = $this->asIdentifier($definition->from);
+            $to = $this->asIdentifier($definition->to);
+            $renames[] = "ALTER TABLE {$from} RENAME TO {$to}";
+        }
+        return $renames;
     }
 
     /**

@@ -9,12 +9,10 @@ use Override;
 class RenameTableStatement extends SchemaStatement
 {
     /**
-     * @param string $from
-     * @param string $to
+     * @param list<RenameDefinition> $definitions
      */
     public function __construct(
-        public readonly string $from,
-        public readonly string $to,
+        public array $definitions = [],
     )
     {
     }

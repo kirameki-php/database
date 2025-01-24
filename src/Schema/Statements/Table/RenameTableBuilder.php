@@ -12,15 +12,22 @@ class RenameTableBuilder extends SchemaBuilder
 {
     /**
      * @param SchemaHandler $handler
-     * @param string $from
-     * @param string $to
      */
     public function __construct(
         SchemaHandler $handler,
-        string $from,
-        string $to,
     )
     {
-        parent::__construct($handler, new RenameTableStatement($from, $to));
+        parent::__construct($handler, new RenameTableStatement());
+    }
+
+    /**
+     * @param string $from
+     * @param string $to
+     * @return static
+     */
+    public function rename(string $from, string $to): static
+    {
+        $this->statement->definitions[] = new RenameDefinition($from, $to);
+        return $this;
     }
 }

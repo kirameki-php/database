@@ -17,6 +17,7 @@ use Kirameki\Database\Schema\Statements\Table\AlterTableStatement;
 use Kirameki\Database\Schema\Statements\Table\CreateTableBuilder;
 use Kirameki\Database\Schema\Statements\Table\CreateTableStatement;
 use Kirameki\Database\Schema\Statements\Table\DropTableStatement;
+use Kirameki\Database\Schema\Statements\Table\RenameTableBuilder;
 use Kirameki\Database\Schema\Statements\Table\RenameTableStatement;
 use function basename;
 use function str_replace;
@@ -136,6 +137,15 @@ abstract class Migration
     protected function renameTable(string $from, string $to): SchemaResult
     {
         return $this->apply($this->getSchemaHandler()->renameTable($from, $to));
+    }
+
+    /**
+     * @param Closure(RenameTableBuilder): void $callback
+     * @return SchemaResult<RenameTableStatement>
+     */
+    protected function renameTables(Closure $callback): SchemaResult
+    {
+        return $this->apply($this->getSchemaHandler()->renameTables(), $callback);
     }
 
     /**

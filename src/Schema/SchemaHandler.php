@@ -72,7 +72,15 @@ class SchemaHandler
      */
     public function renameTable(string $from, string $to): RenameTableBuilder
     {
-        return new RenameTableBuilder($this, $from, $to);
+        return new RenameTableBuilder($this)->rename($from, $to);
+    }
+
+    /**
+     * @return RenameTableBuilder
+     */
+    public function renameTables(): RenameTableBuilder
+    {
+        return new RenameTableBuilder($this);
     }
 
     /**
