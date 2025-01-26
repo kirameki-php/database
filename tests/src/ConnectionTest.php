@@ -6,11 +6,15 @@ use Exception;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Adapters\SqliteAdapter;
 use Kirameki\Database\Events\ConnectionEstablished;
+use Kirameki\Database\Events\TransactionCommitted;
+use Kirameki\Database\Events\TransactionCommitting;
+use Kirameki\Database\Events\TransactionRolledBack;
 use Kirameki\Database\Info\InfoHandler;
 use Kirameki\Database\Query\QueryHandler;
 use Kirameki\Database\Schema\SchemaHandler;
 use Kirameki\Database\Transaction\TransactionContext;
 use Kirameki\Event\Event;
+use Kirameki\Event\EventHandler;
 use Tests\Kirameki\Database\Query\QueryTestCase;
 use function iterator_to_array;
 use const INF;
@@ -37,6 +41,12 @@ class ConnectionTest extends QueryTestCase
 
         $this->assertSame('temp', $connection->name);
         $this->assertInstanceOf(SqliteAdapter::class, $connection->adapter);
+        $this->assertInstanceOf(EventHandler::class, $connection->beforeCommit);
+        $this->assertInstanceOf(EventHandler::class, $connection->afterCommit);
+        $this->assertInstanceOf(EventHandler::class, $connection->afterRollback);
+        $this->assertSame(TransactionCommitting::class, $connection->beforeCommit->class);
+        $this->assertSame(TransactionCommitted::class, $connection->afterCommit->class);
+        $this->assertSame(TransactionRolledBack::class, $connection->afterRollback->class);
     }
 
     public function test_reconnect(): void
@@ -165,18 +175,25 @@ class ConnectionTest extends QueryTestCase
     public function test_transaction__nested(): void
     {
         $connection = $this->createTempConnection('sqlite');
+        $table = $connection->schema()->createTable('t');
+        $table->id();
+        $table->execute();
+
         $this->assertFalse($connection->inTransaction());
         $result = $connection->transaction(function(TransactionContext $tx) use ($connection) {
             $r2 = $connection->transaction(function(TransactionContext $tx2) use ($connection, $tx) {
                 $this->assertSame($tx, $tx2);
                 $this->assertTrue($connection->inTransaction());
+                $connection->query()->insertInto('t')->value(['id' => 1])->execute();
                 return INF;
             });
             $this->assertTrue($connection->inTransaction());
+            $connection->query()->insertInto('t')->value(['id' => 2])->execute();
             return $r2;
         });
         $this->assertInfinite($result);
         $this->assertFalse($connection->inTransaction());
+        $this->assertSame(2, $connection->query()->select()->from('t')->count());
     }
 
     public function test_transaction__rollback(): void
@@ -195,5 +212,42 @@ class ConnectionTest extends QueryTestCase
         $this->assertInstanceOf(Exception::class, $thrown);
         $this->assertSame('rollback', $thrown->getMessage());
         $this->assertFalse($connection->inTransaction());
+    }
+
+    public function test_transaction__rollback_nested(): void
+    {
+        $connection = $this->createTempConnection('sqlite');
+        $table = $connection->schema()->createTable('t');
+        $table->id();
+        $table->execute();
+
+        $called = false;
+        $thrown = null;
+        try {
+            $connection->transaction(function() use ($connection) {
+                $connection->transaction(function() use ($connection) {
+                    $connection->query()->insertInto('t')->value(['id' => 1])->execute();
+                });
+                $connection->query()->insertInto('t')->value(['id' => 2])->execute();
+                throw new Exception('rollback');
+            });
+        } catch (Exception $e) {
+            $called = true;
+            $thrown = $e;
+        }
+        $this->assertTrue($called);
+        $this->assertInstanceOf(Exception::class, $thrown);
+        $this->assertSame('rollback', $thrown->getMessage());
+        $this->assertFalse($connection->inTransaction());
+        $this->assertSame(0, $connection->query()->select()->from('t')->count());
+    }
+
+    public function test_getTransactionInfoOrNull(): void
+    {
+        $connection = $this->createTempConnection('sqlite');
+        $this->assertNull($connection->getTransactionInfoOrNull());
+        $connection->transaction(function() use ($connection) {
+            $this->assertInstanceOf(TransactionContext::class, $connection->getTransactionInfoOrNull());
+        });
     }
 }

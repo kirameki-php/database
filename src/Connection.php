@@ -35,21 +35,21 @@ class Connection
     /**
      * @var EventHandler<TransactionCommitting>
      */
-    protected EventHandler $beforeCommit {
+    public EventHandler $beforeCommit {
         get => $this->getEventHandler(TransactionCommitting::class);
     }
 
     /**
      * @var EventHandler<TransactionCommitted>
      */
-    protected EventHandler $afterCommit {
+    public EventHandler $afterCommit {
         get => $this->getEventHandler(TransactionCommitted::class);
     }
 
     /**
      * @var EventHandler<TransactionRolledBack>
      */
-    protected EventHandler $afterRollback {
+    public EventHandler $afterRollback {
         get => $this->getEventHandler(TransactionRolledBack::class);
     }
 
@@ -216,7 +216,7 @@ class Connection
     /**
      * @return TransactionInfo
      */
-    public function tryGetTransactionInfo(): ?TransactionInfo
+    public function getTransactionInfoOrNull(): ?TransactionInfo
     {
         return $this->transactionContext;
     }
