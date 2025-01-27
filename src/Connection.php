@@ -194,7 +194,7 @@ class Connection
         // Already in transaction so just execute callback
         if ($this->inTransaction()) {
             $context = $this->getTransactionContext();
-            $context->ensureValidIsolationLevel($level);
+            $this->handleNestedTransaction($context, $level);
             return $callback($context);
         }
 
@@ -246,6 +246,7 @@ class Connection
     {
         $this->connectIfNotConnected();
         $this->adapter->beginTransaction($context->isolationLevel);
+        $context->incrementCount();
         $this->emitEvent(new TransactionBegan($context));
     }
 
@@ -260,6 +261,12 @@ class Connection
         $this->adapter->commit();
         $this->emitEvent(new TransactionCommitted($this));
         $context->runAfterCommitCallbacks();
+    }
+
+    protected function handleNestedTransaction(TransactionContext $context, ?IsolationLevel $level): void
+    {
+        $context->ensureValidIsolationLevel($level);
+        $context->incrementCount();
     }
 
     /**
@@ -280,7 +287,14 @@ class Connection
      */
     protected function cleanUpTransaction(): void
     {
-        $this->transactionContext = null;
+        $context = $this->transactionContext;
+        if ($context === null) {
+            return;
+        }
+
+        if ($context->decrementCount() === 0) {
+            $this->transactionContext = null;
+        }
     }
 
     /**

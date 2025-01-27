@@ -19,6 +19,14 @@ class TransactionContext implements TransactionInfo
     public protected(set) ?IsolationLevel $isolationLevel;
 
     /**
+     * @var int
+     */
+    public protected(set) int $count = 0 {
+        get => $this->count;
+        set => $this->count = $value;
+    }
+
+    /**
      * @param Connection $connection
      * @param IsolationLevel|null $isolationLevel
      * @param list<Closure(): mixed>|null $beforeCommitCallbacks
@@ -107,6 +115,24 @@ class TransactionContext implements TransactionInfo
         foreach ($callbacks as $callback) {
             $callback();
         }
+    }
+
+    /**
+     * @internal
+     * @return int
+     */
+    public function incrementCount(): int
+    {
+        return ++$this->count;
+    }
+
+    /**
+     * @internal
+     * @return int
+     */
+    public function decrementCount(): int
+    {
+        return --$this->count;
     }
 
     /**
