@@ -2,6 +2,6 @@
 
 namespace Kirameki\Database\Events;
 
-class TransactionCommitted extends TransactionEvent
+abstract class TransactionEvent extends DatabaseEvent
 {
 }

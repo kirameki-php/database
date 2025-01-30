@@ -11,6 +11,7 @@ use Kirameki\Database\Events\ConnectionEstablished;
 use Kirameki\Database\Events\TransactionBegan;
 use Kirameki\Database\Events\TransactionCommitted;
 use Kirameki\Database\Events\TransactionCommitting;
+use Kirameki\Database\Events\TransactionEvent;
 use Kirameki\Database\Events\TransactionRolledBack;
 use Kirameki\Database\Info\InfoHandler;
 use Kirameki\Database\Query\QueryHandler;
@@ -19,40 +20,12 @@ use Kirameki\Database\Schema\SchemaHandler;
 use Kirameki\Database\Transaction\IsolationLevel;
 use Kirameki\Database\Transaction\TransactionContext;
 use Kirameki\Database\Transaction\TransactionInfo;
-use Kirameki\Event\Event;
 use Kirameki\Event\EventEmitter;
-use Kirameki\Event\EventHandler;
 use Random\Randomizer;
 use Throwable;
 
 class Connection
 {
-    /**
-     * @var array<class-string<Event>, EventHandler<Event>|null>
-     */
-    protected array $eventHandlers = [];
-
-    /**
-     * @var EventHandler<TransactionCommitting>
-     */
-    public EventHandler $beforeCommit {
-        get => $this->getEventHandler(TransactionCommitting::class);
-    }
-
-    /**
-     * @var EventHandler<TransactionCommitted>
-     */
-    public EventHandler $afterCommit {
-        get => $this->getEventHandler(TransactionCommitted::class);
-    }
-
-    /**
-     * @var EventHandler<TransactionRolledBack>
-     */
-    public EventHandler $afterRollback {
-        get => $this->getEventHandler(TransactionRolledBack::class);
-    }
-
     /**
      * @param string $name
      * @param Adapter<covariant ConnectionConfig> $adapter
@@ -193,9 +166,7 @@ class Connection
     {
         // Already in transaction so just execute callback
         if ($this->inTransaction()) {
-            $context = $this->getTransactionContext();
-            $this->handleNestedTransaction($context, $level);
-            return $callback($context);
+            return $this->handleNestedTransaction($callback, $level);
         }
 
         $context = $this->initTransactionContext($level);
@@ -222,14 +193,6 @@ class Connection
     }
 
     /**
-     * @return TransactionContext
-     */
-    protected function getTransactionContext(): TransactionContext
-    {
-        return $this->transactionContext ?? throw new UnreachableException();
-    }
-
-    /**
      * @param IsolationLevel|null $level
      * @return TransactionContext
      */
@@ -247,7 +210,7 @@ class Connection
         $this->connectIfNotConnected();
         $this->adapter->beginTransaction($context->isolationLevel);
         $context->incrementCount();
-        $this->emitEvent(new TransactionBegan($context));
+        $this->emitTransactionEvent($context, new TransactionBegan($context));
     }
 
     /**
@@ -256,17 +219,25 @@ class Connection
      */
     protected function handleCommit(TransactionContext $context): void
     {
-        $context->runBeforeCommitCallbacks();
-        $this->emitEvent(new TransactionCommitting($context));
+        $this->emitTransactionEvent($context, new TransactionCommitting($context));
         $this->adapter->commit();
-        $this->emitEvent(new TransactionCommitted($this));
-        $context->runAfterCommitCallbacks();
+        $this->emitTransactionEvent($context, new TransactionCommitted($this));
     }
 
-    protected function handleNestedTransaction(TransactionContext $context, ?IsolationLevel $level): void
+    /**
+     * @template TReturn
+     * @param Closure(TransactionContext): TReturn $callback
+     * @param IsolationLevel|null $level
+     * @return TReturn
+     */
+    protected function handleNestedTransaction(Closure $callback, ?IsolationLevel $level): mixed
     {
+        $context = $this->transactionContext ?? throw new UnreachableException();
         $context->ensureValidIsolationLevel($level);
         $context->incrementCount();
+        $result = $callback($context);
+        $context->decrementCount();
+        return $result;
     }
 
     /**
@@ -277,8 +248,7 @@ class Connection
     protected function rollbackAndThrow(TransactionContext $context, Throwable $throwable): never
     {
         $this->adapter->rollback();
-        $this->emitEvent(new TransactionRolledBack($this, $throwable));
-        $context->runAfterRollbackCallbacks();
+        $this->emitTransactionEvent($context, new TransactionRolledBack($this, $throwable));
         throw $throwable;
     }
 
@@ -287,14 +257,8 @@ class Connection
      */
     protected function cleanUpTransaction(): void
     {
-        $context = $this->transactionContext;
-        if ($context === null) {
-            return;
-        }
-
-        if ($context->decrementCount() === 0) {
-            $this->transactionContext = null;
-        }
+        $this->transactionContext?->decrementCount();
+        $this->transactionContext = null;
     }
 
     /**
@@ -306,23 +270,13 @@ class Connection
     }
 
     /**
-     * @template TEvent of Event
-     * @param class-string<TEvent> $class
-     * @return EventHandler<TEvent>
-     */
-    protected function getEventHandler(string $class): EventHandler
-    {
-        /** @var EventHandler<TEvent> */
-        return $this->eventHandlers[$class] ??= new EventHandler($class);
-    }
-
-    /**
-     * @param Event $event
+     * @param TransactionContext $context
+     * @param TransactionEvent $event
      * @return void
      */
-    protected function emitEvent(Event $event): void
+    protected function emitTransactionEvent(TransactionContext $context, TransactionEvent $event): void
     {
-        ($this->eventHandlers[$event::class] ?? null)?->emit($event);
+        $context->emitTransactionEvent($event);
         $this->events?->emit($event);
     }
 }

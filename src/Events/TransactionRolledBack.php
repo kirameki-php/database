@@ -5,7 +5,7 @@ namespace Kirameki\Database\Events;
 use Kirameki\Database\Connection;
 use Throwable;
 
-class TransactionRolledBack extends DatabaseEvent
+class TransactionRolledBack extends TransactionEvent
 {
     /**
      * @param Connection $connection

@@ -6,15 +6,12 @@ use Exception;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Adapters\SqliteAdapter;
 use Kirameki\Database\Events\ConnectionEstablished;
-use Kirameki\Database\Events\TransactionCommitted;
-use Kirameki\Database\Events\TransactionCommitting;
-use Kirameki\Database\Events\TransactionRolledBack;
 use Kirameki\Database\Info\InfoHandler;
 use Kirameki\Database\Query\QueryHandler;
 use Kirameki\Database\Schema\SchemaHandler;
 use Kirameki\Database\Transaction\TransactionContext;
+use Kirameki\Database\Transaction\TransactionInfo;
 use Kirameki\Event\Event;
-use Kirameki\Event\EventHandler;
 use Tests\Kirameki\Database\Query\QueryTestCase;
 use function iterator_to_array;
 use const INF;
@@ -41,12 +38,6 @@ class ConnectionTest extends QueryTestCase
 
         $this->assertSame('temp', $connection->name);
         $this->assertInstanceOf(SqliteAdapter::class, $connection->adapter);
-        $this->assertInstanceOf(EventHandler::class, $connection->beforeCommit);
-        $this->assertInstanceOf(EventHandler::class, $connection->afterCommit);
-        $this->assertInstanceOf(EventHandler::class, $connection->afterRollback);
-        $this->assertSame(TransactionCommitting::class, $connection->beforeCommit->class);
-        $this->assertSame(TransactionCommitted::class, $connection->afterCommit->class);
-        $this->assertSame(TransactionRolledBack::class, $connection->afterRollback->class);
     }
 
     public function test_reconnect(): void
@@ -163,7 +154,7 @@ class ConnectionTest extends QueryTestCase
     {
         $connection = $this->createTempConnection('sqlite');
         $this->assertFalse($connection->inTransaction());
-        $result = $connection->transaction(function(TransactionContext $tx) use ($connection) {
+        $result = $connection->transaction(function(TransactionInfo $tx) use ($connection) {
             $this->assertInstanceOf(TransactionContext::class, $tx);
             $this->assertTrue($connection->inTransaction());
             return INF;
@@ -180,8 +171,8 @@ class ConnectionTest extends QueryTestCase
         $table->execute();
 
         $this->assertFalse($connection->inTransaction());
-        $result = $connection->transaction(function(TransactionContext $tx) use ($connection) {
-            $r2 = $connection->transaction(function(TransactionContext $tx2) use ($connection, $tx) {
+        $result = $connection->transaction(function(TransactionInfo $tx) use ($connection) {
+            $r2 = $connection->transaction(function(TransactionInfo $tx2) use ($connection, $tx) {
                 $this->assertSame($tx, $tx2);
                 $this->assertTrue($connection->inTransaction());
                 $connection->query()->insertInto('t')->value(['id' => 1])->execute();

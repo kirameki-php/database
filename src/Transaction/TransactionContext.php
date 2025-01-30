@@ -2,12 +2,19 @@
 
 namespace Kirameki\Database\Transaction;
 
-use Closure;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Connection;
+use Kirameki\Database\Events\TransactionCommitted;
+use Kirameki\Database\Events\TransactionCommitting;
+use Kirameki\Database\Events\TransactionEvent;
+use Kirameki\Database\Events\TransactionRolledBack;
+use Kirameki\Event\EventHandler;
+use Kirameki\Event\HandlesEvents;
 
 class TransactionContext implements TransactionInfo
 {
+    use HandlesEvents;
+
     /**
      * @var Connection
      */
@@ -27,94 +34,37 @@ class TransactionContext implements TransactionInfo
     }
 
     /**
+     * @var EventHandler<TransactionCommitting>
+     */
+    public EventHandler $beforeCommit {
+        get => $this->resolveEventHandler(TransactionCommitting::class);
+    }
+
+    /**
+     * @var EventHandler<TransactionCommitted>
+     */
+    public EventHandler $afterCommit {
+        get => $this->resolveEventHandler(TransactionCommitted::class);
+    }
+
+    /**
+     * @var EventHandler<TransactionRolledBack>
+     */
+    public EventHandler $afterRollback {
+        get => $this->resolveEventHandler(TransactionRolledBack::class);
+    }
+
+    /**
      * @param Connection $connection
      * @param IsolationLevel|null $isolationLevel
-     * @param list<Closure(): mixed>|null $beforeCommitCallbacks
-     * @param list<Closure(): mixed>|null $afterCommitCallbacks
-     * @param list<Closure(): mixed>|null $afterRollbackCallbacks
      */
     public function __construct(
         Connection $connection,
         ?IsolationLevel $isolationLevel,
-        protected ?array $beforeCommitCallbacks = null,
-        protected ?array $afterCommitCallbacks = null,
-        protected ?array $afterRollbackCallbacks = null,
     )
     {
         $this->connection = $connection;
         $this->isolationLevel = $isolationLevel;
-    }
-
-    /**
-     * @param Closure(): mixed $callback
-     * @return void
-     */
-    public function beforeCommit(Closure $callback): void
-    {
-        $this->beforeCommitCallbacks ??= [];
-        $this->beforeCommitCallbacks[] = $callback;
-    }
-
-    /**
-     * @param Closure(): mixed $callback
-     * @return void
-     */
-    public function afterCommit(Closure $callback): void
-    {
-        $this->afterCommitCallbacks ??= [];
-        $this->afterCommitCallbacks[] = $callback;
-    }
-
-    /**
-     * @param Closure(): mixed $callback
-     * @return void
-     */
-    public function afterRollback(Closure $callback): void
-    {
-        $this->afterRollbackCallbacks ??= [];
-        $this->afterRollbackCallbacks[] = $callback;
-    }
-
-    /**
-     * @internal
-     * @return void
-     */
-    public function runBeforeCommitCallbacks(): void
-    {
-        $this->runCallbacks($this->beforeCommitCallbacks);
-    }
-
-    /**
-     * @internal
-     * @return void
-     */
-    public function runAfterCommitCallbacks(): void
-    {
-        $this->runCallbacks($this->afterCommitCallbacks);
-    }
-
-    /**
-     * @internal
-     * @return void
-     */
-    public function runAfterRollbackCallbacks(): void
-    {
-        $this->runCallbacks($this->afterRollbackCallbacks);
-    }
-
-    /**
-     * @param list<Closure(): mixed>|null $callbacks
-     * @return void
-     */
-    protected function runCallbacks(?array $callbacks): void
-    {
-        if ($callbacks === null) {
-            return;
-        }
-
-        foreach ($callbacks as $callback) {
-            $callback();
-        }
     }
 
     /**
@@ -133,6 +83,16 @@ class TransactionContext implements TransactionInfo
     public function decrementCount(): int
     {
         return --$this->count;
+    }
+
+    /**
+     * @internal
+     * @param TransactionEvent $event
+     * @return void
+     */
+    public function emitTransactionEvent(TransactionEvent $event): void
+    {
+        $this->emitEvent($event);
     }
 
     /**
