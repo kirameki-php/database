@@ -4,7 +4,6 @@ namespace Kirameki\Database;
 
 use Closure;
 use Kirameki\Core\Exceptions\LogicException;
-use Kirameki\Core\Exceptions\UnreachableException;
 use Kirameki\Database\Adapters\Adapter;
 use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Events\ConnectionEstablished;
@@ -23,6 +22,7 @@ use Kirameki\Database\Transaction\TransactionInfo;
 use Kirameki\Event\EventEmitter;
 use Random\Randomizer;
 use Throwable;
+use function dump;
 
 class Connection
 {
@@ -164,11 +164,6 @@ class Connection
      */
     public function transaction(Closure $callback, ?IsolationLevel $level = null): mixed
     {
-        // Already in transaction so just execute callback
-        if ($this->inTransaction()) {
-            return $this->handleNestedTransaction($callback, $level);
-        }
-
         $context = $this->initTransactionContext($level);
         try {
             $this->handleBegin($context);
@@ -180,7 +175,7 @@ class Connection
             $this->rollbackAndThrow($context, $throwable);
         }
         finally {
-            $this->cleanUpTransaction();
+            $this->cleanUpTransaction($context);
         }
     }
 
@@ -198,7 +193,13 @@ class Connection
      */
     protected function initTransactionContext(?IsolationLevel $level): TransactionContext
     {
-        return $this->transactionContext = new TransactionContext($this, $level);
+        $context = $this->transactionContext ??= new TransactionContext($this, $level);
+
+        if ($context->count > 0) {
+            $context->ensureValidIsolationLevel($level);
+        }
+
+        return $context;
     }
 
     /**
@@ -207,10 +208,14 @@ class Connection
      */
     protected function handleBegin(TransactionContext $context): void
     {
-        $this->connectIfNotConnected();
-        $this->adapter->beginTransaction($context->isolationLevel);
-        $context->incrementCount();
-        $this->emitTransactionEvent($context, new TransactionBegan($context));
+        if ($context->count === 0) {
+            $this->connectIfNotConnected();
+            $this->adapter->beginTransaction($context->isolationLevel);
+            $context->incrementCount();
+            $this->emitTransactionEvent($context, new TransactionBegan($context));
+        } else {
+            $context->incrementCount();
+        }
     }
 
     /**
@@ -219,25 +224,14 @@ class Connection
      */
     protected function handleCommit(TransactionContext $context): void
     {
-        $this->emitTransactionEvent($context, new TransactionCommitting($context));
-        $this->adapter->commit();
-        $this->emitTransactionEvent($context, new TransactionCommitted($this));
-    }
-
-    /**
-     * @template TReturn
-     * @param Closure(TransactionContext): TReturn $callback
-     * @param IsolationLevel|null $level
-     * @return TReturn
-     */
-    protected function handleNestedTransaction(Closure $callback, ?IsolationLevel $level): mixed
-    {
-        $context = $this->transactionContext ?? throw new UnreachableException();
-        $context->ensureValidIsolationLevel($level);
-        $context->incrementCount();
-        $result = $callback($context);
-        $context->decrementCount();
-        return $result;
+        if ($context->count === 1) {
+            $this->emitTransactionEvent($context, new TransactionCommitting($context));
+            $this->adapter->commit();
+            $context->decrementCount();
+            $this->emitTransactionEvent($context, new TransactionCommitted($this));
+        } else {
+            $context->decrementCount();
+        }
     }
 
     /**
@@ -247,18 +241,25 @@ class Connection
      */
     protected function rollbackAndThrow(TransactionContext $context, Throwable $throwable): never
     {
-        $this->adapter->rollback();
-        $this->emitTransactionEvent($context, new TransactionRolledBack($this, $throwable));
+        if ($context->count === 1) {
+            $this->adapter->rollback();
+            $context->decrementCount();
+            $this->emitTransactionEvent($context, new TransactionRolledBack($this, $throwable));
+        } else {
+            $context->decrementCount();
+        }
         throw $throwable;
     }
 
     /**
+     * @param TransactionContext $context
      * @return void
      */
-    protected function cleanUpTransaction(): void
+    protected function cleanUpTransaction(TransactionContext $context): void
     {
-        $this->transactionContext?->decrementCount();
-        $this->transactionContext = null;
+        if ($context->count === 0) {
+            $this->transactionContext = null;
+        }
     }
 
     /**

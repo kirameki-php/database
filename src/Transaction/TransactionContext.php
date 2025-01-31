@@ -98,19 +98,22 @@ class TransactionContext implements TransactionInfo
     /**
      * @internal
      * @param IsolationLevel|null $level
-     * @return void|never
+     * @return $this
      */
-    public function ensureValidIsolationLevel(?IsolationLevel $level): void
+    public function ensureValidIsolationLevel(?IsolationLevel $level): static
     {
         if ($level === null) {
-            return;
+            return $this;
         }
 
         if($level === $this->isolationLevel) {
-            return;
+            return $this;
         }
 
-        throw new LogicException('Cannot change Isolation level within the same transaction.', [
+        $currentName = $this->isolationLevel->name ?? 'null';
+        $givenName = $level->name ?? 'null';
+
+        throw new LogicException("Transaction isolation level mismatch. Expected: {$currentName}. Got: {$givenName}", [
             'connection' => $this->connection->name,
             'current' => $this->isolationLevel,
             'given' => $level,

@@ -9,6 +9,7 @@ use Kirameki\Database\Events\ConnectionEstablished;
 use Kirameki\Database\Info\InfoHandler;
 use Kirameki\Database\Query\QueryHandler;
 use Kirameki\Database\Schema\SchemaHandler;
+use Kirameki\Database\Transaction\IsolationLevel;
 use Kirameki\Database\Transaction\TransactionContext;
 use Kirameki\Database\Transaction\TransactionInfo;
 use Kirameki\Event\Event;
@@ -231,6 +232,41 @@ class ConnectionTest extends QueryTestCase
         $this->assertSame('rollback', $thrown->getMessage());
         $this->assertFalse($connection->inTransaction());
         $this->assertSame(0, $connection->query()->select()->from('t')->count());
+    }
+
+    public function test_transaction__nested_same_isolation_level(): void
+    {
+        $connection = $this->createTempConnection('mysql');
+        $table = $connection->schema()->createTable('t');
+        $table->id();
+        $table->execute();
+
+        $level = IsolationLevel::RepeatableRead;
+        $connection->transaction(function() use ($connection, $level) {
+            $connection->transaction(function() use ($connection) {
+                $connection->query()->insertInto('t')->value(['id' => 1])->execute();
+            }, $level);
+            $connection->query()->insertInto('t')->value(['id' => 2])->execute();
+        }, $level);
+        $this->assertSame(2, $connection->query()->select()->from('t')->count());
+    }
+
+    public function test_transaction__nested_different_isolation_level(): void
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('Transaction isolation level mismatch. Expected: Serializable. Got: RepeatableRead');
+
+        $connection = $this->createTempConnection('mysql');
+        $table = $connection->schema()->createTable('t');
+        $table->id();
+        $table->execute();
+
+        $connection->transaction(function() use ($connection) {
+            $connection->transaction(function() use ($connection) {
+                $connection->query()->insertInto('t')->value(['id' => 1])->execute();
+            }, IsolationLevel::RepeatableRead);
+            $connection->query()->insertInto('t')->value(['id' => 2])->execute();
+        }, IsolationLevel::Serializable);
     }
 
     public function test_getTransactionInfoOrNull(): void
