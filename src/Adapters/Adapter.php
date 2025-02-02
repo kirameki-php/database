@@ -16,6 +16,7 @@ use Kirameki\Database\Schema\SchemaResult;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 use Kirameki\Database\Transaction\IsolationLevel;
+use Kirameki\Database\Transaction\TransactionOptions;
 use Throwable;
 use function hrtime;
 
@@ -94,10 +95,10 @@ abstract class Adapter
     abstract public function inTransaction(): bool;
 
     /**
-     * @param IsolationLevel|null $level
+     * @param TransactionOptions|null $options
      * @return void
      */
-    abstract public function beginTransaction(?IsolationLevel $level = null): void;
+    abstract public function beginTransaction(?TransactionOptions $options = null): void;
 
     /**
      * @return void

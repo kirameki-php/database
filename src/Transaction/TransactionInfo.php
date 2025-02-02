@@ -12,7 +12,7 @@ interface TransactionInfo
     public Connection $connection { get; }
 
     /**
-     * @var ?IsolationLevel
+     * @var TransactionOptions|null
      */
-    public ?IsolationLevel $isolationLevel { get; }
+    public ?TransactionOptions $options { get; }
 }

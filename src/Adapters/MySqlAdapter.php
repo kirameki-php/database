@@ -14,6 +14,7 @@ use Kirameki\Database\Schema\Statements\RawStatement;
 use Kirameki\Database\Schema\Syntax\MySqlSchemaSyntax;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 use Kirameki\Database\Transaction\IsolationLevel;
+use Kirameki\Database\Transaction\TransactionOptions;
 use Override;
 use PDO;
 use function array_filter;
@@ -219,11 +220,14 @@ class MySqlAdapter extends PdoAdapter
      * @inheritDoc
      */
     #[Override]
-    public function beginTransaction(?IsolationLevel $level = null): void
+    public function beginTransaction(?TransactionOptions $options = null): void
     {
+        $level = $options?->isolationLevel;
+
         if ($level !== null) {
             $this->getPdo()->exec("SET TRANSACTION ISOLATION LEVEL {$level->value}");
         }
+
         $this->getPdo()->beginTransaction();
     }
 }

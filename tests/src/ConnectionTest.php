@@ -12,6 +12,7 @@ use Kirameki\Database\Schema\SchemaHandler;
 use Kirameki\Database\Transaction\IsolationLevel;
 use Kirameki\Database\Transaction\TransactionContext;
 use Kirameki\Database\Transaction\TransactionInfo;
+use Kirameki\Database\Transaction\TransactionOptions;
 use Kirameki\Event\Event;
 use Tests\Kirameki\Database\Query\QueryTestCase;
 use function iterator_to_array;
@@ -245,9 +246,9 @@ class ConnectionTest extends QueryTestCase
         $connection->transaction(function() use ($connection, $level) {
             $connection->transaction(function() use ($connection) {
                 $connection->query()->insertInto('t')->value(['id' => 1])->execute();
-            }, $level);
+            }, new TransactionOptions($level));
             $connection->query()->insertInto('t')->value(['id' => 2])->execute();
-        }, $level);
+        }, new TransactionOptions($level));
         $this->assertSame(2, $connection->query()->select()->from('t')->count());
     }
 
@@ -264,9 +265,9 @@ class ConnectionTest extends QueryTestCase
         $connection->transaction(function() use ($connection) {
             $connection->transaction(function() use ($connection) {
                 $connection->query()->insertInto('t')->value(['id' => 1])->execute();
-            }, IsolationLevel::RepeatableRead);
+            }, new TransactionOptions(isolationLevel: IsolationLevel::RepeatableRead));
             $connection->query()->insertInto('t')->value(['id' => 2])->execute();
-        }, IsolationLevel::Serializable);
+        }, new TransactionOptions(isolationLevel: IsolationLevel::Serializable));
     }
 
     public function test_getTransactionInfoOrNull(): void

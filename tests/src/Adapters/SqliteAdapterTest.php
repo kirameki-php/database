@@ -8,6 +8,7 @@ use Kirameki\Database\Exceptions\QueryException;
 use Kirameki\Database\Query\Statements\RawStatement;
 use Kirameki\Database\Schema\Statements\RawStatement as SchemaRawStatement;
 use Kirameki\Database\Transaction\IsolationLevel;
+use Kirameki\Database\Transaction\TransactionOptions;
 use Override;
 
 class SqliteAdapterTest extends PdoAdapterTestAbstract
@@ -34,6 +35,9 @@ class SqliteAdapterTest extends PdoAdapterTestAbstract
         $this->expectException(NotSupportedException::class);
         $this->expectExceptionMessage('Transaction Isolation level cannot be changed in SQLite.');
         $adapter = $this->connect()->adapter;
-        $adapter->beginTransaction(IsolationLevel::Serializable);
+        $options = new TransactionOptions(
+            isolationLevel: IsolationLevel::Serializable,
+        );
+        $adapter->beginTransaction($options);
     }
 }

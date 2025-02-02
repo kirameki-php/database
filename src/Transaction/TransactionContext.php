@@ -16,16 +16,6 @@ class TransactionContext implements TransactionInfo
     use HandlesEvents;
 
     /**
-     * @var Connection
-     */
-    public protected(set) Connection $connection;
-
-    /**
-     * @var ?IsolationLevel
-     */
-    public protected(set) ?IsolationLevel $isolationLevel;
-
-    /**
      * @var int
      */
     public protected(set) int $count = 0 {
@@ -56,15 +46,13 @@ class TransactionContext implements TransactionInfo
 
     /**
      * @param Connection $connection
-     * @param IsolationLevel|null $isolationLevel
+     * @param TransactionOptions|null $options
      */
     public function __construct(
-        Connection $connection,
-        ?IsolationLevel $isolationLevel,
+        public protected(set) Connection $connection,
+        public protected(set) ?TransactionOptions $options = null,
     )
     {
-        $this->connection = $connection;
-        $this->isolationLevel = $isolationLevel;
     }
 
     /**
@@ -106,16 +94,18 @@ class TransactionContext implements TransactionInfo
             return $this;
         }
 
-        if($level === $this->isolationLevel) {
+        $currentLevel = $this->options?->isolationLevel;
+
+        if($level === $currentLevel) {
             return $this;
         }
 
-        $currentName = $this->isolationLevel->name ?? 'null';
+        $currentName = $currentLevel->name ?? 'null';
         $givenName = $level->name ?? 'null';
 
         throw new LogicException("Transaction isolation level mismatch. Expected: {$currentName}. Got: {$givenName}", [
             'connection' => $this->connection->name,
-            'current' => $this->isolationLevel,
+            'current' => $currentLevel,
             'given' => $level,
         ]);
     }

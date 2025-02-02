@@ -10,6 +10,7 @@ use Kirameki\Database\Exceptions\DropProtectionException;
 use Kirameki\Database\Query\Syntax\SqliteQuerySyntax;
 use Kirameki\Database\Schema\Syntax\SqliteSchemaSyntax;
 use Kirameki\Database\Transaction\IsolationLevel;
+use Kirameki\Database\Transaction\TransactionOptions;
 use Override;
 use PDO;
 use function file_exists;
@@ -193,8 +194,10 @@ class SqliteAdapter extends PdoAdapter
      * @inheritDoc
      */
     #[Override]
-    public function beginTransaction(?IsolationLevel $level = null): void
+    public function beginTransaction(?TransactionOptions $options = null): void
     {
+        $level = $options?->isolationLevel;
+
         if ($level !== null) {
             throw new NotSupportedException('Transaction Isolation level cannot be changed in SQLite.', [
                 'adapter' => $this,

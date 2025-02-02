@@ -16,13 +16,12 @@ use Kirameki\Database\Info\InfoHandler;
 use Kirameki\Database\Query\QueryHandler;
 use Kirameki\Database\Query\Statements\Tags;
 use Kirameki\Database\Schema\SchemaHandler;
-use Kirameki\Database\Transaction\IsolationLevel;
 use Kirameki\Database\Transaction\TransactionContext;
 use Kirameki\Database\Transaction\TransactionInfo;
+use Kirameki\Database\Transaction\TransactionOptions;
 use Kirameki\Event\EventEmitter;
 use Random\Randomizer;
 use Throwable;
-use function dump;
 
 class Connection
 {
@@ -159,12 +158,12 @@ class Connection
     /**
      * @template TReturn
      * @param Closure(TransactionInfo): TReturn $callback
-     * @param IsolationLevel|null $level
+     * @param TransactionOptions|null $options
      * @return TReturn
      */
-    public function transaction(Closure $callback, ?IsolationLevel $level = null): mixed
+    public function transaction(Closure $callback, ?TransactionOptions $options = null): mixed
     {
-        $context = $this->initTransactionContext($level);
+        $context = $this->initTransactionContext($options);
         try {
             $this->handleBegin($context);
             $result = $callback($context);
@@ -188,15 +187,15 @@ class Connection
     }
 
     /**
-     * @param IsolationLevel|null $level
+     * @param TransactionOptions|null $options
      * @return TransactionContext
      */
-    protected function initTransactionContext(?IsolationLevel $level): TransactionContext
+    protected function initTransactionContext(?TransactionOptions $options): TransactionContext
     {
-        $context = $this->transactionContext ??= new TransactionContext($this, $level);
+        $context = $this->transactionContext ??= new TransactionContext($this, $options);
 
         if ($context->count > 0) {
-            $context->ensureValidIsolationLevel($level);
+            $context->ensureValidIsolationLevel($options?->isolationLevel);
         }
 
         return $context;
@@ -210,7 +209,7 @@ class Connection
     {
         if ($context->count === 0) {
             $this->connectIfNotConnected();
-            $this->adapter->beginTransaction($context->isolationLevel);
+            $this->adapter->beginTransaction($context->options);
             $context->incrementCount();
             $this->emitTransactionEvent($context, new TransactionBegan($context));
         } else {

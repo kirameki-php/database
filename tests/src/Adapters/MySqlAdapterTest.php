@@ -10,6 +10,7 @@ use Kirameki\Database\Exceptions\QueryException;
 use Kirameki\Database\Query\Statements\RawStatement;
 use Kirameki\Database\Schema\Statements\RawStatement as SchemaRawStatement;
 use Kirameki\Database\Transaction\IsolationLevel;
+use Kirameki\Database\Transaction\TransactionOptions;
 use Override;
 use PDOException;
 
@@ -61,11 +62,11 @@ class MySqlAdapterTest extends PdoAdapterTestAbstract
 
         $adapter1->runSchema(new SchemaRawStatement('CREATE TABLE test (id INT PRIMARY KEY, name VARCHAR(255))'));
         $adapter1->runQuery(new RawStatement('INSERT INTO test (id, name) VALUES (1, "a")'));
-        $adapter1->beginTransaction(IsolationLevel::Serializable);
+        $adapter1->beginTransaction(new TransactionOptions(IsolationLevel::Serializable));
         $adapter1->runQuery(new RawStatement('UPDATE test SET name = "b" WHERE id = 1'));
 
         $adapter2 = $this->createMySqlAdapter($name);
-        $adapter2->beginTransaction(IsolationLevel::ReadUncommitted);
+        $adapter2->beginTransaction(new TransactionOptions(IsolationLevel::ReadUncommitted));
         $result = $adapter2->runQuery(new RawStatement('SELECT * FROM test'));
         $this->assertSame('b', $result->first()->name);
     }
