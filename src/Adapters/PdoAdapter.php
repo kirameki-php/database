@@ -51,7 +51,13 @@ abstract class PdoAdapter extends Adapter
         protected ?PDO $pdo = null,
     )
     {
-        parent::__construct($databaseConfig, $connectionConfig, $casters, $querySyntax, $schemaSyntax);
+        parent::__construct(
+            $databaseConfig,
+            $connectionConfig,
+            $casters,
+            $querySyntax,
+            $schemaSyntax,
+        );
     }
 
     /**
