@@ -79,7 +79,7 @@ class SqliteAdapter extends PdoAdapter
         }
 
         try {
-            $this->getPdo()->exec(implode(';', $statements));
+            $this->executeRawStatement(implode(';', $statements));
         } catch (PDOException $e) {
             $this->throwConnectionException($e);
         }

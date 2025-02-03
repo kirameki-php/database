@@ -111,7 +111,7 @@ class MySqlAdapter extends PdoAdapter
             . ($connectionConfig->isReadOnly() ? ', READ ONLY' : '');
 
         try {
-            $this->getPdo()->exec($setTransaction);
+            $this->executeRawStatement($setTransaction);
         } catch (PDOException $e) {
             $this->throwConnectionException($e);
         }
@@ -230,7 +230,7 @@ class MySqlAdapter extends PdoAdapter
 
         $this->tryTransactionCall(function() use ($level) {
             if ($level !== null) {
-                $this->getPdo()->exec("SET TRANSACTION ISOLATION LEVEL {$level->value}");
+                $this->executeRawStatement("SET TRANSACTION ISOLATION LEVEL {$level->value}");
             }
             $this->getPdo()->beginTransaction();
         });

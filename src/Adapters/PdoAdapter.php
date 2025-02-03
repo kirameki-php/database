@@ -290,6 +290,15 @@ abstract class PdoAdapter extends Adapter
     }
 
     /**
+     * @param string $statement
+     * @return void
+     */
+    protected function executeRawStatement(string $statement): void
+    {
+        $this->getPdo()->exec($statement);
+    }
+
+    /**
      * @param QueryStatement $statement
      * @return array<string, TypeCaster>|null
      */
