@@ -6,8 +6,10 @@ use Closure;
 use DateTimeInterface;
 use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
+use Kirameki\Database\Exceptions\ConnectionException;
 use Kirameki\Database\Exceptions\QueryException;
 use Kirameki\Database\Exceptions\SchemaException;
+use Kirameki\Database\Exceptions\TransactionException;
 use Kirameki\Database\Query\QueryResult;
 use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
@@ -15,7 +17,6 @@ use Kirameki\Database\Query\TypeCastRegistry;
 use Kirameki\Database\Schema\SchemaResult;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
-use Kirameki\Database\Transaction\IsolationLevel;
 use Kirameki\Database\Transaction\TransactionOptions;
 use Throwable;
 use function hrtime;
@@ -222,6 +223,15 @@ abstract class Adapter
 
     /**
      * @param Throwable $e
+     * @return never
+     */
+    protected function throwConnectionException(Throwable $e): never
+    {
+        throw new ConnectionException($e->getMessage(), $this->connectionConfig, $e);
+    }
+
+    /**
+     * @param Throwable $e
      * @param SchemaStatement $statement
      * @return never
      */
@@ -238,5 +248,14 @@ abstract class Adapter
     protected function throwQueryException(Throwable $e, QueryStatement $statement): never
     {
         throw new QueryException($e->getMessage(), $statement, null, $e);
+    }
+
+    /**
+     * @param Throwable $e
+     * @return never
+     */
+    protected function throwTransactionException(Throwable $e): never
+    {
+        throw new TransactionException($e->getMessage(), $e);
     }
 }

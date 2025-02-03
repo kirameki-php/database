@@ -13,10 +13,10 @@ use Kirameki\Database\Query\Syntax\MySqlQuerySyntax;
 use Kirameki\Database\Schema\Statements\RawStatement;
 use Kirameki\Database\Schema\Syntax\MySqlSchemaSyntax;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
-use Kirameki\Database\Transaction\IsolationLevel;
 use Kirameki\Database\Transaction\TransactionOptions;
 use Override;
 use PDO;
+use PDOException;
 use function array_filter;
 use function implode;
 use function iterator_to_array;
@@ -110,7 +110,11 @@ class MySqlAdapter extends PdoAdapter
             . $connectionConfig->isolationLevel->value
             . ($connectionConfig->isReadOnly() ? ', READ ONLY' : '');
 
-        $this->getPdo()->exec($setTransaction);
+        try {
+            $this->getPdo()->exec($setTransaction);
+        } catch (PDOException $e) {
+            $this->throwConnectionException($e);
+        }
 
         return $this;
     }
@@ -224,10 +228,11 @@ class MySqlAdapter extends PdoAdapter
     {
         $level = $options?->isolationLevel;
 
-        if ($level !== null) {
-            $this->getPdo()->exec("SET TRANSACTION ISOLATION LEVEL {$level->value}");
-        }
-
-        $this->getPdo()->beginTransaction();
+        $this->tryTransactionCall(function() use ($level) {
+            if ($level !== null) {
+                $this->getPdo()->exec("SET TRANSACTION ISOLATION LEVEL {$level->value}");
+            }
+            $this->getPdo()->beginTransaction();
+        });
     }
 }

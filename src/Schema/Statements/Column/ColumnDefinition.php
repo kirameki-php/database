@@ -15,7 +15,7 @@ class ColumnDefinition
      * @param mixed|null $default
      * @param ForeignKeyConstraint|null $references
      * @param bool|null $primaryKey
-     * @param int|null $autoIncrement
+     * @param int|bool|null $autoIncrement
      */
     public function __construct(
         public readonly string $name,
@@ -26,7 +26,7 @@ class ColumnDefinition
         public mixed $default = null,
         public ?ForeignKeyConstraint $references = null,
         public ?bool $primaryKey = null,
-        public ?int $autoIncrement = null,
+        public int|bool|null $autoIncrement = null,
     )
     {
     }

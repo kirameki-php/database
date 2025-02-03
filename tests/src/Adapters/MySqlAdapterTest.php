@@ -6,13 +6,13 @@ use Kirameki\Core\Exceptions\InvalidConfigException;
 use Kirameki\Database\Adapters\MySqlAdapter;
 use Kirameki\Database\Config\DatabaseConfig;
 use Kirameki\Database\Config\MySqlConfig;
+use Kirameki\Database\Exceptions\ConnectionException;
 use Kirameki\Database\Exceptions\QueryException;
 use Kirameki\Database\Query\Statements\RawStatement;
 use Kirameki\Database\Schema\Statements\RawStatement as SchemaRawStatement;
 use Kirameki\Database\Transaction\IsolationLevel;
 use Kirameki\Database\Transaction\TransactionOptions;
 use Override;
-use PDOException;
 
 class MySqlAdapterTest extends PdoAdapterTestAbstract
 {
@@ -34,7 +34,7 @@ class MySqlAdapterTest extends PdoAdapterTestAbstract
 
     public function test_connect_try_with_socket(): void
     {
-        $this->expectException(PDOException::class);
+        $this->expectException(ConnectionException::class);
         $this->expectExceptionMessage('SQLSTATE[HY000] [2002] No such file or directory');
         new MySqlAdapter(new DatabaseConfig([]), new MySqlConfig(socket: '/run/mysql.sock'))->connect();
     }

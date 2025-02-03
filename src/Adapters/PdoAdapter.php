@@ -5,10 +5,10 @@ namespace Kirameki\Database\Adapters;
 use Closure;
 use Iterator;
 use Kirameki\Collections\LazyIterator;
-use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Exceptions\UnreachableException;
 use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
+use Kirameki\Database\Exceptions\ConnectionException;
 use Kirameki\Database\Query\Casters\TypeCaster;
 use Kirameki\Database\Query\QueryResult;
 use Kirameki\Database\Query\Statements\Normalizable;
@@ -79,12 +79,14 @@ abstract class PdoAdapter extends Adapter
     public function connect(): static
     {
         if ($this->pdo !== null) {
-            throw new LogicException('Already connected.', [
-                'connectionConfig' => $this->connectionConfig,
-            ]);
+            throw new ConnectionException('Already connected.', $this->connectionConfig);
         }
 
-        $this->pdo = $this->createPdo();
+        try {
+            $this->pdo = $this->createPdo();
+        } catch (PDOException $e) {
+            $this->throwConnectionException($e);
+        }
 
         return $this;
     }
@@ -254,7 +256,7 @@ abstract class PdoAdapter extends Adapter
     #[Override]
     public function inTransaction(): bool
     {
-        return $this->getPdo()->inTransaction();
+        return $this->tryTransactionCall($this->getPdo()->inTransaction(...));
     }
 
     /**
@@ -263,7 +265,7 @@ abstract class PdoAdapter extends Adapter
     #[Override]
     public function commit(): void
     {
-        $this->getPdo()->commit();
+        $this->tryTransactionCall($this->getPdo()->commit(...));
     }
 
     /**
@@ -272,7 +274,7 @@ abstract class PdoAdapter extends Adapter
     #[Override]
     public function rollback(): void
     {
-        $this->getPdo()->rollBack();
+        $this->tryTransactionCall($this->getPdo()->rollBack(...));
     }
 
     /**
@@ -330,5 +332,19 @@ abstract class PdoAdapter extends Adapter
             return 0;
         }
         return $prepared->rowCount(...);
+    }
+
+    /**
+     * @template TReturn of mixed
+     * @param Closure(): TReturn $callback
+     * @return TReturn
+     */
+    protected function tryTransactionCall(Closure $callback): mixed
+    {
+        try {
+            return $callback();
+        } catch (PDOException $e) {
+            $this->throwTransactionException($e);
+        }
     }
 }

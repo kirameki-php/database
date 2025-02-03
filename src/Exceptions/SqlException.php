@@ -2,8 +2,6 @@
 
 namespace Kirameki\Database\Exceptions;
 
-use Kirameki\Core\Exceptions\RuntimeException;
-
-class SqlException extends RuntimeException
+class SqlException extends DatabaseException
 {
 }

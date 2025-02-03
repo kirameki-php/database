@@ -8,11 +8,13 @@ use Kirameki\Database\Exceptions\DatabaseExistsException;
 use Kirameki\Database\Exceptions\DatabaseNotFoundException;
 use Kirameki\Database\Exceptions\DropProtectionException;
 use Kirameki\Database\Query\Syntax\SqliteQuerySyntax;
+use Kirameki\Database\Schema\Statements\RawStatement;
 use Kirameki\Database\Schema\Syntax\SqliteSchemaSyntax;
-use Kirameki\Database\Transaction\IsolationLevel;
 use Kirameki\Database\Transaction\TransactionOptions;
 use Override;
 use PDO;
+use PDOException;
+use function array_map;
 use function file_exists;
 use function glob;
 use function implode;
@@ -75,7 +77,13 @@ class SqliteAdapter extends PdoAdapter
         foreach ($pragmas as $name => $value) {
             $statements[] = "PRAGMA {$name}={$value}";
         }
-        $this->getPdo()->exec(implode(';', $statements));
+
+        try {
+            $this->getPdo()->exec(implode(';', $statements));
+        } catch (PDOException $e) {
+            $this->throwConnectionException($e);
+        }
+
         return $this;
     }
 
@@ -124,10 +132,13 @@ class SqliteAdapter extends PdoAdapter
             ]);
         }
 
-        // TODO: catch PDOException and throw dedicated exception
-        $pdo = $this->getPdo();
-        $pdo->exec('CREATE TABLE _setup (id INTEGER PRIMARY KEY AUTOINCREMENT)');
-        $pdo->exec('DROP TABLE _setup');
+        $statements = [
+            new RawStatement('CREATE TABLE _setup (id INTEGER PRIMARY KEY AUTOINCREMENT)'),
+            new RawStatement('DROP TABLE _setup'),
+        ];
+        foreach ($statements as $statement) {
+            $this->runSchema($statement);
+        }
     }
 
     /**
@@ -204,6 +215,6 @@ class SqliteAdapter extends PdoAdapter
                 'level' => $level,
             ]);
         }
-        $this->getPdo()->beginTransaction();
+        $this->tryTransactionCall($this->getPdo()->beginTransaction(...));
     }
 }
