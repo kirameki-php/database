@@ -118,7 +118,7 @@ class MySqlAdapter extends PdoAdapter
         try {
             $this->executeRawStatement($setTransaction);
             if ($setOptions !== []) {
-                $this->executeRawStatement('SET' . implode(',', $setOptions));
+                $this->executeRawStatement('SET ' . implode(',', $setOptions));
             }
         } catch (PDOException $e) {
             $this->throwConnectionException($e);
