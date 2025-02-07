@@ -47,10 +47,10 @@ class DatabaseTestCase extends TestCase
         $conn->schema()->execute($builder->getStatement());
     }
 
-    public function createTempConnection(string $driver): Connection
+    public function createTempConnection(string $driver, ?string $db = null): Connection
     {
         $adapter = match ($driver) {
-            'mysql' => $this->createMySqlAdapter(),
+            'mysql' => $this->createMySqlAdapter($db),
             'sqlite' => $this->createSqliteAdapter(),
             default => throw new RuntimeException("Unsupported driver: $driver"),
         };

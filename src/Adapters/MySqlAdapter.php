@@ -110,8 +110,16 @@ class MySqlAdapter extends PdoAdapter
             . $connectionConfig->isolationLevel->value
             . ($connectionConfig->isReadOnly() ? ', READ ONLY' : '');
 
+        $setOptions = [];
+        if ($connectionConfig->transactionLockWaitTimeoutSeconds) {
+            $setOptions[] = 'innodb_lock_wait_timeout=' . $connectionConfig->transactionLockWaitTimeoutSeconds;
+        }
+
         try {
             $this->executeRawStatement($setTransaction);
+            if ($setOptions !== []) {
+                $this->executeRawStatement('SET' . implode(',', $setOptions));
+            }
         } catch (PDOException $e) {
             $this->throwConnectionException($e);
         }

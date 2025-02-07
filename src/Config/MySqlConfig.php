@@ -34,8 +34,9 @@ class MySqlConfig implements ConnectionConfig
         public ?string $charset = 'utf8mb4',
         public ?string $collation = 'utf8mb4_bin',
         public int $connectTimeoutSeconds = 3,
+        public ?int $transactionLockWaitTimeoutSeconds = 3,
         public bool $readOnly = false,
-        public IsolationLevel $isolationLevel = IsolationLevel::Serializable,
+        public IsolationLevel $isolationLevel = IsolationLevel::RepeatableRead,
         public ?array $serverOptions = null,
     )
     {

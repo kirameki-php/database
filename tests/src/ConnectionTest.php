@@ -15,6 +15,7 @@ use Kirameki\Database\Transaction\TransactionInfo;
 use Kirameki\Database\Transaction\TransactionOptions;
 use Kirameki\Event\Event;
 use Tests\Kirameki\Database\Query\QueryTestCase;
+use function dump;
 use function iterator_to_array;
 use const INF;
 
@@ -268,6 +269,50 @@ class ConnectionTest extends QueryTestCase
             }, new TransactionOptions(isolationLevel: IsolationLevel::RepeatableRead));
             $connection->query()->insertInto('t')->value(['id' => 2])->execute();
         }, new TransactionOptions(isolationLevel: IsolationLevel::Serializable));
+    }
+
+    public function test_transaction__transient_error(): void
+    {
+        $database = 'test_' . mt_rand();
+        $connection1 = $this->createTempConnection('mysql', $database);
+        $connection2 = $this->createTempConnection('mysql', $database);
+        $table = $connection1->schema()->createTable('t');
+        $table->id();
+        $table->string('name', 1)->nullable();
+        $table->execute();
+
+        $query1 = $connection1->reconnect()->query();
+        $query2 = $connection2->query();
+
+        $connection1->transaction(function() use ($query1) {
+            $query1->insertInto('t')->value(['id' => 1])->execute();
+        });
+
+        $connection1->transaction(function() use ($connection2, $query1, $query2) {
+            $connection2->transaction(function() use ($query1, $query2) {
+                $query1->select()
+                    ->from('t')
+                    ->where('id', 1)
+                    ->first();
+
+                $query2->select()
+                    ->from('t')
+                    ->where('id', 1)
+                    ->first();
+
+                $query2->update('t')
+                    ->set(['name' => 'b'])
+                    ->where('id', 1)
+                    ->execute();
+
+                $query1->update('t')
+                    ->where('id', 1)
+                    ->set(['name' => 'c'])
+                    ->execute();
+            });
+        }, new TransactionOptions(isolationLevel: IsolationLevel::Serializable));
+
+        dump($query1->select()->from('t')->execute());
     }
 
     public function test_getTransactionInfoOrNull(): void

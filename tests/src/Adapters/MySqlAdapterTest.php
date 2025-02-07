@@ -13,6 +13,7 @@ use Kirameki\Database\Schema\Statements\RawStatement as SchemaRawStatement;
 use Kirameki\Database\Transaction\IsolationLevel;
 use Kirameki\Database\Transaction\TransactionOptions;
 use Override;
+use PDOException;
 
 class MySqlAdapterTest extends PdoAdapterTestAbstract
 {
@@ -37,6 +38,17 @@ class MySqlAdapterTest extends PdoAdapterTestAbstract
         $this->expectException(ConnectionException::class);
         $this->expectExceptionMessage('SQLSTATE[HY000] [2002] No such file or directory');
         new MySqlAdapter(new DatabaseConfig([]), new MySqlConfig(socket: '/run/mysql.sock'))->connect();
+    }
+
+    public function test_connect__fail_with_timeout(): void
+    {
+        $this->expectException(ConnectionException::class);
+        $this->expectExceptionMessage('SQLSTATE[HY000] [2002] Connection timed out');
+
+        $stub = $this->createStub(MySqlAdapter::class);
+        $stub->method('connect')
+            ->willThrowException(new ConnectionException('SQLSTATE[HY000] [2002] Connection timed out', new MySqlConfig()));
+        $stub->connect();
     }
 
     #[Override]

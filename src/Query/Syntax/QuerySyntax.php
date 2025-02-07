@@ -117,6 +117,7 @@ abstract class QuerySyntax extends Syntax
             $this->formatOrderByPart($statement->orderBy),
             $this->formatLimitPart($statement->limit),
             $this->formatOffsetPart($statement->offset),
+            $this->formatSelectLockPart($statement->lock),
         ]);
 
         return $this->concat([
@@ -316,7 +317,6 @@ abstract class QuerySyntax extends Syntax
         return 'SELECT ' . $this->concat([
             $statement->distinct ? 'DISTINCT' : null,
             $this->formatSelectColumnsPart($statement),
-            $this->formatSelectLockPart($statement->lock),
         ]);
     }
 
