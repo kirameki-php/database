@@ -7,6 +7,7 @@ use Kirameki\Database\Adapters\PdoAdapter;
 use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
 use Kirameki\Database\Connection;
+use Kirameki\Database\Exceptions\ConnectionException;
 use Kirameki\Database\Exceptions\DatabaseExistsException;
 use Kirameki\Database\Exceptions\DatabaseNotFoundException;
 use Kirameki\Database\Exceptions\DropProtectionException;
@@ -133,7 +134,7 @@ abstract class PdoAdapterTestAbstract extends DatabaseTestCase
 
     public function test_connecting_twice(): void
     {
-        $this->expectException(LogicException::class);
+        $this->expectException(ConnectionException::class);
         $this->expectExceptionMessage('Already connected.');
         $adapter = $this->connect()->adapter;
         $adapter->connect();

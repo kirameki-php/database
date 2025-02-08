@@ -170,4 +170,16 @@ class DatabaseManagerTest extends QueryTestCase
         $this->assertInstanceOf(Connection::class, $connection);
         $this->assertSame($adapter, $connection->adapter);
     }
+
+    public function test__no_connection_shares_adapters(): void
+    {
+        $connectionConfig = new SqliteConfig(':memory:');
+        $config = new DatabaseConfig(['a' => $connectionConfig, 'b' => $connectionConfig]);
+        $db = new DatabaseManager($config);
+
+        $this->assertNotSame(
+            $db->use('a')->adapter,
+            $db->use('b')->adapter,
+        );
+    }
 }

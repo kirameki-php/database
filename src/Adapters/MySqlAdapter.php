@@ -7,7 +7,10 @@ use Kirameki\Database\Config\MySqlConfig;
 use Kirameki\Database\Exceptions\DatabaseExistsException;
 use Kirameki\Database\Exceptions\DatabaseNotFoundException;
 use Kirameki\Database\Exceptions\DropProtectionException;
+use Kirameki\Database\Exceptions\LockException;
+use Kirameki\Database\Exceptions\QueryException;
 use Kirameki\Database\Exceptions\SchemaException;
+use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Statements\RawStatement as RawQueryStatement;
 use Kirameki\Database\Query\Syntax\MySqlQuerySyntax;
 use Kirameki\Database\Schema\Statements\RawStatement;
@@ -17,10 +20,13 @@ use Kirameki\Database\Transaction\TransactionOptions;
 use Override;
 use PDO;
 use PDOException;
+use Throwable;
 use function array_filter;
+use function assert;
 use function implode;
 use function iterator_to_array;
 use function str_ends_with;
+use function substr;
 
 /**
  * @extends PdoAdapter<MySqlConfig>
@@ -243,4 +249,29 @@ class MySqlAdapter extends PdoAdapter
             $this->getPdo()->beginTransaction();
         });
     }
+
+    /**
+     * @param Throwable $e
+     * @param QueryStatement $statement
+     * @return never
+     */
+    protected function throwQueryException(Throwable $e, QueryStatement $statement): never
+    {
+        assert($e instanceof PDOException);
+
+        if ($e->getCode() === 'HY000') {
+            $msg = $e->getMessage();
+
+            if ($msg === 'SQLSTATE[HY000]: General error: 3572 Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.') {
+                throw new LockException(substr($msg, 37), $statement, [], $e);
+            }
+
+            if ($msg === 'SQLSTATE[HY000]: General error: 1205 Lock wait timeout exceeded; try restarting transaction') {
+                throw new LockException(substr($msg, 37), $statement, [], $e);
+            }
+        }
+
+        parent::throwQueryException($e, $statement);
+    }
+
 }

@@ -5,9 +5,12 @@ namespace Tests\Kirameki\Database;
 use Exception;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Adapters\SqliteAdapter;
+use Kirameki\Database\Config\MySqlConfig;
 use Kirameki\Database\Events\ConnectionEstablished;
+use Kirameki\Database\Exceptions\LockException;
 use Kirameki\Database\Info\InfoHandler;
 use Kirameki\Database\Query\QueryHandler;
+use Kirameki\Database\Query\Statements\LockOption;
 use Kirameki\Database\Schema\SchemaHandler;
 use Kirameki\Database\Transaction\IsolationLevel;
 use Kirameki\Database\Transaction\TransactionContext;
@@ -17,6 +20,7 @@ use Kirameki\Event\Event;
 use Tests\Kirameki\Database\Query\QueryTestCase;
 use function dump;
 use function iterator_to_array;
+use function mt_rand;
 use const INF;
 
 class ConnectionTest extends QueryTestCase
@@ -271,11 +275,16 @@ class ConnectionTest extends QueryTestCase
         }, new TransactionOptions(isolationLevel: IsolationLevel::Serializable));
     }
 
-    public function test_transaction__transient_error(): void
+    public function test_transaction__connection_not_shared(): void
     {
+        $this->expectException(LockException::class);
+        $this->expectExceptionMessage('Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.');
+
         $database = 'test_' . mt_rand();
-        $connection1 = $this->createTempConnection('mysql', $database);
-        $connection2 = $this->createTempConnection('mysql', $database);
+        $connectionConfig = new MySqlConfig(host: 'mysql', database: $database);
+        $adapter = $this->createMySqlAdapter($database, null, $connectionConfig);
+        $connection1 = $this->createTempConnection('mysql', $adapter);
+        $connection2 = $this->createTempConnection('mysql', clone $adapter);
         $table = $connection1->schema()->createTable('t');
         $table->id();
         $table->string('name', 1)->nullable();
@@ -285,7 +294,7 @@ class ConnectionTest extends QueryTestCase
         $query2 = $connection2->query();
 
         $connection1->transaction(function() use ($query1) {
-            $query1->insertInto('t')->value(['id' => 1])->execute();
+            $query1->insertInto('t')->values([['id' => 1], ['id' => 2]])->execute();
         });
 
         $connection1->transaction(function() use ($connection2, $query1, $query2) {
@@ -293,26 +302,58 @@ class ConnectionTest extends QueryTestCase
                 $query1->select()
                     ->from('t')
                     ->where('id', 1)
+                    ->forUpdate()
                     ->first();
 
                 $query2->select()
                     ->from('t')
                     ->where('id', 1)
+                    ->forUpdate(LockOption::Nowait)
+                    ->first();
+            });
+        });
+    }
+
+    public function test_transaction__lock_timeout(): void
+    {
+        $this->expectException(LockException::class);
+        $this->expectExceptionMessage('Lock wait timeout exceeded; try restarting transaction');
+
+        $database = 'test_' . mt_rand();
+        $adapter = $this->createMySqlAdapter($database, null, new MySqlConfig(
+            host: 'mysql',
+            database: $database,
+            transactionLockWaitTimeoutSeconds: 1,
+        ));
+        $connection1 = $this->createTempConnection('mysql', $adapter);
+        $connection2 = $this->createTempConnection('mysql', clone $adapter);
+        $table = $connection1->schema()->createTable('t');
+        $table->id();
+        $table->string('name', 1)->nullable();
+        $table->execute();
+
+        $query1 = $connection1->reconnect()->query();
+        $query2 = $connection2->query();
+
+        $connection1->transaction(function() use ($query1) {
+            $query1->insertInto('t')->values([['id' => 1], ['id' => 2]])->execute();
+        });
+
+        $connection1->transaction(function() use ($connection2, $query1, $query2) {
+            $connection2->transaction(function() use ($query1, $query2) {
+                $query1->select()
+                    ->from('t')
+                    ->where('id', 1)
+                    ->forUpdate()
                     ->first();
 
-                $query2->update('t')
-                    ->set(['name' => 'b'])
+                $query2->select()
+                    ->from('t')
                     ->where('id', 1)
-                    ->execute();
-
-                $query1->update('t')
-                    ->where('id', 1)
-                    ->set(['name' => 'c'])
-                    ->execute();
+                    ->forUpdate()
+                    ->first();
             });
-        }, new TransactionOptions(isolationLevel: IsolationLevel::Serializable));
-
-        dump($query1->select()->from('t')->execute());
+        });
     }
 
     public function test_getTransactionInfoOrNull(): void

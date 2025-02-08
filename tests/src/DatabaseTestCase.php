@@ -3,8 +3,10 @@
 namespace Tests\Kirameki\Database;
 
 use Kirameki\Core\Testing\TestCase;
+use Kirameki\Database\Adapters\Adapter;
 use Kirameki\Database\Adapters\MySqlAdapter;
 use Kirameki\Database\Adapters\SqliteAdapter;
+use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
 use Kirameki\Database\Config\MySqlConfig;
 use Kirameki\Database\Config\SqliteConfig;
@@ -47,10 +49,15 @@ class DatabaseTestCase extends TestCase
         $conn->schema()->execute($builder->getStatement());
     }
 
-    public function createTempConnection(string $driver, ?string $db = null): Connection
+    /**
+     * @template TConnectionConfig of ConnectionConfig
+     * @template TAdapter of Adapter<TConnectionConfig>
+     * @param TAdapter|null $adapter
+     */
+    public function createTempConnection(string $driver, ?Adapter $adapter = null): Connection
     {
-        $adapter = match ($driver) {
-            'mysql' => $this->createMySqlAdapter($db),
+        $adapter ??= match ($driver) {
+            'mysql' => $this->createMySqlAdapter($adapter),
             'sqlite' => $this->createSqliteAdapter(),
             default => throw new RuntimeException("Unsupported driver: $driver"),
         };

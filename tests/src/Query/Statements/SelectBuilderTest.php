@@ -91,25 +91,25 @@ class SelectBuilderTest extends QueryTestCase
     public function test_lockForUpdate(): void
     {
         $sql = $this->selectBuilder()->from('User')->where('id', 1)->forUpdate()->toString();
-        $this->assertSame("SELECT * FOR UPDATE FROM `User` WHERE `id` = 1", $sql);
+        $this->assertSame("SELECT * FROM `User` WHERE `id` = 1 FOR UPDATE", $sql);
     }
 
     public function test_lockForUpdate_with_option_nowait(): void
     {
         $sql = $this->selectBuilder()->from('User')->where('id', 1)->forUpdate(LockOption::Nowait)->toString();
-        $this->assertSame("SELECT * FOR UPDATE NOWAIT FROM `User` WHERE `id` = 1", $sql);
+        $this->assertSame("SELECT * FROM `User` WHERE `id` = 1 FOR UPDATE NOWAIT", $sql);
     }
 
     public function test_lockForUpdate_with_option_skip_locked(): void
     {
         $sql = $this->selectBuilder()->from('User')->where('id', 1)->forUpdate(LockOption::SkipLocked)->toString();
-        $this->assertSame("SELECT * FOR UPDATE SKIP LOCKED FROM `User` WHERE `id` = 1", $sql);
+        $this->assertSame("SELECT * FROM `User` WHERE `id` = 1 FOR UPDATE SKIP LOCKED", $sql);
     }
 
     public function test_lockForShare(): void
     {
         $sql = $this->selectBuilder()->from('User')->where('id', 1)->forShare()->toString();
-        $this->assertSame("SELECT * FOR SHARE FROM `User` WHERE `id` = 1", $sql);
+        $this->assertSame("SELECT * FROM `User` WHERE `id` = 1 FOR SHARE", $sql);
     }
 
     public function test_where_with_two_args(): void
