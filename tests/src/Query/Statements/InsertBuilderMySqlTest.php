@@ -3,11 +3,10 @@
 namespace Tests\Kirameki\Database\Query\Statements;
 
 use Kirameki\Time\Time;
-use Tests\Kirameki\Database\Query\QueryTestCase;
 
-class InsertBuilderTest extends QueryTestCase
+class InsertBuilderMySqlTest extends InsertBuilderTestAbstract
 {
-    protected string $connection = 'mysql';
+    protected string $useConnection = 'mysql';
 
     public function test_insert_value(): void
     {

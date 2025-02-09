@@ -13,6 +13,7 @@ use Kirameki\Database\Exceptions\DatabaseNotFoundException;
 use Kirameki\Database\Exceptions\DropProtectionException;
 use Kirameki\Database\Exceptions\QueryException;
 use Kirameki\Database\Exceptions\SchemaException;
+use Kirameki\Database\Exceptions\TransactionException;
 use Kirameki\Database\Query\QueryResult;
 use Kirameki\Database\Query\Statements\Normalizable;
 use Kirameki\Database\Query\Statements\RawStatement;
@@ -20,7 +21,6 @@ use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Kirameki\Database\Schema\SchemaResult;
 use Kirameki\Database\Schema\Statements\RawStatement as SchemaRawStatement;
 use Kirameki\Time\Time;
-use LogicException;
 use stdClass;
 use Tests\Kirameki\Database\DatabaseTestCase;
 use Tests\Kirameki\Database\Query\Statements\_Support\IntCastEnum;
@@ -143,6 +143,8 @@ abstract class PdoAdapterTestAbstract extends DatabaseTestCase
 
     abstract public function test_connect_as_readOnly(): void;
 
+    abstract public function test_connect__failure_throws_ConnectionException(): void;
+
     public function test_disconnect(): void
     {
         $adapter = $this->createAdapter();
@@ -192,6 +194,23 @@ abstract class PdoAdapterTestAbstract extends DatabaseTestCase
         $adapter->rollback();
         $this->assertFalse($adapter->inTransaction());
         $this->assertSame(0, $adapter->runQuery(new RawStatement('SELECT COUNT(*) as count FROM test'))->first()->count);
+    }
+
+    public function test_beginTransaction__failure_throws_TransactionException(): void
+    {
+        $this->expectException(TransactionException::class);
+        $this->expectExceptionMessage('There is already an active transaction');
+
+        $adapter = $this->createMySqlAdapter();
+
+        $conn = $this->createTempConnection('mysql', $adapter);
+        $table = $conn->schema()->createTable('t');
+        $table->id();
+        $table->string('name', 1)->nullable();
+        $table->execute();
+
+        $adapter->beginTransaction();
+        $adapter->beginTransaction();
     }
 
     public function test_runSchema_with_valid_statement(): void

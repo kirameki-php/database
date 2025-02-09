@@ -14,6 +14,7 @@ use Kirameki\Database\Transaction\IsolationLevel;
 use Kirameki\Database\Transaction\TransactionOptions;
 use Override;
 use PDOException;
+use const PHP_INT_MAX;
 
 class MySqlAdapterTest extends PdoAdapterTestAbstract
 {
@@ -62,6 +63,17 @@ class MySqlAdapterTest extends PdoAdapterTestAbstract
         $adapter->disconnect();
         $adapter->connectionConfig->readOnly = true;
         $adapter->runQuery(new RawStatement('INSERT INTO test (id, name) VALUES (1, "a")'));
+    }
+
+    #[Override]
+    public function test_connect__failure_throws_ConnectionException(): void
+    {
+        $this->expectException(ConnectionException::class);
+        $this->expectExceptionMessage('SQLSTATE[HY000]: General error: 1229 Variable \'max_connections\' is a GLOBAL variable and should be set with SET GLOBAL');
+        $config = new MySqlConfig('mysql');
+        $config->systemVariables = ['max_connections' => PHP_INT_MAX];
+        $adapter = $this->createMySqlAdapter(connectionConfig: $config);
+        $adapter->createDatabase();
     }
 
     #[Override]

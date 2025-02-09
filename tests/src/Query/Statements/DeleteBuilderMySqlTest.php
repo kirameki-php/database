@@ -2,11 +2,9 @@
 
 namespace Tests\Kirameki\Database\Query\Statements;
 
-use Tests\Kirameki\Database\Query\QueryTestCase;
-
-class DeleteBuilderTest extends QueryTestCase
+class DeleteBuilderMySqlTest extends DeleteBuilderTestAbstract
 {
-    protected string $connection = 'mysql';
+    protected string $useConnection = 'mysql';
 
     public function test_deleteAll(): void
     {

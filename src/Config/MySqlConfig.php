@@ -23,6 +23,7 @@ class MySqlConfig implements ConnectionConfig
      * @param bool $readOnly
      * @param IsolationLevel $isolationLevel
      * @param array<string, mixed>|null $serverOptions
+     * @param array<string, mixed>|null $systemVariables
      */
     public function __construct(
         public ?string $host = null,
@@ -38,6 +39,7 @@ class MySqlConfig implements ConnectionConfig
         public bool $readOnly = false,
         public IsolationLevel $isolationLevel = IsolationLevel::RepeatableRead,
         public ?array $serverOptions = null,
+        public ?array $systemVariables = null,
     )
     {
     }

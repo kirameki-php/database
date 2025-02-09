@@ -4,6 +4,7 @@ namespace Tests\Kirameki\Database\Adapters;
 
 use Kirameki\Core\Exceptions\NotSupportedException;
 use Kirameki\Database\Config\SqliteConfig;
+use Kirameki\Database\Exceptions\ConnectionException;
 use Kirameki\Database\Exceptions\QueryException;
 use Kirameki\Database\Query\Statements\RawStatement;
 use Kirameki\Database\Schema\Statements\RawStatement as SchemaRawStatement;
@@ -27,6 +28,15 @@ class SqliteAdapterTest extends PdoAdapterTestAbstract
         $adapter->disconnect();
         $adapter->connectionConfig->readOnly = true;
         $adapter->runQuery(new RawStatement('INSERT INTO test (id, name) VALUES (1, "a")'));
+    }
+
+    #[Override]
+    public function test_connect__failure_throws_ConnectionException(): void
+    {
+        $this->expectException(ConnectionException::class);
+        $this->expectExceptionMessage('General error: 1 near "?": syntax error');
+        $adapter = $this->createSqliteAdapter(connectionConfig: new SqliteConfig(':memory:', pragmas: ['fail' => '?']));
+        $adapter->connect();
     }
 
     #[Override]

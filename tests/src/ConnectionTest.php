@@ -8,6 +8,7 @@ use Kirameki\Database\Adapters\SqliteAdapter;
 use Kirameki\Database\Config\MySqlConfig;
 use Kirameki\Database\Events\ConnectionEstablished;
 use Kirameki\Database\Exceptions\LockException;
+use Kirameki\Database\Exceptions\TransactionException;
 use Kirameki\Database\Info\InfoHandler;
 use Kirameki\Database\Query\QueryHandler;
 use Kirameki\Database\Query\Statements\LockOption;
@@ -212,7 +213,34 @@ class ConnectionTest extends QueryTestCase
         $this->assertFalse($connection->inTransaction());
     }
 
-    public function test_transaction__rollback_nested(): void
+    public function test_transaction__rollback_nested_deep(): void
+    {
+        $connection = $this->createTempConnection('sqlite');
+        $table = $connection->schema()->createTable('t');
+        $table->id();
+        $table->execute();
+
+        $called = false;
+        $thrown = null;
+        try {
+            $connection->transaction(function() use ($connection) {
+                $connection->transaction(function() use ($connection) {
+                    $connection->query()->insertInto('t')->value(['id' => 1])->execute();
+                    throw new Exception('rollback');
+                });
+            });
+        } catch (Exception $e) {
+            $called = true;
+            $thrown = $e;
+        }
+        $this->assertTrue($called);
+        $this->assertInstanceOf(Exception::class, $thrown);
+        $this->assertSame('rollback', $thrown->getMessage());
+        $this->assertFalse($connection->inTransaction());
+        $this->assertSame(0, $connection->query()->select()->from('t')->count());
+    }
+
+    public function test_transaction__rollback_nested_after_unnested(): void
     {
         $connection = $this->createTempConnection('sqlite');
         $table = $connection->schema()->createTable('t');
@@ -299,17 +327,8 @@ class ConnectionTest extends QueryTestCase
 
         $connection1->transaction(function() use ($connection2, $query1, $query2) {
             $connection2->transaction(function() use ($query1, $query2) {
-                $query1->select()
-                    ->from('t')
-                    ->where('id', 1)
-                    ->forUpdate()
-                    ->first();
-
-                $query2->select()
-                    ->from('t')
-                    ->where('id', 1)
-                    ->forUpdate(LockOption::Nowait)
-                    ->first();
+                $query1->select()->from('t')->where('id', 1)->forUpdate()->first();
+                $query2->select()->from('t')->where('id', 1)->forUpdate(LockOption::Nowait)->first();
             });
         });
     }
@@ -341,17 +360,8 @@ class ConnectionTest extends QueryTestCase
 
         $connection1->transaction(function() use ($connection2, $query1, $query2) {
             $connection2->transaction(function() use ($query1, $query2) {
-                $query1->select()
-                    ->from('t')
-                    ->where('id', 1)
-                    ->forUpdate()
-                    ->first();
-
-                $query2->select()
-                    ->from('t')
-                    ->where('id', 1)
-                    ->forUpdate()
-                    ->first();
+                $query1->select()->from('t')->where('id', 1)->forUpdate()->first();
+                $query2->select()->from('t')->where('id', 1)->forUpdate()->first();
             });
         });
     }

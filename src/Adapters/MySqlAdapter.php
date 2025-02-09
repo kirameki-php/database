@@ -22,6 +22,7 @@ use PDO;
 use PDOException;
 use Throwable;
 use function array_filter;
+use function array_map;
 use function assert;
 use function implode;
 use function iterator_to_array;
@@ -116,15 +117,16 @@ class MySqlAdapter extends PdoAdapter
             . $connectionConfig->isolationLevel->value
             . ($connectionConfig->isReadOnly() ? ', READ ONLY' : '');
 
-        $setOptions = [];
+        $vars = $connectionConfig->systemVariables ?? [];
         if ($connectionConfig->transactionLockWaitTimeoutSeconds) {
-            $setOptions[] = 'innodb_lock_wait_timeout=' . $connectionConfig->transactionLockWaitTimeoutSeconds;
+            $vars['innodb_lock_wait_timeout'] = $connectionConfig->transactionLockWaitTimeoutSeconds;
         }
 
         try {
             $this->executeRawStatement($setTransaction);
-            if ($setOptions !== []) {
-                $this->executeRawStatement('SET ' . implode(',', $setOptions));
+            if ($vars !== []) {
+                $parts = array_map(static fn($k, $v) => "{$k}={$v}", array_keys($vars), $vars);
+                $this->executeRawStatement('SET ' . implode(',', $parts));
             }
         } catch (PDOException $e) {
             $this->throwConnectionException($e);

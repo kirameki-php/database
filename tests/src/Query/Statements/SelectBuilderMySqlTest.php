@@ -9,11 +9,10 @@ use Kirameki\Database\Query\Statements\LockOption;
 use Kirameki\Database\Raw;
 use Kirameki\Time\Time;
 use Tests\Kirameki\Database\Query\Statements\_Support\IntCastEnum;
-use Tests\Kirameki\Database\Query\QueryTestCase;
 
-class SelectBuilderTest extends QueryTestCase
+class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
 {
-    protected string $connection = 'mysql';
+    protected string $useConnection = 'mysql';
 
     public function test_plain(): void
     {

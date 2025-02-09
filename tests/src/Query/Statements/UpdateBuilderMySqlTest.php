@@ -2,11 +2,9 @@
 
 namespace Tests\Kirameki\Database\Query\Statements;
 
-use Tests\Kirameki\Database\Query\QueryTestCase;
-
-class UpdateBuilderTest extends QueryTestCase
+class UpdateBuilderMySqlTest extends UpdateBuilderTestAbstract
 {
-    protected string $connection = 'mysql';
+    protected string $useConnection = 'mysql';
 
     public function test_update_value(): void
     {
