@@ -35,17 +35,17 @@ use function substr;
 class MySqlAdapter extends PdoAdapter
 {
     /**
-     * @var string
+     * @inheritdoc
      */
     protected string $identifierDelimiter = '`';
 
     /**
-     * @var string
+     * @inheritdoc
      */
     protected string $literalDelimiter = '"';
 
     /**
-     * @var string
+     * @inheritdoc
      */
     protected string $dateTimeFormat = 'Y-m-d H:i:s.u';
 

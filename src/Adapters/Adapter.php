@@ -18,6 +18,7 @@ use Kirameki\Database\Schema\SchemaResult;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 use Kirameki\Database\Transaction\TransactionOptions;
+use Kirameki\Time\Time;
 use Throwable;
 use function hrtime;
 
@@ -39,7 +40,7 @@ abstract class Adapter
     /**
      * @var string
      */
-    protected string $dateTimeFormat = DateTimeInterface::RFC3339_EXTENDED;
+    protected string $dateTimeFormat = 'Y-m-d\TH:i:s.up';
 
     /**
      * @param DatabaseConfig $databaseConfig

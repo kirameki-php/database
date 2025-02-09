@@ -15,7 +15,6 @@ use Kirameki\Database\Info\Statements\ListIndexesStatement;
 use Kirameki\Database\Info\Statements\ListTablesStatement;
 use Kirameki\Database\Info\Statements\TableExistsStatement;
 use Kirameki\Database\Query\Expressions\Aggregate;
-use Kirameki\Database\Query\Expressions\CastType;
 use Kirameki\Database\Query\Statements\Bounds;
 use Kirameki\Database\Query\Statements\CompoundDefinition;
 use Kirameki\Database\Query\Statements\ConditionDefinition;
