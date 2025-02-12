@@ -2,22 +2,29 @@
 
 namespace Kirameki\Database\Query\Expressions;
 
+use Kirameki\Database\Expression;
 use Kirameki\Database\Query\Statements\NullOrder;
 use Kirameki\Database\Query\Statements\Ordering;
 use Kirameki\Database\Query\Statements\SortOrder;
+use Kirameki\Database\Query\Syntax\QuerySyntax;
+use Kirameki\Database\Syntax;
+use Override;
 use function array_is_list;
 use function array_values;
 
-class WindowBuilder
+/**
+ * @implements Expression<QuerySyntax>
+ */
+class WindowBuilder implements Expression
 {
     /**
-     * @param Aggregate $aggregate
+     * @param QueryFunction $func
      */
     public function __construct(
-        protected readonly Aggregate $aggregate,
+        public readonly QueryFunction $func,
     )
     {
-        $aggregate->isWindowFunction = true;
+        $func->isWindowFunction = true;
     }
 
     /**
@@ -26,7 +33,7 @@ class WindowBuilder
      */
     public function partitionBy(string ...$column): static
     {
-        $this->aggregate->partitionBy = array_is_list($column) ? $column : array_values($column);
+        $this->func->partitionBy = array_is_list($column) ? $column : array_values($column);
         return $this;
     }
 
@@ -42,8 +49,8 @@ class WindowBuilder
         ?NullOrder $nulls = null,
     ): static
     {
-        $this->aggregate->orderBy ??= [];
-        $this->aggregate->orderBy[$column] = new Ordering($sort, $nulls);
+        $this->func->orderBy ??= [];
+        $this->func->orderBy[$column] = new Ordering($sort, $nulls);
         return $this;
     }
 
@@ -65,5 +72,14 @@ class WindowBuilder
     public function orderByDesc(string $column, ?NullOrder $nulls = null): static
     {
         return $this->orderBy($column, SortOrder::Descending, $nulls);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function toValue(Syntax $syntax): string
+    {
+        return $this->func->toValue($syntax);
     }
 }

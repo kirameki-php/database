@@ -14,7 +14,7 @@ use Kirameki\Database\Info\Statements\ListForeignKeysStatement;
 use Kirameki\Database\Info\Statements\ListIndexesStatement;
 use Kirameki\Database\Info\Statements\ListTablesStatement;
 use Kirameki\Database\Info\Statements\TableExistsStatement;
-use Kirameki\Database\Query\Expressions\Aggregate;
+use Kirameki\Database\Query\Expressions\QueryFunction;
 use Kirameki\Database\Query\Statements\Bounds;
 use Kirameki\Database\Query\Statements\CompoundDefinition;
 use Kirameki\Database\Query\Statements\ConditionDefinition;
@@ -32,6 +32,7 @@ use Kirameki\Database\Query\Statements\Ordering;
 use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Statements\RawStatement;
 use Kirameki\Database\Query\Statements\SelectStatement;
+use Kirameki\Database\Query\Statements\SortOrder;
 use Kirameki\Database\Query\Statements\Tags;
 use Kirameki\Database\Query\Statements\TagsFormat;
 use Kirameki\Database\Query\Statements\UpdateStatement;
@@ -857,7 +858,9 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatSortOrderingPart(string $column, Ordering $ordering): string
     {
-        return $ordering->sort->value;
+        return $ordering->sort === SortOrder::Ascending
+            ? ''
+            : $ordering->sort->value;
     }
 
     /**
@@ -899,44 +902,47 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param Aggregate $aggregate
+     * @param QueryFunction $func
      * @return string
      */
-    public function formatAggregate(Aggregate $aggregate): string
+    public function formatFunction(QueryFunction $func): string
     {
         return $this->concat([
-            $this->formatAggregateFunction($aggregate),
-            $this->formatWindowFunction($aggregate),
-            $aggregate->as !== null ? 'AS ' . $this->asIdentifier($aggregate->as) : null,
+            $this->formatFunctionNamePart($func),
+            $this->formatWindowFunctionPart($func),
+            $func->as !== null ? 'AS ' . $this->asIdentifier($func->as) : null,
         ]);
     }
 
     /**
-     * @param Aggregate $aggregate
+     * @param QueryFunction $func
      * @return string
      */
-    public function formatAggregateFunction(Aggregate $aggregate): string
+    protected function formatFunctionNamePart(QueryFunction $func): string
     {
-        return $aggregate::$function . '(' . $this->asColumn($aggregate->column) . ')';
+        $column = $func->column !== null
+            ? $this->asColumn($func->column)
+            : '';
+        return $func::$name . '(' . $column . ')';
     }
 
     /**
-     * @param Aggregate $aggregate
+     * @param QueryFunction $func
      * @return string
      */
-    protected function formatWindowFunction(Aggregate $aggregate): string
+    protected function formatWindowFunctionPart(QueryFunction $func): string
     {
-        if (!$aggregate->isWindowFunction) {
+        if (!$func->isWindowFunction) {
             return '';
         }
 
         $parts = [];
-        if ($aggregate->partitionBy) {
-            $parts[] = 'PARTITION BY ' . $this->asCsv($this->asIdentifiers($aggregate->partitionBy));
+        if ($func->partitionBy) {
+            $parts[] = 'PARTITION BY ' . $this->asCsv($this->asIdentifiers($func->partitionBy));
         }
-        if ($aggregate->orderBy !== null) {
+        if ($func->orderBy !== null) {
             $clauses = [];
-            foreach ($aggregate->orderBy as $column => $ordering) {
+            foreach ($func->orderBy as $column => $ordering) {
                 $clauses[] = $this->concat([
                     $this->asIdentifier($column),
                     $this->formatSortOrderingPart($column, $ordering),

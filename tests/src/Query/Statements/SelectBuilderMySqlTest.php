@@ -168,7 +168,7 @@ class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
     public function test_orderBy(): void
     {
         $sql = $this->selectBuilder()->from('User')->where('id', 1)->orderBy('id')->toString();
-        $this->assertSame("SELECT * FROM `User` WHERE `id` = 1 ORDER BY `id` ASC", $sql);
+        $this->assertSame("SELECT * FROM `User` WHERE `id` = 1 ORDER BY `id`", $sql);
     }
 
     public function test_orderByDesc(): void
@@ -204,7 +204,7 @@ class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
     public function test_combination(): void
     {
         $sql = $this->selectBuilder()->from('User')->where('id', 1)->groupBy('status')->having('status', 1)->limit(2)->orderBy('id')->toString();
-        $this->assertSame("SELECT * FROM `User` WHERE `id` = 1 GROUP BY `status` HAVING `status` = 1 ORDER BY `id` ASC LIMIT 2", $sql);
+        $this->assertSame("SELECT * FROM `User` WHERE `id` = 1 GROUP BY `status` HAVING `status` = 1 ORDER BY `id` LIMIT 2", $sql);
     }
 
     public function test_clone(): void

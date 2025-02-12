@@ -20,7 +20,10 @@
   "autoload": {
     "psr-4": {
       "Kirameki\\Database\\": "src/"
-    }
+    },
+    "files": [
+      "src/Query/Expressions/functions.php"
+    ]
   },
   "autoload-dev": {
     "psr-4": {

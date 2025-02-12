@@ -4,6 +4,6 @@ namespace Kirameki\Database\Query\Expressions;
 
 final class Sum extends Aggregate
 {
-    public static string $function = 'SUM';
+    public static string $name = 'SUM';
     public static string $defaultAlias = 'sum';
 }

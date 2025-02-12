@@ -4,6 +4,6 @@ namespace Kirameki\Database\Query\Expressions;
 
 final class Avg extends Aggregate
 {
-    public static string $function = 'AVG';
+    public static string $name = 'AVG';
     public static string $defaultAlias = 'avg';
 }

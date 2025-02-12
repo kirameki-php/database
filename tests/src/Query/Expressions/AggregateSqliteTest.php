@@ -8,6 +8,7 @@ use Kirameki\Database\Query\Expressions\Count;
 use Kirameki\Database\Query\Expressions\Max;
 use Kirameki\Database\Query\Expressions\Min;
 use Kirameki\Database\Query\Expressions\Sum;
+use function Kirameki\Database\Query\Expressions\row_number;
 use const PHP_INT_MAX;
 
 class AggregateSqliteTest extends AggregateTestAbstract
@@ -219,5 +220,25 @@ class AggregateSqliteTest extends AggregateTestAbstract
         $this->expectException(QueryException::class);
         $this->expectExceptionMessage('SQLSTATE[HY000]: General error: 1 integer overflow');
         $query->value('_sum_');
+    }
+
+    public function test_aggregate_over__row_number(): void
+    {
+        $connection = $this->connect();
+        $table = $connection->schema()->createTable('t');
+        $table->int('id')->primaryKey();
+        $table->execute();
+        $connection->query()->insertInto('t')
+            ->value(['id' => 1])
+            ->value(['id' => 2])
+            ->value(['id' => 3])
+            ->execute();
+
+        $query = $connection->query()
+            ->select(row_number()->over()->orderBy('id'))
+            ->from('t');
+
+        $this->assertSame('SELECT ROW_NUMBER() OVER(ORDER BY "id") AS "row" FROM "t"', $query->toString());
+        $this->assertSame([1, 2, 3], $query->execute()->map(fn($d) => $d->row)->all());
     }
 }

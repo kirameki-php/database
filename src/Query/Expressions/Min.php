@@ -4,6 +4,6 @@ namespace Kirameki\Database\Query\Expressions;
 
 final class Min extends Aggregate
 {
-    public static string $function = 'MIN';
+    public static string $name = 'MIN';
     public static string $defaultAlias = 'min';
 }
