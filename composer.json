@@ -22,6 +22,7 @@
       "Kirameki\\Database\\": "src/"
     },
     "files": [
+      "src/Functions/functions.php",
       "src/Query/Expressions/functions.php"
     ]
   },
