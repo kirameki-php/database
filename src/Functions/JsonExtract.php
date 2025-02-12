@@ -6,7 +6,6 @@ use Kirameki\Database\Expression;
 use Kirameki\Database\Query\Expressions\Column;
 use Kirameki\Database\Syntax;
 use Override;
-use function str_starts_with;
 
 final class JsonExtract implements Expression
 {
@@ -26,7 +25,7 @@ final class JsonExtract implements Expression
      * @param string $path
      * @param string|null $as
      */
-    private function __construct(
+    public function __construct(
         public readonly string|Expression $target,
         public readonly string $path,
         public readonly ?string $as = null,

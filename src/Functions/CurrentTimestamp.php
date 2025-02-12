@@ -12,7 +12,7 @@ final class CurrentTimestamp implements Expression
      * @param int|null $size
      */
     public function __construct(
-        protected ?int $size = null,
+        protected readonly ?int $size = null,
     )
     {
     }

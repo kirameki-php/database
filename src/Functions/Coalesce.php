@@ -33,7 +33,7 @@ final class Coalesce implements Expression
     /**
      * @param list<string|Expression> $values
      */
-    private function __construct(
+    public function __construct(
         public readonly array $values,
     )
     {
