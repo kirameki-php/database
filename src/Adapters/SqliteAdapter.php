@@ -43,14 +43,7 @@ class SqliteAdapter extends PdoAdapter
     {
         $config = $this->connectionConfig;
 
-        $filePath = realpath($config->filename);
-        if ($filePath === false) {
-            throw new InvalidConfigException("Database file could not be created in '{$config->filename}'.", [
-                'adapter' => $this,
-            ]);
-        }
-
-        $dsn = "sqlite:{$filePath}";
+        $dsn = "sqlite:{$config->filename}";
         $options = iterator_to_array($config->options ?? []);
         $options += [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
