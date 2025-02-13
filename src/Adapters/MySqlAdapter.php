@@ -8,7 +8,6 @@ use Kirameki\Database\Exceptions\DatabaseExistsException;
 use Kirameki\Database\Exceptions\DatabaseNotFoundException;
 use Kirameki\Database\Exceptions\DropProtectionException;
 use Kirameki\Database\Exceptions\LockException;
-use Kirameki\Database\Exceptions\QueryException;
 use Kirameki\Database\Exceptions\SchemaException;
 use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Statements\RawStatement as RawQueryStatement;

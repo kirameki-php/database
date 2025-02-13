@@ -129,7 +129,7 @@ readonly class QueryHandler
      */
     public function toString(QueryStatement $statement): string
     {
-        return $statement->toString($this->connection->adapter->getQuerySyntax());
+        return $statement->toString($this->connection->adapter->querySyntax);
     }
 
     /**

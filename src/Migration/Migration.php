@@ -217,6 +217,6 @@ abstract class Migration
      */
     protected function supportsDdlTransaction(Connection $connection): bool
     {
-        return $connection->adapter->getSchemaSyntax()->supportsDdlTransaction();
+        return $connection->adapter->schemaSyntax->supportsDdlTransaction();
     }
 }

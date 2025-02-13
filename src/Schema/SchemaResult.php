@@ -7,7 +7,7 @@ use Kirameki\Database\Schema\Statements\SchemaStatement;
 /**
  * @template TSchemaStatement of SchemaStatement
  */
-readonly class SchemaResult
+class SchemaResult
 {
     /**
      * @param TSchemaStatement $statement
@@ -15,9 +15,9 @@ readonly class SchemaResult
      * @param float $elapsedMs
      */
     public function __construct(
-        public SchemaStatement $statement,
-        public array $commands,
-        public float $elapsedMs,
+        public readonly SchemaStatement $statement,
+        public readonly array $commands,
+        public readonly float $elapsedMs,
     )
     {
     }

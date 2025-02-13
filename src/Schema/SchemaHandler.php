@@ -129,7 +129,7 @@ class SchemaHandler
      */
     public function toString(SchemaStatement $statement): string
     {
-        return $statement->toString($this->connection->adapter->getSchemaSyntax());
+        return $statement->toString($this->connection->adapter->schemaSyntax);
     }
 
     /**

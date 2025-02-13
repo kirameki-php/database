@@ -41,20 +41,36 @@ abstract class Adapter
     protected string $dateTimeFormat = 'Y-m-d\TH:i:s.up';
 
     /**
+     * @var QuerySyntax
+     */
+    public QuerySyntax $querySyntax {
+        get => $this->querySyntax ??= $this->instantiateQuerySyntax();
+    }
+
+    /**
+     * @var SchemaSyntax
+     */
+    public SchemaSyntax $schemaSyntax {
+        get => $this->schemaSyntax ??= $this->instantiateSchemaSyntax();
+    }
+
+    /**
+     * @var TypeCastRegistry
+     */
+    public protected(set) TypeCastRegistry $casters;
+
+    /**
      * @param DatabaseConfig $databaseConfig
      * @param TConnectionConfig $connectionConfig
      * @param TypeCastRegistry|null $casters
-     * @param QuerySyntax|null $querySyntax
-     * @param SchemaSyntax|null $schemaSyntax
      */
     public function __construct(
         public readonly DatabaseConfig $databaseConfig,
         public readonly ConnectionConfig $connectionConfig,
-        protected ?TypeCastRegistry $casters = null,
-        protected ?QuerySyntax $querySyntax = null,
-        protected ?SchemaSyntax $schemaSyntax = null,
+        ?TypeCastRegistry $casters = null,
     )
     {
+        $this->casters = $casters ?? new TypeCastRegistry();
     }
 
     /**
@@ -139,41 +155,9 @@ abstract class Adapter
     abstract public function explainQuery(QueryStatement $statement): QueryResult;
 
     /**
-     * @return TypeCastRegistry
-     */
-    public function getTypeCasterRegistry(): TypeCastRegistry
-    {
-        return $this->casters ??= $this->instantiateTypeCasterRegistry();
-    }
-
-    /**
-     * @return TypeCastRegistry
-     */
-    protected function instantiateTypeCasterRegistry(): TypeCastRegistry
-    {
-        return new TypeCastRegistry();
-    }
-
-    /**
-     * @return QuerySyntax
-     */
-    public function getQuerySyntax(): QuerySyntax
-    {
-        return $this->querySyntax ??= $this->instantiateQuerySyntax();
-    }
-
-    /**
      * @return QuerySyntax
      */
     abstract protected function instantiateQuerySyntax(): QuerySyntax;
-
-    /**
-     * @return SchemaSyntax
-     */
-    public function getSchemaSyntax(): SchemaSyntax
-    {
-        return $this->schemaSyntax ??= $this->instantiateSchemaSyntax();
-    }
 
     /**
      * @return SchemaSyntax

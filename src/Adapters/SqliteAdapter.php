@@ -2,7 +2,6 @@
 
 namespace Kirameki\Database\Adapters;
 
-use Kirameki\Core\Exceptions\InvalidConfigException;
 use Kirameki\Core\Exceptions\NotSupportedException;
 use Kirameki\Database\Config\SqliteConfig;
 use Kirameki\Database\Exceptions\DatabaseExistsException;

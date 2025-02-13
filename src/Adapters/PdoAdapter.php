@@ -37,17 +37,13 @@ abstract class PdoAdapter extends Adapter
     /**
      * @param DatabaseConfig $databaseConfig
      * @param TConnectionConfig $connectionConfig
-     * @param TypeCastRegistry $casters
-     * @param QuerySyntax|null $querySyntax
-     * @param SchemaSyntax|null $schemaSyntax
+     * @param TypeCastRegistry|null $casters
      * @param PDO|null $pdo
      */
     public function __construct(
         DatabaseConfig $databaseConfig,
         ConnectionConfig $connectionConfig,
         ?TypeCastRegistry $casters = null,
-        ?QuerySyntax $querySyntax = null,
-        ?SchemaSyntax $schemaSyntax = null,
         protected ?PDO $pdo = null,
     )
     {
@@ -55,8 +51,6 @@ abstract class PdoAdapter extends Adapter
             $databaseConfig,
             $connectionConfig,
             $casters,
-            $querySyntax,
-            $schemaSyntax,
         );
     }
 
@@ -124,7 +118,7 @@ abstract class PdoAdapter extends Adapter
     {
         try {
             $startTime = hrtime(true);
-            $executables = $statement->toExecutable($this->getSchemaSyntax());
+            $executables = $statement->toExecutable($this->schemaSyntax);
             array_map($this->getPdo()->exec(...), $executables);
             return $this->instantiateSchemaExecution($statement, $executables, $startTime);
         } catch (PDOException $e) {
@@ -139,7 +133,7 @@ abstract class PdoAdapter extends Adapter
     public function runQuery(QueryStatement $statement): QueryResult
     {
         try {
-            $syntax = $this->getQuerySyntax();
+            $syntax = $this->querySyntax;
             $casters = $this->getColumnCasters($statement);
 
             $template = $statement->generateTemplate($syntax);
@@ -185,7 +179,7 @@ abstract class PdoAdapter extends Adapter
     public function runQueryWithCursor(QueryStatement $statement): QueryResult
     {
         try {
-            $syntax = $this->getQuerySyntax();
+            $syntax = $this->querySyntax;
             $casters = $this->getColumnCasters($statement);
 
             $template = $statement->generateTemplate($syntax);
@@ -245,7 +239,7 @@ abstract class PdoAdapter extends Adapter
     {
         try {
             $startTime = hrtime(true);
-            $syntax = $this->getQuerySyntax();
+            $syntax = $this->querySyntax;
             $template = 'EXPLAIN ' . $statement->generateTemplate($syntax);
             $parameters = $statement->generateParameters($syntax);
             $prepared = $this->executeQueryStatement($template, $parameters);
@@ -317,7 +311,7 @@ abstract class PdoAdapter extends Adapter
         }
 
         $mapped = [];
-        $casters = $this->getTypeCasterRegistry();
+        $casters = $this->casters;
         foreach ($casts as $key => $type) {
             $mapped[$key] = $casters->getCaster($type);
         }
