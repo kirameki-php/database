@@ -39,11 +39,11 @@ abstract class QueryFunction implements Expression
     public ?array $orderBy = null;
 
     /**
-     * @param string|null $column
+     * @param string|Expression|null $column
      * @param string|null $as
      */
     public function __construct(
-        public readonly ?string $column = null,
+        public readonly string|Expression|null $column = null,
         public ?string $as = null,
     )
     {

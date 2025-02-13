@@ -3,7 +3,6 @@
 namespace Kirameki\Database\Adapters;
 
 use Closure;
-use DateTimeInterface;
 use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
 use Kirameki\Database\Exceptions\ConnectionException;
@@ -18,7 +17,6 @@ use Kirameki\Database\Schema\SchemaResult;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 use Kirameki\Database\Transaction\TransactionOptions;
-use Kirameki\Time\Time;
 use Throwable;
 use function hrtime;
 

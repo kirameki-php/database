@@ -7,8 +7,8 @@ use Kirameki\Database\Query\Expressions\Avg;
 use Kirameki\Database\Query\Expressions\Count;
 use Kirameki\Database\Query\Expressions\Max;
 use Kirameki\Database\Query\Expressions\Min;
+use Kirameki\Database\Query\Expressions\RowNumber;
 use Kirameki\Database\Query\Expressions\Sum;
-use function Kirameki\Database\Query\Expressions\row_number;
 use const PHP_INT_MAX;
 
 class AggregateSqliteTest extends AggregateTestAbstract
@@ -26,8 +26,9 @@ class AggregateSqliteTest extends AggregateTestAbstract
             ->value(['id' => 2])
             ->execute();
 
-        $expr = Min::column('id');
-        $query = $connection->query()->select($expr)->from('t');
+        $query = $connection->query()
+            ->select(new Min('id'))
+            ->from('t');
 
         $this->assertSame('SELECT MIN("id") AS "min" FROM "t"', $query->toString());
         $this->assertSame(2, $query->value('min'));
@@ -44,8 +45,9 @@ class AggregateSqliteTest extends AggregateTestAbstract
             ->value(['id' => 2])
             ->execute();
 
-        $expr = Min::column('id', '_min_');
-        $query = $connection->query()->select($expr)->from('t');
+        $query = $connection->query()
+            ->select(new Min('id', '_min_'))
+            ->from('t');
 
         $this->assertSame('SELECT MIN("id") AS "_min_" FROM "t"', $query->toString());
         $this->assertSame(2, $query->value('_min_'));
@@ -62,8 +64,9 @@ class AggregateSqliteTest extends AggregateTestAbstract
             ->value(['id' => 3])
             ->execute();
 
-        $expr = Max::column('id');
-        $query = $connection->query()->select($expr)->from('t');
+        $query = $connection->query()
+            ->select(new Max('id'))
+            ->from('t');
 
         $this->assertSame('SELECT MAX("id") AS "max" FROM "t"', $query->toString());
         $this->assertSame(3, $query->value('max'));
@@ -80,8 +83,9 @@ class AggregateSqliteTest extends AggregateTestAbstract
             ->value(['id' => 3])
             ->execute();
 
-        $expr = Max::column('id', '_max_');
-        $query = $connection->query()->select($expr)->from('t');
+        $query = $connection->query()
+            ->select(new Max('id', '_max_'))
+            ->from('t');
 
         $this->assertSame('SELECT MAX("id") AS "_max_" FROM "t"', $query->toString());
         $this->assertSame(3, $query->value('_max_'));
@@ -99,8 +103,9 @@ class AggregateSqliteTest extends AggregateTestAbstract
             ->value(['id' => 3])
             ->execute();
 
-        $expr = Count::column('*');
-        $query = $connection->query()->select($expr)->from('t');
+        $query = $connection->query()
+            ->select(new Count())
+            ->from('t');
 
         $this->assertSame('SELECT COUNT(*) AS "count" FROM "t"', $query->toString());
         $this->assertSame(3, $query->value('count'));
@@ -118,8 +123,7 @@ class AggregateSqliteTest extends AggregateTestAbstract
             ->value(['id' => 3])
             ->execute();
 
-        $expr = Count::column('*', '_cnt_');
-        $query = $connection->query()->select($expr)->from('t');
+        $query = $connection->query()->select(new Count('*', '_cnt_'))->from('t');
 
         $this->assertSame('SELECT COUNT(*) AS "_cnt_" FROM "t"', $query->toString());
         $this->assertSame(3, $query->value('_cnt_'));
@@ -137,8 +141,7 @@ class AggregateSqliteTest extends AggregateTestAbstract
             ->value(['id' => 30])
             ->execute();
 
-        $expr = Avg::column('id');
-        $query = $connection->query()->select($expr)->from('t');
+        $query = $connection->query()->select(new Avg('id'))->from('t');
 
         $this->assertSame('SELECT AVG("id") AS "avg" FROM "t"', $query->toString());
         $this->assertSame(20.0, $query->value('avg'));
@@ -175,8 +178,9 @@ class AggregateSqliteTest extends AggregateTestAbstract
             ->value(['id' => 30])
             ->execute();
 
-        $expr = Sum::column('id');
-        $query = $connection->query()->select($expr)->from('t');
+        $query = $connection->query()
+            ->select(new Sum('id'))
+            ->from('t');
 
         $this->assertSame('SELECT SUM("id") AS "sum" FROM "t"', $query->toString());
         $this->assertSame(60, $query->value('sum'));
@@ -194,8 +198,9 @@ class AggregateSqliteTest extends AggregateTestAbstract
             ->value(['id' => 30])
             ->execute();
 
-        $expr = Sum::column('id', '_sum_');
-        $query = $connection->query()->select($expr)->from('t');
+        $query = $connection->query()
+            ->select(new Sum('id', '_sum_'))
+            ->from('t');
 
         $this->assertSame('SELECT SUM("id") AS "_sum_" FROM "t"', $query->toString());
         $this->assertSame(60, $query->value('_sum_'));
@@ -235,7 +240,7 @@ class AggregateSqliteTest extends AggregateTestAbstract
             ->execute();
 
         $query = $connection->query()
-            ->select(row_number()->over()->orderBy('id'))
+            ->select(new RowNumber()->over()->orderBy('id'))
             ->from('t');
 
         $this->assertSame('SELECT ROW_NUMBER() OVER(ORDER BY "id") AS "row" FROM "t"', $query->toString());

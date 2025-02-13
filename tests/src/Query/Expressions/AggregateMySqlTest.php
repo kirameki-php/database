@@ -2,7 +2,6 @@
 
 namespace Tests\Kirameki\Database\Query\Expressions;
 
-use Kirameki\Database\Query\Expressions\Aggregate;
 use Kirameki\Database\Query\Expressions\Avg;
 use Kirameki\Database\Query\Expressions\Count;
 use Kirameki\Database\Query\Expressions\Max;
@@ -25,7 +24,7 @@ class AggregateMySqlTest extends AggregateTestAbstract
             ->value(['id' => 2])
             ->execute();
 
-        $expr = Min::column('id');
+        $expr = new Min('id');
         $query = $connection->query()->select($expr)->from('t');
 
         $this->assertSame('SELECT MIN(`id`) AS `min` FROM `t`', $query->toString());
@@ -43,7 +42,7 @@ class AggregateMySqlTest extends AggregateTestAbstract
             ->value(['id' => 2])
             ->execute();
 
-        $expr = Min::column('id', '_min_');
+        $expr = new Min('id', '_min_');
         $query = $connection->query()->select($expr)->from('t');
 
         $this->assertSame('SELECT MIN(`id`) AS `_min_` FROM `t`', $query->toString());
@@ -61,7 +60,7 @@ class AggregateMySqlTest extends AggregateTestAbstract
             ->value(['id' => 3])
             ->execute();
 
-        $expr = Max::column('id');
+        $expr = new Max('id');
         $query = $connection->query()->select($expr)->from('t');
 
         $this->assertSame('SELECT MAX(`id`) AS `max` FROM `t`', $query->toString());
@@ -79,7 +78,7 @@ class AggregateMySqlTest extends AggregateTestAbstract
             ->value(['id' => 3])
             ->execute();
 
-        $expr = Max::column('id', '_max_');
+        $expr = new Max('id', '_max_');
         $query = $connection->query()->select($expr)->from('t');
 
         $this->assertSame('SELECT MAX(`id`) AS `_max_` FROM `t`', $query->toString());
@@ -98,8 +97,9 @@ class AggregateMySqlTest extends AggregateTestAbstract
             ->value(['id' => 3])
             ->execute();
 
-        $expr = Count::column('*');
-        $query = $connection->query()->select($expr)->from('t');
+        $query = $connection->query()
+            ->select(new Count())
+            ->from('t');
 
         $this->assertSame('SELECT COUNT(*) AS `count` FROM `t`', $query->toString());
         $this->assertSame(3, $query->value('count'));
@@ -117,8 +117,9 @@ class AggregateMySqlTest extends AggregateTestAbstract
             ->value(['id' => 3])
             ->execute();
 
-        $expr = Count::column('*', '_cnt_');
-        $query = $connection->query()->select($expr)->from('t');
+        $query = $connection->query()
+            ->select(new Count('*', '_cnt_'))
+            ->from('t');
 
         $this->assertSame('SELECT COUNT(*) AS `_cnt_` FROM `t`', $query->toString());
         $this->assertSame(3, $query->value('_cnt_'));
@@ -136,8 +137,9 @@ class AggregateMySqlTest extends AggregateTestAbstract
             ->value(['id' => 30])
             ->execute();
 
-        $expr = Avg::column('id');
-        $query = $connection->query()->select($expr)->from('t');
+        $query = $connection->query()
+            ->select(new Avg('id'))
+            ->from('t');
 
         $this->assertSame('SELECT AVG(`id`) AS `avg` FROM `t`', $query->toString());
         $this->assertSame('20.0000', $query->value('avg'));
@@ -155,8 +157,9 @@ class AggregateMySqlTest extends AggregateTestAbstract
             ->value(['id' => 30])
             ->execute();
 
-        $expr = Avg::column('id', '_avg_');
-        $query = $connection->query()->select($expr)->from('t');
+        $query = $connection->query()
+            ->select(new Avg('id', '_avg_'))
+            ->from('t');
 
         $this->assertSame('SELECT AVG(`id`) AS `_avg_` FROM `t`', $query->toString());
         $this->assertSame('20.0000', $query->value('_avg_'));
@@ -195,7 +198,7 @@ class AggregateMySqlTest extends AggregateTestAbstract
             ->execute();
 
         $query = $connection->query()
-            ->select(Sum::column('id', '_sum_'))
+            ->select(new Sum('id', '_sum_'))
             ->from('t');
 
         $this->assertSame('SELECT SUM(`id`) AS `_sum_` FROM `t`', $query->toString());
@@ -214,7 +217,7 @@ class AggregateMySqlTest extends AggregateTestAbstract
             ->execute();
 
         $query = $connection->query()
-            ->select(Sum::column('id', '_sum_'))
+            ->select(new Sum('id', '_sum_'))
             ->from('t');
 
         $this->assertSame('SELECT SUM(`id`) AS `_sum_` FROM `t`', $query->toString());

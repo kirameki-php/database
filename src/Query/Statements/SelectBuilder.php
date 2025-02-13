@@ -6,7 +6,6 @@ use Closure;
 use Generator;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Expression;
-use Kirameki\Database\Query\Expressions\Aggregate;
 use Kirameki\Database\Query\Expressions\Avg;
 use Kirameki\Database\Query\Expressions\Count;
 use Kirameki\Database\Query\Expressions\Max;
@@ -510,7 +509,7 @@ class SelectBuilder extends ConditionsBuilder
         }
 
         return $this->copy()
-            ->addToSelect(Count::all('total'))
+            ->addToSelect(new Count(as: 'total'))
             ->valueOrNull('total') ?? 0;
     }
 
@@ -533,7 +532,7 @@ class SelectBuilder extends ConditionsBuilder
         }
 
         $results = $this->copy()
-            ->addToSelect(Count::all('total'))
+            ->addToSelect(new Avg(as: 'total'))
             ->execute();
 
         // when GROUP BY is defined, return in [columnValue => count] format
@@ -551,36 +550,36 @@ class SelectBuilder extends ConditionsBuilder
      * @param string $column
      * @return int|float
      */
-    public function sum(string $column): float|int
+    public function sum(string $column = '*'): float|int
     {
-        return $this->copy()->columns(Sum::all($column))->value(Sum::$defaultAlias);
+        return $this->copy()->columns(new Sum($column))->value(Sum::$defaultAlias);
     }
 
     /**
      * @param string $column
      * @return int|float
      */
-    public function avg(string $column): float|int
+    public function avg(string $column = '*'): float|int
     {
-        return $this->copy()->columns(Avg::all($column))->value(Avg::$defaultAlias);
+        return $this->copy()->columns(new Avg($column))->value(Avg::$defaultAlias);
     }
 
     /**
      * @param string $column
      * @return int
      */
-    public function min(string $column): int
+    public function min(string $column = '*'): int
     {
-        return $this->copy()->columns(Min::all($column))->value(Min::$defaultAlias);
+        return $this->copy()->columns(new Min($column))->value(Min::$defaultAlias);
     }
 
     /**
      * @param string $column
      * @return int
      */
-    public function max(string $column): int
+    public function max(string $column = '*'): int
     {
-        return $this->copy()->columns(Max::all($column))->value(Max::$defaultAlias);
+        return $this->copy()->columns(new Max($column))->value(Max::$defaultAlias);
     }
 
     #endregion execution -----------------------------------------------------------------------------------------------
