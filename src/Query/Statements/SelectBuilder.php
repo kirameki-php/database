@@ -14,6 +14,7 @@ use Kirameki\Database\Query\Expressions\Sum;
 use Kirameki\Database\Query\Pagination\Cursor;
 use Kirameki\Database\Query\Pagination\CursorPaginator;
 use Kirameki\Database\Query\Pagination\OffsetPaginator;
+use Kirameki\Database\Query\Pagination\Paginator;
 use Kirameki\Database\Query\QueryHandler;
 use Kirameki\Database\Query\QueryResult;
 use function array_is_list;
@@ -26,8 +27,6 @@ use function min;
  */
 class SelectBuilder extends ConditionsBuilder
 {
-    protected const int DEFAULT_PAGE_SIZE = 30;
-
     /**
      * @param QueryHandler $handler
      */
@@ -409,7 +408,7 @@ class SelectBuilder extends ConditionsBuilder
      * @param int $size
      * @return OffsetPaginator<mixed>
      */
-    public function offsetPaginate(int $page, int $size = self::DEFAULT_PAGE_SIZE): OffsetPaginator
+    public function offsetPaginate(int $page, int $size = Paginator::DEFAULT_PAGE_SIZE): OffsetPaginator
     {
         $total = $this->copy()->count();
         $result = $this->copy()->offset(($page - 1) * $size)->limit($size)->execute();
@@ -421,7 +420,7 @@ class SelectBuilder extends ConditionsBuilder
      * @param Cursor|null $cursor
      * @return CursorPaginator<mixed>
      */
-    public function cursorPaginate(int $size = self::DEFAULT_PAGE_SIZE, ?Cursor $cursor = null): CursorPaginator
+    public function cursorPaginate(int $size = Paginator::DEFAULT_PAGE_SIZE, ?Cursor $cursor = null): CursorPaginator
     {
         $cursor?->apply($this);
         $cursor ??= Cursor::init($this, $size);
