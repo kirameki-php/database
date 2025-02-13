@@ -2,6 +2,7 @@
 
 namespace Kirameki\Database\Adapters;
 
+use Kirameki\Core\Exceptions\InvalidConfigException;
 use Kirameki\Core\Exceptions\NotSupportedException;
 use Kirameki\Database\Config\SqliteConfig;
 use Kirameki\Database\Exceptions\DatabaseExistsException;
@@ -18,6 +19,7 @@ use function file_exists;
 use function glob;
 use function implode;
 use function iterator_to_array;
+use function realpath;
 use function unlink;
 
 /**
@@ -41,7 +43,14 @@ class SqliteAdapter extends PdoAdapter
     {
         $config = $this->connectionConfig;
 
-        $dsn = "sqlite:{$config->filename}";
+        $filePath = realpath($config->filename);
+        if ($filePath === false) {
+            throw new InvalidConfigException("Database file could not be created in '{$config->filename}'.", [
+                'adapter' => $this,
+            ]);
+        }
+
+        $dsn = "sqlite:{$filePath}";
         $options = iterator_to_array($config->options ?? []);
         $options += [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -189,14 +198,12 @@ class SqliteAdapter extends PdoAdapter
             return true;
         }
 
-        $filename = $this->connectionConfig->filename;
-
         // In-memory or temporary databases only exist when connected.
         if (!$this->isPersistentDatabase()) {
             return false;
         }
 
-        return file_exists($filename);
+        return file_exists($this->connectionConfig->filename);
     }
 
     /**
