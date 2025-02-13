@@ -159,8 +159,9 @@ class AggregateSqliteTest extends AggregateTestAbstract
             ->value(['id' => 30])
             ->execute();
 
-        $expr = Avg::column('id', '_avg_');
-        $query = $connection->query()->select($expr)->from('t');
+        $query = $connection->query()
+            ->select(new Avg('id', '_avg_'))
+            ->from('t');
 
         $this->assertSame('SELECT AVG("id") AS "_avg_" FROM "t"', $query->toString());
         $this->assertSame(20.0, $query->value('_avg_'));
@@ -217,8 +218,9 @@ class AggregateSqliteTest extends AggregateTestAbstract
             ->value(['id' => PHP_INT_MAX - 1])
             ->execute();
 
-        $expr = Sum::column('id', '_sum_');
-        $query = $connection->query()->select($expr)->from('t');
+        $query = $connection->query()
+            ->select(new Sum('id', '_sum_'))
+            ->from('t');
 
         $this->assertSame('SELECT SUM("id") AS "_sum_" FROM "t"', $query->toString());
 

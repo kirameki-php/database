@@ -178,7 +178,7 @@ class AggregateMySqlTest extends AggregateTestAbstract
             ->execute();
 
         $query = $connection->query()
-            ->select(Sum::column('id'))
+            ->select(new Sum('id'))
             ->from('t');
 
         $this->assertSame('SELECT SUM(`id`) AS `sum` FROM `t`', $query->toString());

@@ -4,21 +4,8 @@ namespace Kirameki\Database\Query\Expressions;
 
 use Kirameki\Database\Expression;
 
-/**
- * @consistent-constructor
- */
 abstract class Aggregate extends QueryFunction
 {
-    /**
-     * @param string $column
-     * @param string|null $as
-     * @return static
-     */
-    public static function column(string $column, ?string $as = null): static
-    {
-        return new static($column, $as);
-    }
-
     /**
      * @param string $column
      * @param string|null $as
