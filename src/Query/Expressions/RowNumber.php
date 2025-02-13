@@ -6,9 +6,4 @@ final class RowNumber extends RankingFunction
 {
     public static string $name = 'ROW_NUMBER';
     public static string $defaultAlias = 'row';
-
-    public static function _(): self
-    {
-        return new self();
-    }
 }
