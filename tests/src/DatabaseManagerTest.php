@@ -5,7 +5,6 @@ namespace Tests\Kirameki\Database;
 use Kirameki\Core\Exceptions\InvalidConfigException;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Adapters\SqliteAdapter;
-use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
 use Kirameki\Database\Config\MySqlConfig;
 use Kirameki\Database\Config\SqliteConfig;

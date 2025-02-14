@@ -18,7 +18,6 @@ use function file_exists;
 use function glob;
 use function implode;
 use function iterator_to_array;
-use function realpath;
 use function unlink;
 
 /**

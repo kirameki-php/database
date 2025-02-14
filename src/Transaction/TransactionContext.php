@@ -18,10 +18,7 @@ class TransactionContext implements TransactionInfo
     /**
      * @var int
      */
-    public protected(set) int $count = 0 {
-        get => $this->count;
-        set => $this->count = $value;
-    }
+    public protected(set) int $count = 0;
 
     /**
      * @var EventHandler<TransactionCommitting>
