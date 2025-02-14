@@ -26,26 +26,46 @@ use Throwable;
 class Connection
 {
     /**
+     * @var QueryHandler|null
+     */
+    protected ?QueryHandler $queryHandler = null;
+
+    /**
+     * @var SchemaHandler|null
+     */
+    protected ?SchemaHandler $schemaHandler = null;
+
+    /**
+     * @var InfoHandler|null
+     */
+    protected ?InfoHandler $infoHandler = null;
+
+    /**
+     * @var TransactionContext|null
+     */
+    protected ?TransactionContext $transactionContext = null;
+
+    /**
+     * @var Randomizer|null
+     */
+    protected ?Randomizer $randomizer = null;
+
+    /**
+     * @var Tags
+     */
+    public Tags $tags {
+        get => $this->tags ??= new Tags();
+    }
+
+    /**
      * @param string $name
      * @param Adapter<covariant ConnectionConfig> $adapter
      * @param EventEmitter|null $events
-     * @param QueryHandler|null $queryHandler
-     * @param SchemaHandler|null $schemaHandler
-     * @param InfoHandler|null $infoHandler
-     * @param TransactionContext|null $transactionContext
-     * @param Tags|null $tags
-     * @param Randomizer|null $randomizer
      */
     public function __construct(
         public readonly string $name,
         public readonly Adapter $adapter,
         protected readonly ?EventEmitter $events = null,
-        protected ?QueryHandler $queryHandler = null,
-        protected ?SchemaHandler $schemaHandler = null,
-        protected ?InfoHandler $infoHandler = null,
-        protected ?TransactionContext $transactionContext = null,
-        protected ?Tags $tags = null,
-        protected ?Randomizer $randomizer = null,
     )
     {
     }
@@ -128,7 +148,7 @@ class Connection
      */
     public function query(): QueryHandler
     {
-        return $this->queryHandler ??= new QueryHandler($this, $this->events, $this->getTags());
+        return $this->queryHandler ??= new QueryHandler($this, $this->events, $this->tags);
     }
 
     /**
@@ -145,14 +165,6 @@ class Connection
     public function info(): InfoHandler
     {
         return $this->infoHandler ??= new InfoHandler($this);
-    }
-
-    /**
-     * @return Tags
-     */
-    public function getTags(): Tags
-    {
-        return $this->tags ??= new Tags();
     }
 
     /**

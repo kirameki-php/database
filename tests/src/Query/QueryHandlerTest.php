@@ -76,7 +76,7 @@ class QueryHandlerTest extends QueryTestCase
         $this->listenToQueryExecuted();
 
         $statement = new RawStatement('SELECT * FROM users');
-        $connection->getTags()->set('a', 1);
+        $connection->tags->set('a', 1);
         $statement->tags = new Tags(['b' => 2]);
         $handler = $connection->query();
         $result = $handler->execute($statement);
@@ -99,7 +99,7 @@ class QueryHandlerTest extends QueryTestCase
         $this->listenToQueryExecuted();
 
         $handler = $connection->query();
-        $connection->getTags()->set('a', 1);
+        $connection->tags->set('a', 1);
         $result = $handler->executeRaw('SELECT * FROM users');
         $this->assertSame('SELECT * FROM users /* a=1 */', $result->template);
         $this->assertSame([], $result->parameters);
@@ -119,7 +119,7 @@ class QueryHandlerTest extends QueryTestCase
             ->execute();
 
         $handler = $connection->query();
-        $connection->getTags()->set('a', 1);
+        $connection->tags->set('a', 1);
         $result = $handler->executeRaw('SELECT * FROM users WHERE id = ?', [1]);
         $this->assertSame('SELECT * FROM users WHERE id = ? /* a=1 */', $result->template);
         $this->assertSame([1], $result->parameters);
@@ -157,7 +157,7 @@ class QueryHandlerTest extends QueryTestCase
             ->execute();
 
         $handler = $connection->query();
-        $connection->getTags()->set('a', 1);
+        $connection->tags->set('a', 1);
         $result = $handler->executeRaw('SELECT * FROM users', tags: new Tags(['b' => 2]));
         $this->assertSame('SELECT * FROM users /* b=2,a=1 */', $result->template);
         $this->assertSame([], $result->parameters);
@@ -253,7 +253,7 @@ class QueryHandlerTest extends QueryTestCase
     public function test_toString(): void
     {
         $connection = $this->sqliteConnection();
-        $connection->getTags()->set('a', 1);
+        $connection->tags->set('a', 1);
         $statement = new RawStatement('SELECT * FROM users');
         $statement->tags = new Tags(['b' => 2]);
         $result = $connection->query()->toString($statement);

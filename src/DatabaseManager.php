@@ -39,15 +39,17 @@ class DatabaseManager
         get => $this->default ??= $this->resolveDefaultConnectionName();
     }
 
+    protected TypeCastRegistry $casters {
+        get => $this->casters ??= new TypeCastRegistry();
+    }
+
     /**
      * @param DatabaseConfig $config
      * @param EventEmitter|null $events
-     * @param TypeCastRegistry $casters
      */
     public function __construct(
         public readonly DatabaseConfig $config,
         protected readonly ?EventEmitter $events = null,
-        protected ?TypeCastRegistry $casters = null,
     )
     {
         if ($config->connections === []) {
@@ -224,7 +226,7 @@ class DatabaseManager
      */
     protected function getMySqlAdapter(ConnectionConfig $connectionConfig): MySqlAdapter
     {
-        return new MySqlAdapter($this->config, $connectionConfig, $this->getTypeCastRegistry());
+        return new MySqlAdapter($this->config, $connectionConfig, $this->casters);
     }
 
     /**
@@ -233,14 +235,6 @@ class DatabaseManager
      */
     protected function getSqliteAdapter(SqliteConfig $connectionConfig): SqliteAdapter
     {
-        return new SqliteAdapter($this->config, $connectionConfig, $this->getTypeCastRegistry());
-    }
-
-    /**
-     * @return TypeCastRegistry
-     */
-    protected function getTypeCastRegistry(): TypeCastRegistry
-    {
-        return $this->casters ??= new TypeCastRegistry();
+        return new SqliteAdapter($this->config, $connectionConfig, $this->casters);
     }
 }

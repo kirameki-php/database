@@ -150,12 +150,12 @@ class ConnectionTest extends QueryTestCase
         $this->assertSame($infoHandler, $connection->info(), 'test cached');
     }
 
-    public function test_getTags(): void
+    public function test_tags(): void
     {
         $connection = $this->createTempConnection('sqlite');
-        $tags = $connection->getTags();
+        $tags = $connection->tags;
         $this->assertSame([], iterator_to_array($tags));
-        $this->assertSame($tags, $connection->getTags(), 'test cached');
+        $this->assertSame($tags, $connection->tags, 'test cached');
     }
 
     public function test_transaction__simple(): void
