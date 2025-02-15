@@ -138,13 +138,13 @@ class ConditionBuilder
      */
     public static function raw(string $raw): static
     {
-        return new static()->expr(new Raw($raw));
+        return new static('_RAW_')->expr(new Raw($raw));
     }
 
     /**
-     * @param string|iterable<int, string>|Expression|null $column
+     * @param string|iterable<int, string>|Expression $column
      */
-    protected function __construct(string|iterable|Expression|null $column = null)
+    protected function __construct(string|iterable|Expression $column)
     {
         $this->root = $this->current = new ConditionDefinition($column);
         $this->defined = false;

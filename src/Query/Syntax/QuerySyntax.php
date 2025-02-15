@@ -61,7 +61,6 @@ use function preg_quote;
 use function preg_replace_callback;
 use function rawurlencode;
 use function str_contains;
-use function unreachable;
 
 abstract class QuerySyntax extends Syntax
 {
@@ -619,7 +618,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForEqual(ConditionDefinition $def): string
     {
-        $column = $this->asColumn($def->column ?? unreachable());
+        $column = $this->asColumn($def->column);
         $negated = $def->negated;
         $value = $def->value;
 
@@ -634,7 +633,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForLessThanOrEqualTo(ConditionDefinition $def): string
     {
-        $column = $this->asColumn($def->column ?? unreachable());
+        $column = $this->asColumn($def->column);
         $operator = $def->negated ? '>' : '<=';
         $value = $def->value;
         return $this->formatConditionForOperator($column, $operator, $value);
@@ -646,7 +645,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForLessThan(ConditionDefinition $def): string
     {
-        $column = $this->asColumn($def->column ?? unreachable());
+        $column = $this->asColumn($def->column);
         $operator = $def->negated ? '>=' : '<';
         $value = $def->value;
         return $this->formatConditionForOperator($column, $operator, $value);
@@ -658,7 +657,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForGreaterThanOrEqualTo(ConditionDefinition $def): string
     {
-        $column = $this->asColumn($def->column ?? unreachable());
+        $column = $this->asColumn($def->column);
         $operator = $def->negated ? '<' : '>=';
         $value = $def->value;
         return $this->formatConditionForOperator($column, $operator, $value);
@@ -670,7 +669,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForGreaterThan(ConditionDefinition $def): string
     {
-        $column = $this->asColumn($def->column ?? unreachable());
+        $column = $this->asColumn($def->column);
         $operator = $def->negated ? '<=' : '>';
         $value = $def->value;
         return $this->formatConditionForOperator($column, $operator, $value);
@@ -682,7 +681,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForIn(ConditionDefinition $def): string
     {
-        $column = $this->asColumn($def->column ?? unreachable());
+        $column = $this->asColumn($def->column);
         $operator = ($def->negated ? Logic::Not->value : '') . $def->operator->value;
         $value = $def->value;
 
@@ -711,7 +710,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForBetween(ConditionDefinition $def): string
     {
-        $column = $this->asColumn($def->column ?? unreachable());
+        $column = $this->asColumn($def->column);
         $operator = ($def->negated ? Logic::Not->value : '') . $def->operator->value;
         $min = $this->asPlaceholder($def->value[0]);
         $max = $this->asPlaceholder($def->value[1]);
@@ -725,7 +724,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForExists(ConditionDefinition $def): string
     {
-        $column = $this->asColumn($def->column ?? unreachable());
+        $column = $this->asColumn($def->column);
         $operator = ($def->negated ? Logic::Not->value : '') . $def->operator->value;
         $value = $def->value;
 
@@ -744,7 +743,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForLike(ConditionDefinition $def): string
     {
-        $column = $this->asColumn($def->column ?? unreachable());
+        $column = $this->asColumn($def->column);
         $operator = ($def->negated ? Logic::Not->value : '') . $def->operator->value;
         $value = $def->value;
         return $this->formatConditionForOperator($column, $operator, $value);
@@ -756,7 +755,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForRange(ConditionDefinition $def): string
     {
-        $column = $this->asColumn($def->column ?? unreachable());
+        $column = $this->asColumn($def->column);
         $negated = $def->negated;
         $logic = $negated ? Logic::Or : Logic::And;
         $value = $def->value;
