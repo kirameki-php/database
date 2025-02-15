@@ -11,15 +11,16 @@ class MySqlConfig implements ConnectionConfig
      * For why the collation is set to utf8mb4_bin by default, see
      * https://dev.mysql.com/blog-archive/sushi-beer-an-introduction-of-utf8-support-in-mysql-8-0/
      *
-     * @param string $database
      * @param string|null $host
      * @param int|null $port
      * @param string|null $socket
+     * @param string $database
      * @param string|null $username
      * @param string|null $password
      * @param string|null $charset
      * @param string|null $collation
      * @param int $connectTimeoutSeconds
+     * @param int|null $transactionLockWaitTimeoutSeconds
      * @param bool $readOnly
      * @param IsolationLevel $isolationLevel
      * @param array<string, mixed>|null $serverOptions

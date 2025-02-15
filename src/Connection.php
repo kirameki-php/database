@@ -249,9 +249,9 @@ class Connection
     /**
      * @param TransactionContext $context
      * @param Throwable $throwable
-     * @return void
+     * @return never
      */
-    protected function rollbackAndThrow(TransactionContext $context, Throwable $throwable): void
+    protected function rollbackAndThrow(TransactionContext $context, Throwable $throwable): never
     {
         if ($context->count === 1) {
             $this->adapter->rollback();
