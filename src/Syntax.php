@@ -5,16 +5,12 @@ namespace Kirameki\Database;
 use BackedEnum;
 use DateTimeInterface;
 use Kirameki\Collections\Utils\Arr;
-use Kirameki\Core\Exceptions\NotSupportedException;
-use Kirameki\Core\Value;
 use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
 use function array_filter;
 use function array_map;
-use function dump;
 use function implode;
 use function is_iterable;
-use function is_string;
 use function preg_match;
 use function preg_quote;
 use function str_replace;
@@ -97,24 +93,25 @@ abstract class Syntax
     }
 
     /**
-     * @param iterable<int, mixed> $columns
+     * @param iterable<int, string|iterable<int, string>|Expression> $columns
      * @param bool $withAlias
      * @return list<string>
      */
     public function asColumns(iterable $columns, bool $withAlias = false): array
     {
-        return array_map(
-            fn($column) => $this->asColumn($column, $withAlias),
-            Arr::values($columns),
-        );
+        $results = [];
+        foreach ($columns as $column) {
+            $results[] = $this->asColumn($column, $withAlias);
+        }
+        return $results;
     }
 
     /**
-     * @param mixed $name
+     * @param string|iterable<int, string>|Expression $name
      * @param bool $withAlias
      * @return string
      */
-    public function asColumn(mixed $name, bool $withAlias = false): string
+    public function asColumn(string|iterable|Expression $name, bool $withAlias = false): string
     {
         if ($name instanceof Expression) {
             return $name->toValue($this);
@@ -124,38 +121,34 @@ abstract class Syntax
             return $this->asEnclosedCsv($this->asColumns($name));
         }
 
-        if (is_string($name)) {
-            $table = null;
-            $as = null;
-            if (preg_match('/(\.| as | AS )/', $name)) {
-                $dlm = preg_quote($this->identifierDelimiter);
-                $patterns = [];
-                $patterns[] = '(' . $dlm . '?(?<table>[^\.' . $dlm . ']+)' . $dlm . '?\.)?';
-                $patterns[] = $dlm . '?(?<column>[^ ' . $dlm . ']+)' . $dlm . '?';
-                if ($withAlias) {
-                    $patterns[] = '( (AS|as) ' . $dlm . '?(?<as>[^' . $dlm . ']+)' . $dlm . '?)?';
-                }
-                $pattern = '/^' . implode('', $patterns) . '$/';
-                $match = null;
-                if (preg_match($pattern, $name, $match)) {
-                    $table = $match['table'] !== '' ? $match['table'] : null;
-                    $name = $match['column'];
-                    $as = $match['as'] ?? null;
-                }
+        $table = null;
+        $as = null;
+        if (preg_match('/(\.| as | AS )/', $name)) {
+            $dlm = preg_quote($this->identifierDelimiter);
+            $patterns = [];
+            $patterns[] = '(' . $dlm . '?(?<table>[^\.' . $dlm . ']+)' . $dlm . '?\.)?';
+            $patterns[] = $dlm . '?(?<column>[^ ' . $dlm . ']+)' . $dlm . '?';
+            if ($withAlias) {
+                $patterns[] = '( (AS|as) ' . $dlm . '?(?<as>[^' . $dlm . ']+)' . $dlm . '?)?';
             }
-            if ($name !== '*') {
-                $name = $this->asIdentifier($name);
+            $pattern = '/^' . implode('', $patterns) . '$/';
+            $match = null;
+            if (preg_match($pattern, $name, $match)) {
+                $table = $match['table'] !== '' ? $match['table'] : null;
+                $name = $match['column'];
+                $as = $match['as'] ?? null;
             }
-            if ($table !== null) {
-                $name = $this->asIdentifier($table) . '.' . $name;
-            }
-            if ($as !== null) {
-                $name .= ' AS ' . $this->asIdentifier($as);
-            }
-            return $name;
         }
-
-        throw new NotSupportedException('Unknown column type: ' . Value::getType($name));
+        if ($name !== '*') {
+            $name = $this->asIdentifier($name);
+        }
+        if ($table !== null) {
+            $name = $this->asIdentifier($table) . '.' . $name;
+        }
+        if ($as !== null) {
+            $name .= ' AS ' . $this->asIdentifier($as);
+        }
+        return $name;
     }
 
     public function asBlockComment(string $comment): string

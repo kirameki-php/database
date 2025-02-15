@@ -39,8 +39,9 @@ abstract class ConditionsBuilder extends QueryBuilder
     protected function addWithDefinition(string $name, bool $recursive): WithBuilder
     {
         $builder = new WithBuilder($this->handler, $name, $recursive);
-        $this->statement->with ??= [];
-        $this->statement->with[] = $builder->getDefinition();
+        $statement = $this->statement;
+        $statement->with ??= [];
+        $statement->with[] = $builder->getDefinition();
         return $builder;
     }
 
