@@ -12,6 +12,8 @@ abstract class InsertBuilderTestAbstract extends QueryTestCase
 
     abstract public function test_insert_partial_values(): void;
 
+    abstract public function test_insert_with_no_value(): void;
+
     abstract public function test_insert_integer(): void;
 
     abstract public function test_insert_string(): void;

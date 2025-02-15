@@ -4,6 +4,7 @@ namespace Kirameki\Database\Query\Statements;
 
 use Kirameki\Database\Query\QueryHandler;
 use Kirameki\Database\Query\QueryResult;
+use function dump;
 
 /**
  * @template TQueryStatement of QueryStatement
@@ -48,13 +49,24 @@ abstract class QueryBuilder
 
     /**
      * @param string $key
-     * @param mixed $value
+     * @param scalar $value
      * @return $this
      */
     public function setTag(string $key, mixed $value): static
     {
-        $tags = $this->statement->tags ??= new Tags();
-        $tags->set($key, $value);
+        return $this->withTags([$key => $value]);
+    }
+
+    /**
+     * @param iterable<string, scalar> $tags
+     * @return $this
+     */
+    public function withTags(iterable $tags): static
+    {
+        $_tags = $this->statement->tags ??= new Tags();
+        foreach ($tags as $key => $value) {
+            $_tags->set($key, $value);
+        }
         return $this;
     }
 

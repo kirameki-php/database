@@ -112,12 +112,12 @@ class MySqlQuerySyntax extends QuerySyntax
     {
         $row->type = match ($row->type) {
             'int', 'mediumint', 'tinyint', 'smallint', 'bigint' => 'int',
-            'decimal', 'float', 'double' => 'float',
-            'bool' => 'bool',
+            'float', 'double' => 'float',
+            'decimal' => 'decimal',
             'varchar' => 'string',
             'datetime' => 'datetime',
             'json' => 'json',
-            'blob' => 'binary',
+            'binary' => 'binary',
             default => throw new LogicException('Unsupported column type: ' . $row->type, [
                 'type' => $row->type,
             ]),

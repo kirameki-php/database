@@ -5,7 +5,6 @@ namespace Kirameki\Database\Query\Syntax;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Exceptions\NotSupportedException;
-use Kirameki\Core\Exceptions\UnreachableException;
 use Kirameki\Core\Value;
 use Kirameki\Database\Exceptions\DropProtectionException;
 use Kirameki\Database\Expression;
@@ -78,26 +77,30 @@ abstract class QuerySyntax extends Syntax
         $parameters = Arr::flatten($parameters);
         $remains = count($parameters);
 
-        return (string) preg_replace_callback('/\?\??/', function($matches) use ($template, &$parameters, &$remains) {
+        $interpolated = (string) preg_replace_callback('/\?\??/', function($matches) use (&$parameters, &$remains) {
             if ($matches[0] === '??') {
                 return '??';
             }
-            if ($remains > 0) {
-                $value = current($parameters);
-                next($parameters);
-                $remains--;
-                return match (true) {
-                    is_null($value) => 'NULL',
-                    is_bool($value) => $value ? 'TRUE' : 'FALSE',
-                    is_string($value) => $this->asLiteral($value),
-                    default => (string) $value,
-                };
-            }
-            throw new UnreachableException('No more parameters to interpolate', [
+            $value = current($parameters);
+            next($parameters);
+            $remains--;
+            return match (true) {
+                is_null($value) => 'NULL',
+                is_bool($value) => $value ? 'TRUE' : 'FALSE',
+                is_string($value) => $this->asLiteral($value),
+                default => (string) $value,
+            };
+        }, $template);
+
+        if ($remains !== 0) {
+            throw new LogicException("Invalid number of parameters given for query. (query: {$template}, remains: {$remains})", [
                 'template' => $template,
                 'parameters' => $parameters,
+                'remains' => $remains,
             ]);
-        }, $template);
+        }
+
+        return $interpolated;
     }
 
     /**

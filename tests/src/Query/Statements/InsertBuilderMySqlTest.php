@@ -26,6 +26,12 @@ class InsertBuilderMySqlTest extends InsertBuilderTestAbstract
         $this->assertSame("INSERT INTO `User` (`status`, `name`) VALUES (1, DEFAULT), (DEFAULT, \"abc\")", $sql);
     }
 
+    public function test_insert_with_no_value(): void
+    {
+        $sql = $this->insertBuilder('User')->toString();
+        $this->assertSame('INSERT INTO `User` DEFAULT VALUES', $sql);
+    }
+
     public function test_insert_integer(): void
     {
         $sql = $this->insertBuilder('User')->values([['id' => 1], ['id' => 2]])->toString();
