@@ -11,6 +11,8 @@ use Kirameki\Database\Query\Statements\Tags;
 use Kirameki\Database\Query\Statements\UpdateBuilder;
 use Kirameki\Database\Query\Statements\UpsertBuilder;
 use Kirameki\Event\Event;
+use Kirameki\Time\Time;
+use Tests\Kirameki\Database\Query\_Support\StatusEnum;
 
 class QueryHandlerTest extends QueryTestCase
 {
@@ -132,17 +134,23 @@ class QueryHandlerTest extends QueryTestCase
         $table = $connection->schema()->createTable('users');
         $table->id();
         $table->datetime('time');
+        $table->int('status');
         $table->execute();
 
+        $time = new Time('2021-01-01 00:00:00.000');
+        $status = StatusEnum::Active;
         $connection->query()->insertInto('users')
-            ->value(['id' => 1, 'time' => '2021-01-01 00:00:00.000'])
+            ->value(['id' => 1, 'time' => $time, 'status' => $status])
             ->execute();
 
         $handler = $connection->query();
-        $result = $handler->executeRaw('SELECT * FROM users');
+        $result = $handler->executeRaw('SELECT * FROM users', casts: [
+            'time' => Time::class,
+            'status' => StatusEnum::class,
+        ]);
         $this->assertSame('SELECT * FROM users', $result->template);
         $this->assertSame([], $result->parameters);
-        $this->assertSame(['id' => 1, 'time' => '2021-01-01 00:00:00.000'], (array) $result->first());
+        $this->assertEquals(['id' => 1, 'time' => $time, 'status' => $status], (array) $result->first());
     }
 
     public function test_executeRaw_with_tags(): void
