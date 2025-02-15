@@ -51,7 +51,7 @@ abstract class Paginator extends QueryResult
     }
 
     /**
-     * @return int
+     * @return int|null
      */
     public function getNextPage(): ?int
     {
@@ -59,7 +59,7 @@ abstract class Paginator extends QueryResult
     }
 
     /**
-     * @return int
+     * @return int|null
      */
     public function getPreviousPage(): ?int
     {

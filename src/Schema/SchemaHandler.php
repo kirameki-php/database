@@ -17,6 +17,11 @@ use Random\Randomizer;
 
 class SchemaHandler
 {
+    public Randomizer $randomizer {
+        get => $this->randomizer ??= new Randomizer();
+        set => $this->randomizer = $value;
+    }
+
     /**
      * @param Connection $connection
      * @param EventEmitter|null $events
@@ -25,9 +30,12 @@ class SchemaHandler
     public function __construct(
         public readonly Connection $connection,
         protected readonly ?EventEmitter $events = null,
-        protected ?Randomizer $randomizer = null,
+        ?Randomizer $randomizer = null,
     )
     {
+        if ($randomizer !== null) {
+            $this->randomizer = $randomizer;
+        }
     }
 
     /**
@@ -150,13 +158,5 @@ class SchemaHandler
     {
         $this->events?->emit(new SchemaExecuted($this->connection, $result));
         return $result;
-    }
-
-    /**
-     * @return Randomizer
-     */
-    public function getRandomizer(): Randomizer
-    {
-        return $this->randomizer ??= new Randomizer();
     }
 }

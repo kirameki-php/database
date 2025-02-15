@@ -14,7 +14,7 @@ class CursorPaginator extends Paginator
 {
     /**
      * @param QueryResult<SelectStatement, TRow> $result
-     * @param Cursor $cursor,
+     * @param Cursor $cursor
      */
     public function __construct(
         QueryResult $result,

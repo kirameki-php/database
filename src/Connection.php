@@ -46,26 +46,27 @@ class Connection
     protected ?TransactionContext $transactionContext = null;
 
     /**
-     * @var Randomizer|null
-     */
-    protected ?Randomizer $randomizer = null;
-
-    /**
      * @var Tags
      */
     public Tags $tags {
         get => $this->tags ??= new Tags();
     }
 
+    public ?TransactionInfo $transactionInfo {
+        get => $this->transactionContext;
+    }
+
     /**
      * @param string $name
      * @param Adapter<covariant ConnectionConfig> $adapter
      * @param EventEmitter|null $events
+     * @param Randomizer|null $randomizer
      */
     public function __construct(
         public readonly string $name,
         public readonly Adapter $adapter,
         protected readonly ?EventEmitter $events = null,
+        protected ?Randomizer $randomizer = null,
     )
     {
     }
@@ -191,11 +192,11 @@ class Connection
     }
 
     /**
-     * @return TransactionInfo
+     * @return bool
      */
-    public function getTransactionInfoOrNull(): ?TransactionInfo
+    public function inTransaction(): bool
     {
-        return $this->transactionContext;
+        return $this->transactionContext !== null;
     }
 
     /**
@@ -248,9 +249,9 @@ class Connection
     /**
      * @param TransactionContext $context
      * @param Throwable $throwable
-     * @return never
+     * @return void
      */
-    protected function rollbackAndThrow(TransactionContext $context, Throwable $throwable): never
+    protected function rollbackAndThrow(TransactionContext $context, Throwable $throwable): void
     {
         if ($context->count === 1) {
             $this->adapter->rollback();
@@ -271,14 +272,6 @@ class Connection
         if ($context->count === 0) {
             $this->transactionContext = null;
         }
-    }
-
-    /**
-     * @return bool
-     */
-    public function inTransaction(): bool
-    {
-        return $this->transactionContext !== null;
     }
 
     /**

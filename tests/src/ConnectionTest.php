@@ -366,12 +366,12 @@ class ConnectionTest extends QueryTestCase
         });
     }
 
-    public function test_getTransactionInfoOrNull(): void
+    public function test_transactionInfo(): void
     {
         $connection = $this->createTempConnection('sqlite');
-        $this->assertNull($connection->getTransactionInfoOrNull());
+        $this->assertNull($connection->transactionInfo);
         $connection->transaction(function() use ($connection) {
-            $this->assertInstanceOf(TransactionContext::class, $connection->getTransactionInfoOrNull());
+            $this->assertInstanceOf(TransactionContext::class, $connection->transactionInfo);
         });
     }
 }
