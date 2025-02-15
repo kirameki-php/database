@@ -60,6 +60,12 @@ class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
         $this->assertSame("SELECT `u`.*, `u`.`name` FROM `User` AS `u`", $sql);
     }
 
+    public function test_columns_with_alias_embedded(): void
+    {
+        $sql = $this->selectBuilder()->from('User as u')->columns('u.name as u_name')->toString();
+        $this->assertSame("SELECT `u`.`name` AS `u_name` FROM `User` AS `u`", $sql);
+    }
+
     public function test_distinct(): void
     {
         $sql = $this->selectBuilder()->from('User')->columns('id')->distinct()->toString();

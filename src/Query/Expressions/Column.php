@@ -27,6 +27,6 @@ class Column implements Expression
     #[Override]
     public function toValue(Syntax $syntax): string
     {
-        return $syntax->asColumn($this->column);
+        return $syntax->asColumn($this->column, true);
     }
 }

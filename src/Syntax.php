@@ -11,6 +11,7 @@ use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
 use function array_filter;
 use function array_map;
+use function dump;
 use function implode;
 use function is_iterable;
 use function is_string;
@@ -97,11 +98,15 @@ abstract class Syntax
 
     /**
      * @param iterable<int, mixed> $columns
+     * @param bool $withAlias
      * @return list<string>
      */
-    public function asColumns(iterable $columns): array
+    public function asColumns(iterable $columns, bool $withAlias = false): array
     {
-        return array_map($this->asColumn(...), Arr::values($columns));
+        return array_map(
+            fn($column) => $this->asColumn($column, $withAlias),
+            Arr::values($columns),
+        );
     }
 
     /**
