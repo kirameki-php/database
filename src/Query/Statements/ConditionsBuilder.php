@@ -100,6 +100,16 @@ abstract class ConditionsBuilder extends QueryBuilder
         return $this->where(ConditionBuilder::raw($raw));
     }
 
+    public function whereExists(SelectBuilder $query): static
+    {
+        return $this->where(ConditionBuilder::for('_EXISTS_')->exists($query));
+    }
+
+    public function whereNotExists(SelectBuilder $query): static
+    {
+        return $this->where(ConditionBuilder::for('_NOT_EXISTS_')->notExists($query));
+    }
+
     /**
      * @param mixed ...$args
      * @return $this

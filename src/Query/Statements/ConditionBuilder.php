@@ -104,8 +104,6 @@ class ConditionBuilder
             'notIn' => $self->notIn($value),
             'between' => $self->between($value[0], $value[1]),
             'notBetween' => $self->notBetween($value[0], $value[1]),
-            'exists' => $self->exists($value),
-            'notExists' => $self->notExists($value),
             'like' => $self->like($value),
             'notLike' => $self->notLike($value),
             default => throw new InvalidArgumentException('Unknown operator: ' . $key),

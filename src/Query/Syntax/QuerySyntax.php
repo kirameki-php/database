@@ -5,6 +5,7 @@ namespace Kirameki\Database\Query\Syntax;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Exceptions\NotSupportedException;
+use Kirameki\Core\Func;
 use Kirameki\Core\Value;
 use Kirameki\Database\Exceptions\DropProtectionException;
 use Kirameki\Database\Expression;
@@ -46,12 +47,12 @@ use function array_map;
 use function array_push;
 use function count;
 use function current;
+use function dump;
 use function explode;
 use function implode;
 use function is_array;
 use function is_bool;
 use function is_iterable;
-use function is_null;
 use function is_string;
 use function iterator_to_array;
 use function next;
@@ -75,6 +76,11 @@ abstract class QuerySyntax extends Syntax
     {
         $parameters = $this->stringifyParameters($parameters);
         $parameters = Arr::flatten($parameters);
+
+        // null values will be turned into IS [NOT] NULL and will be part of the template so
+        // they will not be included in the parameters
+        $parameters = array_filter($parameters, Func::notNull());
+
         $remains = count($parameters);
 
         $interpolated = (string) preg_replace_callback('/\?\??/', function($matches) use (&$parameters, &$remains) {
@@ -85,7 +91,6 @@ abstract class QuerySyntax extends Syntax
             next($parameters);
             $remains--;
             return match (true) {
-                is_null($value) => 'NULL',
                 is_bool($value) => $value ? 'TRUE' : 'FALSE',
                 is_string($value) => $this->asLiteral($value),
                 default => (string) $value,
@@ -612,7 +617,10 @@ abstract class QuerySyntax extends Syntax
             return $def->value->toValue($this);
         }
 
-        throw new NotSupportedException('Condition: ' . Value::getType($def->value));
+        $message = 'Invalid Raw value. Expected: Expression. Got: ' . Value::getType($def->value) . '.';
+        throw new NotSupportedException($message, [
+            'definition' => $def,
+        ]);
     }
 
     /**
@@ -702,9 +710,9 @@ abstract class QuerySyntax extends Syntax
             return "{$column} {$operator} {$this->formatSubQuery($value)}";
         }
 
-        $error = 'Value for WHERE ' . $operator . '. ';
-        $error.= 'Expected: iterable|SelectStatement. Got: ' . Value::getType($value) . '.';
-        throw new NotSupportedException($error, [
+        $message = 'Value for WHERE ' . $operator . '. ';
+        $message.= 'Expected: iterable|SelectStatement. Got: ' . Value::getType($value) . '.';
+        throw new NotSupportedException($message, [
             'definition' => $def,
         ]);
     }
@@ -734,7 +742,7 @@ abstract class QuerySyntax extends Syntax
         $value = $def->value;
 
         if ($value instanceof QueryStatement) {
-            return "{$column} {$operator} {$this->formatSubQuery($value)}";
+            return "{$operator} {$this->formatSubQuery($value)}";
         }
 
         throw new NotSupportedException('WHERE ' . $operator . ' value: ' . Value::getType($value), [
@@ -749,7 +757,7 @@ abstract class QuerySyntax extends Syntax
     protected function formatConditionForLike(ConditionDefinition $def): string
     {
         $column = $this->asColumn($def->column);
-        $operator = ($def->negated ? Logic::Not->value : '') . $def->operator->value;
+        $operator = ($def->negated ? Logic::Not->value . ' ' : '') . $def->operator->value;
         $value = $def->value;
         return $this->formatConditionForOperator($column, $operator, $value);
     }
@@ -799,7 +807,7 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForNull(string $column, bool $negated): string
     {
-        return $column . ' IS ' . ($negated ? Logic::Not->value : '') . 'NULL';
+        return $column . ' IS ' . ($negated ? Logic::Not->value . ' ' : '') . 'NULL';
     }
 
     /**
@@ -894,16 +902,20 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param list<string>|null $returning
+     * @param list<string>|null $columns
      * @return string
      */
-    protected function formatReturningPart(?array $returning): string
+    protected function formatReturningPart(?array $columns): string
     {
-        if ($returning === null) {
+        if ($columns === null) {
             return '';
         }
 
-        return "RETURNING {$this->asCsv($this->asIdentifiers($returning))}";
+        if (count($columns) === 0) {
+            $columns[] = '*';
+        }
+
+        return "RETURNING {$this->asCsv($this->asColumns($columns))}";
     }
 
     /**
