@@ -685,7 +685,7 @@ abstract class QuerySyntax extends Syntax
     protected function formatConditionForIn(ConditionDefinition $def): string
     {
         $column = $this->asColumn($def->column);
-        $operator = ($def->negated ? Logic::Not->value : '') . $def->operator->value;
+        $operator = ($def->negated ? Logic::Not->value . ' ' : '') . $def->operator->value;
         $value = $def->value;
 
         if (is_iterable($value)) {
@@ -702,7 +702,9 @@ abstract class QuerySyntax extends Syntax
             return "{$column} {$operator} {$this->formatSubQuery($value)}";
         }
 
-        throw new NotSupportedException('WHERE ' . $operator . ' value: ' . Value::getType($value), [
+        $error = 'Value for WHERE ' . $operator . '. ';
+        $error.= 'Expected: iterable|SelectStatement. Got: ' . Value::getType($value) . '.';
+        throw new NotSupportedException($error, [
             'definition' => $def,
         ]);
     }
@@ -714,7 +716,7 @@ abstract class QuerySyntax extends Syntax
     protected function formatConditionForBetween(ConditionDefinition $def): string
     {
         $column = $this->asColumn($def->column);
-        $operator = ($def->negated ? Logic::Not->value : '') . $def->operator->value;
+        $operator = ($def->negated ? Logic::Not->value . ' ' : '') . $def->operator->value;
         $min = $this->asPlaceholder($def->value[0]);
         $max = $this->asPlaceholder($def->value[1]);
         $logic = Logic::And->value;
@@ -728,7 +730,7 @@ abstract class QuerySyntax extends Syntax
     protected function formatConditionForExists(ConditionDefinition $def): string
     {
         $column = $this->asColumn($def->column);
-        $operator = ($def->negated ? Logic::Not->value : '') . $def->operator->value;
+        $operator = ($def->negated ? Logic::Not->value . ' ' : '') . $def->operator->value;
         $value = $def->value;
 
         if ($value instanceof QueryStatement) {

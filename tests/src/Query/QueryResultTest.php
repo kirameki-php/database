@@ -72,7 +72,7 @@ class QueryResultTest extends QueryTestCase
         $result = new QueryResult($statement, $template, $parameters, 1.1, fn() => 10, ['foo']);
 
         $this->expectException(QueryException::class);
-        $this->expectExceptionMessage('Unexpected affected row count. Expected: 1. Got 10.');
+        $this->expectExceptionMessage('Unexpected affected row count. Expected: 1. Got: 10.');
         $this->assertSame(10, $result->ensureAffectedRowIs(1));
     }
 }
