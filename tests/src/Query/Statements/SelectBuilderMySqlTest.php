@@ -72,6 +72,12 @@ class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
         $this->assertSame("SELECT DISTINCT `id` FROM `User`", $sql);
     }
 
+    public function test_forceIndex(): void
+    {
+        $sql = $this->selectBuilder()->from('User')->columns('id')->forceIndex('force')->toString();
+        $this->assertSame("SELECT `id` FROM `User` FORCE INDEX (`force`)", $sql);
+    }
+
     public function test_join_using_on(): void
     {
         $sql = $this->selectBuilder()->from('User')->join('Device', fn(JoinBuilder $join) => $join->on('User.id', 'Device.userId'))->toString();
@@ -177,6 +183,12 @@ class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
         $this->assertSame("SELECT * FROM `User` WHERE `id` = 1 ORDER BY `id`", $sql);
     }
 
+    public function test_orderByAsc(): void
+    {
+        $sql = $this->selectBuilder()->from('User')->where('id', 1)->orderByAsc('id')->toString();
+        $this->assertSame("SELECT * FROM `User` WHERE `id` = 1 ORDER BY `id`", $sql);
+    }
+
     public function test_orderByDesc(): void
     {
         $sql = $this->selectBuilder()->from('User')->where('id', 1)->orderByDesc('id')->toString();
@@ -211,6 +223,69 @@ class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
     {
         $sql = $this->selectBuilder()->from('User')->where('id', 1)->groupBy('status')->having('status', 1)->limit(2)->orderBy('id')->toString();
         $this->assertSame("SELECT * FROM `User` WHERE `id` = 1 GROUP BY `status` HAVING `status` = 1 ORDER BY `id` LIMIT 2", $sql);
+    }
+
+    public function test_compound_union(): void
+    {
+        $query = $this->selectBuilder()->from('User_A')->union($this->selectBuilder()->from('User_B'));
+        $this->assertSame("(SELECT * FROM `User_A`) UNION (SELECT * FROM `User_B`)", $query->toString());
+    }
+
+    public function test_compound_union_all(): void
+    {
+        $query = $this->selectBuilder()->from('User_A')->unionAll($this->selectBuilder()->from('User_B'));
+        $this->assertSame("(SELECT * FROM `User_A`) UNION ALL (SELECT * FROM `User_B`)", $query->toString());
+    }
+
+    public function test_compound_intersect(): void
+    {
+        $query = $this->selectBuilder()->from('User_A')->intersect($this->selectBuilder()->from('User_B'));
+        $this->assertSame("(SELECT * FROM `User_A`) INTERSECT (SELECT * FROM `User_B`)", $query->toString());
+    }
+
+    public function test_compound_except(): void
+    {
+        $query = $this->selectBuilder()->from('User_A')->except($this->selectBuilder()->from('User_B'));
+        $this->assertSame("(SELECT * FROM `User_A`) EXCEPT (SELECT * FROM `User_B`)", $query->toString());
+    }
+
+    public function test_compound_orderBy(): void
+    {
+        $query = $this->selectBuilder()->from('User_A')
+            ->union($this->selectBuilder()->from('User_B'))
+            ->orderBy('id');
+        $this->assertSame("(SELECT * FROM `User_A`) UNION (SELECT * FROM `User_B`) ORDER BY `id`", $query->toString());
+    }
+
+    public function test_compound_orderByAsc(): void
+    {
+        $query = $this->selectBuilder()->from('User_A')
+            ->union($this->selectBuilder()->from('User_B'))
+            ->orderByAsc('id');
+        $this->assertSame("(SELECT * FROM `User_A`) UNION (SELECT * FROM `User_B`) ORDER BY `id`", $query->toString());
+    }
+
+    public function test_compound_orderByDesc(): void
+    {
+        $query = $this->selectBuilder()->from('User_A')
+            ->union($this->selectBuilder()->from('User_B'))
+            ->orderByDesc('id');
+        $this->assertSame("(SELECT * FROM `User_A`) UNION (SELECT * FROM `User_B`) ORDER BY `id` DESC", $query->toString());
+    }
+
+    public function test_compound_reorder(): void
+    {
+        $query = $this->selectBuilder()->from('User_A')
+            ->union($this->selectBuilder()->from('User_B'))
+            ->orderByDesc('id')
+            ->reorder();
+        $this->assertSame("(SELECT * FROM `User_A`) UNION (SELECT * FROM `User_B`)", $query->toString());
+    }
+
+    public function test_compound_limit(): void
+    {
+        $query = $this->selectBuilder()->from('User_A')->union($this->selectBuilder()->from('User_B'))->limit(1);
+        $this->assertSame("(SELECT * FROM `User_A`) UNION (SELECT * FROM `User_B`) LIMIT 1", $query->toString());
     }
 
     public function test_clone(): void

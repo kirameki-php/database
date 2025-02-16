@@ -4,7 +4,6 @@ namespace Kirameki\Database\Query\Statements;
 
 use Kirameki\Database\Query\QueryHandler;
 use Kirameki\Database\Query\QueryResult;
-use function dump;
 
 /**
  * @template TQueryStatement of QueryStatement

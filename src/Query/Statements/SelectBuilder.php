@@ -377,9 +377,7 @@ class SelectBuilder extends ConditionsBuilder
      */
     protected function setCompoundOperator(CompoundType $operator, SelectBuilder $query): CompoundBuilder
     {
-        $builder =  new CompoundBuilder($operator, $query->getStatement());
-        $this->statement->compound = $builder->getDefinition();
-        return $builder;
+        return new CompoundBuilder($this->handler, $operator, $this->statement, $query->getStatement());
     }
 
     #endregion compounding ---------------------------------------------------------------------------------------------

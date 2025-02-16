@@ -2,28 +2,32 @@
 
 namespace Kirameki\Database\Query\Statements;
 
-class CompoundBuilder
+use Kirameki\Database\Query\QueryHandler;
+
+/**
+ * @extends QueryBuilder<SelectStatement>
+ */
+class CompoundBuilder extends QueryBuilder
 {
     protected CompoundDefinition $definition;
 
     /**
+     * @param QueryHandler $handler
      * @param CompoundType $operator
+     * @param SelectStatement $root
      * @param SelectStatement $query
      */
     public function __construct(
+        QueryHandler $handler,
         CompoundType $operator,
+        SelectStatement $root,
         SelectStatement $query,
     )
     {
-        $this->definition = new CompoundDefinition($operator, $query);
-    }
+        parent::__construct($handler, $root);
 
-    /**
-     * @return CompoundDefinition
-     */
-    public function getDefinition(): CompoundDefinition
-    {
-        return $this->definition;
+        $this->definition = new CompoundDefinition($operator, $query);
+        $root->compound = $this->definition;
     }
 
     #region sorting ----------------------------------------------------------------------------------------------------

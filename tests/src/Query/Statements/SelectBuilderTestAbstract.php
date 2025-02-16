@@ -64,6 +64,14 @@ abstract class SelectBuilderTestAbstract extends QueryTestCase
 
     abstract public function test_combination(): void;
 
+    abstract public function test_compound_union(): void;
+
+    abstract public function test_compound_union_all(): void;
+
+    abstract public function test_compound_intersect(): void;
+
+    abstract public function test_compound_except(): void;
+
     abstract public function test_clone(): void;
 
     abstract public function test_cast_to_time_from_string(): void;
