@@ -14,9 +14,7 @@ class MySql_CreateTableBuilderTest extends SchemaTestCase
     {
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('Table requires at least one column to be defined.');
-
-        $builder = $this->createTableBuilder('users');
-        dump($builder->toString());
+        $this->createTableBuilder('users')->toString();
     }
 
     public function test_string_column(): void

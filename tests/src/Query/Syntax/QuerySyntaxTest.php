@@ -7,6 +7,7 @@ use Kirameki\Core\Exceptions\NotSupportedException;
 use Kirameki\Database\Adapters\SqliteAdapter;
 use Kirameki\Database\Config\DatabaseConfig;
 use Kirameki\Database\Config\SqliteConfig;
+use Kirameki\Database\Query\Statements\Bounds;
 use Kirameki\Database\Query\Statements\NullOrder;
 use Kirameki\Database\Query\Statements\RawStatement;
 use Kirameki\Database\Query\Statements\SortOrder;
@@ -202,12 +203,47 @@ class QuerySyntaxTest extends QueryTestCase
         $this->assertSame('SELECT * FROM "t" WHERE "name" NOT LIKE \'a%\'', $q->toString());
     }
 
+    public function test_where_in_range(): void
+    {
+        $handler = $this->sqliteConnection()->query();
+        $q = $handler->select()->from('t')->where('id', Bounds::excluded(1, 2));
+        $this->assertSame('SELECT * FROM "t" WHERE "id" > 1 AND "id" < 2', $q->toString());
+    }
+
+    public function test_where_in_range__invalid_value(): void
+    {
+        $this->expectException(NotSupportedException::class);
+        $this->expectExceptionMessage('Value for WHERE with range. Expected: Bounds. Got: int.');
+        $handler = $this->sqliteConnection()->query();
+        $q = $handler->select()->from('t')->where('id', Bounds::excluded(1, 2));
+        $q->getStatement()->where[0]->value = 1;
+        $q->toString();
+    }
+
+    public function test_where_not_in_range(): void
+    {
+        $handler = $this->sqliteConnection()->query();
+        $q = $handler->select()->from('t')->where('id', not: Bounds::excluded(1, 2));
+        $this->assertSame('SELECT * FROM "t" WHERE "id" <= 1 OR "id" >= 2', $q->toString());
+    }
+
     public function test_where_exists(): void
     {
         $handler = $this->sqliteConnection()->query();
         $sub = $handler->select()->from('t2')->where('id', 1);
         $q = $handler->select()->from('t')->whereExists($sub);
         $this->assertSame('SELECT * FROM "t" WHERE EXISTS (SELECT * FROM "t2" WHERE "id" = 1)', $q->toString());
+    }
+
+    public function test_where_exists__invalid_value(): void
+    {
+        $this->expectException(NotSupportedException::class);
+        $this->expectExceptionMessage('Value for WHERE EXISTS. Expected: SelectStatement. Got: int.');
+        $handler = $this->sqliteConnection()->query();
+        $sub = $handler->select()->from('t2')->where('id', 1);
+        $q = $handler->select()->from('t')->whereExists($sub);
+        $q->getStatement()->where[0]->value = 1;
+        $q->toString();
     }
 
     public function test_where_not_exists(): void

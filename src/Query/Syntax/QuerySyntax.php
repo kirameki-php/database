@@ -711,7 +711,7 @@ abstract class QuerySyntax extends Syntax
         }
 
         $message = 'Value for WHERE ' . $operator . '. ';
-        $message.= 'Expected: iterable|SelectStatement. Got: ' . Value::getType($value) . '.';
+        $message .= 'Expected: iterable|SelectStatement. Got: ' . Value::getType($value) . '.';
         throw new NotSupportedException($message, [
             'definition' => $def,
         ]);
@@ -737,7 +737,6 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForExists(ConditionDefinition $def): string
     {
-        $column = $this->asColumn($def->column);
         $operator = ($def->negated ? Logic::Not->value . ' ' : '') . $def->operator->value;
         $value = $def->value;
 
@@ -745,7 +744,9 @@ abstract class QuerySyntax extends Syntax
             return "{$operator} {$this->formatSubQuery($value)}";
         }
 
-        throw new NotSupportedException('WHERE ' . $operator . ' value: ' . Value::getType($value), [
+        $message = 'Value for WHERE ' . $operator . '. ';
+        $message .= 'Expected: SelectStatement. Got: ' . Value::getType($value) . '.';
+        throw new NotSupportedException($message, [
             'definition' => $def,
         ]);
     }
@@ -784,7 +785,9 @@ abstract class QuerySyntax extends Syntax
             ]);
         }
 
-        throw new NotSupportedException('WHERE ranged value: ' . Value::getType($value), [
+        $message = 'Value for WHERE with range. ';
+        $message .= 'Expected: Bounds. Got: ' . Value::getType($value) . '.';
+        throw new NotSupportedException($message, [
             'definition' => $def,
         ]);
     }

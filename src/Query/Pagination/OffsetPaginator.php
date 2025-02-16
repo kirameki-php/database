@@ -35,7 +35,9 @@ class OffsetPaginator extends Paginator
     #[Override]
     public function instantiate(mixed $iterable): static
     {
-        return new static($this, $this->size, $this->page, $this->total);
+        $instantiate = new static($this, $this->size, $this->page, $this->total);
+        $instantiate->items = $iterable;
+        return $instantiate;
     }
 
     /**
