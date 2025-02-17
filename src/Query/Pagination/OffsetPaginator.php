@@ -14,16 +14,23 @@ use function ceil;
 class OffsetPaginator extends Paginator
 {
     /**
+     * @var int
+     */
+    public int $totalPages {
+        get => (int) ceil($this->totalRows / $this->size);
+    }
+
+    /**
      * @param QueryResult<SelectStatement, TRow> $result
      * @param int $size
      * @param int $page
-     * @param int $total
+     * @param int $totalRows
      */
     public function __construct(
         QueryResult $result,
         int $size,
         int $page,
-        public readonly int $total,
+        public readonly int $totalRows,
     )
     {
         parent::__construct($result, $size, $page);
@@ -35,7 +42,7 @@ class OffsetPaginator extends Paginator
     #[Override]
     public function instantiate(mixed $iterable): static
     {
-        $instantiate = new static($this, $this->size, $this->page, $this->total);
+        $instantiate = new static($this, $this->size, $this->page, $this->totalRows);
         $instantiate->items = $iterable;
         return $instantiate;
     }
@@ -46,15 +53,7 @@ class OffsetPaginator extends Paginator
     #[Override]
     public function hasMorePages(): bool
     {
-        return $this->page < $this->getTotalPages();
-    }
-
-    /**
-     * @return int
-     */
-    public function getTotalPages(): int
-    {
-        return (int) ceil($this->total / $this->size);
+        return $this->page < $this->totalPages;
     }
 
     /**
@@ -62,6 +61,6 @@ class OffsetPaginator extends Paginator
      */
     public function isLastPage(): bool
     {
-        return $this->page === $this->getTotalPages();
+        return $this->page === $this->totalPages;
     }
 }
