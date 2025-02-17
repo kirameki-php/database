@@ -35,7 +35,7 @@ class QueryResult extends Vec
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function instantiate(mixed $iterable): static
     {
