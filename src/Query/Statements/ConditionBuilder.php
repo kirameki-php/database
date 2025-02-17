@@ -45,7 +45,7 @@ class ConditionBuilder
             if ($args[0] instanceof static) {
                 return $args[0];
             }
-            throw new InvalidArgumentException('Expected: ' . static::class . 'Got: ' . Value::getType($args[0]) . '.', [
+            throw new InvalidArgumentException('Expected: ' . static::class . '. Got: ' . Value::getType($args[0]) . '.', [
                 'args' => $args,
             ]);
         }
@@ -74,7 +74,7 @@ class ConditionBuilder
             $column = $args['column'];
             unset($args['column']);
         } else {
-            throw new InvalidArgumentException('Missing column parameter', [
+            throw new InvalidArgumentException('Missing column parameter.', [
                 'args' => $args,
             ]);
         }
@@ -106,7 +106,11 @@ class ConditionBuilder
             'notBetween' => $self->notBetween($value[0], $value[1]),
             'like' => $self->like($value),
             'notLike' => $self->notLike($value),
-            default => throw new InvalidArgumentException('Unknown operator: ' . $key),
+            default => throw new InvalidArgumentException("Unknown operator: \"{$key}\".", [
+                'column' => $column,
+                'key' => $key,
+                'value' => $value,
+            ]),
         };
     }
 
@@ -136,7 +140,7 @@ class ConditionBuilder
      */
     public static function raw(string $raw): static
     {
-        return new static('_RAW_')->expr(new Raw($raw));
+        return new static('_UNUSED_')->expr(new Raw($raw));
     }
 
     /**
@@ -202,7 +206,7 @@ class ConditionBuilder
     public function equals(mixed $value): static
     {
         if (is_iterable($value)) {
-            throw new LogicException('Iterable should use in(iterable $iterable) method instead', [
+            throw new LogicException('Iterable should use in(iterable $iterable) method.', [
                 'root' => $this->root,
                 'current' => $this->current,
                 'value' => $value,
