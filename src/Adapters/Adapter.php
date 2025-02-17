@@ -188,7 +188,7 @@ abstract class Adapter
      * @param list<mixed> $parameters
      * @param float $startTime
      * @param iterable<int, mixed> $rows
-     * @param int|Closure(): int $affectedRowCount
+     * @param int $affectedRowCount
      * @return QueryResult<TQueryStatement, mixed>
      */
     protected function instantiateQueryResult(
@@ -197,7 +197,7 @@ abstract class Adapter
         array $parameters,
         float $startTime,
         iterable $rows,
-        int|Closure $affectedRowCount,
+        int $affectedRowCount,
     ): QueryResult
     {
         $elapsedMs = (hrtime(true) - $startTime) / 1_000_000;

@@ -19,7 +19,7 @@ class QueryResultTest extends QueryTestCase
         $this->assertSame($template, $result->template);
         $this->assertSame($parameters, $result->parameters);
         $this->assertSame(1.1, $result->elapsedMs);
-        $this->assertSame(0, $result->getAffectedRowCount());
+        $this->assertSame(0, $result->affectedRowCount);
         $this->assertSame(['foo'], $result->all());
     }
 
@@ -43,16 +43,7 @@ class QueryResultTest extends QueryTestCase
         $parameters = [1];
         $statement = new RawStatement($template, $parameters);
         $result = new QueryResult($statement, $template, $parameters, 1.1, 10, ['foo']);
-        $this->assertSame(10, $result->getAffectedRowCount());
-    }
-
-    public function test_getAffectedRowCount_using_closure(): void
-    {
-        $template = 'SELECT ?';
-        $parameters = [1];
-        $statement = new RawStatement($template, $parameters);
-        $result = new QueryResult($statement, $template, $parameters, 1.1, fn() => 10, ['foo']);
-        $this->assertSame(10, $result->getAffectedRowCount());
+        $this->assertSame(10, $result->affectedRowCount);
     }
 
     public function test_ensureAffectedRowCount_with_correct_amount(): void
@@ -60,7 +51,7 @@ class QueryResultTest extends QueryTestCase
         $template = 'SELECT ?';
         $parameters = [1];
         $statement = new RawStatement($template, $parameters);
-        $result = new QueryResult($statement, $template, $parameters, 1.1, fn() => 10, ['foo']);
+        $result = new QueryResult($statement, $template, $parameters, 1.1, 10, ['foo']);
         $this->assertInstanceOf($result::class, $result->ensureAffectedRowIs(10));
     }
 
@@ -69,7 +60,7 @@ class QueryResultTest extends QueryTestCase
         $template = 'SELECT ?';
         $parameters = [1];
         $statement = new RawStatement($template, $parameters);
-        $result = new QueryResult($statement, $template, $parameters, 1.1, fn() => 10, ['foo']);
+        $result = new QueryResult($statement, $template, $parameters, 1.1, 10, ['foo']);
 
         $this->expectException(QueryException::class);
         $this->expectExceptionMessage('Unexpected affected row count. Expected: 1. Got: 10.');

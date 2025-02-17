@@ -19,7 +19,7 @@ class QueryResult extends Vec
      * @param string $template
      * @param list<mixed> $parameters
      * @param float $elapsedMs
-     * @param Closure(): int $affectedRowCount
+     * @param int $affectedRowCount
      * @param iterable<int, TRow> $rows
      */
     public function __construct(
@@ -27,7 +27,7 @@ class QueryResult extends Vec
         public readonly string $template,
         public readonly array $parameters,
         public readonly float $elapsedMs,
-        protected int|Closure $affectedRowCount,
+        public readonly int $affectedRowCount,
         iterable $rows,
     )
     {
@@ -50,29 +50,18 @@ class QueryResult extends Vec
     }
 
     /**
-     * @return int
-     */
-    public function getAffectedRowCount(): int
-    {
-        if ($this->affectedRowCount instanceof Closure) {
-            $this->affectedRowCount = ($this->affectedRowCount)();
-        }
-        return $this->affectedRowCount;
-    }
-
-    /**
      * @param int $expected
      * @return $this
      */
     public function ensureAffectedRowIs(int $expected): static
     {
-        $affectedRowCount = $this->getAffectedRowCount();
-        if ($affectedRowCount !== $expected) {
-            $message = "Unexpected affected row count. Expected: {$expected}. Got: {$affectedRowCount}.";
+        $affectedRows = $this->affectedRowCount;
+        if ($affectedRows !== $expected) {
+            $message = "Unexpected affected row count. Expected: {$expected}. Got: {$affectedRows}.";
             throw new QueryException($message, $this->statement, [
                 'result' => $this,
                 'expected' => $expected,
-                'actual' => $affectedRowCount,
+                'actual' => $affectedRows,
             ]);
         }
         return $this;

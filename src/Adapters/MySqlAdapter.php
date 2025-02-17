@@ -232,7 +232,7 @@ class MySqlAdapter extends PdoAdapter
         $copy = (clone $this);
         $copy->omitDatabaseOnConnect = true;
         $statement = new RawQueryStatement("SHOW DATABASES LIKE '{$this->connectionConfig->database}'");
-        return $copy->runQuery($statement)->getAffectedRowCount() > 0;
+        return $copy->runQuery($statement)->affectedRowCount > 0;
     }
 
     /**

@@ -331,14 +331,14 @@ abstract class PdoAdapter extends Adapter
     /**
      * @param QueryStatement $statement
      * @param PDOStatement $prepared
-     * @return Closure(): int|int
+     * @return int
      */
-    protected function getAffectedRows(QueryStatement $statement, PDOStatement $prepared): Closure|int
+    protected function getAffectedRows(QueryStatement $statement, PDOStatement $prepared): int
     {
         if ($statement instanceof SelectStatement) {
             return 0;
         }
-        return $prepared->rowCount(...);
+        return $prepared->rowCount();
     }
 
     /**
