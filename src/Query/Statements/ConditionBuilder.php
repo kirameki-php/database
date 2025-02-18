@@ -12,6 +12,7 @@ use function array_key_exists;
 use function assert;
 use function count;
 use function is_iterable;
+use function is_string;
 
 /**
  * @consistent-constructor
@@ -135,12 +136,34 @@ class ConditionBuilder
     }
 
     /**
-     * @param string $raw
+     * @param string|Expression $raw
      * @return static
      */
-    public static function raw(string $raw): static
+    public static function raw(string|Expression $raw): static
     {
-        return new static('_UNUSED_')->expr(new Raw($raw));
+        $expr = is_string($raw)
+            ? new Raw($raw)
+            : $raw;
+
+        return new static('_UNUSED_')->define(Operator::Raw, $expr);
+    }
+
+    /**
+     * @param SelectBuilder $builder
+     * @return $this
+     */
+    public static function exists(SelectBuilder $builder): static
+    {
+        return new static('_UNUSED_')->define(Operator::Exists, $builder);
+    }
+
+    /**
+     * @param SelectBuilder $builder
+     * @return $this
+     */
+    public static function notExists(SelectBuilder $builder): static
+    {
+        return static::exists($builder)->negate();
     }
 
     /**
@@ -206,7 +229,7 @@ class ConditionBuilder
     public function equals(mixed $value): static
     {
         if (is_iterable($value)) {
-            throw new LogicException('Iterable should use in(iterable $iterable) method.', [
+            throw new InvalidArgumentException('Iterable should use in(iterable $iterable) method.', [
                 'root' => $this->root,
                 'current' => $this->current,
                 'value' => $value,
@@ -339,24 +362,6 @@ class ConditionBuilder
     }
 
     /**
-     * @param SelectBuilder $builder
-     * @return $this
-     */
-    public function exists(SelectBuilder $builder): static
-    {
-        return $this->define(Operator::Exists, $builder);
-    }
-
-    /**
-     * @param SelectBuilder $builder
-     * @return $this
-     */
-    public function notExists(SelectBuilder $builder): static
-    {
-        return $this->exists($builder)->negate();
-    }
-
-    /**
      * @param Bounds $bounds
      * @return $this
      */
@@ -372,15 +377,6 @@ class ConditionBuilder
     public function notInRange(Bounds $bounds): static
     {
         return $this->inRange($bounds)->negate();
-    }
-
-    /**
-     * @param Expression $expr
-     * @return $this
-     */
-    public function expr(Expression $expr): static
-    {
-        return $this->define(Operator::Raw, $expr);
     }
 
     /**

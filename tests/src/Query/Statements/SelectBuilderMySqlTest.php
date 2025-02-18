@@ -6,9 +6,12 @@ use Kirameki\Database\Query\Statements\Bounds;
 use Kirameki\Database\Query\Statements\ConditionBuilder;
 use Kirameki\Database\Query\Statements\JoinBuilder;
 use Kirameki\Database\Query\Statements\LockOption;
+use Kirameki\Database\Query\Statements\SelectStatement;
 use Kirameki\Database\Raw;
 use Kirameki\Time\Time;
 use Tests\Kirameki\Database\Query\Statements\_Support\IntCastEnum;
+use function dump;
+use function iterator_to_array;
 
 class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
 {
@@ -297,6 +300,39 @@ class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
         $this->assertSame("SELECT * FROM `User` WHERE (`id` = 1 OR `id` = 2 OR `id` IN (3, 4))", $base->toString());
         $this->assertSame("SELECT * FROM `User` WHERE (`id` = 1 OR `id` = 2)", $copy->toString());
         $this->assertNotSame($base->toString(), $copy->toString());
+    }
+
+    public function test_setTag(): void
+    {
+        $query = $this->selectBuilder()->from('User')->setTag('a', '1');
+        $statement = $query->getStatement();
+        $this->assertNotNull($statement->tags);
+        $this->assertSame(['a' => '1'], iterator_to_array($statement->tags));
+        $this->assertSame('SELECT * FROM `User` /* a=1 */', $query->toString());
+    }
+
+    public function test_withTags(): void
+    {
+        $query = $this->selectBuilder()->from('User')->withTags(['a' => '1', 'b' => '2']);
+        $statement = $query->getStatement();
+        $this->assertNotNull($statement->tags);
+        $this->assertSame(['a' => '1', 'b' => '2'], iterator_to_array($statement->tags));
+        $this->assertSame('SELECT * FROM `User` /* a=1,b=2 */', $query->toString());
+    }
+
+    public function test_explain(): void
+    {
+        $conn = $this->createTempConnection($this->useConnection);
+        $table = $conn->schema()->createTable('t');
+        $table->id();
+        $table->execute();
+        $conn->query()->insertInto('t')->value(['id' => 1])->execute();
+        $result = $conn->query()->select()->from('t')->where('id', 1)->explain();
+        $explain = (array) $result->first();
+        $this->assertSame(1, $explain['id']);
+        $this->assertSame('SIMPLE', $explain['select_type']);
+        $this->assertSame('t', $explain['table']);
+        $this->assertSame('PRIMARY', $explain['key']);
     }
 
     public function test_cast_to_time_from_string(): void

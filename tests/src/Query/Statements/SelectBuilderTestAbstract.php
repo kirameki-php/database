@@ -2,6 +2,7 @@
 
 namespace Tests\Kirameki\Database\Query\Statements;
 
+use Kirameki\Database\Query\Statements\SelectStatement;
 use Tests\Kirameki\Database\Query\QueryTestCase;
 
 abstract class SelectBuilderTestAbstract extends QueryTestCase
@@ -72,7 +73,39 @@ abstract class SelectBuilderTestAbstract extends QueryTestCase
 
     abstract public function test_compound_except(): void;
 
+    abstract public function test_compound_orderBy(): void;
+
+    abstract public function test_compound_orderByAsc(): void;
+
+    abstract public function test_compound_orderByDesc(): void;
+
+    abstract public function test_compound_reorder(): void;
+
+    abstract public function test_compound_limit(): void;
+
     abstract public function test_clone(): void;
+
+    public function test_getStatement(): void
+    {
+        $query = $this->selectBuilder()->from('User')->where('id', 1);
+        $this->assertInstanceOf(SelectStatement::class, $query->getStatement());
+    }
+
+    abstract public function test_setTag(): void;
+
+    abstract public function test_withTags(): void;
+
+    public function test_execute(): void
+    {
+        $conn = $this->createTempConnection($this->useConnection);
+        $table = $conn->schema()->createTable('t');
+        $table->id();
+        $table->execute();
+        $result = $conn->query()->select()->from('t')->where('id', 1)->execute();
+        $this->assertSame([], $result->all());
+    }
+
+    abstract public function test_explain(): void;
 
     abstract public function test_cast_to_time_from_string(): void;
 

@@ -12,7 +12,6 @@ use Kirameki\Database\Config\MySqlConfig;
 use Kirameki\Database\Config\SqliteConfig;
 use Kirameki\Database\Connection;
 use Kirameki\Database\Schema\Statements\Table\CreateTableBuilder;
-use Kirameki\Event\Event;
 use Kirameki\Event\EventManager;
 use RuntimeException;
 use function mt_rand;
