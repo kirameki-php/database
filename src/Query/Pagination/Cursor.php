@@ -9,71 +9,79 @@ use Kirameki\Database\Query\Statements\Operator;
 use Kirameki\Database\Query\Statements\SelectBuilder;
 use Kirameki\Database\Query\Statements\SortOrder;
 use function array_keys;
+use function array_values;
+use function count;
 
-/**
- * @consistent-constructor
- */
 class Cursor
 {
     /**
      * @param SelectBuilder $builder
-     * @param int $size
-     * @return static
+     * @param object|null $next
+     * @return static|null
      */
-    public static function init(SelectBuilder $builder, int $size): static
+    public static function init(
+        SelectBuilder $builder,
+        ?object $next,
+    ): ?static
     {
+        if ($next === null) {
+            return null;
+        }
+
         $orderBy = $builder->getStatement()->orderBy ?? [];
-        if ($orderBy === []) {
+
+        if (count($orderBy) === 0) {
             throw new LogicException('Cannot paginate with cursor without an order by clause.', [
                 'builder' => $builder,
             ]);
         }
 
         $columns = [];
-        foreach ($orderBy as $column => $order) {
-            $columns[$column] = null;
+        foreach (array_keys($orderBy) as $column) {
+            $columns[$column] = $next->$column;
         }
-        $sortOrder = Arr::first($orderBy)->sort;
-        return new static($columns, $sortOrder, $size);
-    }
+        $order = Arr::first($orderBy)->sort;
 
-    /**
-     * @param CursorPaginator<mixed> $paginator
-     * @param self $current
-     * @return static
-     */
-    public static function next(CursorPaginator $paginator, self $current): static
-    {
-        $ref = $paginator->last();
-
-        $columns = [];
-        foreach ($current->columns as $name => $value) {
-            $columns[$name] = $ref[$name];
-        }
-
-        return new static($columns, $current->order, $current->size, $current->page + 1);
+        return new static($columns, $order);
     }
 
     /**
      * @param array<string, mixed> $columns
      * @param SortOrder $order
-     * @param int $size
      * @param int $page
      */
-    public function __construct(
+    protected function __construct(
         public readonly array $columns,
         public readonly SortOrder $order,
-        public readonly int $size,
         public readonly int $page = 1,
     )
     {
     }
 
+    public function next(?object $next): ?static
+    {
+        if ($next === null) {
+            return null;
+        }
+
+        $columns = [];
+        foreach (array_keys($this->columns) as $column) {
+            $columns[$column] = $next->$column;
+        }
+
+        return new static(
+            $this->columns,
+            $this->order,
+            $this->page + 1,
+        );
+    }
+
     /**
+     * @internal
      * @param SelectBuilder $builder
-     * @return void
+     * @return $this
      */
-    public function apply(SelectBuilder $builder): void
+    public function apply(SelectBuilder $builder): static
     {
         $columns = array_keys($this->columns);
         $values = array_values($this->columns);
@@ -87,5 +95,7 @@ class Cursor
         foreach ($columns as $column) {
             $builder->orderBy($column, $this->order);
         }
+
+        return $this;
     }
 }

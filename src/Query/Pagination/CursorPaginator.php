@@ -7,21 +7,25 @@ use Kirameki\Database\Query\Statements\SelectStatement;
 use Override;
 
 /**
- * @template TRow of mixed
+ * @template TRow of object
  * @extends Paginator<TRow>
  */
 class CursorPaginator extends Paginator
 {
     /**
      * @param QueryResult<SelectStatement, TRow> $result
+     * @param TRow|null $next
      * @param Cursor $cursor
+     * @param int $size
      */
     public function __construct(
         QueryResult $result,
-        protected Cursor $cursor,
+        public readonly ?object $next,
+        public readonly ?Cursor $cursor,
+        int $size,
     )
     {
-        parent::__construct($result, $cursor->size, $cursor->page);
+        parent::__construct($result, $size, $cursor->page ?? 1);
     }
 
     /**
@@ -30,16 +34,16 @@ class CursorPaginator extends Paginator
     #[Override]
     public function instantiate(mixed $iterable): static
     {
-        $instance = new static($this, $this->cursor);
+        $instance = new static($this, $this->next, $this->cursor, $this->size);
         $instance->items = $iterable;
         return $instance;
     }
 
     /**
-     * @return Cursor
+     * @return Cursor|null
      */
-    public function getNextCursor(): Cursor
+    public function getNextCursorOrNull(): ?Cursor
     {
-        return Cursor::next($this, $this->cursor);
+        return $this->cursor?->next($this->next);
     }
 }

@@ -1,0 +1,40 @@
+<?php declare(strict_types=1);
+
+namespace Tests\Kirameki\Database\Query\Pagination;
+
+use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Database\Query\Pagination\Cursor;
+use Kirameki\Database\Query\Statements\SortOrder;
+
+class CursorTest extends PaginatorTestCase
+{
+    public function test_init(): void
+    {
+        $builder = $this->getCachedConnection()->query()->select()->from('t')->orderByAsc('id');
+        $object = (object) ['id' => 1];
+        $cursor = Cursor::init($builder, $object);
+        $this->assertNotNull($cursor);
+        $this->assertSame(1, $cursor->page);
+        $this->assertSame(['id' => 1], $cursor->columns);
+        $this->assertSame(SortOrder::Ascending, $cursor->order);
+    }
+
+    public function test_init__without_ordering(): void
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('Cannot paginate with cursor without an order by clause.');
+        $builder = $this->getCachedConnection()->query()->select()->from('t');
+        Cursor::init($builder, (object) ['id' => 1]);
+    }
+
+    public function test_apply(): void
+    {
+        $builder = $this->getCachedConnection()->query()->select()->from('t')
+            ->orderByAsc('id')
+            ->orderByDesc('name');
+        $object = (object) ['id' => 1, 'name' => 'foo'];
+        $cursor = Cursor::init($builder, $object);
+        $this->assertInstanceOf(Cursor::class, $cursor);
+        $this->assertInstanceOf(Cursor::class, $cursor->apply($builder));
+    }
+}

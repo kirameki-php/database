@@ -404,7 +404,7 @@ class SelectBuilder extends ConditionsBuilder
     /**
      * @param int $page
      * @param int $size
-     * @return OffsetPaginator<mixed>
+     * @return OffsetPaginator<object>
      */
     public function offsetPaginate(int $page, int $size = Paginator::DEFAULT_PAGE_SIZE): OffsetPaginator
     {
@@ -416,15 +416,22 @@ class SelectBuilder extends ConditionsBuilder
     /**
      * @param int $size
      * @param Cursor|null $cursor
-     * @return CursorPaginator<mixed>
+     * @return CursorPaginator<object>
      */
-    public function cursorPaginate(int $size = Paginator::DEFAULT_PAGE_SIZE, ?Cursor $cursor = null): CursorPaginator
+    public function cursorPaginate(
+        int $size = Paginator::DEFAULT_PAGE_SIZE,
+        ?Cursor $cursor = null,
+    ): CursorPaginator
     {
+        $query = $this->copy()->limit($size + 1);
         $cursor?->apply($this);
-        $cursor ??= Cursor::init($this, $size);
+        $result = $query->execute();
 
-        $result = $this->copy()->limit($size + 1)->execute();
-        return new CursorPaginator($result, $cursor);
+        $items = $result->takeFirst($size);
+        $next = $result->atOrNull($size);
+        $cursor ??= Cursor::init($this, $next);
+
+        return new CursorPaginator($items, $next, $cursor, $size);
     }
 
     /**
@@ -585,7 +592,7 @@ class SelectBuilder extends ConditionsBuilder
 
     /**
      * @param int $size
-     * @return Generator<CursorPaginator<mixed>>
+     * @return Generator<CursorPaginator<object>>
      */
     public function batch(int $size = 1_000): Generator
     {
@@ -610,7 +617,7 @@ class SelectBuilder extends ConditionsBuilder
                 }
             }
 
-            $cursor = $paginator->getnextCursor();
+            $cursor = $paginator->getNextCursorOrNull();
         } while ($paginator->hasMorePages());
     }
 
