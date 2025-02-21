@@ -27,7 +27,7 @@ class AggregateMySqlTest extends AggregateTestAbstract
         $expr = new Min('id');
         $query = $connection->query()->select($expr)->from('t');
 
-        $this->assertSame('SELECT MIN(`id`) AS `min` FROM `t`', $query->toString());
+        $this->assertSame('SELECT MIN(`id`) AS `min` FROM `t`', $query->toSql());
         $this->assertSame(2, $query->value('min'));
     }
 
@@ -45,7 +45,7 @@ class AggregateMySqlTest extends AggregateTestAbstract
         $expr = new Min('id', '_min_');
         $query = $connection->query()->select($expr)->from('t');
 
-        $this->assertSame('SELECT MIN(`id`) AS `_min_` FROM `t`', $query->toString());
+        $this->assertSame('SELECT MIN(`id`) AS `_min_` FROM `t`', $query->toSql());
         $this->assertSame(2, $query->value('_min_'));
     }
 
@@ -63,7 +63,7 @@ class AggregateMySqlTest extends AggregateTestAbstract
         $expr = new Max('id');
         $query = $connection->query()->select($expr)->from('t');
 
-        $this->assertSame('SELECT MAX(`id`) AS `max` FROM `t`', $query->toString());
+        $this->assertSame('SELECT MAX(`id`) AS `max` FROM `t`', $query->toSql());
         $this->assertSame(3, $query->value('max'));
     }
 
@@ -81,7 +81,7 @@ class AggregateMySqlTest extends AggregateTestAbstract
         $expr = new Max('id', '_max_');
         $query = $connection->query()->select($expr)->from('t');
 
-        $this->assertSame('SELECT MAX(`id`) AS `_max_` FROM `t`', $query->toString());
+        $this->assertSame('SELECT MAX(`id`) AS `_max_` FROM `t`', $query->toSql());
         $this->assertSame(3, $query->value('_max_'));
     }
 
@@ -101,7 +101,7 @@ class AggregateMySqlTest extends AggregateTestAbstract
             ->select(new Count())
             ->from('t');
 
-        $this->assertSame('SELECT COUNT(*) AS `count` FROM `t`', $query->toString());
+        $this->assertSame('SELECT COUNT(*) AS `count` FROM `t`', $query->toSql());
         $this->assertSame(3, $query->value('count'));
     }
 
@@ -121,7 +121,7 @@ class AggregateMySqlTest extends AggregateTestAbstract
             ->select(new Count('*', '_cnt_'))
             ->from('t');
 
-        $this->assertSame('SELECT COUNT(*) AS `_cnt_` FROM `t`', $query->toString());
+        $this->assertSame('SELECT COUNT(*) AS `_cnt_` FROM `t`', $query->toSql());
         $this->assertSame(3, $query->value('_cnt_'));
     }
 
@@ -141,7 +141,7 @@ class AggregateMySqlTest extends AggregateTestAbstract
             ->select(new Avg('id'))
             ->from('t');
 
-        $this->assertSame('SELECT AVG(`id`) AS `avg` FROM `t`', $query->toString());
+        $this->assertSame('SELECT AVG(`id`) AS `avg` FROM `t`', $query->toSql());
         $this->assertSame('20.0000', $query->value('avg'));
     }
 
@@ -161,7 +161,7 @@ class AggregateMySqlTest extends AggregateTestAbstract
             ->select(new Avg('id', '_avg_'))
             ->from('t');
 
-        $this->assertSame('SELECT AVG(`id`) AS `_avg_` FROM `t`', $query->toString());
+        $this->assertSame('SELECT AVG(`id`) AS `_avg_` FROM `t`', $query->toSql());
         $this->assertSame('20.0000', $query->value('_avg_'));
     }
 
@@ -181,7 +181,7 @@ class AggregateMySqlTest extends AggregateTestAbstract
             ->select(new Sum('id'))
             ->from('t');
 
-        $this->assertSame('SELECT SUM(`id`) AS `sum` FROM `t`', $query->toString());
+        $this->assertSame('SELECT SUM(`id`) AS `sum` FROM `t`', $query->toSql());
         $this->assertSame('60', $query->value('sum'));
     }
 
@@ -201,7 +201,7 @@ class AggregateMySqlTest extends AggregateTestAbstract
             ->select(new Sum('id', '_sum_'))
             ->from('t');
 
-        $this->assertSame('SELECT SUM(`id`) AS `_sum_` FROM `t`', $query->toString());
+        $this->assertSame('SELECT SUM(`id`) AS `_sum_` FROM `t`', $query->toSql());
         $this->assertSame('60', $query->value('_sum_'));
     }
 
@@ -220,7 +220,7 @@ class AggregateMySqlTest extends AggregateTestAbstract
             ->select(new Sum('id', '_sum_'))
             ->from('t');
 
-        $this->assertSame('SELECT SUM(`id`) AS `_sum_` FROM `t`', $query->toString());
+        $this->assertSame('SELECT SUM(`id`) AS `_sum_` FROM `t`', $query->toSql());
         $this->assertSame('18446744073709551613', $query->value('_sum_'));
     }
 }

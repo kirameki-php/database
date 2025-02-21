@@ -14,7 +14,7 @@ class CoalesceSqliteTest extends CoalesceTestAbstract
         $connection = $this->getConnection();
 
         $q = $connection->query()->select(Coalesce::values('NULL', '1', '1.1'));
-        $this->assertSame('SELECT COALESCE(NULL, 1, 1.1)', $q->toString());
+        $this->assertSame('SELECT COALESCE(NULL, 1, 1.1)', $q->toSql());
 
         $result = Arr::first((array)$q->first());
         $this->assertSame(1, $result);
@@ -25,6 +25,6 @@ class CoalesceSqliteTest extends CoalesceTestAbstract
         $connection = $this->getConnection();
 
         $q = $connection->query()->select(Coalesce::columns('a', 'b'));
-        $this->assertSame('SELECT COALESCE("a", "b")', $q->toString());
+        $this->assertSame('SELECT COALESCE("a", "b")', $q->toSql());
     }
 }

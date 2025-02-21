@@ -135,9 +135,9 @@ class SchemaHandler
      * @param TSchemaStatement $statement
      * @return string
      */
-    public function toString(SchemaStatement $statement): string
+    public function toDdl(SchemaStatement $statement): string
     {
-        return $statement->toString($this->connection->adapter->schemaSyntax);
+        return $statement->toDdl($this->connection->adapter->schemaSyntax);
     }
 
     /**

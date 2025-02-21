@@ -30,7 +30,7 @@ class AggregateSqliteTest extends AggregateTestAbstract
             ->select(new Min('id'))
             ->from('t');
 
-        $this->assertSame('SELECT MIN("id") AS "min" FROM "t"', $query->toString());
+        $this->assertSame('SELECT MIN("id") AS "min" FROM "t"', $query->toSql());
         $this->assertSame(2, $query->value('min'));
     }
 
@@ -49,7 +49,7 @@ class AggregateSqliteTest extends AggregateTestAbstract
             ->select(new Min('id', '_min_'))
             ->from('t');
 
-        $this->assertSame('SELECT MIN("id") AS "_min_" FROM "t"', $query->toString());
+        $this->assertSame('SELECT MIN("id") AS "_min_" FROM "t"', $query->toSql());
         $this->assertSame(2, $query->value('_min_'));
     }
 
@@ -68,7 +68,7 @@ class AggregateSqliteTest extends AggregateTestAbstract
             ->select(new Max('id'))
             ->from('t');
 
-        $this->assertSame('SELECT MAX("id") AS "max" FROM "t"', $query->toString());
+        $this->assertSame('SELECT MAX("id") AS "max" FROM "t"', $query->toSql());
         $this->assertSame(3, $query->value('max'));
     }
 
@@ -87,7 +87,7 @@ class AggregateSqliteTest extends AggregateTestAbstract
             ->select(new Max('id', '_max_'))
             ->from('t');
 
-        $this->assertSame('SELECT MAX("id") AS "_max_" FROM "t"', $query->toString());
+        $this->assertSame('SELECT MAX("id") AS "_max_" FROM "t"', $query->toSql());
         $this->assertSame(3, $query->value('_max_'));
     }
 
@@ -107,7 +107,7 @@ class AggregateSqliteTest extends AggregateTestAbstract
             ->select(new Count())
             ->from('t');
 
-        $this->assertSame('SELECT COUNT(*) AS "count" FROM "t"', $query->toString());
+        $this->assertSame('SELECT COUNT(*) AS "count" FROM "t"', $query->toSql());
         $this->assertSame(3, $query->value('count'));
     }
 
@@ -125,7 +125,7 @@ class AggregateSqliteTest extends AggregateTestAbstract
 
         $query = $connection->query()->select(new Count('*', '_cnt_'))->from('t');
 
-        $this->assertSame('SELECT COUNT(*) AS "_cnt_" FROM "t"', $query->toString());
+        $this->assertSame('SELECT COUNT(*) AS "_cnt_" FROM "t"', $query->toSql());
         $this->assertSame(3, $query->value('_cnt_'));
     }
 
@@ -143,7 +143,7 @@ class AggregateSqliteTest extends AggregateTestAbstract
 
         $query = $connection->query()->select(new Avg('id'))->from('t');
 
-        $this->assertSame('SELECT AVG("id") AS "avg" FROM "t"', $query->toString());
+        $this->assertSame('SELECT AVG("id") AS "avg" FROM "t"', $query->toSql());
         $this->assertSame(20.0, $query->value('avg'));
     }
 
@@ -163,7 +163,7 @@ class AggregateSqliteTest extends AggregateTestAbstract
             ->select(new Avg('id', '_avg_'))
             ->from('t');
 
-        $this->assertSame('SELECT AVG("id") AS "_avg_" FROM "t"', $query->toString());
+        $this->assertSame('SELECT AVG("id") AS "_avg_" FROM "t"', $query->toSql());
         $this->assertSame(20.0, $query->value('_avg_'));
     }
 
@@ -183,7 +183,7 @@ class AggregateSqliteTest extends AggregateTestAbstract
             ->select(new Sum('id'))
             ->from('t');
 
-        $this->assertSame('SELECT SUM("id") AS "sum" FROM "t"', $query->toString());
+        $this->assertSame('SELECT SUM("id") AS "sum" FROM "t"', $query->toSql());
         $this->assertSame(60, $query->value('sum'));
     }
 
@@ -203,7 +203,7 @@ class AggregateSqliteTest extends AggregateTestAbstract
             ->select(new Sum('id', '_sum_'))
             ->from('t');
 
-        $this->assertSame('SELECT SUM("id") AS "_sum_" FROM "t"', $query->toString());
+        $this->assertSame('SELECT SUM("id") AS "_sum_" FROM "t"', $query->toSql());
         $this->assertSame(60, $query->value('_sum_'));
     }
 
@@ -222,7 +222,7 @@ class AggregateSqliteTest extends AggregateTestAbstract
             ->select(new Sum('id', '_sum_'))
             ->from('t');
 
-        $this->assertSame('SELECT SUM("id") AS "_sum_" FROM "t"', $query->toString());
+        $this->assertSame('SELECT SUM("id") AS "_sum_" FROM "t"', $query->toSql());
 
         $this->expectException(QueryException::class);
         $this->expectExceptionMessage('SQLSTATE[HY000]: General error: 1 integer overflow');
@@ -245,7 +245,7 @@ class AggregateSqliteTest extends AggregateTestAbstract
             ->select(new RowNumber()->over()->orderBy('id'))
             ->from('t');
 
-        $this->assertSame('SELECT ROW_NUMBER() OVER(ORDER BY "id") AS "row" FROM "t"', $query->toString());
+        $this->assertSame('SELECT ROW_NUMBER() OVER(ORDER BY "id") AS "row" FROM "t"', $query->toSql());
         $this->assertSame([1, 2, 3], $query->execute()->map(fn($d) => $d->row)->all());
     }
 }

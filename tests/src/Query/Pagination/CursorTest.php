@@ -8,7 +8,7 @@ use Kirameki\Database\Query\Statements\SortOrder;
 
 class CursorTest extends PaginatorTestCase
 {
-    public function test_init(): void
+    public function test_init_asc(): void
     {
         $builder = $this->getCachedConnection()->query()->select()->from('t')->orderByAsc('id');
         $object = (object) ['id' => 1];
@@ -17,6 +17,17 @@ class CursorTest extends PaginatorTestCase
         $this->assertSame(1, $cursor->page);
         $this->assertSame(['id' => 1], $cursor->columns);
         $this->assertSame(SortOrder::Ascending, $cursor->order);
+    }
+
+    public function test_init_desc(): void
+    {
+        $builder = $this->getCachedConnection()->query()->select()->from('t')->orderByDesc('id');
+        $object = (object) ['id' => 1];
+        $cursor = Cursor::init($builder, $object);
+        $this->assertNotNull($cursor);
+        $this->assertSame(1, $cursor->page);
+        $this->assertSame(['id' => 1], $cursor->columns);
+        $this->assertSame(SortOrder::Descending, $cursor->order);
     }
 
     public function test_init__without_ordering(): void
@@ -36,5 +47,10 @@ class CursorTest extends PaginatorTestCase
         $cursor = Cursor::init($builder, $object);
         $this->assertInstanceOf(Cursor::class, $cursor);
         $this->assertInstanceOf(Cursor::class, $cursor->apply($builder));
+
+        $this->assertSame(
+            'SELECT * FROM "t" WHERE ("id", "name") > (1, \'foo\') ORDER BY "id", "name"',
+            $builder->toSql(),
+        );
     }
 }

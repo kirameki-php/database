@@ -14,14 +14,14 @@ class MySql_CreateTableBuilderTest extends SchemaTestCase
     {
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('Table requires at least one column to be defined.');
-        $this->createTableBuilder('users')->toString();
+        $this->createTableBuilder('users')->toDdl();
     }
 
     public function test_string_column(): void
     {
         $builder = $this->createTableBuilder('users');
         $builder->uuid('id')->primaryKey();
-        $schema = $builder->toString();
+        $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE `users` (`id` VARCHAR(36) NOT NULL PRIMARY KEY);', $schema);
     }
 
@@ -29,7 +29,7 @@ class MySql_CreateTableBuilderTest extends SchemaTestCase
     {
         $builder = $this->createTableBuilder('users');
         $builder->int('id')->primaryKey();
-        $schema = $builder->toString();
+        $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE `users` (`id` BIGINT NOT NULL PRIMARY KEY);', $schema);
     }
 
@@ -37,7 +37,7 @@ class MySql_CreateTableBuilderTest extends SchemaTestCase
     {
         $builder = $this->createTableBuilder('users');
         $builder->int('id', 1)->primaryKey();
-        $schema = $builder->toString();
+        $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE `users` (`id` TINYINT NOT NULL PRIMARY KEY);', $schema);
     }
 
@@ -45,7 +45,7 @@ class MySql_CreateTableBuilderTest extends SchemaTestCase
     {
         $builder = $this->createTableBuilder('users');
         $builder->int('id', 2)->primaryKey();
-        $schema = $builder->toString();
+        $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE `users` (`id` SMALLINT NOT NULL PRIMARY KEY);', $schema);
     }
 
@@ -53,7 +53,7 @@ class MySql_CreateTableBuilderTest extends SchemaTestCase
     {
         $builder = $this->createTableBuilder('users');
         $builder->int('id', 4)->primaryKey();
-        $schema = $builder->toString();
+        $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE `users` (`id` INT NOT NULL PRIMARY KEY);', $schema);
     }
 
@@ -61,7 +61,7 @@ class MySql_CreateTableBuilderTest extends SchemaTestCase
     {
         $builder = $this->createTableBuilder('users');
         $builder->int('id', 8)->primaryKey();
-        $schema = $builder->toString();
+        $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE `users` (`id` BIGINT NOT NULL PRIMARY KEY);', $schema);
     }
 
@@ -70,7 +70,7 @@ class MySql_CreateTableBuilderTest extends SchemaTestCase
         $builder = $this->createTableBuilder('users');
         $builder->int('id')->primaryKey();
         $builder->bool('enabled')->nullable()->default(true);
-        $schema = $builder->toString();
+        $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE `users` (`id` BIGINT NOT NULL PRIMARY KEY, `enabled` BOOL DEFAULT TRUE);', $schema);
     }
 
@@ -78,7 +78,7 @@ class MySql_CreateTableBuilderTest extends SchemaTestCase
     {
         $builder = $this->createTableBuilder('users');
         $builder->int('id')->primaryKey();
-        $schema = $builder->toString();
+        $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE `users` (`id` BIGINT NOT NULL PRIMARY KEY);', $schema);
     }
 
@@ -86,7 +86,7 @@ class MySql_CreateTableBuilderTest extends SchemaTestCase
     {
         $builder = $this->createTableBuilder('users');
         $builder->int('id')->primaryKey()->autoIncrement();
-        $schema = $builder->toString();
+        $schema = $builder->toDdl();
         $this->assertStringStartsWith(
             'CREATE TABLE `users` (`id` BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT);' . PHP_EOL .
             'ALTER TABLE `users` AUTO_INCREMENT = '
@@ -97,7 +97,7 @@ class MySql_CreateTableBuilderTest extends SchemaTestCase
     {
         $builder = $this->createTableBuilder('users');
         $builder->uuid('id')->nullable()->primaryKey()->default('ABC');
-        $schema = $builder->toString();
+        $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE `users` (`id` VARCHAR(36) DEFAULT "ABC" PRIMARY KEY);', $schema);
     }
 
@@ -106,7 +106,7 @@ class MySql_CreateTableBuilderTest extends SchemaTestCase
         $builder = $this->createTableBuilder('users');
         $builder->int('id')->nullable()->primaryKey();
         $builder->datetime('loginAt')->nullable()->default(new Raw('CURRENT_TIMESTAMP'));
-        $schema = $builder->toString();
+        $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE `users` (`id` BIGINT PRIMARY KEY, `loginAt` DATETIME(6) DEFAULT CURRENT_TIMESTAMP);', $schema);
     }
 }

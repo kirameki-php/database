@@ -15,7 +15,7 @@ abstract class SchemaStatement
      * @param SchemaSyntax $syntax
      * @return string
      */
-    public function toString(SchemaSyntax $syntax): string
+    public function toDdl(SchemaSyntax $syntax): string
     {
         return implode(";\n", $this->toExecutable($syntax)) . ';';
     }

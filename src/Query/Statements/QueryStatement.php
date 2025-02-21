@@ -33,7 +33,7 @@ abstract class QueryStatement
      * @param QuerySyntax $syntax
      * @return string
      */
-    public function toString(QuerySyntax $syntax): string
+    public function toSql(QuerySyntax $syntax): string
     {
         return $syntax->interpolate(
             $this->generateTemplate($syntax),

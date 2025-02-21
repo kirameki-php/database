@@ -258,13 +258,13 @@ class QueryHandlerTest extends QueryTestCase
         $this->assertCount(1, $this->eventTriggers);
     }
 
-    public function test_toString(): void
+    public function test_toSql(): void
     {
         $connection = $this->sqliteConnection();
         $connection->tags->set('a', 1);
         $statement = new RawStatement('SELECT * FROM users');
         $statement->tags = new Tags(['b' => 2]);
-        $result = $connection->query()->toString($statement);
+        $result = $connection->query()->toSql($statement);
         $this->assertSame('SELECT * FROM users /* b=2 */', $result);
     }
 }

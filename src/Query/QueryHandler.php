@@ -127,9 +127,9 @@ readonly class QueryHandler
      * @param QueryStatement $statement
      * @return string
      */
-    public function toString(QueryStatement $statement): string
+    public function toSql(QueryStatement $statement): string
     {
-        return $statement->toString($this->connection->adapter->querySyntax);
+        return $statement->toSql($this->connection->adapter->querySyntax);
     }
 
     /**

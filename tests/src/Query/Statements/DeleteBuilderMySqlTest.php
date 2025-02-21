@@ -8,19 +8,19 @@ class DeleteBuilderMySqlTest extends DeleteBuilderTestAbstract
 
     public function test_deleteAll(): void
     {
-        $sql = $this->deleteBuilder('User')->toString();
+        $sql = $this->deleteBuilder('User')->toSql();
         $this->assertSame("DELETE FROM `User`", $sql);
     }
 
     public function test_delete_with_where(): void
     {
-        $sql = $this->deleteBuilder('User')->where('id', 1)->toString();
+        $sql = $this->deleteBuilder('User')->where('id', 1)->toSql();
         $this->assertSame("DELETE FROM `User` WHERE `id` = 1", $sql);
     }
 
     public function test_returning(): void
     {
-        $sql = $this->deleteBuilder('User')->where('id', 1)->returning('id', 'name')->toString();
+        $sql = $this->deleteBuilder('User')->where('id', 1)->returning('id', 'name')->toSql();
         $this->assertSame("DELETE FROM `User` WHERE `id` = 1 RETURNING `id`, `name`", $sql);
     }
 }

@@ -298,7 +298,7 @@ class ConditionBuilderTest extends QueryTestCase
 
         $conn = $this->sqliteConnection();
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE id = 1', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE id = 1', $q->toSql());
     }
 
     public function test_exists(): void
@@ -313,7 +313,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertFalse($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE EXISTS (SELECT "id" FROM "t2")', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE EXISTS (SELECT "id" FROM "t2")', $q->toSql());
     }
 
     public function test_notExists(): void
@@ -328,7 +328,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertTrue($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE NOT EXISTS (SELECT "id" FROM "t2")', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE NOT EXISTS (SELECT "id" FROM "t2")', $q->toSql());
     }
 
     public function test___clone(): void
@@ -366,7 +366,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertSame(Logic::And, $def->nextLogic);
 
         $q = $conn->query()->select()->from('t')->where($current);
-        $this->assertSame('SELECT * FROM "t" WHERE ("id" = 1 AND "id" = 2)', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE ("id" = 1 AND "id" = 2)', $q->toSql());
     }
 
     public function test_and__with_column(): void
@@ -377,7 +377,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertSame($current, $next);
 
         $q = $conn->query()->select()->from('t')->where($current);
-        $this->assertSame('SELECT * FROM "t" WHERE ("id" = 1 AND "name" = \'a\')', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE ("id" = 1 AND "name" = \'a\')', $q->toSql());
     }
 
     public function test_or__without_column(): void
@@ -397,7 +397,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertSame(Logic::Or, $def->nextLogic);
 
         $q = $conn->query()->select()->from('t')->where($current);
-        $this->assertSame('SELECT * FROM "t" WHERE ("id" = 1 OR "id" = 2)', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE ("id" = 1 OR "id" = 2)', $q->toSql());
     }
 
     public function test_and_or_multi_define(): void
@@ -408,7 +408,7 @@ class ConditionBuilderTest extends QueryTestCase
             ->or()->lessThan(3);
 
         $q = $conn->query()->select()->from('t')->where($current);
-        $this->assertSame('SELECT * FROM "t" WHERE ("id" = 1 AND "id" > 2 OR "id" < 3)', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE ("id" = 1 AND "id" > 2 OR "id" < 3)', $q->toSql());
     }
 
     public function test_equals__with_scalar(): void
@@ -422,7 +422,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertFalse($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" = TRUE', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE "b" = TRUE', $q->toSql());
     }
 
     public function test_equals__with_iterable_and_fail(): void
@@ -443,7 +443,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertTrue($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" != TRUE', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE "b" != TRUE', $q->toSql());
     }
 
     public function test_greaterThanOrEquals(): void
@@ -457,7 +457,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertFalse($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" >= 1', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE "b" >= 1', $q->toSql());
     }
 
     public function test_greaterThan(): void
@@ -471,7 +471,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertFalse($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" > 1', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE "b" > 1', $q->toSql());
     }
 
     public function test_lessThanOrEqualTo(): void
@@ -485,7 +485,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertFalse($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" <= 1', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE "b" <= 1', $q->toSql());
     }
 
     public function test_lessThan(): void
@@ -499,7 +499,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertFalse($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" < 1', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE "b" < 1', $q->toSql());
     }
 
     public function test_isNull(): void
@@ -513,7 +513,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertFalse($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" IS NULL', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE "b" IS NULL', $q->toSql());
     }
 
     public function test_isNotNull(): void
@@ -527,7 +527,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertTrue($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" IS NOT NULL', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE "b" IS NOT NULL', $q->toSql());
     }
 
     public function test_like(): void
@@ -541,7 +541,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertFalse($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "name" LIKE \'John%\'', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE "name" LIKE \'John%\'', $q->toSql());
     }
 
     public function test_notLike(): void
@@ -555,7 +555,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertTrue($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "name" NOT LIKE \'John%\'', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE "name" NOT LIKE \'John%\'', $q->toSql());
     }
 
     public function test_in__with_array(): void
@@ -569,7 +569,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertFalse($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" IN (1, 2)', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE "b" IN (1, 2)', $q->toSql());
     }
 
     public function test_in__with_empty_array(): void
@@ -577,7 +577,7 @@ class ConditionBuilderTest extends QueryTestCase
         $conn = $this->sqliteConnection();
         $cond = ConditionBuilder::for('b')->in([]);
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE 1 = 0', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE 1 = 0', $q->toSql());
     }
 
     public function test_in__with_subquery(): void
@@ -592,7 +592,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertFalse($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" IN (SELECT "id" FROM "t2")', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE "b" IN (SELECT "id" FROM "t2")', $q->toSql());
     }
 
     public function test_notIn__with_array(): void
@@ -606,7 +606,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertTrue($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" NOT IN (1, 2)', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE "b" NOT IN (1, 2)', $q->toSql());
     }
 
     public function test_notIn__with_subquery(): void
@@ -621,7 +621,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertTrue($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" NOT IN (SELECT "id" FROM "t2")', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE "b" NOT IN (SELECT "id" FROM "t2")', $q->toSql());
     }
 
     public function test_notIn__with_empty_array(): void
@@ -629,7 +629,7 @@ class ConditionBuilderTest extends QueryTestCase
         $conn = $this->sqliteConnection();
         $cond = ConditionBuilder::for('b')->notIn([]);
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE 1 = 0', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE 1 = 0', $q->toSql());
     }
 
     public function test_between(): void
@@ -643,7 +643,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertFalse($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" BETWEEN 1 AND 10', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE "b" BETWEEN 1 AND 10', $q->toSql());
     }
 
     public function test_notBetween(): void
@@ -657,7 +657,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertTrue($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" NOT BETWEEN 1 AND 10', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE "b" NOT BETWEEN 1 AND 10', $q->toSql());
     }
 
     public function test_inRange(): void
@@ -671,7 +671,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertFalse($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" > 1 AND "b" < 10', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE "b" > 1 AND "b" < 10', $q->toSql());
     }
 
     public function test_notInRange(): void
@@ -685,7 +685,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertTrue($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" <= 1 OR "b" >= 10', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE "b" <= 1 OR "b" >= 10', $q->toSql());
     }
 
     public function test_apply(): void
@@ -702,7 +702,7 @@ class ConditionBuilderTest extends QueryTestCase
 
         $conn = $this->sqliteConnection();
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" > 2', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE "b" > 2', $q->toSql());
     }
 
     public function test_negate_equals(): void
@@ -714,7 +714,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertTrue($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" != 1', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE "b" != 1', $q->toSql());
     }
 
     public function test_negate_greaterThanOrEquals(): void
@@ -726,7 +726,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertTrue($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" < 1', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE "b" < 1', $q->toSql());
     }
 
     public function test_negate_greaterThan(): void
@@ -738,7 +738,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertTrue($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" <= 1', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE "b" <= 1', $q->toSql());
     }
 
     public function test_negate_lessThanOrEqualTo(): void
@@ -750,7 +750,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertTrue($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" > 1', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE "b" > 1', $q->toSql());
     }
 
     public function test_negate_lessThan(): void
@@ -762,7 +762,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertTrue($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" >= 1', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE "b" >= 1', $q->toSql());
     }
 
     public function test_negate_isNull(): void
@@ -774,7 +774,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertTrue($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" IS NOT NULL', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE "b" IS NOT NULL', $q->toSql());
     }
 
     public function test_negate_isNotNull(): void
@@ -786,7 +786,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertFalse($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" IS NULL', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE "b" IS NULL', $q->toSql());
     }
 
     public function test_negate_like(): void
@@ -798,7 +798,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertTrue($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "name" NOT LIKE \'John%\'', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE "name" NOT LIKE \'John%\'', $q->toSql());
     }
 
     public function test_negate_in(): void
@@ -810,7 +810,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertTrue($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" NOT IN (1, 2)', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE "b" NOT IN (1, 2)', $q->toSql());
     }
 
     public function test_negate_between(): void
@@ -822,7 +822,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertTrue($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" NOT BETWEEN 1 AND 10', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE "b" NOT BETWEEN 1 AND 10', $q->toSql());
     }
 
     public function test_negate_inRange(): void
@@ -834,7 +834,7 @@ class ConditionBuilderTest extends QueryTestCase
         $this->assertTrue($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" <= 1 OR "b" >= 10', $q->toString());
+        $this->assertSame('SELECT * FROM "t" WHERE "b" <= 1 OR "b" >= 10', $q->toSql());
     }
 
     public function test_getDefinition(): void

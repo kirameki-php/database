@@ -88,9 +88,9 @@ abstract class QueryBuilder
     /**
      * @return string
      */
-    public function toString(): string
+    public function toSql(): string
     {
-        return $this->handler->toString($this->statement);
+        return $this->handler->toSql($this->statement);
     }
 
     /**

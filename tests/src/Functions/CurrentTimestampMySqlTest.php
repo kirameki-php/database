@@ -14,7 +14,7 @@ class CurrentTimestampMySqlTest extends CurrentTimestampTestAbstract
         $connection = $this->getConnection();
 
         $q = $connection->query()->select(new CurrentTimestamp());
-        $this->assertSame('SELECT CURRENT_TIMESTAMP()', $q->toString());
+        $this->assertSame('SELECT CURRENT_TIMESTAMP()', $q->toSql());
         $result = Arr::first((array)$q->first());
         $this->assertStringMatchesFormat('%d-%d-%d %d:%d:%d', $result);
     }
@@ -24,7 +24,7 @@ class CurrentTimestampMySqlTest extends CurrentTimestampTestAbstract
         $connection = $this->getConnection();
 
         $q = $connection->query()->select(new CurrentTimestamp(6));
-        $this->assertSame('SELECT CURRENT_TIMESTAMP(6)', $q->toString());
+        $this->assertSame('SELECT CURRENT_TIMESTAMP(6)', $q->toSql());
         $result = Arr::first((array)$q->first());
         $this->assertStringMatchesFormat('%d-%d-%d %d:%d:%d.%d', $result);
     }

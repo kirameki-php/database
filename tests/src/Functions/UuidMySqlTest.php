@@ -14,7 +14,7 @@ class UuidMySqlTest extends UuidTestAbstract
         $connection = $this->getConnection();
 
         $q = $connection->query()->select(new Uuid());
-        $this->assertSame('SELECT UUID()', $q->toString());
+        $this->assertSame('SELECT UUID()', $q->toSql());
 
         $result = Arr::first((array)$q->first());
         $this->assertMatchesRegularExpression('/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/', $result);

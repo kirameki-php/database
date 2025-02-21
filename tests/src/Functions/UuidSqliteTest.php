@@ -14,7 +14,7 @@ class UuidSqliteTest extends UuidTestAbstract
         $connection = $this->getConnection();
 
         $q = $connection->query()->select(new Uuid());
-        $this->assertSame('SELECT PRINTF(\'%s-%s-%s-%s-%s\', LOWER(HEX(RANDOMBLOB(4))), LOWER(HEX(RANDOMBLOB(2))), LOWER(HEX(RANDOMBLOB(2))), LOWER(HEX(RANDOMBLOB(2))), LOWER(HEX(RANDOMBLOB(6))))', $q->toString());
+        $this->assertSame('SELECT PRINTF(\'%s-%s-%s-%s-%s\', LOWER(HEX(RANDOMBLOB(4))), LOWER(HEX(RANDOMBLOB(2))), LOWER(HEX(RANDOMBLOB(2))), LOWER(HEX(RANDOMBLOB(2))), LOWER(HEX(RANDOMBLOB(6))))', $q->toSql());
 
         $result = Arr::first((array)$q->first());
         $this->assertMatchesRegularExpression('/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/', $result);

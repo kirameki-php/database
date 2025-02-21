@@ -21,7 +21,7 @@ class JsonExtractSqliteTest extends JsonExtractTestAbstract
         $q = $connection->query()
             ->select(JsonExtract::column('attrs', '$.users[1]'))
             ->from('test');
-        $this->assertSame('SELECT "attrs" -> \'$.users[1]\' FROM "test"', $q->toString());
+        $this->assertSame('SELECT "attrs" -> \'$.users[1]\' FROM "test"', $q->toSql());
 
         $result = Arr::first((array)$q->first());
         $this->assertSame('2', $result);
@@ -39,7 +39,7 @@ class JsonExtractSqliteTest extends JsonExtractTestAbstract
         $q = $connection->query()
             ->select(JsonExtract::column('attrs', '$.users', 't'))
             ->from('test');
-        $this->assertSame('SELECT "attrs" -> \'$.users\' AS "t" FROM "test"', $q->toString());
+        $this->assertSame('SELECT "attrs" -> \'$.users\' AS "t" FROM "test"', $q->toSql());
 
         $result = (array)$q->first();
         $this->assertSame(['t' => '[1,2,3]'], $result);

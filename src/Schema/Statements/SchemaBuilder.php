@@ -68,8 +68,8 @@ abstract class SchemaBuilder
     /**
      * @return string
      */
-    public function toString(): string
+    public function toDdl(): string
     {
-        return $this->handler->toString($this->statement);
+        return $this->handler->toDdl($this->statement);
     }
 }
