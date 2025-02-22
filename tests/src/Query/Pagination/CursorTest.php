@@ -38,7 +38,7 @@ class CursorTest extends PaginatorTestCase
         Cursor::init($builder, (object) ['id' => 1]);
     }
 
-    public function test_apply(): void
+    public function test_applyTo(): void
     {
         $builder = $this->getCachedConnection()->query()->select()->from('t')
             ->orderByAsc('id')
@@ -49,7 +49,7 @@ class CursorTest extends PaginatorTestCase
         $this->assertInstanceOf(Cursor::class, $cursor->applyTo($builder));
 
         $this->assertSame(
-            'SELECT * FROM "t" WHERE ("id", "name") > (1, \'foo\') ORDER BY "id", "name"',
+            'SELECT * FROM "t" WHERE ("id", "name") >= (1, \'foo\') ORDER BY "id", "name"',
             $builder->toSql(),
         );
     }

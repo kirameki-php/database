@@ -86,7 +86,7 @@ class Cursor
         $columns = array_keys($this->columns);
         $values = array_values($this->columns);
         $operator = match ($this->order) {
-            SortOrder::Ascending => Operator::GreaterThan,
+            SortOrder::Ascending => Operator::GreaterThanOrEqualTo,
             SortOrder::Descending => Operator::LessThan,
         };
 
