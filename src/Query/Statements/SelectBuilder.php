@@ -428,6 +428,10 @@ class SelectBuilder extends ConditionsBuilder
         $next = $result->atOrNull($size);
         $cursor ??= Cursor::init($query, $next);
 
+        if (!$cursor?->direction->isNext()) {
+            $items = $items->reverse();
+        }
+
         return new CursorPaginator($items, $next, $cursor, $size);
     }
 
@@ -614,7 +618,7 @@ class SelectBuilder extends ConditionsBuilder
                 }
             }
 
-            $cursor = $paginator->getNextCursorOrNull();
+            $cursor = $paginator->nextCursor;
         } while ($paginator->hasNextPage());
     }
 

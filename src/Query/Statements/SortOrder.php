@@ -6,4 +6,15 @@ enum SortOrder: string
 {
     case Ascending = 'ASC';
     case Descending = 'DESC';
+
+    /**
+     * @return SortOrder
+     */
+    public function reverse(): SortOrder
+    {
+        return match($this) {
+            self::Ascending => self::Descending,
+            self::Descending => self::Ascending,
+        };
+    }
 }

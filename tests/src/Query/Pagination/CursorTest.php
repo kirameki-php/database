@@ -15,7 +15,7 @@ class CursorTest extends PaginatorTestCase
         $cursor = Cursor::init($builder, $object);
         $this->assertNotNull($cursor);
         $this->assertSame(1, $cursor->page);
-        $this->assertSame(['id' => 1], $cursor->columns);
+        $this->assertSame(['id' => 1], $cursor->parameters);
         $this->assertSame(SortOrder::Ascending, $cursor->order);
     }
 
@@ -26,7 +26,7 @@ class CursorTest extends PaginatorTestCase
         $cursor = Cursor::init($builder, $object);
         $this->assertNotNull($cursor);
         $this->assertSame(1, $cursor->page);
-        $this->assertSame(['id' => 1], $cursor->columns);
+        $this->assertSame(['id' => 1], $cursor->parameters);
         $this->assertSame(SortOrder::Descending, $cursor->order);
     }
 

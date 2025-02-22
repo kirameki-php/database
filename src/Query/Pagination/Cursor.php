@@ -42,37 +42,63 @@ class Cursor
         }
         $order = Arr::first($orderBy)->sort;
 
-        return new static($columns, $order);
+        return new static($columns, $order, 1);
     }
 
     /**
-     * @param array<string, mixed> $columns
+     * @param array<string, mixed> $parameters
      * @param SortOrder $order
      * @param int $page
+     * @param Direction $direction
      */
     protected function __construct(
-        public readonly array $columns,
+        public readonly array $parameters,
         public readonly SortOrder $order,
-        public readonly int $page = 1,
+        public readonly int $page,
+        public readonly Direction $direction = Direction::Next,
     )
     {
     }
 
+    /**
+     * @param object|null $next
+     * @return static|null
+     */
     public function next(?object $next): ?static
     {
         if ($next === null) {
             return null;
         }
 
-        $nextColumns = [];
-        foreach (array_keys($this->columns) as $name) {
-            $nextColumns[$name] = $next->$name;
+        return new static(
+            $this->extractParameters($next),
+            $this->order,
+            $this->page + 1,
+            Direction::Next,
+        );
+    }
+
+    /**
+     * @param object|null $previous
+     * @return static|null
+     */
+    public function previous(?object $previous): ?static
+    {
+        if ($previous === null) {
+            return null;
+        }
+
+        $previousPage = $this->page - 1;
+
+        if ($previousPage < 1) {
+            return null;
         }
 
         return new static(
-            $nextColumns,
+            $this->extractParameters($previous),
             $this->order,
-            $this->page + 1,
+            $previousPage,
+            Direction::Previous,
         );
     }
 
@@ -83,9 +109,15 @@ class Cursor
      */
     public function applyTo(SelectBuilder $builder): static
     {
-        $columns = array_keys($this->columns);
-        $values = array_values($this->columns);
-        $operator = match ($this->order) {
+        $columns = array_keys($this->parameters);
+        $values = array_values($this->parameters);
+
+        $order = match ($this->direction) {
+            Direction::Next => $this->order,
+            Direction::Previous => $this->order->reverse(),
+        };
+
+        $operator = match ($order) {
             SortOrder::Ascending => Operator::GreaterThanOrEqualTo,
             SortOrder::Descending => Operator::LessThan,
         };
@@ -93,9 +125,22 @@ class Cursor
         $builder->where(ConditionBuilder::with($columns, $operator, $values));
 
         foreach ($columns as $column) {
-            $builder->orderBy($column, $this->order);
+            $builder->orderBy($column, $order);
         }
 
         return $this;
+    }
+
+    /**
+     * @param object $object
+     * @return array<string, mixed>
+     */
+    protected function extractParameters(object $object): array
+    {
+        $parameters = [];
+        foreach ($this->parameters as $name => $value) {
+            $parameters[$name] = $object->$name;
+        }
+        return $parameters;
     }
 }
