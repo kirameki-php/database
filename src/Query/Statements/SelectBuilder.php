@@ -131,7 +131,7 @@ class SelectBuilder extends ConditionsBuilder
      */
     public function joinOn(string $table, string $column1, string $column2): static
     {
-        return $this->addJoinToStatement((new JoinBuilder(JoinType::Inner, $table))->on($column1, $column2));
+        return $this->addJoinToStatement(new JoinBuilder(JoinType::Inner, $table)->on($column1, $column2));
     }
 
     /**
@@ -152,7 +152,7 @@ class SelectBuilder extends ConditionsBuilder
      */
     public function crossJoinOn(string $table, string $column1, string $column2): static
     {
-        return $this->addJoinToStatement((new JoinBuilder(JoinType::Cross, $table))->on($column1, $column2));
+        return $this->addJoinToStatement(new JoinBuilder(JoinType::Cross, $table)->on($column1, $column2));
     }
 
     /**
@@ -173,7 +173,7 @@ class SelectBuilder extends ConditionsBuilder
      */
     public function leftJoinOn(string $table, string $column1, string $column2): static
     {
-        return $this->addJoinToStatement((new JoinBuilder(JoinType::Left, $table))->on($column1, $column2));
+        return $this->addJoinToStatement(new JoinBuilder(JoinType::Left, $table)->on($column1, $column2));
     }
 
     /**
@@ -194,7 +194,7 @@ class SelectBuilder extends ConditionsBuilder
      */
     public function rightJoinOn(string $table, string $column1, string $column2): static
     {
-        return $this->addJoinToStatement((new JoinBuilder(JoinType::Right, $table))->on($column1, $column2));
+        return $this->addJoinToStatement(new JoinBuilder(JoinType::Right, $table)->on($column1, $column2));
     }
 
     /**
@@ -215,7 +215,7 @@ class SelectBuilder extends ConditionsBuilder
      */
     public function fullJoinOn(string $table, string $column1, string $column2): static
     {
-        return $this->addJoinToStatement((new JoinBuilder(JoinType::Full, $table))->on($column1, $column2));
+        return $this->addJoinToStatement(new JoinBuilder(JoinType::Full, $table)->on($column1, $column2));
     }
 
     /**
@@ -424,11 +424,12 @@ class SelectBuilder extends ConditionsBuilder
     ): CursorPaginator
     {
         $query = $this->copy()->limit($size + 1);
-        $cursor?->apply($this);
+        $cursor?->applyTo($query);
         $result = $query->execute();
 
         $items = $result->takeFirst($size);
         $next = $result->atOrNull($size);
+
         $cursor ??= Cursor::init($this, $next);
 
         return new CursorPaginator($items, $next, $cursor, $size);

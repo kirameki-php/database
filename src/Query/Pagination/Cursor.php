@@ -64,13 +64,13 @@ class Cursor
             return null;
         }
 
-        $columns = [];
-        foreach (array_keys($this->columns) as $column) {
-            $columns[$column] = $next->$column;
+        $nextColumns = [];
+        foreach (array_keys($this->columns) as $name) {
+            $nextColumns[$name] = $next->$name;
         }
 
         return new static(
-            $this->columns,
+            $nextColumns,
             $this->order,
             $this->page + 1,
         );
@@ -81,7 +81,7 @@ class Cursor
      * @param SelectBuilder $builder
      * @return $this
      */
-    public function apply(SelectBuilder $builder): static
+    public function applyTo(SelectBuilder $builder): static
     {
         $columns = array_keys($this->columns);
         $values = array_values($this->columns);

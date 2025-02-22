@@ -4,6 +4,7 @@ namespace Tests\Kirameki\Database\Query\Pagination;
 
 use Kirameki\Database\Query\Pagination\Cursor;
 use Kirameki\Database\Query\Pagination\CursorPaginator;
+use stdClass;
 use function dump;
 
 class CursorPaginatorTest extends PaginatorTestCase
@@ -45,12 +46,21 @@ class CursorPaginatorTest extends PaginatorTestCase
 
     public function test_getNextCursor__has_next(): void
     {
-        $this->createRecords(12);
-        $paginator = $this->createDummyPaginator(10);
+        $this->createRecords(7);
+        $paginator = $this->createDummyPaginator(3);
         $nextCursor = $paginator->getNextCursorOrNull();
         $this->assertInstanceOf(Cursor::class, $nextCursor);
-        $this->assertSame(10, $paginator->size);
+        $this->assertSame(3, $paginator->size);
         $this->assertSame(2, $nextCursor->page);
+        $this->assertSame([0, 1, 2], $paginator->map(fn($r) => ((array) $r)['id'])->all());
+
+        $nextPaginator = $this->getCachedConnection()->query()->select()->from('t')
+            ->orderByAsc('id')
+            ->cursorPaginate(3, $nextCursor);
+        $this->assertInstanceOf(CursorPaginator::class, $nextPaginator);
+        $this->assertSame(3, $nextPaginator->size);
+        $this->assertSame(2, $nextPaginator->page);
+        $this->assertSame([3, 4, 5], $nextPaginator->map(fn($r) => ((array) $r)['id'])->all());
     }
 
     public function test_getNextCursor__no_next(): void

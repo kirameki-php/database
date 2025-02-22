@@ -46,7 +46,7 @@ class CursorTest extends PaginatorTestCase
         $object = (object) ['id' => 1, 'name' => 'foo'];
         $cursor = Cursor::init($builder, $object);
         $this->assertInstanceOf(Cursor::class, $cursor);
-        $this->assertInstanceOf(Cursor::class, $cursor->apply($builder));
+        $this->assertInstanceOf(Cursor::class, $cursor->applyTo($builder));
 
         $this->assertSame(
             'SELECT * FROM "t" WHERE ("id", "name") > (1, \'foo\') ORDER BY "id", "name"',
