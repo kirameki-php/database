@@ -109,8 +109,9 @@ class Cursor
      */
     public function applyTo(SelectBuilder $builder): static
     {
-        $columns = array_keys($this->parameters);
-        $values = array_values($this->parameters);
+        $parameters = $this->parameters;
+        $columns = array_keys($parameters);
+        $values = array_values($parameters);
 
         $order = match ($this->direction) {
             Direction::Next => $this->order,
