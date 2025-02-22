@@ -430,7 +430,7 @@ class SelectBuilder extends ConditionsBuilder
         $items = $result->takeFirst($size);
         $next = $result->atOrNull($size);
 
-        $cursor ??= Cursor::init($this, $next);
+        $cursor ??= Cursor::init($query, $next);
 
         return new CursorPaginator($items, $next, $cursor, $size);
     }
