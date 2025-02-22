@@ -406,9 +406,9 @@ class SelectBuilder extends ConditionsBuilder
      * @param int $size
      * @return OffsetPaginator<object>
      */
-    public function offsetPaginate(int $page, int $size = Paginator::DEFAULT_PAGE_SIZE): OffsetPaginator
+    public function offsetPaginate(int $page, int $size = Paginator::DEFAULT_SIZE): OffsetPaginator
     {
-        $total = $this->copy()->count();
+        $total = $this->count();
         $result = $this->copy()->offset(($page - 1) * $size)->limit($size)->execute();
         return new OffsetPaginator($result, $size, $page, $total);
     }
@@ -418,10 +418,7 @@ class SelectBuilder extends ConditionsBuilder
      * @param Cursor|null $cursor
      * @return CursorPaginator<object>
      */
-    public function cursorPaginate(
-        int $size = Paginator::DEFAULT_PAGE_SIZE,
-        ?Cursor $cursor = null,
-    ): CursorPaginator
+    public function cursorPaginate(int $size = Paginator::DEFAULT_SIZE, ?Cursor $cursor = null): CursorPaginator
     {
         $query = $this->copy()->limit($size + 1);
         $cursor?->applyTo($query);
@@ -429,7 +426,6 @@ class SelectBuilder extends ConditionsBuilder
 
         $items = $result->takeFirst($size);
         $next = $result->atOrNull($size);
-
         $cursor ??= Cursor::init($query, $next);
 
         return new CursorPaginator($items, $next, $cursor, $size);
