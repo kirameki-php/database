@@ -26,19 +26,6 @@ class PaginatorTest extends PaginatorTestCase
         $this->assertSame(1, $paginator->page);
     }
 
-    public function test_hasMorePages__false(): void
-    {
-        $paginator = $this->createDummyPaginator(10, 1);
-        $this->assertFalse($paginator->hasMorePages());
-    }
-
-    public function test_hasMorePages__true(): void
-    {
-        $this->createRecords(2);
-        $paginator = $this->createDummyPaginator(2, 1);
-        $this->assertTrue($paginator->hasMorePages());
-    }
-
     public function test_isFirstPage__true(): void
     {
         $paginator = $this->createDummyPaginator(10, 1);

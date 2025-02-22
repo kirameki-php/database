@@ -70,6 +70,7 @@ class CursorPaginatorTest extends PaginatorTestCase
         $nextCursor = $paginator->getNextCursorOrNull();
         $this->assertNull($nextCursor);
         $this->assertSame(9, $paginator->count());
+        $this->assertFalse($paginator->hasNextPage());
     }
 
 

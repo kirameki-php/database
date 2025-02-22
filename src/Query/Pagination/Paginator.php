@@ -37,7 +37,7 @@ abstract class Paginator extends QueryResult
     /**
      * @return bool
      */
-    public function hasMorePages(): bool
+    protected function hasMorePages(): bool
     {
         return $this->count() === $this->size;
     }

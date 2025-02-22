@@ -39,19 +39,6 @@ class OffsetPaginatorTest extends PaginatorTestCase
         $this->assertSame([], $newPaginator->all());
     }
 
-    public function test_hasMorePages__false(): void
-    {
-        $paginator = $this->createDummyPaginator(10, 1);
-        $this->assertFalse($paginator->hasMorePages());
-    }
-
-    public function test_hasMorePages__true(): void
-    {
-        $this->createRecords(2);
-        $paginator = $this->createDummyPaginator(1, 1);
-        $this->assertTrue($paginator->hasMorePages());
-    }
-
     public function test_getTotalPages(): void
     {
         $this->createRecords(11);
