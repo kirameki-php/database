@@ -12,7 +12,7 @@ class CursorTest extends PaginatorTestCase
     {
         $builder = $this->getCachedConnection()->query()->select()->from('t')->orderByAsc('id');
         $object = (object) ['id' => 1];
-        $cursor = Cursor::init($builder, $object);
+        $cursor = Cursor::initOrNull($builder, $object);
         $this->assertNotNull($cursor);
         $this->assertSame(1, $cursor->page);
         $this->assertSame(['id' => 1], $cursor->parameters);
@@ -23,7 +23,7 @@ class CursorTest extends PaginatorTestCase
     {
         $builder = $this->getCachedConnection()->query()->select()->from('t')->orderByDesc('id');
         $object = (object) ['id' => 1];
-        $cursor = Cursor::init($builder, $object);
+        $cursor = Cursor::initOrNull($builder, $object);
         $this->assertNotNull($cursor);
         $this->assertSame(1, $cursor->page);
         $this->assertSame(['id' => 1], $cursor->parameters);
@@ -35,7 +35,7 @@ class CursorTest extends PaginatorTestCase
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('Cannot paginate with cursor without an order by clause.');
         $builder = $this->getCachedConnection()->query()->select()->from('t');
-        Cursor::init($builder, (object) ['id' => 1]);
+        Cursor::initOrNull($builder, (object) ['id' => 1]);
     }
 
     public function test_applyTo(): void
@@ -44,7 +44,7 @@ class CursorTest extends PaginatorTestCase
             ->orderByAsc('id')
             ->orderByDesc('name');
         $object = (object) ['id' => 1, 'name' => 'foo'];
-        $cursor = Cursor::init($builder, $object);
+        $cursor = Cursor::initOrNull($builder, $object);
         $this->assertInstanceOf(Cursor::class, $cursor);
         $this->assertInstanceOf(Cursor::class, $cursor->applyTo($builder));
 

@@ -426,7 +426,7 @@ class SelectBuilder extends ConditionsBuilder
 
         $items = $result->takeFirst($size);
         $next = $result->atOrNull($size);
-        $cursor ??= Cursor::init($query, $next);
+        $cursor ??= Cursor::initOrNull($query, $next);
 
         if (!$cursor?->direction->isNext()) {
             $items = $items->reverse();

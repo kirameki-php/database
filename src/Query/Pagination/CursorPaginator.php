@@ -16,25 +16,25 @@ class CursorPaginator extends Paginator
      * @var Cursor|null
      */
     public ?Cursor $nextCursor {
-        get => $this->nextCursor ??= $this->currentCursor?->next($this->next);
+        get => $this->nextCursor ??= $this->currentCursor?->nextOrNull($this->nextRow);
     }
 
     /**
      * @return Cursor|null
      */
     public ?Cursor $previousCursor {
-        get => $this->previousCursor ??= $this->currentCursor?->previous($this->first());
+        get => $this->previousCursor ??= $this->currentCursor?->previousOrNull($this->firstOrNull());
     }
 
     /**
      * @param QueryResult<SelectStatement, TRow> $result
-     * @param TRow|null $next
-     * @param ($next is null ? null : Cursor) $currentCursor
+     * @param TRow|null $nextRow
+     * @param ($nextRow is null ? null : Cursor) $currentCursor
      * @param int $size
      */
     public function __construct(
         QueryResult $result,
-        public readonly ?object $next,
+        protected readonly ?object $nextRow,
         public readonly ?Cursor $currentCursor,
         int $size,
     )
@@ -48,7 +48,7 @@ class CursorPaginator extends Paginator
     #[Override]
     public function instantiate(mixed $iterable): static
     {
-        $instance = new static($this, $this->next, $this->currentCursor, $this->size);
+        $instance = new static($this, $this->nextRow, $this->currentCursor, $this->size);
         $instance->items = $iterable;
         return $instance;
     }

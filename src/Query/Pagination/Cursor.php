@@ -19,7 +19,7 @@ class Cursor
      * @param object|null $next
      * @return static|null
      */
-    public static function init(
+    public static function initOrNull(
         SelectBuilder $builder,
         ?object $next,
     ): ?static
@@ -64,7 +64,7 @@ class Cursor
      * @param object|null $next
      * @return static|null
      */
-    public function next(?object $next): ?static
+    public function nextOrNull(?object $next): ?static
     {
         if ($next === null) {
             return null;
@@ -82,7 +82,7 @@ class Cursor
      * @param object|null $previous
      * @return static|null
      */
-    public function previous(?object $previous): ?static
+    public function previousOrNull(?object $previous): ?static
     {
         if ($previous === null) {
             return null;
