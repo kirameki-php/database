@@ -20,6 +20,7 @@ use Kirameki\Database\Query\QueryHandler;
 use Kirameki\Database\Query\QueryResult;
 use function array_is_list;
 use function array_values;
+use function dump;
 use function is_array;
 use function min;
 
@@ -413,12 +414,14 @@ class SelectBuilder extends ConditionsBuilder
             throw new InvalidArgumentException("Invalid page number. Expected: > 0. Got: {$page}.", [
                 'statement' => $this->statement,
                 'page' => $page,
+                'size' => $size,
             ]);
         }
 
         if ($size <= 0) {
             throw new InvalidArgumentException("Invalid page size. Expected: > 0. Got: {$size}.", [
                 'statement' => $this->statement,
+                'page' => $page,
                 'size' => $size,
             ]);
         }

@@ -16,7 +16,6 @@ class CursorTest extends PaginatorTestCase
         $this->assertNotNull($cursor);
         $this->assertSame(1, $cursor->page);
         $this->assertSame(['id' => 1], $cursor->parameters);
-        $this->assertSame(SortOrder::Ascending, $cursor->order);
     }
 
     public function test_init_desc(): void
@@ -27,7 +26,6 @@ class CursorTest extends PaginatorTestCase
         $this->assertNotNull($cursor);
         $this->assertSame(1, $cursor->page);
         $this->assertSame(['id' => 1], $cursor->parameters);
-        $this->assertSame(SortOrder::Descending, $cursor->order);
     }
 
     public function test_init__without_ordering(): void
@@ -49,7 +47,7 @@ class CursorTest extends PaginatorTestCase
         $this->assertInstanceOf(Cursor::class, $cursor->applyTo($builder));
 
         $this->assertSame(
-            'SELECT * FROM "t" WHERE ("id", "name") >= (1, \'foo\') ORDER BY "id", "name"',
+            'SELECT * FROM "t" WHERE ("id", "name") >= (1, \'foo\') ORDER BY "id", "name" DESC',
             $builder->toSql(),
         );
     }

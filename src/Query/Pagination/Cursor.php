@@ -6,12 +6,14 @@ use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Query\Statements\ConditionBuilder;
 use Kirameki\Database\Query\Statements\Operator;
+use Kirameki\Database\Query\Statements\Ordering;
 use Kirameki\Database\Query\Statements\SelectBuilder;
 use Kirameki\Database\Query\Statements\SelectStatement;
 use Kirameki\Database\Query\Statements\SortOrder;
 use function array_keys;
 use function array_values;
 use function count;
+use function dump;
 
 class Cursor
 {
@@ -116,8 +118,16 @@ class Cursor
         }
 
         $order = Arr::first($orderBy)->sort;
+
         if ($this->direction === Direction::Previous) {
             $order = $order->reverse();
+
+            foreach ($orderBy as $column => $ordering) {
+                $statement->orderBy[$column] = new Ordering(
+                    $ordering->sort->reverse(),
+                    $ordering->nulls,
+                );
+            }
         }
 
         return match ($order) {
@@ -133,7 +143,7 @@ class Cursor
     protected function extractParameters(object $object): array
     {
         $parameters = [];
-        foreach ($this->parameters as $name => $value) {
+        foreach (array_keys($this->parameters) as $name) {
             $parameters[$name] = $object->$name;
         }
         return $parameters;
