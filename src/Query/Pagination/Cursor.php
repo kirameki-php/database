@@ -7,6 +7,7 @@ use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Query\Statements\ConditionBuilder;
 use Kirameki\Database\Query\Statements\Operator;
 use Kirameki\Database\Query\Statements\SelectBuilder;
+use Kirameki\Database\Query\Statements\SelectStatement;
 use Kirameki\Database\Query\Statements\SortOrder;
 use function array_keys;
 use function array_values;
@@ -40,21 +41,18 @@ class Cursor
         foreach (array_keys($orderBy) as $column) {
             $columns[$column] = $nextRow->$column;
         }
-        $order = Arr::first($orderBy)->sort;
 
-        return new static(Direction::Next, $columns, $order, 1);
+        return new static(Direction::Next, $columns, 1);
     }
 
     /**
      * @param array<string, mixed> $parameters
-     * @param SortOrder $order
      * @param int $page
      * @param Direction $direction
      */
     protected function __construct(
         public readonly Direction $direction,
         public readonly array $parameters,
-        public readonly SortOrder $order,
         public readonly int $page,
     )
     {
@@ -69,7 +67,6 @@ class Cursor
         return new static(
             Direction::Next,
             $this->extractParameters($next),
-            $this->order,
             $this->page + 1,
         );
     }
@@ -83,7 +80,6 @@ class Cursor
         return new static(
             Direction::Previous,
             $this->extractParameters($previous),
-            $this->order,
             $this->page - 1,
         );
     }
@@ -98,24 +94,36 @@ class Cursor
         $parameters = $this->parameters;
         $columns = array_keys($parameters);
         $values = array_values($parameters);
-
-        $order = match ($this->direction) {
-            Direction::Next => $this->order,
-            Direction::Previous => $this->order->reverse(),
-        };
-
-        $operator = match ($order) {
-            SortOrder::Ascending => Operator::GreaterThanOrEqualTo,
-            SortOrder::Descending => Operator::LessThan,
-        };
+        $operator = $this->getOperator($builder->getStatement());
 
         $builder->where(ConditionBuilder::with($columns, $operator, $values));
 
-        foreach ($columns as $column) {
-            $builder->orderBy($column, $order);
+        return $this;
+    }
+
+    /**
+     * @param SelectStatement $statement
+     * @return Operator
+     */
+    protected function getOperator(SelectStatement $statement): Operator
+    {
+        $orderBy = $statement->orderBy ?? [];
+
+        if (count($orderBy) === 0) {
+            throw new LogicException('Cannot paginate with cursor without an order by clause.', [
+                'statement' => $statement,
+            ]);
         }
 
-        return $this;
+        $order = Arr::first($orderBy)->sort;
+        if ($this->direction === Direction::Previous) {
+            $order = $order->reverse();
+        }
+
+        return match ($order) {
+            SortOrder::Ascending => Operator::GreaterThanOrEqualTo,
+            SortOrder::Descending => Operator::LessThan,
+        };
     }
 
     /**
