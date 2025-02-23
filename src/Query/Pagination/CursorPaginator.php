@@ -16,14 +16,18 @@ class CursorPaginator extends Paginator
      * @var Cursor|null
      */
     public ?Cursor $nextCursor {
-        get => $this->nextCursor ??= $this->currentCursor?->nextOrNull($this->nextRow);
+        get => $this->nextCursor ??= $this->nextRow !== null
+            ? $this->currentCursor?->toNext($this->nextRow)
+            : null;
     }
 
     /**
      * @return Cursor|null
      */
     public ?Cursor $previousCursor {
-        get => $this->previousCursor ??= $this->currentCursor?->previousOrNull($this->firstOrNull());
+        get => $this->previousCursor ??= $this->page > 1
+            ? $this->currentCursor?->toPrevious($this->first())
+            : null;
     }
 
     /**

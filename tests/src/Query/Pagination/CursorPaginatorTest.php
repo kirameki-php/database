@@ -4,8 +4,6 @@ namespace Tests\Kirameki\Database\Query\Pagination;
 
 use Kirameki\Database\Query\Pagination\Cursor;
 use Kirameki\Database\Query\Pagination\CursorPaginator;
-use stdClass;
-use function dump;
 
 class CursorPaginatorTest extends PaginatorTestCase
 {

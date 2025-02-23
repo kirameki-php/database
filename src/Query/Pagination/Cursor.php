@@ -16,15 +16,15 @@ class Cursor
 {
     /**
      * @param SelectBuilder $builder
-     * @param object|null $next
+     * @param object|null $nextRow
      * @return static|null
      */
     public static function initOrNull(
         SelectBuilder $builder,
-        ?object $next,
+        ?object $nextRow,
     ): ?static
     {
-        if ($next === null) {
+        if ($nextRow === null) {
             return null;
         }
 
@@ -38,11 +38,11 @@ class Cursor
 
         $columns = [];
         foreach (array_keys($orderBy) as $column) {
-            $columns[$column] = $next->$column;
+            $columns[$column] = $nextRow->$column;
         }
         $order = Arr::first($orderBy)->sort;
 
-        return new static($columns, $order, 1);
+        return new static(Direction::Next, $columns, $order, 1);
     }
 
     /**
@@ -52,53 +52,39 @@ class Cursor
      * @param Direction $direction
      */
     protected function __construct(
+        public readonly Direction $direction,
         public readonly array $parameters,
         public readonly SortOrder $order,
         public readonly int $page,
-        public readonly Direction $direction = Direction::Next,
     )
     {
     }
 
     /**
-     * @param object|null $next
+     * @param object $next
      * @return static|null
      */
-    public function nextOrNull(?object $next): ?static
+    public function toNext(object $next): ?static
     {
-        if ($next === null) {
-            return null;
-        }
-
         return new static(
+            Direction::Next,
             $this->extractParameters($next),
             $this->order,
             $this->page + 1,
-            Direction::Next,
         );
     }
 
     /**
-     * @param object|null $previous
+     * @param object $previous
      * @return static|null
      */
-    public function previousOrNull(?object $previous): ?static
+    public function toPrevious(object $previous): ?static
     {
-        if ($previous === null) {
-            return null;
-        }
-
-        $previousPage = $this->page - 1;
-
-        if ($previousPage < 1) {
-            return null;
-        }
-
         return new static(
+            Direction::Previous,
             $this->extractParameters($previous),
             $this->order,
-            $previousPage,
-            Direction::Previous,
+            $this->page - 1,
         );
     }
 

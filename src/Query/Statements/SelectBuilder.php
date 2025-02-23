@@ -424,15 +424,15 @@ class SelectBuilder extends ConditionsBuilder
         $cursor?->applyTo($query);
         $result = $query->execute();
 
-        $items = $result->takeFirst($size);
-        $next = $result->atOrNull($size);
-        $cursor ??= Cursor::initOrNull($query, $next);
+        $rows = $result->takeFirst($size);
+        $nextRow = $result->atOrNull($size);
+        $cursor ??= Cursor::initOrNull($query, $nextRow);
 
         if (!$cursor?->direction->isNext()) {
-            $items = $items->reverse();
+            $rows = $rows->reverse();
         }
 
-        return new CursorPaginator($items, $next, $cursor, $size);
+        return new CursorPaginator($rows, $nextRow, $cursor, $size);
     }
 
     /**

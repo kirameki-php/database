@@ -2,10 +2,10 @@
 
 namespace Kirameki\Database\Query\Pagination;
 
-enum Direction
+enum Direction: string
 {
-    case Next;
-    case Previous;
+    case Next = 'next';
+    case Previous = 'previous';
 
     public function isNext(): bool
     {
