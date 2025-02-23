@@ -11,11 +11,13 @@ abstract class SelectBuilderTestAbstract extends QueryTestCase
 
     abstract public function test_from(): void;
 
-    abstract public function test_from_with_alias(): void;
+    abstract public function test_from__with_alias(): void;
 
     abstract public function test_from_multiple(): void;
 
     abstract public function test_from_multiple_where_column(): void;
+
+    abstract public function test_from__with_expression(): void;
 
     abstract public function test_columns(): void;
 

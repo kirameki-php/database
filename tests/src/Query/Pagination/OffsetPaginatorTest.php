@@ -39,6 +39,40 @@ class OffsetPaginatorTest extends PaginatorTestCase
         $this->assertSame([], $newPaginator->all());
     }
 
+    public function test_getNextPage__no_record(): void
+    {
+        $paginator = $this->createDummyPaginator(10, 1);
+        $this->assertNull($paginator->getNextPage());
+    }
+
+    public function test_getNextPage__less_than_size(): void
+    {
+        $this->createRecords(1);
+        $paginator = $this->createDummyPaginator(2, 1);
+        $this->assertNull($paginator->getNextPage());
+    }
+
+    public function test_getNextPage__exact_size(): void
+    {
+        $this->createRecords(2);
+        $paginator = $this->createDummyPaginator(2, 1);
+        $this->assertNull($paginator->getNextPage());
+    }
+
+    public function test_getNextPage__greater_than_size(): void
+    {
+        $this->createRecords(3);
+        $paginator = $this->createDummyPaginator(2, 1);
+        $this->assertSame(2, $paginator->getNextPage());
+    }
+
+    public function test_getNextPage__greater_than_size_next_page(): void
+    {
+        $this->createRecords(3);
+        $paginator = $this->createDummyPaginator(2, 2);
+        $this->assertNull($paginator->getNextPage());
+    }
+
     public function test_getTotalPages(): void
     {
         $this->createRecords(11);

@@ -4,6 +4,7 @@ namespace Kirameki\Database\Query\Statements;
 
 use Closure;
 use Generator;
+use Kirameki\Core\Exceptions\InvalidArgumentException;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Expression;
 use Kirameki\Database\Query\Expressions\Avg;
@@ -408,6 +409,20 @@ class SelectBuilder extends ConditionsBuilder
      */
     public function offsetPaginate(int $page, int $size = Paginator::DEFAULT_SIZE): OffsetPaginator
     {
+        if ($page <= 0) {
+            throw new InvalidArgumentException("Invalid page number. Expected: > 0. Got: {$page}.", [
+                'statement' => $this->statement,
+                'page' => $page,
+            ]);
+        }
+
+        if ($size <= 0) {
+            throw new InvalidArgumentException("Invalid page size. Expected: > 0. Got: {$size}.", [
+                'statement' => $this->statement,
+                'size' => $size,
+            ]);
+        }
+
         $total = $this->count();
         $result = $this->copy()->offset(($page - 1) * $size)->limit($size)->execute();
         return new OffsetPaginator($result, $size, $page, $total);
@@ -420,6 +435,13 @@ class SelectBuilder extends ConditionsBuilder
      */
     public function cursorPaginate(int $size = Paginator::DEFAULT_SIZE, ?Cursor $cursor = null): CursorPaginator
     {
+        if ($size <= 0) {
+            throw new InvalidArgumentException("Invalid page size. Expected: > 0. Got: {$size}.", [
+                'statement' => $this->statement,
+                'size' => $size,
+            ]);
+        }
+
         $query = $this->copy()->limit($size + 1);
         $cursor?->applyTo($query);
         $result = $query->execute();

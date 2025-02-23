@@ -2,18 +2,20 @@
 
 namespace Tests\Kirameki\Database\Query\Statements;
 
+use Kirameki\Collections\Exceptions\CountMismatchException;
+use Kirameki\Core\Exceptions\InvalidArgumentException;
+use Kirameki\Database\Query\Pagination\OffsetPaginator;
+use Kirameki\Database\Query\QueryResult;
 use Kirameki\Database\Query\Statements\Bounds;
 use Kirameki\Database\Query\Statements\ConditionBuilder;
 use Kirameki\Database\Query\Statements\JoinBuilder;
 use Kirameki\Database\Query\Statements\LockOption;
-use Kirameki\Database\Query\Statements\SelectStatement;
 use Kirameki\Database\Raw;
 use Kirameki\Time\Time;
 use Tests\Kirameki\Database\Query\Statements\_Support\IntCastEnum;
-use function dump;
 use function iterator_to_array;
 
-class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
+final class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
 {
     protected string $useConnection = 'mysql';
 
@@ -29,7 +31,7 @@ class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
         $this->assertSame("SELECT * FROM `User`", $sql);
     }
 
-    public function test_from_with_alias(): void
+    public function test_from__with_alias(): void
     {
         $sql = $this->selectBuilder()->from('User AS u')->toSql();
         $this->assertSame("SELECT * FROM `User` AS `u`", $sql);
@@ -49,6 +51,12 @@ class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
             ->whereColumn('User.id', 'UserItem.userId')
             ->toSql();
         $this->assertSame("SELECT `User`.* FROM `User`, `UserItem` WHERE `User`.`id` = `UserItem`.`userId`", $sql);
+    }
+
+    public function test_from__with_expression(): void
+    {
+        $sql = $this->selectBuilder()->from(new Raw('User'))->toSql();
+        $this->assertSame("SELECT * FROM User", $sql);
     }
 
     public function test_columns(): void
@@ -250,6 +258,75 @@ class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
     {
         $query = $this->selectBuilder()->from('User_A')->except($this->selectBuilder()->from('User_B'));
         $this->assertSame("(SELECT * FROM `User_A`) EXCEPT (SELECT * FROM `User_B`)", $query->toSql());
+    }
+
+    public function test_cursor(): void
+    {
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->execute();
+
+        $conn->query()->insertInto('User')->values([['id' => 1], ['id' => 2]])->execute();
+        $ptr = $conn->query()->select()->from('User')->cursor();
+        $this->assertTrue($ptr->isLazy());
+        $this->assertSame([['id' => 1], ['id' => 2]], $ptr->map(fn($row) => (array)$row)->all());
+    }
+
+    public function test_exactly__matches(): void
+    {
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->execute();
+
+        $conn->query()->insertInto('User')->values([['id' => 1], ['id' => 2]])->execute();
+        $result = $conn->query()->select()->from('User')->exactly(2);
+        $this->assertInstanceOf(QueryResult::class, $result);
+    }
+
+    public function test_exactly__does_not_match(): void
+    {
+        $this->expectException(CountMismatchException::class);
+        $this->expectExceptionMessage('Expected count: 3, Got: 2.');
+
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->execute();
+
+        $conn->query()->insertInto('User')->values([['id' => 1], ['id' => 2]])->execute();
+        $conn->query()->select()->from('User')->exactly(3);
+    }
+
+    public function test_offsetPaginate(): void
+    {
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->execute();
+
+        $conn->query()->insertInto('User')->values([['id' => 1], ['id' => 2], ['id' => 3], ['id' => 4], ['id' => 5]])->execute();
+        $query = $conn->query()->select()->from('User');
+        $result = $query->offsetPaginate(2, 2);
+        $this->assertInstanceOf(OffsetPaginator::class, $result);
+        $this->assertSame([['id' => 3], ['id' => 4]], $result->map(fn($row) => (array)$row)->all());
+        $this->assertSame(5, $result->totalRows);
+        $this->assertSame(3, $result->totalPages);
+    }
+
+    public function test_offsetPaginate__with_invalid_page(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid page number. Expected: > 0. Got: 0.');
+        $this->selectBuilder()->from('User')->offsetPaginate(0, 2);
+    }
+
+    public function test_offsetPaginate__with_invalid_size(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid page size. Expected: > 0. Got: -1.');
+        $this->selectBuilder()->from('User')->offsetPaginate(2, -1);
     }
 
     public function test_compound_orderBy(): void
