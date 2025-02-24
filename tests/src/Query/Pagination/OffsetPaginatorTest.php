@@ -3,6 +3,7 @@
 namespace Tests\Kirameki\Database\Query\Pagination;
 
 use Kirameki\Database\Query\Pagination\OffsetPaginator;
+use function dump;
 
 class OffsetPaginatorTest extends PaginatorTestCase
 {
@@ -37,6 +38,32 @@ class OffsetPaginatorTest extends PaginatorTestCase
         $this->assertSame(1, $newPaginator->page);
         $this->assertSame(11, $newPaginator->totalRows);
         $this->assertSame([], $newPaginator->all());
+    }
+
+    public function test_isFirstPage__true(): void
+    {
+        $paginator = $this->createDummyPaginator(10, 1);
+        $this->assertTrue($paginator->isFirstPage());
+    }
+
+    public function test_isFirstPage__false(): void
+    {
+        $paginator = $this->createDummyPaginator(10, 2);
+        $this->assertFalse($paginator->isFirstPage());
+    }
+
+    public function test_isLastPage__false(): void
+    {
+        $this->createRecords(11);
+        $paginator = $this->createDummyPaginator(10, 1);
+        $this->assertFalse($paginator->isLastPage());
+    }
+
+    public function test_isLastPage__true(): void
+    {
+        $this->createRecords(11);
+        $paginator = $this->createDummyPaginator(10, 2);
+        $this->assertTrue($paginator->isLastPage());
     }
 
     public function test_getNextPage__no_record(): void
@@ -80,17 +107,81 @@ class OffsetPaginatorTest extends PaginatorTestCase
         $this->assertSame(2, $paginator->totalPages);
     }
 
-    public function test_isLastPage__false(): void
+    public function test_getNextPage__returns_null(): void
     {
-        $this->createRecords(11);
         $paginator = $this->createDummyPaginator(10, 1);
-        $this->assertFalse($paginator->isLastPage());
+        $this->assertNull($paginator->getNextPage());
     }
 
-    public function test_isLastPage__true(): void
+    public function test_getNextPage__returns_page(): void
     {
-        $this->createRecords(11);
+        $this->createRecords(2);
+        $paginator = $this->createDummyPaginator(1, 1);
+        $this->assertSame(2, $paginator->getNextPage());
+    }
+
+    public function test_getPreviousPage__returns_null(): void
+    {
+        $paginator = $this->createDummyPaginator(10, 1);
+        $this->assertNull($paginator->getPreviousPage());
+    }
+
+    public function test_getPreviousPage__returns_page(): void
+    {
+        $this->createRecords(2);
+        $paginator = $this->createDummyPaginator(2, 2);
+        $this->assertSame(1, $paginator->getPreviousPage());
+    }
+
+    public function test_hasNextPage__false(): void
+    {
+        $paginator = $this->createDummyPaginator(10, 1);
+        $this->assertFalse($paginator->hasNextPage());
+    }
+
+    public function test_hasNextPage__true(): void
+    {
+        $this->createRecords(2);
+        $paginator = $this->createDummyPaginator(1, 1);
+        $this->assertTrue($paginator->hasNextPage());
+    }
+
+    public function test_hasPreviousPage__false(): void
+    {
+        $paginator = $this->createDummyPaginator(10, 1);
+        $this->assertFalse($paginator->hasPreviousPage());
+    }
+
+    public function test_hasPreviousPage__true(): void
+    {
+        $this->createRecords(2);
+        $paginator = $this->createDummyPaginator(2, 2);
+        $this->assertTrue($paginator->hasPreviousPage());
+    }
+
+    public function test_getStartingOffset_first_page(): void
+    {
+        $paginator = $this->createDummyPaginator(10, 1);
+        $this->assertSame(1, $paginator->getStartingOffset());
+    }
+
+    public function test_getStartingOffset__page_2(): void
+    {
         $paginator = $this->createDummyPaginator(10, 2);
-        $this->assertTrue($paginator->isLastPage());
+        $this->assertSame(11, $paginator->getStartingOffset());
+    }
+
+    public function test_getEndingOffset_first_page(): void
+    {
+        $this->createRecords(10);
+        $paginator = $this->createDummyPaginator(10, 1);
+        $this->assertSame(10, $paginator->getEndingOffset());
+    }
+
+    public function test_getEndingOffset__page_2(): void
+    {
+        $this->createRecords(19);
+        $paginator = $this->createDummyPaginator(10, 2);
+        $this->assertSame(19, $paginator->getEndingOffset());
     }
 }
