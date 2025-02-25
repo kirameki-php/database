@@ -48,9 +48,8 @@ class OffsetPaginator extends Paginator
     }
 
     /**
-     * @inheritDoc
+     * @return bool
      */
-    #[Override]
     protected function hasMorePages(): bool
     {
         return $this->page < $this->totalPages;

@@ -31,9 +31,4 @@ abstract class Paginator extends QueryResult
             $result->items,
         );
     }
-
-    /**
-     * @return bool
-     */
-    abstract protected function hasMorePages(): bool;
 }
