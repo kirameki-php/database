@@ -25,7 +25,7 @@ class CursorPaginatorTest extends PaginatorTestCase
     {
         $paginator = $this->createDummyPaginator(10);
         $this->assertInstanceOf(CursorPaginator::class, $paginator);
-        $this->assertSame(10, $paginator->size);
+        $this->assertSame(10, $paginator->pageSize);
         $this->assertSame(1, $paginator->page);
         $this->assertNull($paginator->currentCursor);
     }
@@ -36,7 +36,7 @@ class CursorPaginatorTest extends PaginatorTestCase
         $paginator = $this->createDummyPaginator(10);
         $newPaginator = $paginator->instantiate([]);
         $this->assertInstanceOf(CursorPaginator::class, $newPaginator);
-        $this->assertSame(10, $newPaginator->size);
+        $this->assertSame(10, $newPaginator->pageSize);
         $this->assertSame(1, $newPaginator->page);
         $this->assertInstanceOf(Cursor::class, $paginator->currentCursor);
         $this->assertSame([], $newPaginator->all());
@@ -48,7 +48,7 @@ class CursorPaginatorTest extends PaginatorTestCase
 
         $this->createRecords(7);
         $paginator1 = $this->createDummyPaginator(3);
-        $this->assertSame(3, $paginator1->size);
+        $this->assertSame(3, $paginator1->pageSize);
         $this->assertSame(1, $paginator1->page);
         $this->assertSame([0, 1, 2], $paginator1->map(fn($r) => ((array) $r)['id'])->all());
 
@@ -56,7 +56,7 @@ class CursorPaginatorTest extends PaginatorTestCase
         $this->assertInstanceOf(Cursor::class, $cursor2);
         $this->assertSame(2, $cursor2->page);
         $paginator2 = $query->cursorPaginate(3, $cursor2);
-        $this->assertSame(3, $paginator2->size);
+        $this->assertSame(3, $paginator2->pageSize);
         $this->assertSame(2, $paginator2->page);
         $this->assertSame([3, 4, 5], $paginator2->map(fn($r) => ((array) $r)['id'])->all());
 

@@ -17,23 +17,23 @@ class OffsetPaginator extends Paginator
      * @var int
      */
     public int $totalPages {
-        get => (int) ceil($this->totalRows / $this->size);
+        get => (int) ceil($this->totalRows / $this->pageSize);
     }
 
     /**
      * @param QueryResult<SelectStatement, TRow> $result
-     * @param int $size
+     * @param int $pageSize
      * @param int $page
      * @param int $totalRows
      */
     public function __construct(
         QueryResult $result,
-        int $size,
+        int $pageSize,
         public readonly int $page,
         public readonly int $totalRows,
     )
     {
-        parent::__construct($result, $size);
+        parent::__construct($result, $pageSize);
     }
 
     /**
@@ -42,7 +42,7 @@ class OffsetPaginator extends Paginator
     #[Override]
     public function instantiate(mixed $iterable): static
     {
-        $instantiate = new static($this, $this->size, $this->page, $this->totalRows);
+        $instantiate = new static($this, $this->pageSize, $this->page, $this->totalRows);
         $instantiate->items = $iterable;
         return $instantiate;
     }
@@ -108,7 +108,7 @@ class OffsetPaginator extends Paginator
      */
     public function getStartingOffset(): int
     {
-        return ($this->page - 1) * $this->size + 1;
+        return ($this->page - 1) * $this->pageSize + 1;
     }
 
     /**

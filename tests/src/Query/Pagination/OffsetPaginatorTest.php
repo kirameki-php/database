@@ -23,7 +23,7 @@ class OffsetPaginatorTest extends PaginatorTestCase
         $this->createRecords(11);
         $paginator = $this->createDummyPaginator(10, 1);
         $this->assertInstanceOf(OffsetPaginator::class, $paginator);
-        $this->assertSame(10, $paginator->size);
+        $this->assertSame(10, $paginator->pageSize);
         $this->assertSame(1, $paginator->page);
         $this->assertSame(11, $paginator->totalRows);
     }
@@ -34,7 +34,7 @@ class OffsetPaginatorTest extends PaginatorTestCase
         $paginator = $this->createDummyPaginator(10, 1);
         $newPaginator = $paginator->instantiate([]);
         $this->assertInstanceOf(OffsetPaginator::class, $newPaginator);
-        $this->assertSame(10, $newPaginator->size);
+        $this->assertSame(10, $newPaginator->pageSize);
         $this->assertSame(1, $newPaginator->page);
         $this->assertSame(11, $newPaginator->totalRows);
         $this->assertSame([], $newPaginator->all());

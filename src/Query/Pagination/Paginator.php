@@ -11,15 +11,15 @@ use Kirameki\Database\Query\Statements\SelectStatement;
  */
 abstract class Paginator extends QueryResult
 {
-    public const int DEFAULT_SIZE = 30;
+    public const int DEFAULT_PAGE_SIZE = 30;
 
     /**
      * @param QueryResult<SelectStatement, mixed> $result
-     * @param int $size
+     * @param int $pageSize
      */
     public function __construct(
         QueryResult $result,
-        public readonly int $size,
+        public readonly int $pageSize,
     )
     {
         parent::__construct(

@@ -408,7 +408,7 @@ class SelectBuilder extends ConditionsBuilder
      * @param int $size
      * @return OffsetPaginator<object>
      */
-    public function offsetPaginate(int $page, int $size = Paginator::DEFAULT_SIZE): OffsetPaginator
+    public function offsetPaginate(int $page, int $size = Paginator::DEFAULT_PAGE_SIZE): OffsetPaginator
     {
         if ($page <= 0) {
             throw new InvalidArgumentException("Invalid page number. Expected: > 0. Got: {$page}.", [
@@ -436,7 +436,7 @@ class SelectBuilder extends ConditionsBuilder
      * @param Cursor|null $cursor
      * @return CursorPaginator<object>
      */
-    public function cursorPaginate(int $size = Paginator::DEFAULT_SIZE, ?Cursor $cursor = null): CursorPaginator
+    public function cursorPaginate(int $size = Paginator::DEFAULT_PAGE_SIZE, ?Cursor $cursor = null): CursorPaginator
     {
         if ($size <= 0) {
             throw new InvalidArgumentException("Invalid page size. Expected: > 0. Got: {$size}.", [

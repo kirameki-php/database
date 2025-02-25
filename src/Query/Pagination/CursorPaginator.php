@@ -32,18 +32,18 @@ class CursorPaginator extends Paginator
 
     /**
      * @param QueryResult<SelectStatement, TRow> $result
+     * @param int $pageSize
      * @param TRow|null $nextRow
      * @param ($nextRow is null ? null : Cursor) $currentCursor
-     * @param int $size
      */
     public function __construct(
         QueryResult $result,
+        int $pageSize,
         protected readonly ?object $nextRow,
         public readonly ?Cursor $currentCursor,
-        int $size,
     )
     {
-        parent::__construct($result, $size, $currentCursor->page ?? 1);
+        parent::__construct($result, $pageSize);
     }
 
     /**
@@ -52,7 +52,7 @@ class CursorPaginator extends Paginator
     #[Override]
     public function instantiate(mixed $iterable): static
     {
-        $instance = new static($this, $this->nextRow, $this->currentCursor, $this->size);
+        $instance = new static($this, $this->pageSize, $this->currentCursor);
         $instance->items = $iterable;
         return $instance;
     }
