@@ -8,9 +8,9 @@ enum SortOrder: string
     case Descending = 'DESC';
 
     /**
-     * @return SortOrder
+     * @return self
      */
-    public function reverse(): SortOrder
+    public function reverse(): self
     {
         return match($this) {
             self::Ascending => self::Descending,

@@ -11,4 +11,9 @@ enum Direction: string
     {
         return $this === Direction::Next;
     }
+
+    public function isPrevious(): bool
+    {
+        return $this === Direction::Previous;
+    }
 }
