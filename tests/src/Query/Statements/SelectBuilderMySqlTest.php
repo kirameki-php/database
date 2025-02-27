@@ -3,7 +3,10 @@
 namespace Tests\Kirameki\Database\Query\Statements;
 
 use Kirameki\Collections\Exceptions\CountMismatchException;
+use Kirameki\Collections\Exceptions\EmptyNotAllowedException;
 use Kirameki\Core\Exceptions\InvalidArgumentException;
+use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Database\Query\Pagination\CursorPaginator;
 use Kirameki\Database\Query\Pagination\OffsetPaginator;
 use Kirameki\Database\Query\QueryResult;
 use Kirameki\Database\Query\Statements\Bounds;
@@ -13,6 +16,7 @@ use Kirameki\Database\Query\Statements\LockOption;
 use Kirameki\Database\Raw;
 use Kirameki\Time\Time;
 use Tests\Kirameki\Database\Query\Statements\_Support\IntCastEnum;
+use function dump;
 use function iterator_to_array;
 
 final class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
@@ -327,6 +331,332 @@ final class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid page size. Expected: > 0. Got: -1.');
         $this->selectBuilder()->from('User')->offsetPaginate(2, -1);
+    }
+
+    public function test_cursorPaginate(): void
+    {
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->execute();
+
+        $query = $conn->query();
+        $query->insertInto('User')->values([['id' => 1], ['id' => 2], ['id' => 3]])->execute();
+        $paginator = $query->select()->from('User')->orderBy('id')->cursorPaginate(2);
+        $this->assertInstanceOf(CursorPaginator::class, $paginator);
+        $this->assertSame(['id' => 2], $paginator->generateNextCursor()?->parameters);
+    }
+
+    public function test_cursorPaginate__with__invalid_size(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid page size. Expected: > 0. Got: -1.');
+        $this->selectBuilder()->from('User')->cursorPaginate(-1);
+    }
+
+    public function test_first(): void
+    {
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->execute();
+
+        $query = $conn->query();
+        $query->insertInto('User')->values([['id' => 1], ['id' => 2]])->execute();
+        $row = $query->select()->from('User')->first();
+        $this->assertSame(['id' => 1], (array) $row);
+    }
+
+    public function test_firstOrNull(): void
+    {
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->execute();
+
+        $query = $conn->query();
+
+        $row = $query->select()->from('User')->firstOrNull();
+        $this->assertNull($row);
+
+        $query->insertInto('User')->values([['id' => 1], ['id' => 2]])->execute();
+        $row = $query->select()->from('User')->first();
+        $this->assertSame(['id' => 1], (array) $row);
+    }
+
+    public function test_single(): void
+    {
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->execute();
+
+        $query = $conn->query();
+        $query->insertInto('User')->values([['id' => 1]])->execute();
+        $row = $query->select()->from('User')->single();
+        $this->assertSame(['id' => 1], (array) $row);
+    }
+
+    public function test_single__empty(): void
+    {
+        $this->expectException(EmptyNotAllowedException::class);
+        $this->expectExceptionMessage('$iterable must contain at least one element.');
+
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->execute();
+
+        $query = $conn->query();
+        $query->select()->from('User')->single();
+    }
+
+    public function test_single__multiple_rows(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Expected only one element in result. 2 given.');
+
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->execute();
+
+        $query = $conn->query();
+        $query->insertInto('User')->values([['id' => 1], ['id' => 2]])->execute();
+        $query->select()->from('User')->single();
+    }
+
+    public function test_pluck(): void
+    {
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->execute();
+
+        $query = $conn->query();
+        $query->insertInto('User')->values([['id' => 1], ['id' => 2]])->execute();
+        $result = $query->select()->from('User')->pluck('id');
+        $this->assertSame([1, 2], $result->all());
+    }
+
+    public function test_value(): void
+    {
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->execute();
+
+        $query = $conn->query();
+        $query->insertInto('User')->values([['id' => 1], ['id' => 2]])->execute();
+        $value = $query->select()->from('User')->orderByDesc('id')->value('id');
+        $this->assertSame(2, $value);
+    }
+
+    public function test_value__empty(): void
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('Expected query to return a row, but none was returned.');
+
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->execute();
+
+        $query = $conn->query();
+        $query->select()->from('User')->orderByDesc('id')->value('id');
+    }
+
+    public function test_value__unknown_column(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("Column 'x' does not exist.");
+
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->execute();
+
+        $query = $conn->query();
+        $query->insertInto('User')->values([['id' => 1]])->execute();
+        $query->select()->from('User')->orderByDesc('id')->value('x');
+    }
+
+    public function test_valueOrNull(): void
+    {
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->execute();
+
+        $query = $conn->query();
+        $query->insertInto('User')->values([['id' => 1], ['id' => 2]])->execute();
+        $value = $query->select()->from('User')->orderByDesc('id')->valueOrNull('id');
+        $this->assertSame(2, $value);
+    }
+
+    public function test_valueOrNull__empty(): void
+    {
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->execute();
+
+        $query = $conn->query();
+        $value = $query->select()->from('User')->orderByDesc('id')->valueOrNull('id');
+        $this->assertNull($value);
+    }
+
+    public function test_valueOrNull__unknown_column(): void
+    {
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->execute();
+
+        $query = $conn->query();
+        $query->insertInto('User')->values([['id' => 1]])->execute();
+        $value = $query->select()->from('User')->orderByDesc('id')->valueOrNull('x');
+        $this->assertNull($value);
+    }
+
+    public function test_exists__returns_true(): void
+    {
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->execute();
+
+        $query = $conn->query();
+        $query->insertInto('User')->values([['id' => 1]])->execute();
+        $exists = $query->select()->from('User')->exists();
+        $this->assertTrue($exists);
+    }
+
+    public function test_exists__returns_false(): void
+    {
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->execute();
+
+        $query = $conn->query();
+        $exists = $query->select()->from('User')->exists();
+        $this->assertFalse($exists);
+    }
+
+    public function test_count__nothing(): void
+    {
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->execute();
+
+        $query = $conn->query();
+        $count = $query->select()->from('User')->count();
+        $this->assertSame(0, $count);
+    }
+
+    public function test_count__some(): void
+    {
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->execute();
+
+        $query = $conn->query();
+        $query->insertInto('User')->values([['id' => 1], ['id' => 2]])->execute();
+        $count = $query->select()->from('User')->count();
+        $this->assertSame(2, $count);
+    }
+
+    public function test_count__with_groupBy_throws_error(): void
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('Cannot get count when GROUP BY is defined. Use tally instead.');
+
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->string('s');
+        $table->execute();
+
+        $query = $conn->query();
+        $query->insertInto('User')->values([
+            ['id' => 1, 's' => 'a'],
+            ['id' => 2, 's' => 'a'],
+            ['id' => 3, 's' => 'b'],
+        ])->execute();
+        $query->select()->from('User')->groupBy('name')->count();
+    }
+
+    public function test_tally(): void
+    {
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->string('s');
+        $table->execute();
+
+        $query = $conn->query();
+        $query->insertInto('User')->values([
+            ['id' => 1, 's' => 'a'],
+            ['id' => 2, 's' => 'a'],
+            ['id' => 3, 's' => 'b'],
+        ])->execute();
+        $tally = $query->select()->from('User')->groupBy('s')->tally();
+        $this->assertSame(['a' => 2, 'b' => 1], $tally);
+    }
+
+    public function test_sum(): void
+    {
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->execute();
+
+        $query = $conn->query();
+        $query->insertInto('User')->values([['id' => 1], ['id' => 2]])->execute();
+        $sum = $query->select()->from('User')->sum('id');
+        $this->assertSame(3, $sum);
+    }
+
+    public function test_avg(): void
+    {
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->execute();
+
+        $query = $conn->query();
+        $query->insertInto('User')->values([['id' => 1], ['id' => 2], ['id' => 3]])->execute();
+        $avg = $query->select()->from('User')->avg('id');
+        $this->assertSame(2.0, $avg);
+    }
+
+    public function test_min(): void
+    {
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->execute();
+
+        $query = $conn->query();
+        $query->insertInto('User')->values([['id' => 1], ['id' => 2], ['id' => 3]])->execute();
+        $min = $query->select()->from('User')->min('id');
+        $this->assertSame(1, $min);
+    }
+
+    public function test_max(): void
+    {
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->execute();
+
+        $query = $conn->query();
+        $query->insertInto('User')->values([['id' => 1], ['id' => 2], ['id' => 3]])->execute();
+        $max = $query->select()->from('User')->max('id');
+        $this->assertSame(3, $max);
     }
 
     public function test_compound_orderBy(): void

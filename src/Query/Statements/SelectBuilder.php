@@ -4,6 +4,7 @@ namespace Kirameki\Database\Query\Statements;
 
 use Closure;
 use Generator;
+use Kirameki\Collections\Vec;
 use Kirameki\Core\Exceptions\InvalidArgumentException;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Expression;
@@ -14,7 +15,6 @@ use Kirameki\Database\Query\Expressions\Min;
 use Kirameki\Database\Query\Expressions\Sum;
 use Kirameki\Database\Query\Pagination\Cursor;
 use Kirameki\Database\Query\Pagination\CursorPaginator;
-use Kirameki\Database\Query\Pagination\Direction;
 use Kirameki\Database\Query\Pagination\OffsetPaginator;
 use Kirameki\Database\Query\Pagination\Paginator;
 use Kirameki\Database\Query\QueryHandler;
@@ -24,6 +24,7 @@ use function array_values;
 use function dump;
 use function is_array;
 use function min;
+use function property_exists;
 
 /**
  * @extends ConditionsBuilder<SelectStatement>
@@ -484,11 +485,11 @@ class SelectBuilder extends ConditionsBuilder
 
     /**
      * @param string $column
-     * @return QueryResult<SelectStatement, mixed>
+     * @return Vec<mixed>
      */
-    public function pluck(string $column): QueryResult
+    public function pluck(string $column): Vec
     {
-        return $this->copy()->columns($column)->limit(1)->execute();
+        return $this->copy()->columns($column)->execute()->map(static fn ($row) => $row->$column ?? null);
     }
 
     /**
@@ -497,14 +498,23 @@ class SelectBuilder extends ConditionsBuilder
      */
     public function value(string $column): mixed
     {
-        $value = $this->valueOrNull($column);
-        if ($value === null) {
+        $first = $this->firstOrNull();
+
+        if ($first === null) {
             throw new LogicException("Expected query to return a row, but none was returned.", [
                 'column' => $column,
                 'statement' => $this->statement,
             ]);
         }
-        return $value;
+
+        if (!property_exists($first, $column)) {
+            throw new InvalidArgumentException("Column '$column' does not exist.", [
+                'column' => $column,
+                'statement' => $this->statement,
+            ]);
+        }
+
+        return $first->$column;
     }
 
     /**
@@ -513,7 +523,7 @@ class SelectBuilder extends ConditionsBuilder
      */
     public function valueOrNull(string $column): mixed
     {
-        return $this->copy()->limit(1)->execute()->firstOrNull()?->{$column};
+        return $this->firstOrNull()->$column ?? null;
     }
 
     /**
@@ -521,7 +531,7 @@ class SelectBuilder extends ConditionsBuilder
      */
     public function exists(): bool
     {
-        return $this->copy()->columns('1')->limit(1)->execute()->isNotEmpty();
+        return $this->count() > 0;
     }
 
     /**
@@ -555,20 +565,20 @@ class SelectBuilder extends ConditionsBuilder
         }
 
         // If GROUP BY exists but no SELECT is defined, use the first GROUP BY column that was defined.
-        if ($statement->columns === null) {
+        if ($statement->columns === []) {
             $this->addToSelect($statement->groupBy[0]);
         }
 
         $results = $this->copy()
-            ->addToSelect(new Avg(as: 'total'))
+            ->addToSelect(new Count(as: 'total'))
             ->execute();
 
         // when GROUP BY is defined, return in [columnValue => count] format
         $keyName = $statement->groupBy[0];
         $aggregated = [];
         foreach ($results as $result) {
-            $groupKey = $result[$keyName];
-            $groupTotal = (int) $result['total'];
+            $groupKey = $result->$keyName;
+            $groupTotal = (int) $result->total;
             $aggregated[$groupKey] = $groupTotal;
         }
         return $aggregated;
@@ -578,25 +588,25 @@ class SelectBuilder extends ConditionsBuilder
      * @param string $column
      * @return int|float
      */
-    public function sum(string $column = '*'): float|int
+    public function sum(string $column): float|int
     {
-        return $this->copy()->columns(new Sum($column))->value(Sum::$defaultAlias);
+        return $this->copy()->columns(new Sum($column))->value(Sum::$defaultAlias) + 0;
     }
 
     /**
      * @param string $column
-     * @return int|float
+     * @return float
      */
-    public function avg(string $column = '*'): float|int
+    public function avg(string $column): float
     {
-        return $this->copy()->columns(new Avg($column))->value(Avg::$defaultAlias);
+        return (float) $this->copy()->columns(new Avg($column))->value(Avg::$defaultAlias);
     }
 
     /**
      * @param string $column
      * @return int
      */
-    public function min(string $column = '*'): int
+    public function min(string $column): int
     {
         return $this->copy()->columns(new Min($column))->value(Min::$defaultAlias);
     }
@@ -605,7 +615,7 @@ class SelectBuilder extends ConditionsBuilder
      * @param string $column
      * @return int
      */
-    public function max(string $column = '*'): int
+    public function max(string $column): int
     {
         return $this->copy()->columns(new Max($column))->value(Max::$defaultAlias);
     }
