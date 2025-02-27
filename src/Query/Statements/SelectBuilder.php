@@ -641,8 +641,8 @@ class SelectBuilder extends ConditionsBuilder
                 }
             }
 
-            $cursor = $paginator->nextCursor;
-        } while ($paginator->hasNextPage());
+            $cursor = $paginator->generateNextCursor();
+        } while ($cursor !== null);
     }
 
     /**

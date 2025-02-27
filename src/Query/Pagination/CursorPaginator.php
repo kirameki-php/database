@@ -13,15 +13,6 @@ use Override;
 class CursorPaginator extends Paginator
 {
     /**
-     * @var Cursor|null
-     */
-    public ?Cursor $nextCursor {
-        get => $this->nextCursor ??= $this->hasNext
-            ? $this->cursor->toNext($this->last())
-            : null;
-    }
-
-    /**
      * @param QueryResult<SelectStatement, TRow> $result
      * @param int $perPage
      * @param Cursor $cursor
@@ -51,5 +42,15 @@ class CursorPaginator extends Paginator
         );
         $instance->items = $iterable;
         return $instance;
+    }
+
+    /**
+     * @return Cursor|null
+     */
+    public function generateNextCursor(): ?Cursor
+    {
+        return $this->hasNext
+            ? $this->cursor->toNext($this->last())
+            : null;
     }
 }

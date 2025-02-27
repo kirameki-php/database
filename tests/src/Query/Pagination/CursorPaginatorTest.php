@@ -50,13 +50,13 @@ class CursorPaginatorTest extends PaginatorTestCase
         $this->assertSame(3, $paginator1->perPage);
         $this->assertSame([0, 1, 2], $paginator1->map(fn($r) => ((array) $r)['id'])->all());
 
-        $cursor2 = $paginator1->nextCursor;
+        $cursor2 = $paginator1->generateNextCursor();
         $this->assertInstanceOf(Cursor::class, $cursor2);
         $paginator2 = $query->cursorPaginate(3, $cursor2);
         $this->assertSame(3, $paginator2->perPage);
         $this->assertSame([3, 4, 5], $paginator2->map(fn($r) => ((array) $r)['id'])->all());
 
-        $cursor3 = $paginator2->nextCursor;
+        $cursor3 = $paginator2->generateNextCursor();
         $this->assertInstanceOf(Cursor::class, $cursor3);
         $paginator3 = $query->cursorPaginate(3, $cursor3);
         $this->assertSame([6], $paginator3->map(fn($r) => ((array) $r)['id'])->all());
@@ -66,7 +66,7 @@ class CursorPaginatorTest extends PaginatorTestCase
     {
         $this->createRecords(9);
         $paginator = $this->createDummyPaginator(10);
-        $nextCursor = $paginator->nextCursor;
+        $nextCursor = $paginator->generateNextCursor();
         $this->assertNull($nextCursor);
         $this->assertSame(9, $paginator->count());
     }
@@ -74,7 +74,7 @@ class CursorPaginatorTest extends PaginatorTestCase
     public function test_nextCursor__empty(): void
     {
         $paginator = $this->createDummyPaginator(10);
-        $nextCursor = $paginator->nextCursor;
+        $nextCursor = $paginator->generateNextCursor();
         $this->assertNull($nextCursor);
         $this->assertSame(0, $paginator->count());
     }
