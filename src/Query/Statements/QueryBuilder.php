@@ -16,7 +16,7 @@ abstract class QueryBuilder
      */
     public function __construct(
         protected readonly QueryHandler $handler,
-        protected QueryStatement $statement,
+        public protected(set) QueryStatement $statement,
     )
     {
     }
@@ -28,14 +28,6 @@ abstract class QueryBuilder
     public function __clone()
     {
         $this->statement = clone $this->statement;
-    }
-
-    /**
-     * @return TQueryStatement
-     */
-    public function getStatement(): QueryStatement
-    {
-        return $this->statement;
     }
 
     /**

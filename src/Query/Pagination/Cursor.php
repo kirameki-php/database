@@ -25,7 +25,7 @@ class Cursor
         ?object $next,
     ): static
     {
-        $orderBy = $builder->getStatement()->orderBy ?? [];
+        $orderBy = $builder->statement->orderBy ?? [];
 
         if (count($orderBy) === 0) {
             throw new LogicException('Cannot paginate with cursor without an order by clause.', [
@@ -68,7 +68,7 @@ class Cursor
         $parameters = $this->parameters;
         $columns = array_keys($parameters);
         $values = array_values($parameters);
-        $operator = $this->getOperator($builder->getStatement());
+        $operator = $this->getOperator($builder->statement);
 
         $builder->where(ConditionBuilder::with($columns, $operator, $values));
 

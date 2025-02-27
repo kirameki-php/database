@@ -420,7 +420,7 @@ class ConditionBuilder
         $this->current->operator = $operator;
 
         if ($value instanceof SelectBuilder) {
-            $value = $value->getStatement();
+            $value = $value->statement;
         }
         $this->current->value = $value;
 

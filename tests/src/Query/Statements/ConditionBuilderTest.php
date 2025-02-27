@@ -308,7 +308,7 @@ class ConditionBuilderTest extends QueryTestCase
         $cond = ConditionBuilder::exists($subquery);
         $def = $cond->getDefinition();
         $this->assertSame('_UNUSED_', $def->column);
-        $this->assertSame($subquery->getStatement(), $def->value);
+        $this->assertSame($subquery->statement, $def->value);
         $this->assertSame(Operator::Exists, $def->operator);
         $this->assertFalse($def->negated);
 
@@ -323,7 +323,7 @@ class ConditionBuilderTest extends QueryTestCase
         $cond = ConditionBuilder::notExists($subquery);
         $def = $cond->getDefinition();
         $this->assertSame('_UNUSED_', $def->column);
-        $this->assertSame($subquery->getStatement(), $def->value);
+        $this->assertSame($subquery->statement, $def->value);
         $this->assertSame(Operator::Exists, $def->operator);
         $this->assertTrue($def->negated);
 
@@ -587,7 +587,7 @@ class ConditionBuilderTest extends QueryTestCase
         $cond = ConditionBuilder::for('b')->in($subquery);
         $def = $cond->getDefinition();
         $this->assertSame('b', $def->column);
-        $this->assertSame($subquery->getStatement(), $def->value);
+        $this->assertSame($subquery->statement, $def->value);
         $this->assertSame(Operator::In, $def->operator);
         $this->assertFalse($def->negated);
 
@@ -616,7 +616,7 @@ class ConditionBuilderTest extends QueryTestCase
         $cond = ConditionBuilder::for('b')->notIn($subquery);
         $def = $cond->getDefinition();
         $this->assertSame('b', $def->column);
-        $this->assertSame($subquery->getStatement(), $def->value);
+        $this->assertSame($subquery->statement, $def->value);
         $this->assertSame(Operator::In, $def->operator);
         $this->assertTrue($def->negated);
 

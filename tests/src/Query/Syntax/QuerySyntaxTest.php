@@ -68,7 +68,7 @@ class QuerySyntaxTest extends QueryTestCase
         $this->expectExceptionMessage('Invalid Raw value. Expected: Expression. Got: int.');
         $handler = $this->sqliteConnection()->query();
         $q = $handler->select()->from('t')->whereRaw('id');
-        $q->getStatement()->where[0]->value = 1;
+        $q->statement->where[0]->value = 1;
         $q->toSql();
     }
 
@@ -148,7 +148,7 @@ class QuerySyntaxTest extends QueryTestCase
         $this->expectExceptionMessage('Value for WHERE IN. Expected: iterable|SelectStatement. Got: int.');
         $handler = $this->sqliteConnection()->query();
         $q = $handler->select()->from('t')->where('id', in: []);
-        $statement = $q->getStatement();
+        $statement = $q->statement;
         $statement->where[0]->value = 1;
         $q->toSql();
     }
@@ -216,7 +216,7 @@ class QuerySyntaxTest extends QueryTestCase
         $this->expectExceptionMessage('Value for WHERE with range. Expected: Bounds. Got: int.');
         $handler = $this->sqliteConnection()->query();
         $q = $handler->select()->from('t')->where('id', Bounds::excluded(1, 2));
-        $q->getStatement()->where[0]->value = 1;
+        $q->statement->where[0]->value = 1;
         $q->toSql();
     }
 
@@ -242,7 +242,7 @@ class QuerySyntaxTest extends QueryTestCase
         $handler = $this->sqliteConnection()->query();
         $sub = $handler->select()->from('t2')->where('id', 1);
         $q = $handler->select()->from('t')->whereExists($sub);
-        $q->getStatement()->where[0]->value = 1;
+        $q->statement->where[0]->value = 1;
         $q->toSql();
     }
 

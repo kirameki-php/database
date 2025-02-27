@@ -90,7 +90,7 @@ abstract class SelectBuilderTestAbstract extends QueryTestCase
     public function test_getStatement(): void
     {
         $query = $this->selectBuilder()->from('User')->where('id', 1);
-        $this->assertInstanceOf(SelectStatement::class, $query->getStatement());
+        $this->assertInstanceOf(SelectStatement::class, $query->statement);
     }
 
     abstract public function test_setTag(): void;

@@ -37,7 +37,7 @@ readonly class WithBuilder
         }
 
         if ($subquery instanceof SelectBuilder) {
-            $subquery = $subquery->getStatement();
+            $subquery = $subquery->statement;
         }
 
         $this->definition->statement = $subquery;

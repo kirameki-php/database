@@ -382,7 +382,7 @@ final class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
     public function test_setTag(): void
     {
         $query = $this->selectBuilder()->from('User')->setTag('a', '1');
-        $statement = $query->getStatement();
+        $statement = $query->statement;
         $this->assertNotNull($statement->tags);
         $this->assertSame(['a' => '1'], iterator_to_array($statement->tags));
         $this->assertSame('SELECT * FROM `User` /* a=1 */', $query->toSql());
@@ -391,7 +391,7 @@ final class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
     public function test_withTags(): void
     {
         $query = $this->selectBuilder()->from('User')->withTags(['a' => '1', 'b' => '2']);
-        $statement = $query->getStatement();
+        $statement = $query->statement;
         $this->assertNotNull($statement->tags);
         $this->assertSame(['a' => '1', 'b' => '2'], iterator_to_array($statement->tags));
         $this->assertSame('SELECT * FROM `User` /* a=1,b=2 */', $query->toSql());
