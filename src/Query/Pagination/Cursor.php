@@ -6,31 +6,25 @@ use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Query\Statements\ConditionBuilder;
 use Kirameki\Database\Query\Statements\Operator;
-use Kirameki\Database\Query\Statements\Ordering;
 use Kirameki\Database\Query\Statements\SelectBuilder;
 use Kirameki\Database\Query\Statements\SelectStatement;
 use Kirameki\Database\Query\Statements\SortOrder;
 use function array_keys;
 use function array_values;
 use function count;
-use function dump;
 
 class Cursor
 {
     /**
      * @param SelectBuilder $builder
-     * @param object|null $nextRow
-     * @return static|null
+     * @param object|null $next
+     * @return static
      */
-    public static function initOrNull(
+    public static function init(
         SelectBuilder $builder,
-        ?object $nextRow,
-    ): ?static
+        ?object $next,
+    ): static
     {
-        if ($nextRow === null) {
-            return null;
-        }
-
         $orderBy = $builder->getStatement()->orderBy ?? [];
 
         if (count($orderBy) === 0) {
@@ -39,23 +33,16 @@ class Cursor
             ]);
         }
 
-        $columns = [];
-        foreach (array_keys($orderBy) as $column) {
-            $columns[$column] = $nextRow->$column;
-        }
-
-        return new static(Direction::Next, $columns, 1);
+        $columns = array_keys($orderBy);
+        $parameters = static::extractParameters($columns, $next);
+        return new static($parameters);
     }
 
     /**
      * @param array<string, mixed> $parameters
-     * @param int $page
-     * @param Direction $direction
      */
     protected function __construct(
-        public readonly Direction $direction,
         public readonly array $parameters,
-        public readonly int $page,
     )
     {
     }
@@ -66,24 +53,9 @@ class Cursor
      */
     public function toNext(object $next): ?static
     {
-        return new static(
-            Direction::Next,
-            $this->extractParameters($next),
-            $this->page + 1,
-        );
-    }
-
-    /**
-     * @param object $previous
-     * @return static|null
-     */
-    public function toPrevious(object $previous): ?static
-    {
-        return new static(
-            Direction::Previous,
-            $this->extractParameters($previous),
-            $this->page - 1,
-        );
+        $columns = array_keys($this->parameters);
+        $parameters = static::extractParameters($columns, $next);
+        return new static($parameters);
     }
 
     /**
@@ -119,32 +91,22 @@ class Cursor
 
         $order = Arr::first($orderBy)->sort;
 
-        if ($this->direction === Direction::Previous) {
-            $order = $order->reverse();
-
-            foreach ($orderBy as $column => $ordering) {
-                $statement->orderBy[$column] = new Ordering(
-                    $ordering->sort->reverse(),
-                    $ordering->nulls,
-                );
-            }
-        }
-
         return match ($order) {
-            SortOrder::Ascending => Operator::GreaterThanOrEqualTo,
+            SortOrder::Ascending => Operator::GreaterThan,
             SortOrder::Descending => Operator::LessThan,
         };
     }
 
     /**
+     * @param list<string> $columns
      * @param object $object
      * @return array<string, mixed>
      */
-    protected function extractParameters(object $object): array
+    protected static function extractParameters(array $columns, ?object $object): array
     {
         $parameters = [];
-        foreach (array_keys($this->parameters) as $name) {
-            $parameters[$name] = $object->$name;
+        foreach ($columns as $column) {
+            $parameters[$column] = $object?->$column;
         }
         return $parameters;
     }

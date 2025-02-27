@@ -14,6 +14,7 @@ use Kirameki\Database\Query\Expressions\Min;
 use Kirameki\Database\Query\Expressions\Sum;
 use Kirameki\Database\Query\Pagination\Cursor;
 use Kirameki\Database\Query\Pagination\CursorPaginator;
+use Kirameki\Database\Query\Pagination\Direction;
 use Kirameki\Database\Query\Pagination\OffsetPaginator;
 use Kirameki\Database\Query\Pagination\Paginator;
 use Kirameki\Database\Query\QueryHandler;
@@ -408,7 +409,7 @@ class SelectBuilder extends ConditionsBuilder
      * @param int $size
      * @return OffsetPaginator<object>
      */
-    public function offsetPaginate(int $page, int $size = Paginator::DEFAULT_PAGE_SIZE): OffsetPaginator
+    public function offsetPaginate(int $page, int $size = Paginator::DEFAULT_PER_PAGE): OffsetPaginator
     {
         if ($page <= 0) {
             throw new InvalidArgumentException("Invalid page number. Expected: > 0. Got: {$page}.", [
@@ -436,7 +437,7 @@ class SelectBuilder extends ConditionsBuilder
      * @param Cursor|null $cursor
      * @return CursorPaginator<object>
      */
-    public function cursorPaginate(int $size = Paginator::DEFAULT_PAGE_SIZE, ?Cursor $cursor = null): CursorPaginator
+    public function cursorPaginate(int $size = Paginator::DEFAULT_PER_PAGE, ?Cursor $cursor = null): CursorPaginator
     {
         if ($size <= 0) {
             throw new InvalidArgumentException("Invalid page size. Expected: > 0. Got: {$size}.", [
@@ -450,14 +451,11 @@ class SelectBuilder extends ConditionsBuilder
         $result = $query->execute();
 
         $rows = $result->takeFirst($size);
-        $nextRow = $result->atOrNull($size);
-        $cursor ??= Cursor::initOrNull($query, $nextRow);
+        $next = $result->atOrNull($size);
+        $cursor ??= Cursor::init($this, $next);
+        $hasNext = $next !== null;
 
-        if (!$cursor?->direction->isNext()) {
-            $rows = $rows->reverse();
-        }
-
-        return new CursorPaginator($rows, $nextRow, $cursor, $size);
+        return new CursorPaginator($rows, $size, $cursor, $hasNext);
     }
 
     /**

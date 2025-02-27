@@ -4,7 +4,6 @@ namespace Tests\Kirameki\Database\Query\Pagination;
 
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Query\Pagination\Cursor;
-use Kirameki\Database\Query\Statements\SortOrder;
 
 class CursorTest extends PaginatorTestCase
 {
@@ -12,9 +11,8 @@ class CursorTest extends PaginatorTestCase
     {
         $builder = $this->getCachedConnection()->query()->select()->from('t')->orderByAsc('id');
         $object = (object) ['id' => 1];
-        $cursor = Cursor::initOrNull($builder, $object);
+        $cursor = Cursor::init($builder, $object);
         $this->assertNotNull($cursor);
-        $this->assertSame(1, $cursor->page);
         $this->assertSame(['id' => 1], $cursor->parameters);
     }
 
@@ -22,9 +20,8 @@ class CursorTest extends PaginatorTestCase
     {
         $builder = $this->getCachedConnection()->query()->select()->from('t')->orderByDesc('id');
         $object = (object) ['id' => 1];
-        $cursor = Cursor::initOrNull($builder, $object);
+        $cursor = Cursor::init($builder, $object);
         $this->assertNotNull($cursor);
-        $this->assertSame(1, $cursor->page);
         $this->assertSame(['id' => 1], $cursor->parameters);
     }
 
@@ -33,7 +30,7 @@ class CursorTest extends PaginatorTestCase
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('Cannot paginate with cursor without an order by clause.');
         $builder = $this->getCachedConnection()->query()->select()->from('t');
-        Cursor::initOrNull($builder, (object) ['id' => 1]);
+        Cursor::init($builder, (object) ['id' => 1]);
     }
 
     public function test_applyTo(): void
@@ -42,12 +39,12 @@ class CursorTest extends PaginatorTestCase
             ->orderByAsc('id')
             ->orderByDesc('name');
         $object = (object) ['id' => 1, 'name' => 'foo'];
-        $cursor = Cursor::initOrNull($builder, $object);
+        $cursor = Cursor::init($builder, $object);
         $this->assertInstanceOf(Cursor::class, $cursor);
         $this->assertInstanceOf(Cursor::class, $cursor->applyTo($builder));
 
         $this->assertSame(
-            'SELECT * FROM "t" WHERE ("id", "name") >= (1, \'foo\') ORDER BY "id", "name" DESC',
+            'SELECT * FROM "t" WHERE ("id", "name") > (1, \'foo\') ORDER BY "id", "name" DESC',
             $builder->toSql(),
         );
     }

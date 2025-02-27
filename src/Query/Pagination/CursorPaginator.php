@@ -16,34 +16,25 @@ class CursorPaginator extends Paginator
      * @var Cursor|null
      */
     public ?Cursor $nextCursor {
-        get => $this->nextCursor ??= $this->nextRow !== null
-            ? $this->currentCursor?->toNext($this->nextRow)
-            : null;
-    }
-
-    /**
-     * @return Cursor|null
-     */
-    public ?Cursor $previousCursor {
-        get => $this->previousCursor ??= $this->page > 1
-            ? $this->currentCursor?->toPrevious($this->first())
+        get => $this->nextCursor ??= $this->hasNext
+            ? $this->cursor->toNext($this->last())
             : null;
     }
 
     /**
      * @param QueryResult<SelectStatement, TRow> $result
-     * @param int $pageSize
-     * @param TRow|null $nextRow
-     * @param ($nextRow is null ? null : Cursor) $currentCursor
+     * @param int $perPage
+     * @param Cursor $cursor
+     * @param bool $hasNext
      */
     public function __construct(
         QueryResult $result,
-        int $pageSize,
-        protected readonly ?object $nextRow,
-        public readonly ?Cursor $currentCursor,
+        int $perPage,
+        public readonly Cursor $cursor,
+        protected readonly bool $hasNext,
     )
     {
-        parent::__construct($result, $pageSize);
+        parent::__construct($result, $perPage);
     }
 
     /**
@@ -52,7 +43,12 @@ class CursorPaginator extends Paginator
     #[Override]
     public function instantiate(mixed $iterable): static
     {
-        $instance = new static($this, $this->pageSize, $this->currentCursor);
+        $instance = new static(
+            $this,
+            $this->perPage,
+            $this->cursor,
+            $this->hasNext,
+        );
         $instance->items = $iterable;
         return $instance;
     }
