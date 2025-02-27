@@ -34,12 +34,7 @@ class CursorPaginator extends Paginator
     #[Override]
     public function instantiate(mixed $iterable): static
     {
-        $instance = new static(
-            $this,
-            $this->perPage,
-            $this->cursor,
-            $this->hasNext,
-        );
+        $instance = new static($this, $this->perPage, $this->cursor, $this->hasNext);
         $instance->items = $iterable;
         return $instance;
     }
