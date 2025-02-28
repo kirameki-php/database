@@ -6,6 +6,7 @@ use Kirameki\Collections\Exceptions\CountMismatchException;
 use Kirameki\Collections\Exceptions\EmptyNotAllowedException;
 use Kirameki\Core\Exceptions\InvalidArgumentException;
 use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Database\Events\QueryExecuted;
 use Kirameki\Database\Query\Pagination\CursorPaginator;
 use Kirameki\Database\Query\Pagination\OffsetPaginator;
 use Kirameki\Database\Query\QueryResult;
@@ -15,8 +16,9 @@ use Kirameki\Database\Query\Statements\JoinBuilder;
 use Kirameki\Database\Query\Statements\LockOption;
 use Kirameki\Database\Raw;
 use Kirameki\Time\Time;
+use stdClass;
 use Tests\Kirameki\Database\Query\Statements\_Support\IntCastEnum;
-use function dump;
+use function array_map;
 use function iterator_to_array;
 
 final class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
@@ -41,13 +43,13 @@ final class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
         $this->assertSame("SELECT * FROM `User` AS `u`", $sql);
     }
 
-    public function test_from_multiple(): void
+    public function test_from__multiple_tables(): void
     {
         $sql = $this->selectBuilder()->from('User AS u', 'UserItem')->toSql();
         $this->assertSame("SELECT * FROM `User` AS `u`, `UserItem`", $sql);
     }
 
-    public function test_from_multiple_where_column(): void
+    public function test_from__with_multiple_where_column(): void
     {
         $sql = $this->selectBuilder()
             ->columns('User.*')
@@ -69,13 +71,13 @@ final class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
         $this->assertSame("SELECT `id`, `name` FROM `User`", $sql);
     }
 
-    public function test_columns_with_alias(): void
+    public function test_columns__with_alias(): void
     {
         $sql = $this->selectBuilder()->from('User as u')->columns('u.*', 'u.name')->toSql();
         $this->assertSame("SELECT `u`.*, `u`.`name` FROM `User` AS `u`", $sql);
     }
 
-    public function test_columns_with_alias_embedded(): void
+    public function test_columns__with_alias_embedded(): void
     {
         $sql = $this->selectBuilder()->from('User as u')->columns('u.name as u_name')->toSql();
         $this->assertSame("SELECT `u`.`name` AS `u_name` FROM `User` AS `u`", $sql);
@@ -138,7 +140,7 @@ final class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
         $this->assertSame("SELECT * FROM `User` WHERE `id` = 1 FOR SHARE", $sql);
     }
 
-    public function test_where_with_two_args(): void
+    public function test_where__with_two_args(): void
     {
         $sql = $this->selectBuilder()->from('User')->where('id', 1)->toSql();
         $this->assertSame("SELECT * FROM `User` WHERE `id` = 1", $sql);
@@ -153,19 +155,19 @@ final class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
         $this->assertSame("SELECT * FROM `User` WHERE `id` = 1", $sql);
     }
 
-    public function test_where_with_three_args(): void
+    public function test_where__with_three_args(): void
     {
         $sql = $this->selectBuilder()->from('User')->where('id', eq: 1)->toSql();
         $this->assertSame("SELECT * FROM `User` WHERE `id` = 1", $sql);
     }
 
-    public function test_where_multiples(): void
+    public function test_where__multiples(): void
     {
         $sql = $this->selectBuilder()->from('User')->where('id', 1)->where('status', 0)->toSql();
         $this->assertSame("SELECT * FROM `User` WHERE `id` = 1 AND `status` = 0", $sql);
     }
 
-    public function test_where_combined(): void
+    public function test_where__combined(): void
     {
         $sql = $this->selectBuilder()->from('User')
             ->where(ConditionBuilder::for('id')->lessThan(1)->or()->equals(3))
@@ -174,22 +176,53 @@ final class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
         $this->assertSame("SELECT * FROM `User` WHERE (`id` < 1 OR `id` = 3) AND `id` != -1", $sql);
     }
 
-    public function test_where_column(): void
+    public function test_whereColumn(): void
     {
         $sql = $this->selectBuilder()->from('User')->whereColumn('User.id', 'Device.userId')->toSql();
         $this->assertSame("SELECT * FROM `User` WHERE `User`.`id` = `Device`.`userId`", $sql);
     }
 
-    public function test_where_column_aliased(): void
+    public function test_whereColumn__aliased(): void
     {
         $sql = $this->selectBuilder()->from('User AS u', 'Device AS d')->whereColumn('u.id', 'd.userId')->toSql();
         $this->assertSame("SELECT * FROM `User` AS `u`, `Device` AS `d` WHERE `u`.`id` = `d`.`userId`", $sql);
     }
 
-    public function test_where_tuple(): void
+    public function test_where__tuple(): void
     {
         $sql = $this->selectBuilder()->from('User')->where(['id', 'status'], [[1, 1], [2, 3]])->toSql();
         $this->assertSame("SELECT * FROM `User` WHERE (`id`, `status`) IN ((1, 1), (2, 3))", $sql);
+    }
+
+    public function test_and(): void
+    {
+        $sql = $this->selectBuilder()->from('User')->where('id', 1)->and('status', not: 0)->toSql();
+        $this->assertSame("SELECT * FROM `User` WHERE (`id` = 1 AND `status` != 0)", $sql);
+    }
+
+    public function test_or(): void
+    {
+        $sql = $this->selectBuilder()->from('User')->where('id', 1)->or('status', 0)->toSql();
+        $this->assertSame("SELECT * FROM `User` WHERE (`id` = 1 OR `status` = 0)", $sql);
+    }
+
+    public function test_and_or(): void
+    {
+        $sql = $this->selectBuilder()->from('User')
+            ->where('id', 1)
+            ->and('status', 0)
+            ->or('name', 'John')
+            ->toSql();
+        $this->assertSame("SELECT * FROM `User` WHERE (`id` = 1 AND `status` = 0 OR `name` = 'John')", $sql);
+    }
+
+    public function test_and__with_sub_or(): void
+    {
+        $sql = $this->selectBuilder()->from('User')
+            ->where(ConditionBuilder::for('status')->equals(1)->or()->equals(2))
+            ->and('id', 1)
+            ->toSql();
+        $this->assertSame("SELECT * FROM `User` WHERE (`id` = 1 AND (`status` = 0 OR `name` = 'John'))", $sql);
     }
 
     public function test_orderBy(): void
@@ -607,6 +640,15 @@ final class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
         $this->assertSame(['a' => 2, 'b' => 1], $tally);
     }
 
+    public function test_tally__without_grouping(): void
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('Cannot tally without a GROUP BY clause. Use count instead.');
+
+        $conn = $this->connect();
+        $conn->query()->select()->from('User')->tally();
+    }
+
     public function test_sum(): void
     {
         $conn = $this->connect();
@@ -657,6 +699,94 @@ final class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
         $query->insertInto('User')->values([['id' => 1], ['id' => 2], ['id' => 3]])->execute();
         $max = $query->select()->from('User')->max('id');
         $this->assertSame(3, $max);
+    }
+
+    public function test_batch__without_limit(): void
+    {
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->execute();
+
+        $query = $conn->query();
+        $query->insertInto('User')->values([['id' => 1], ['id' => 2], ['id' => 3]])->execute();
+        $batch = $query->select()->from('User')->orderBy('id')->batch(2);
+        $batches = iterator_to_array($batch);
+        $this->assertCount(2, $batches);
+        $this->assertInstanceOf(CursorPaginator::class, $batches[0]);
+        $this->assertInstanceOf(CursorPaginator::class, $batches[1]);
+        $this->assertSame([['id' => 1], ['id' => 2]], $batches[0]->map(fn($r) => (array)$r)->all());
+        $this->assertSame([['id' => 3]], $batches[1]->map(fn($r) => (array)$r)->all());
+    }
+
+    public function test_batch__with_limit_less_than_size(): void
+    {
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->execute();
+
+        $query = $conn->query();
+        $query->insertInto('User')->values([['id' => 1], ['id' => 2], ['id' => 3]])->execute();
+
+        $this->captureEvents(QueryExecuted::class);
+
+        $batch = $query->select()->from('User')->orderBy('id')->limit(2)->batch(3);
+        $batches = iterator_to_array($batch);
+        $this->assertCount(1, $batches);
+        $this->assertInstanceOf(CursorPaginator::class, $batches[0]);
+        $this->assertSame([['id' => 1], ['id' => 2]], $batches[0]->map(fn($r) => (array) $r)->all());
+        $this->assertCount(1, $this->capturedEvents);
+    }
+
+    public function test_batch__with_limit_greater_than_size(): void
+    {
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->execute();
+
+        $query = $conn->query();
+        $dataset = array_map(fn($i) => ['id' => $i], range(1, 7));
+        $query->insertInto('User')->values($dataset)->execute();
+
+        $this->captureEvents(QueryExecuted::class);
+
+        $batch = $query->select()->from('User')->orderBy('id')->limit(5)->batch(2);
+        $batches = iterator_to_array($batch);
+        $this->assertCount(3, $batches);
+        foreach ($batches as $batch) {
+            $this->assertInstanceOf(CursorPaginator::class, $batch);
+        }
+        $this->assertSame([['id' => 1], ['id' => 2]], $batches[0]->map(fn($r) => (array) $r)->all());
+        $this->assertSame([['id' => 3], ['id' => 4]], $batches[1]->map(fn($r) => (array) $r)->all());
+        $this->assertSame([['id' => 5]], $batches[2]->map(fn($r) => (array) $r)->all());
+        $this->assertCount(3, $this->capturedEvents);
+    }
+
+    public function test_flatBatch(): void
+    {
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->execute();
+
+        $query = $conn->query();
+        $dataset = array_map(fn($i) => ['id' => $i], range(1, 7));
+        $query->insertInto('User')->values($dataset)->execute();
+
+        $this->captureEvents(QueryExecuted::class);
+
+        $generator = $query->select()->from('User')->orderBy('id')->limit(5)->flatBatch(2);
+        $results = iterator_to_array($generator);
+        $this->assertCount(5, $results);
+        foreach ($results as $row) {
+            $this->assertInstanceOf(stdClass::class, $row);
+        }
+        $capturedEvents = $this->getCapturedEvents(QueryExecuted::class);
+        $this->assertSame("SELECT * FROM `User` ORDER BY `id` LIMIT 3", $capturedEvents[0]->result->template);
+        $this->assertSame("SELECT * FROM `User` WHERE (`id`) > (?) ORDER BY `id` LIMIT 3", $capturedEvents[1]->result->template);
+        $this->assertCount(3, $capturedEvents);
     }
 
     public function test_compound_orderBy(): void
@@ -769,5 +899,10 @@ final class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
         ])->execute();
         $this->assertSame('2020-01-01 00:00:00', $result->single()->c1->format('Y-m-d H:i:s'));
         $this->assertSame(IntCastEnum::B, $result->single()->c2);
+    }
+
+    public function test_whereColumn_aliased(): void
+    {
+        // TODO: Implement test_whereColumn_aliased() method.
     }
 }

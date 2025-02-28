@@ -12,8 +12,10 @@ use Kirameki\Database\Config\MySqlConfig;
 use Kirameki\Database\Config\SqliteConfig;
 use Kirameki\Database\Connection;
 use Kirameki\Database\Schema\Statements\Table\CreateTableBuilder;
+use Kirameki\Event\Event;
 use Kirameki\Event\EventManager;
 use RuntimeException;
+use function array_values;
 use function mt_rand;
 
 class DatabaseTestCase extends TestCase
@@ -24,6 +26,11 @@ class DatabaseTestCase extends TestCase
     protected array $connections = [];
 
     protected ?EventManager $eventManager = null;
+
+    /**
+     * @var list<Event>
+     */
+    protected array $capturedEvents = [];
 
     public function connection(string $driver): Connection
     {
@@ -91,5 +98,26 @@ class DatabaseTestCase extends TestCase
     protected function getEventManager(): EventManager
     {
         return $this->eventManager ??= new EventManager();
+    }
+
+    /**
+     * @param class-string<Event> $event
+     * @return void
+     */
+    protected function captureEvents(string $event): void
+    {
+        $this->getEventManager()->on($event, fn ($e) => $this->capturedEvents[] = $e);
+    }
+
+    /**
+     * @template TEvent of Event
+     * @param class-string<TEvent> $event
+     * @return list<TEvent>
+     */
+    protected function getCapturedEvents(string $event): array
+    {
+        return array_values(
+            array_filter($this->capturedEvents, static fn ($e) => $e instanceof $event),
+        );
     }
 }

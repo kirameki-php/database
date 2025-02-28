@@ -13,15 +13,15 @@ abstract class SelectBuilderTestAbstract extends QueryTestCase
 
     abstract public function test_from__with_alias(): void;
 
-    abstract public function test_from_multiple(): void;
+    abstract public function test_from__multiple_tables(): void;
 
-    abstract public function test_from_multiple_where_column(): void;
+    abstract public function test_from__with_multiple_where_column(): void;
 
     abstract public function test_from__with_expression(): void;
 
     abstract public function test_columns(): void;
 
-    abstract public function test_columns_with_alias(): void;
+    abstract public function test_columns__with_alias(): void;
 
     abstract public function test_distinct(): void;
 
@@ -39,19 +39,19 @@ abstract class SelectBuilderTestAbstract extends QueryTestCase
 
     abstract public function test_lockForShare(): void;
 
-    abstract public function test_where_with_two_args(): void;
+    abstract public function test_where__with_two_args(): void;
 
-    abstract public function test_where_with_three_args(): void;
+    abstract public function test_where__with_three_args(): void;
 
-    abstract public function test_where_multiples(): void;
+    abstract public function test_where__multiples(): void;
 
-    abstract public function test_where_combined(): void;
+    abstract public function test_where__combined(): void;
 
-    abstract public function test_where_column(): void;
+    abstract public function test_whereColumn(): void;
 
-    abstract public function test_where_column_aliased(): void;
+    abstract public function test_whereColumn__aliased(): void;
 
-    abstract public function test_where_tuple(): void;
+    abstract public function test_where__tuple(): void;
 
     abstract public function test_orderBy(): void;
 

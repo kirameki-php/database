@@ -559,7 +559,7 @@ class SelectBuilder extends ConditionsBuilder
         $statement = $this->statement;
 
         if ($statement->groupBy === null) {
-            throw new LogicException('Cannot get total count when GROUP BY is not defined', [
+            throw new LogicException('Cannot tally without a GROUP BY clause. Use count instead.', [
                 'statement' => $this->statement,
             ]);
         }
@@ -658,7 +658,7 @@ class SelectBuilder extends ConditionsBuilder
     /**
      * @return Generator<mixed>
      */
-    public function batchEach(int $chunkSize = 1_000): Generator
+    public function flatBatch(int $chunkSize = 1_000): Generator
     {
         foreach ($this->batch($chunkSize) as $paginator) {
             foreach ($paginator as $row) {

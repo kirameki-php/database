@@ -55,23 +55,6 @@ class QuerySyntaxTest extends QueryTestCase
         $handler->toSql($statement);
     }
 
-    public function test_where_raw(): void
-    {
-        $handler = $this->sqliteConnection()->query();
-        $q = $handler->select()->from('t')->whereRaw('id1 = id2');
-        $this->assertSame('SELECT * FROM "t" WHERE id1 = id2', $q->toSql());
-    }
-
-    public function test_where_raw_invalid_value(): void
-    {
-        $this->expectException(NotSupportedException::class);
-        $this->expectExceptionMessage('Invalid Raw value. Expected: Expression. Got: int.');
-        $handler = $this->sqliteConnection()->query();
-        $q = $handler->select()->from('t')->whereRaw('id');
-        $q->statement->where[0]->value = 1;
-        $q->toSql();
-    }
-
     public function test_where_eq(): void
     {
         $handler = $this->sqliteConnection()->query();
@@ -227,7 +210,24 @@ class QuerySyntaxTest extends QueryTestCase
         $this->assertSame('SELECT * FROM "t" WHERE "id" <= 1 OR "id" >= 2', $q->toSql());
     }
 
-    public function test_where_exists(): void
+    public function test_whereRaw(): void
+    {
+        $handler = $this->sqliteConnection()->query();
+        $q = $handler->select()->from('t')->whereRaw('id1 = id2');
+        $this->assertSame('SELECT * FROM "t" WHERE id1 = id2', $q->toSql());
+    }
+
+    public function test_whereRaw_invalid_value(): void
+    {
+        $this->expectException(NotSupportedException::class);
+        $this->expectExceptionMessage('Invalid Raw value. Expected: Expression. Got: int.');
+        $handler = $this->sqliteConnection()->query();
+        $q = $handler->select()->from('t')->whereRaw('id');
+        $q->statement->where[0]->value = 1;
+        $q->toSql();
+    }
+
+    public function test_whereExists(): void
     {
         $handler = $this->sqliteConnection()->query();
         $sub = $handler->select()->from('t2')->where('id', 1);
@@ -235,7 +235,7 @@ class QuerySyntaxTest extends QueryTestCase
         $this->assertSame('SELECT * FROM "t" WHERE EXISTS (SELECT * FROM "t2" WHERE "id" = 1)', $q->toSql());
     }
 
-    public function test_where_exists__invalid_value(): void
+    public function test_whereExists__invalid_value(): void
     {
         $this->expectException(NotSupportedException::class);
         $this->expectExceptionMessage('Value for WHERE EXISTS. Expected: SelectStatement. Got: int.');
@@ -246,7 +246,7 @@ class QuerySyntaxTest extends QueryTestCase
         $q->toSql();
     }
 
-    public function test_where_not_exists(): void
+    public function test_whereNotExists(): void
     {
         $handler = $this->sqliteConnection()->query();
         $sub = $handler->select()->from('t2')->where('id', 1);

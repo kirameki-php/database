@@ -26,20 +26,6 @@ use const INF;
 
 class ConnectionTest extends QueryTestCase
 {
-    /**
-     * @var array<class-string<Event>, list<Event>>
-     */
-    protected array $capturedEvents = [];
-
-    /**
-     * @template TEvent of Event
-     * @param class-string<TEvent> $class
-     */
-    protected function captureEvents(string $class): void
-    {
-        $this->getEventManager()->on($class, fn(Event $e) => $this->capturedEvents[$e::class][] = $e);
-    }
-
     public function test_properties(): void
     {
         $connection = $this->createTempConnection('sqlite');
@@ -58,11 +44,11 @@ class ConnectionTest extends QueryTestCase
 
         $this->assertSame($connection, $connection->reconnect());
         $this->assertTrue($connection->isConnected(), 'reconnect while disconnected');
-        $this->assertCount(1, $this->capturedEvents[ConnectionEstablished::class]);
+        $this->assertCount(1, $this->capturedEvents);
 
         $connection->reconnect();
         $this->assertTrue($connection->isConnected(), 'reconnect while connected');
-        $this->assertCount(2, $this->capturedEvents[ConnectionEstablished::class]);
+        $this->assertCount(2, $this->capturedEvents);
     }
 
     public function test_connect__valid(): void
@@ -72,7 +58,7 @@ class ConnectionTest extends QueryTestCase
         $connection = $this->createTempConnection('sqlite');
         $this->assertSame($connection, $connection->disconnect()->connect());
         $this->assertTrue($connection->isConnected());
-        $this->assertCount(1, $this->capturedEvents[ConnectionEstablished::class]);
+        $this->assertCount(1, $this->capturedEvents);
     }
 
     public function test_connect__while_connected(): void
