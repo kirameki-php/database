@@ -222,7 +222,7 @@ final class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
             ->where(ConditionBuilder::for('status')->equals(1)->or()->equals(2))
             ->and('id', 1)
             ->toSql();
-        $this->assertSame("SELECT * FROM `User` WHERE (`id` = 1 AND (`status` = 0 OR `name` = 'John'))", $sql);
+        $this->assertSame("SELECT * FROM `User` WHERE (`status` = 1 OR `status` = 2) AND `id` = 1", $sql);
     }
 
     public function test_orderBy(): void
