@@ -9,10 +9,14 @@ interface TransactionInfo
     /**
      * @var Connection
      */
-    public Connection $connection { get; }
+    public Connection $connection {
+        get;
+    }
 
     /**
      * @var TransactionOptions|null
      */
-    public ?TransactionOptions $options { get; }
+    public ?TransactionOptions $options {
+        get;
+    }
 }

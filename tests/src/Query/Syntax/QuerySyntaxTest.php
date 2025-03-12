@@ -13,6 +13,7 @@ use Kirameki\Database\Query\Statements\RawStatement;
 use Kirameki\Database\Query\Statements\SortOrder;
 use Kirameki\Database\Query\Statements\TagsFormat;
 use Tests\Kirameki\Database\Query\QueryTestCase;
+use function dump;
 
 class QuerySyntaxTest extends QueryTestCase
 {
@@ -132,7 +133,7 @@ class QuerySyntaxTest extends QueryTestCase
         $handler = $this->sqliteConnection()->query();
         $q = $handler->select()->from('t')->where('id', in: []);
         $statement = $q->statement;
-        $statement->where[0]->value = 1;
+        $statement->where->value = 1;
         $q->toSql();
     }
 
@@ -199,7 +200,7 @@ class QuerySyntaxTest extends QueryTestCase
         $this->expectExceptionMessage('Value for WHERE with range. Expected: Bounds. Got: int.');
         $handler = $this->sqliteConnection()->query();
         $q = $handler->select()->from('t')->where('id', Bounds::excluded(1, 2));
-        $q->statement->where[0]->value = 1;
+        $q->statement->where->value = 1;
         $q->toSql();
     }
 
@@ -223,7 +224,7 @@ class QuerySyntaxTest extends QueryTestCase
         $this->expectExceptionMessage('Invalid Raw value. Expected: Expression. Got: int.');
         $handler = $this->sqliteConnection()->query();
         $q = $handler->select()->from('t')->whereRaw('id');
-        $q->statement->where[0]->value = 1;
+        $q->statement->where->value = 1;
         $q->toSql();
     }
 
@@ -242,7 +243,7 @@ class QuerySyntaxTest extends QueryTestCase
         $handler = $this->sqliteConnection()->query();
         $sub = $handler->select()->from('t2')->where('id', 1);
         $q = $handler->select()->from('t')->whereExists($sub);
-        $q->statement->where[0]->value = 1;
+        $q->statement->where->value = 1;
         $q->toSql();
     }
 

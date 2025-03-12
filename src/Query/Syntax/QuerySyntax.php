@@ -16,20 +16,24 @@ use Kirameki\Database\Info\Statements\ListTablesStatement;
 use Kirameki\Database\Info\Statements\TableExistsStatement;
 use Kirameki\Database\Query\Expressions\QueryFunction;
 use Kirameki\Database\Query\Statements\Bounds;
-use Kirameki\Database\Query\Statements\CompoundDefinition;
-use Kirameki\Database\Query\Statements\ConditionDefinition;
-use Kirameki\Database\Query\Statements\ConditionsStatement;
+use Kirameki\Database\Query\Statements\CheckingCondition;
+use Kirameki\Database\Query\Statements\Compound;
+use Kirameki\Database\Query\Statements\FilteringCondition;
+use Kirameki\Database\Query\Statements\ConditionStatement;
 use Kirameki\Database\Query\Statements\Dataset;
 use Kirameki\Database\Query\Statements\DeleteStatement;
 use Kirameki\Database\Query\Statements\InsertStatement;
 use Kirameki\Database\Query\Statements\JoinDefinition;
+use Kirameki\Database\Query\Statements\Condition;
 use Kirameki\Database\Query\Statements\Lock;
 use Kirameki\Database\Query\Statements\LockOption;
 use Kirameki\Database\Query\Statements\LockType;
 use Kirameki\Database\Query\Statements\Logic;
+use Kirameki\Database\Query\Statements\NestedCondition;
 use Kirameki\Database\Query\Statements\Operator;
 use Kirameki\Database\Query\Statements\Ordering;
 use Kirameki\Database\Query\Statements\QueryStatement;
+use Kirameki\Database\Query\Statements\RawCondition;
 use Kirameki\Database\Query\Statements\RawStatement;
 use Kirameki\Database\Query\Statements\SelectStatement;
 use Kirameki\Database\Query\Statements\SortOrder;
@@ -37,7 +41,7 @@ use Kirameki\Database\Query\Statements\Tags;
 use Kirameki\Database\Query\Statements\TagsFormat;
 use Kirameki\Database\Query\Statements\UpdateStatement;
 use Kirameki\Database\Query\Statements\UpsertStatement;
-use Kirameki\Database\Query\Statements\WithDefinition;
+use Kirameki\Database\Query\Statements\With;
 use Kirameki\Database\Syntax;
 use stdClass;
 use function array_filter;
@@ -45,12 +49,11 @@ use function array_key_exists;
 use function array_keys;
 use function array_map;
 use function array_push;
+use function assert;
 use function count;
 use function current;
-use function dump;
 use function explode;
 use function implode;
-use function is_array;
 use function is_bool;
 use function is_iterable;
 use function is_string;
@@ -69,10 +72,9 @@ abstract class QuerySyntax extends Syntax
      *
      * @param string $template
      * @param list<mixed> $parameters
-     * @param Tags|null $tags
      * @return string
      */
-    public function interpolate(string $template, array $parameters, ?Tags $tags = null): string
+    public function interpolate(string $template, array $parameters): string
     {
         $parameters = $this->stringifyParameters($parameters);
         $parameters = Arr::flatten($parameters);
@@ -219,7 +221,7 @@ abstract class QuerySyntax extends Syntax
             $this->asIdentifier($statement->table),
             'SET',
             $this->formatUpdateAssignmentsPart($statement),
-            $this->formatConditionsPart($statement),
+            $this->formatWherePart($statement),
             $this->formatReturningPart($statement->returning),
             $this->formatTags($statement->tags),
         ]);
@@ -243,7 +245,7 @@ abstract class QuerySyntax extends Syntax
      */
     public function prepareTemplateForDelete(DeleteStatement $statement): string
     {
-        if ($this->databaseConfig->dropProtection && count($statement->where ?? []) === 0) {
+        if ($this->databaseConfig->dropProtection && $statement->where === null) {
             throw new DropProtectionException('DELETE without a WHERE clause is prohibited by configuration.', [
                 'statement' => $statement,
             ]);
@@ -253,7 +255,7 @@ abstract class QuerySyntax extends Syntax
             $this->formatWithPart($statement),
             'DELETE FROM',
             $this->asIdentifier($statement->table),
-            $this->formatConditionsPart($statement),
+            $this->formatWherePart($statement),
             $this->formatReturningPart($statement->returning),
             $this->formatTags($statement->tags),
         ]);
@@ -292,10 +294,10 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param ConditionsStatement $statement
+     * @param ConditionStatement $statement
      * @return string
      */
-    protected function formatWithPart(ConditionsStatement $statement): string
+    protected function formatWithPart(ConditionStatement $statement): string
     {
         return $statement->with !== null
             ? 'WITH ' . implode(', ', array_map($this->formatWithDefinition(...), $statement->with))
@@ -303,10 +305,10 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param WithDefinition $with
+     * @param With $with
      * @return string
      */
-    protected function formatWithDefinition(WithDefinition $with): string
+    protected function formatWithDefinition(With $with): string
     {
         return $this->concat([
             $this->asIdentifier($with->name),
@@ -355,7 +357,7 @@ abstract class QuerySyntax extends Syntax
             return '';
         }
 
-        return match($type) {
+        return match ($type) {
             LockType::Exclusive => $type->value . $this->formatSelectLockOptionPart($lock->option),
             LockType::Shared => $type->value,
         };
@@ -424,10 +426,10 @@ abstract class QuerySyntax extends Syntax
 
     /**
      * @param string $query
-     * @param CompoundDefinition|null $compound
+     * @param Compound|null $compound
      * @return string
      */
-    protected function formatCompoundPart(string $query, ?CompoundDefinition $compound): string
+    protected function formatCompoundPart(string $query, ?Compound $compound): string
     {
         if ($compound === null) {
             return $query;
@@ -540,169 +542,111 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param ConditionsStatement $statement
+     * @param ConditionStatement $statement
      * @return string
      */
-    protected function formatConditionsPart(ConditionsStatement $statement): string
+    protected function formatWherePart(ConditionStatement $statement): string
     {
-        return $this->concat([
-            $this->formatWherePart($statement),
-            $this->formatOrderByPart($statement->orderBy),
-            $this->formatLimitPart($statement->limit),
-        ]);
-    }
-
-    /**
-     * @param ConditionsStatement $statement
-     * @return string
-     */
-    protected function formatWherePart(ConditionsStatement $statement): string
-    {
-        $glue = ' ' . Logic::And->value . ' ';
-        $conditions = $statement->where;
-
-        return $conditions !== null
-            ? 'WHERE ' . implode($glue, array_map($this->formatConditionDefinition(...), $conditions))
+        return $statement->where !== null
+            ? 'WHERE ' . $this->formatConditionDefinition($statement->where)
             : '';
     }
 
     /**
-     * @param ConditionDefinition $def
+     * @param Condition $def
      * @return string
      */
-    protected function formatConditionDefinition(ConditionDefinition $def): string
+    protected function formatConditionDefinition(Condition $def): string
     {
         $parts = [];
-        $parts[] = $this->formatConditionSegment($def);
+        do {
+            $part = match(true) {
+                $def instanceof FilteringCondition => $this->formatConditionSegment($def),
+                $def instanceof NestedCondition => $this->formatNestedConditionSegment($def),
+                $def instanceof CheckingCondition => $this->formatConditionForExists($def),
+                $def instanceof RawCondition => $this->formatConditionForRaw($def),
+                default => throw new LogicException('Invalid condition definition.', [
+                    'definition' => $def,
+                ]),
+            };
 
-        // Dig through all chained clauses if exists
-        while (($logic = $def->nextLogic) && ($def = $def->next)) {
-            $parts[] = $logic->value . ' ' . $this->formatConditionSegment($def);
-        }
+            if ($def->logic !== null) {
+                $part .= ' ' . $def->logic->value;
+            }
 
-        $merged = implode(' ', $parts);
-        return (count($parts) > 1)
-            ? '(' . $merged . ')'
-            : $merged;
+            $parts[] = $part;
+        } while ($def = $def->next);
+
+        return implode(' ', $parts);
     }
 
     /**
-     * @param ConditionDefinition $def
+     * @param FilteringCondition $def
      * @return string
      */
-    protected function formatConditionSegment(ConditionDefinition $def): string
+    protected function formatConditionSegment(FilteringCondition $def): string
     {
         return match ($def->operator) {
-            Operator::Raw => $this->formatConditionForRaw($def),
-            Operator::Equals => $this->formatConditionForEqual($def),
-            Operator::LessThanOrEqualTo => $this->formatConditionForLessThanOrEqualTo($def),
-            Operator::LessThan => $this->formatConditionForLessThan($def),
-            Operator::GreaterThanOrEqualTo => $this->formatConditionForGreaterThanOrEqualTo($def),
-            Operator::GreaterThan => $this->formatConditionForGreaterThan($def),
-            Operator::In => $this->formatConditionForIn($def),
-            Operator::Between => $this->formatConditionForBetween($def),
-            Operator::Exists => $this->formatConditionForExists($def),
-            Operator::Like => $this->formatConditionForLike($def),
-            Operator::Range => $this->formatConditionForRange($def),
+            Operator::Equals,
+            Operator::NotEquals => $this->formatConditionForEquals($def),
+            Operator::LessThan,
+            Operator::LessThanOrEqualTo,
+            Operator::GreaterThan,
+            Operator::GreaterThanOrEqualTo,
+            Operator::Like,
+            Operator::NotLike => $this->formatConditionForOperator($def),
+            Operator::In,
+            Operator::NotIn => $this->formatConditionForIn($def),
+            Operator::Between,
+            Operator::NotBetween => $this->formatConditionForBetween($def),
+            Operator::InRange,
+            Operator::NotInRange => $this->formatConditionForRange($def),
         };
     }
 
     /**
-     * @param ConditionDefinition $def
+     * @param NestedCondition $def
      * @return string
      */
-    protected function formatConditionForRaw(ConditionDefinition $def): string
+    protected function formatNestedConditionSegment(NestedCondition $def): string
     {
-        if ($def->value instanceof Expression) {
-            return $def->value->toValue($this);
-        }
-
-        $message = 'Invalid Raw value. Expected: Expression. Got: ' . Value::getType($def->value) . '.';
-        throw new NotSupportedException($message, [
-            'definition' => $def,
-        ]);
+        return '(' . $this->formatConditionDefinition($def->value) . ')';
     }
 
     /**
-     * @param ConditionDefinition $def
+     * @param RawCondition $def
      * @return string
      */
-    protected function formatConditionForEqual(ConditionDefinition $def): string
+    protected function formatConditionForRaw(RawCondition $def): string
     {
-        $column = $this->asColumn($def->column);
-        $negated = $def->negated;
-        $value = $def->value;
-
-        return $value !== null
-            ? $this->formatConditionForOperator($column, $negated ? '!=' : '=', $value)
-            : $this->formatConditionForNull($column, $negated);
+        return $this->stringifyExpression($def->value);
     }
 
     /**
-     * @param ConditionDefinition $def
+     * @param FilteringCondition $def
      * @return string
      */
-    protected function formatConditionForLessThanOrEqualTo(ConditionDefinition $def): string
+    protected function formatConditionForEquals(FilteringCondition $def): string
     {
-        $column = $this->asColumn($def->column);
-        $operator = $def->negated ? '>' : '<=';
-        $value = $def->value;
-        return $this->formatConditionForOperator($column, $operator, $value);
+        return $def->value !== null
+            ? $this->formatConditionForOperator($def)
+            : $this->formatConditionForNull($def);
     }
 
     /**
-     * @param ConditionDefinition $def
+     * @param FilteringCondition $def
      * @return string
      */
-    protected function formatConditionForLessThan(ConditionDefinition $def): string
+    protected function formatConditionForIn(FilteringCondition $def): string
     {
         $column = $this->asColumn($def->column);
-        $operator = $def->negated ? '>=' : '<';
-        $value = $def->value;
-        return $this->formatConditionForOperator($column, $operator, $value);
-    }
-
-    /**
-     * @param ConditionDefinition $def
-     * @return string
-     */
-    protected function formatConditionForGreaterThanOrEqualTo(ConditionDefinition $def): string
-    {
-        $column = $this->asColumn($def->column);
-        $operator = $def->negated ? '<' : '>=';
-        $value = $def->value;
-        return $this->formatConditionForOperator($column, $operator, $value);
-    }
-
-    /**
-     * @param ConditionDefinition $def
-     * @return string
-     */
-    protected function formatConditionForGreaterThan(ConditionDefinition $def): string
-    {
-        $column = $this->asColumn($def->column);
-        $operator = $def->negated ? '<=' : '>';
-        $value = $def->value;
-        return $this->formatConditionForOperator($column, $operator, $value);
-    }
-
-    /**
-     * @param ConditionDefinition $def
-     * @return string
-     */
-    protected function formatConditionForIn(ConditionDefinition $def): string
-    {
-        $column = $this->asColumn($def->column);
-        $operator = ($def->negated ? Logic::Not->value . ' ' : '') . $def->operator->value;
+        $operator = $def->operator->value;
         $value = $def->value;
 
         if (is_iterable($value)) {
-            $value = iterator_to_array($value);
-        }
-
-        if (is_array($value)) {
-            return count($value) > 0
-                ? $this->formatConditionForOperator($column, $operator, $value)
+            $placeholders = $this->asPlaceholders($value);
+            return count($placeholders) > 0
+                ? "{$column} {$operator} {$this->asEnclosedCsv($placeholders)}"
                 : '1 = 0';
         }
 
@@ -718,27 +662,28 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param ConditionDefinition $def
+     * @param FilteringCondition $def
      * @return string
      */
-    protected function formatConditionForBetween(ConditionDefinition $def): string
+    protected function formatConditionForBetween(FilteringCondition $def): string
     {
-        $column = $this->asColumn($def->column);
-        $operator = ($def->negated ? Logic::Not->value . ' ' : '') . $def->operator->value;
-        $min = $this->asPlaceholder($def->value[0]);
-        $max = $this->asPlaceholder($def->value[1]);
-        $logic = Logic::And->value;
-        return "{$column} {$operator} {$min} {$logic} {$max}";
+        return implode(' ', [
+            $this->asColumn($def->column),
+            $def->operator->value,
+            $this->asPlaceholder($def->value[0]),
+            Logic::And->value,
+            $this->asPlaceholder($def->value[1]),
+        ]);
     }
 
     /**
-     * @param ConditionDefinition $def
+     * @param CheckingCondition $def
      * @return string
      */
-    protected function formatConditionForExists(ConditionDefinition $def): string
+    protected function formatConditionForExists(CheckingCondition $def): string
     {
-        $operator = ($def->negated ? Logic::Not->value . ' ' : '') . $def->operator->value;
         $value = $def->value;
+        $operator = $def->negated ? 'NOT EXISTS' : 'EXISTS';
 
         if ($value instanceof QueryStatement) {
             return "{$operator} {$this->formatSubQuery($value)}";
@@ -752,25 +697,13 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param ConditionDefinition $def
+     * @param FilteringCondition $def
      * @return string
      */
-    protected function formatConditionForLike(ConditionDefinition $def): string
+    protected function formatConditionForRange(FilteringCondition $def): string
     {
         $column = $this->asColumn($def->column);
-        $operator = ($def->negated ? Logic::Not->value . ' ' : '') . $def->operator->value;
-        $value = $def->value;
-        return $this->formatConditionForOperator($column, $operator, $value);
-    }
-
-    /**
-     * @param ConditionDefinition $def
-     * @return string
-     */
-    protected function formatConditionForRange(ConditionDefinition $def): string
-    {
-        $column = $this->asColumn($def->column);
-        $negated = $def->negated;
+        $negated = $def->operator === Operator::NotInRange;
         $logic = $negated ? Logic::Or : Logic::And;
         $value = $def->value;
         if ($value instanceof Bounds) {
@@ -793,24 +726,47 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param string $column
-     * @param string $operator
-     * @param mixed $value
+     * @param FilteringCondition $def
      * @return string
      */
-    protected function formatConditionForOperator(string $column, string $operator, mixed $value): string
+    protected function formatConditionForOperator(FilteringCondition $def): string
     {
-        return $column . ' ' . $operator . ' ' . $this->asPlaceholder($value);
+        if (is_iterable($def->column) && is_iterable($def->value)) {
+            return $this->formatConditionForTupleComparison($def);
+        }
+
+        return implode(' ', [
+            $this->asColumn($def->column),
+            $def->operator->value,
+            $this->asPlaceholder($def->value),
+        ]);
+    }
+
+    protected function formatConditionForTupleComparison(FilteringCondition $def): string
+    {
+        assert(is_iterable($def->column));
+        assert(is_iterable($def->value));
+
+        return implode(' ', [
+            $this->asEnclosedCsv($this->asColumns($def->column)),
+            $def->operator->value,
+            $this->asEnclosedCsv($this->asPlaceholders($def->value)),
+        ]);
     }
 
     /**
-     * @param string $column
-     * @param bool $negated
+     * @param FilteringCondition $def
      * @return string
      */
-    protected function formatConditionForNull(string $column, bool $negated): string
+    protected function formatConditionForNull(FilteringCondition $def): string
     {
-        return $column . ' IS ' . ($negated ? Logic::Not->value . ' ' : '') . 'NULL';
+        return $this->asColumn($def->column) . match ($def->operator) {
+            Operator::Equals => ' IS NULL',
+            Operator::NotEquals => ' IS NOT NULL',
+            default => throw new LogicException("Invalid operator: {$def->operator->value} for NULL condition.", [
+                'definition' => $def,
+            ]),
+        };
     }
 
     /**
@@ -839,11 +795,8 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatHavingPart(SelectStatement $statement): string
     {
-        $glue = ' ' . Logic::And->value . ' ';
-        $conditions = $statement->having;
-
-        return $conditions !== null
-            ? 'HAVING ' . implode($glue, array_map($this->formatConditionDefinition(...), $conditions))
+        return $statement->having !== null
+            ? 'HAVING ' . $this->formatConditionDefinition($statement->having)
             : '';
     }
 
@@ -918,7 +871,7 @@ abstract class QuerySyntax extends Syntax
             $columns[] = '*';
         }
 
-        return "RETURNING {$this->asCsv($this->asColumns($columns))}";
+        return 'RETURNING ' . $this->asCsv($this->asColumns($columns));
     }
 
     /**
@@ -983,7 +936,7 @@ abstract class QuerySyntax extends Syntax
         if ($tags === null || count($tags) === 0) {
             return '';
         }
-        return match($this->databaseConfig->tagsFormat) {
+        return match ($this->databaseConfig->tagsFormat) {
             TagsFormat::Log => $this->formatTagsForLogs($tags),
             TagsFormat::OpenTelemetry => $this->formatTagsForOpenTelemetry($tags),
         };
@@ -1046,8 +999,7 @@ abstract class QuerySyntax extends Syntax
     {
         return match (true) {
             $value instanceof Expression => $value->toValue($this),
-            $value instanceof QueryStatement => $this->formatSubQuery($value),
-            is_iterable($value) => $this->asEnclosedCsv($this->asParameterPlaceholders($value)),
+            is_iterable($value) => $this->asEnclosedCsv($this->asPlaceholders($value)),
             default => '?',
         };
     }
@@ -1056,7 +1008,7 @@ abstract class QuerySyntax extends Syntax
      * @param iterable<int, mixed> $values
      * @return list<string>
      */
-    protected function asParameterPlaceholders(iterable $values): array
+    protected function asPlaceholders(iterable $values): array
     {
         return array_map($this->asPlaceholder(...), Arr::values($values));
     }
@@ -1070,19 +1022,21 @@ abstract class QuerySyntax extends Syntax
         if ($statement->joins !== null) {
             $conditions = array_map(static fn(JoinDefinition $join) => $join->condition, $statement->joins);
             $conditions = array_filter($conditions, static fn($def) => $def !== null);
-            $this->addParametersForConditions($parameters, $conditions);
+            foreach ($conditions as $condition) {
+                $this->addParametersForCondition($parameters, $condition);
+            }
         }
     }
 
     /**
      * @param list<mixed> $parameters
-     * @param ConditionsStatement $statement
+     * @param ConditionStatement $statement
      * @return void
      */
-    protected function addParametersForWhere(array &$parameters, ConditionsStatement $statement): void
+    protected function addParametersForWhere(array &$parameters, ConditionStatement $statement): void
     {
         if ($statement->where !== null) {
-            $this->addParametersForConditions($parameters, $statement->where);
+            $this->addParametersForCondition($parameters, $statement->where);
         }
     }
 
@@ -1094,39 +1048,27 @@ abstract class QuerySyntax extends Syntax
     protected function addParametersForHaving(array &$parameters, SelectStatement $statement): void
     {
         if ($statement->having !== null) {
-            $this->addParametersForConditions($parameters, $statement->having);
+            $this->addParametersForCondition($parameters, $statement->having);
         }
     }
 
     /**
      * @param list<mixed> $parameters
-     * @param iterable<int, ConditionDefinition> $conditions
+     * @param Condition $def
      * @return void
      */
-    protected function addParametersForConditions(array &$parameters, iterable $conditions): void
+    protected function addParametersForCondition(array &$parameters, Condition $def): void
     {
-        foreach ($conditions as $condition) {
-            $this->addParametersForCondition($parameters, $condition);
-        }
-    }
-
-    /**
-     * @param list<mixed> $parameters
-     * @param ConditionDefinition $def
-     * @return void
-     */
-    protected function addParametersForCondition(array &$parameters, ConditionDefinition $def): void
-    {
-        while ($def !== null) {
+        do {
             $value = $def->value;
             match (true) {
                 is_iterable($value) => array_push($parameters, ...iterator_to_array($value)),
+                $value instanceof Condition => $this->addParametersForCondition($parameters, $value),
                 $value instanceof QueryStatement => array_push($parameters, ...$value->generateParameters($this)),
                 $value instanceof Expression => null, // already converted to string in `self::asPlaceholder`.
                 default => $parameters[] = $value,
             };
-            $def = $def->next;
-        }
+        } while ($def = $def->next);
     }
 
     /**

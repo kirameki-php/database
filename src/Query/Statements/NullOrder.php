@@ -12,7 +12,7 @@ enum NullOrder: string
      */
     public function reverse(): self
     {
-        return match($this) {
+        return match ($this) {
             self::First => self::Last,
             self::Last => self::First,
         };

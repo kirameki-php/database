@@ -17,7 +17,7 @@ use Kirameki\Database\Query\Statements\LockOption;
 use Kirameki\Database\Raw;
 use Kirameki\Time\Time;
 use stdClass;
-use Tests\Kirameki\Database\Query\Statements\_Support\IntCastEnum;
+use Tests\Kirameki\Database\Adapters\_Support\IntCastEnum;
 use function array_map;
 use function iterator_to_array;
 
@@ -155,10 +155,10 @@ final class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
         $this->assertSame("SELECT * FROM `User` WHERE `id` = 1", $sql);
     }
 
-    public function test_where__with_three_args(): void
+    public function test_where__with_two_args_named_operator_ne(): void
     {
-        $sql = $this->selectBuilder()->from('User')->where('id', eq: 1)->toSql();
-        $this->assertSame("SELECT * FROM `User` WHERE `id` = 1", $sql);
+        $sql = $this->selectBuilder()->from('User')->where('id', ne: 1)->toSql();
+        $this->assertSame("SELECT * FROM `User` WHERE `id` != 1", $sql);
     }
 
     public function test_where__multiples(): void
@@ -170,10 +170,22 @@ final class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
     public function test_where__combined(): void
     {
         $sql = $this->selectBuilder()->from('User')
-            ->where(ConditionBuilder::for('id')->lessThan(1)->or()->equals(3))
+            ->where(fn(ConditionBuilder $q) => $q('id', lt: 1)->or('id', 3))
             ->where('id', not: -1)
             ->toSql();
         $this->assertSame("SELECT * FROM `User` WHERE (`id` < 1 OR `id` = 3) AND `id` != -1", $sql);
+    }
+
+    public function test_where__with_nested_nesting(): void
+    {
+        $sql = $this->selectBuilder()->from('User')
+            ->where(function(ConditionBuilder $q) {
+                $q('id', 1)->or(function(ConditionBuilder $q) {
+                    $q->or('id', 2)->and('id', 3);
+                });
+            })
+            ->toSql();
+        $this->assertSame("SELECT * FROM `User` WHERE (`id` = 1 OR (`id` = 2 AND `id` = 3))", $sql);
     }
 
     public function test_whereColumn(): void
@@ -194,15 +206,15 @@ final class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
         $this->assertSame("SELECT * FROM `User` WHERE (`id`, `status`) IN ((1, 1), (2, 3))", $sql);
     }
 
-    public function test_and(): void
+    public function test_and__from_two_wheres(): void
     {
-        $sql = $this->selectBuilder()->from('User')->where('id', 1)->and('status', not: 0)->toSql();
-        $this->assertSame("SELECT * FROM `User` WHERE (`id` = 1 AND `status` != 0)", $sql);
+        $sql = $this->selectBuilder()->from('User')->where('id', 1)->where('status', not: 0)->toSql();
+        $this->assertSame("SELECT * FROM `User` WHERE `id` = 1 AND `status` != 0", $sql);
     }
 
     public function test_or(): void
     {
-        $sql = $this->selectBuilder()->from('User')->where('id', 1)->or('status', 0)->toSql();
+        $sql = $this->selectBuilder()->from('User')->where(fn(ConditionBuilder $q) => $q('id', 1)->or('status', 0))->toSql();
         $this->assertSame("SELECT * FROM `User` WHERE (`id` = 1 OR `status` = 0)", $sql);
     }
 
@@ -210,17 +222,16 @@ final class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
     {
         $sql = $this->selectBuilder()->from('User')
             ->where('id', 1)
-            ->and('status', 0)
-            ->or('name', 'John')
+            ->where(fn(ConditionBuilder $q) => $q('status', 0)->or('name', 'John'))
             ->toSql();
-        $this->assertSame("SELECT * FROM `User` WHERE (`id` = 1 AND `status` = 0 OR `name` = 'John')", $sql);
+        $this->assertSame("SELECT * FROM `User` WHERE `id` = 1 AND (`status` = 0 OR `name` = \"John\")", $sql);
     }
 
-    public function test_and__with_sub_or(): void
+    public function test_and__with_nested_or(): void
     {
         $sql = $this->selectBuilder()->from('User')
-            ->where(ConditionBuilder::for('status')->equals(1)->or()->equals(2))
-            ->and('id', 1)
+            ->where(static fn(ConditionBuilder $q) => $q->or('status', 1)->or('status', 2))
+            ->where('id', 1)
             ->toSql();
         $this->assertSame("SELECT * FROM `User` WHERE (`status` = 1 OR `status` = 2) AND `id` = 1", $sql);
     }
@@ -830,12 +841,11 @@ final class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
 
     public function test_clone(): void
     {
-        $where = ConditionBuilder::for('id')->equals(1)->or('id')->equals(2);
-        $base = $this->selectBuilder()->from('User')->where($where);
+        $base = $this->selectBuilder()->from('User')->where('id', 1);
         $copy = clone $base;
-        $where->or()->in([3,4]); // change $base but should not be reflected on copy
-        $this->assertSame("SELECT * FROM `User` WHERE (`id` = 1 OR `id` = 2 OR `id` IN (3, 4))", $base->toSql());
-        $this->assertSame("SELECT * FROM `User` WHERE (`id` = 1 OR `id` = 2)", $copy->toSql());
+        $base->where('id', in: [3, 4]); // change $base but should not be reflected on copy
+        $this->assertSame("SELECT * FROM `User` WHERE `id` = 1 AND `id` IN (3, 4)", $base->toSql());
+        $this->assertSame("SELECT * FROM `User` WHERE `id` = 1", $copy->toSql());
         $this->assertNotSame($base->toSql(), $copy->toSql());
     }
 

@@ -6,31 +6,35 @@ use Kirameki\Database\Expression;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Override;
 
-class SelectStatement extends ConditionsStatement
+class SelectStatement extends ConditionStatement
 {
     /**
      * @param list<string|Expression>|null $tables
      * @param list<string|Expression>|null $columns
      * @param list<JoinDefinition>|null $joins
      * @param list<string>|null $groupBy
-     * @param list<ConditionDefinition>|null $having
+     * @param Condition|null $having
+     * @param array<string, Ordering>|null $orderBy
      * @param int|null $offset
+     * @param int|null $limit
      * @param bool|null $distinct
      * @param Lock|null $lock
      * @param string|null $forceIndex
-     * @param CompoundDefinition|null $compound
+     * @param Compound|null $compound
      */
     public function __construct(
         public ?array $tables = null,
         public ?array $columns = null,
         public ?array $joins = null,
         public ?array $groupBy = null,
-        public ?array $having = null,
+        public ?Condition $having = null,
+        public ?array $orderBy = null,
         public ?int $offset = null,
+        public ?int $limit = null,
         public ?bool $distinct = null,
         public ?Lock $lock = null,
         public ?string $forceIndex = null,
-        public ?CompoundDefinition $compound = null,
+        public ?Compound $compound = null,
     )
     {
         parent::__construct();

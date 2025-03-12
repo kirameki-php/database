@@ -8,9 +8,9 @@ use function array_values;
 use function iterator_to_array;
 
 /**
- * @extends ConditionsBuilder<UpdateStatement>
+ * @extends WhereBuilder<UpdateStatement>
  */
-class UpdateBuilder extends ConditionsBuilder
+class UpdateBuilder extends WhereBuilder
 {
     /**
      * @param QueryHandler $handler

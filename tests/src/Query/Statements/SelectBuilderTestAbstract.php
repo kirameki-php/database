@@ -41,7 +41,7 @@ abstract class SelectBuilderTestAbstract extends QueryTestCase
 
     abstract public function test_where__with_two_args(): void;
 
-    abstract public function test_where__with_three_args(): void;
+    abstract public function test_where__with_two_args_named_operator_ne(): void;
 
     abstract public function test_where__multiples(): void;
 

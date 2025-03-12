@@ -182,11 +182,9 @@ class Connection
             $result = $callback($context);
             $this->handleCommit($context);
             return $result;
-        }
-        catch (Throwable $throwable) {
+        } catch (Throwable $throwable) {
             $this->rollbackAndThrow($context, $throwable);
-        }
-        finally {
+        } finally {
             $this->cleanUpTransaction($context);
         }
     }

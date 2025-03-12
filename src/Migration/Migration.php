@@ -83,6 +83,7 @@ abstract class Migration
     {
         return basename(str_replace('\\', '/', $this::class));
     }
+
     /**
      * @return Connection
      */
@@ -164,7 +165,7 @@ abstract class Migration
      */
     protected function createIndex(string $table, Closure $callback): SchemaResult
     {
-       return $this->apply($this->getSchemaHandler()->createIndex($table), $callback);
+        return $this->apply($this->getSchemaHandler()->createIndex($table), $callback);
     }
 
     /**

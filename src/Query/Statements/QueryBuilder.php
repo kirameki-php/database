@@ -39,6 +39,33 @@ abstract class QueryBuilder
     }
 
     /**
+     * @param string $name
+     * @return WithBuilder
+     */
+    public function with(string $name): WithBuilder
+    {
+        return $this->addWithDefinition($name, false);
+    }
+
+    /**
+     * @param string $name
+     * @return WithBuilder
+     */
+    public function withRecursive(string $name): WithBuilder
+    {
+        return $this->addWithDefinition($name, true);
+    }
+
+    protected function addWithDefinition(string $name, bool $recursive): WithBuilder
+    {
+        $builder = new WithBuilder($this->handler, $name, $recursive);
+        $statement = $this->statement;
+        $statement->with ??= [];
+        $statement->with[] = $builder->with;
+        return $builder;
+    }
+
+    /**
      * @param string $key
      * @param scalar $value
      * @return $this

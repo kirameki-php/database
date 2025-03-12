@@ -6,5 +6,4 @@ enum Logic: string
 {
     case And = 'AND';
     case Or = 'OR';
-    case Not = 'NOT';
 }

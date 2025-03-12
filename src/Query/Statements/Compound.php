@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Query\Statements;
 
-class CompoundDefinition
+class Compound
 {
     /**
      * @param CompoundType $operator

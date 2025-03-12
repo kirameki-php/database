@@ -2,7 +2,6 @@
 
 namespace Kirameki\Database\Query\Statements;
 
-use Kirameki\Collections\Utils\Arr;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Override;
 
@@ -21,7 +20,7 @@ class RawStatement extends QueryStatement
         ?Tags $tags = null,
     )
     {
-        parent::__construct($casts, $tags);
+        parent::__construct(null, $casts, $tags);
     }
 
     /**

@@ -24,6 +24,7 @@ use Kirameki\Time\Time;
 use stdClass;
 use Tests\Kirameki\Database\DatabaseTestCase;
 use Tests\Kirameki\Database\Query\Statements\_Support\IntCastEnum;
+use function dump;
 use function rand;
 
 abstract class PdoAdapterTestAbstract extends DatabaseTestCase

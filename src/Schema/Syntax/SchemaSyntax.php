@@ -20,7 +20,6 @@ use Kirameki\Database\Schema\Statements\Index\DropIndexStatement;
 use Kirameki\Database\Schema\Statements\Table\AlterTableStatement;
 use Kirameki\Database\Schema\Statements\Table\CreateTableStatement;
 use Kirameki\Database\Schema\Statements\Table\DropTableStatement;
-use Kirameki\Database\Schema\Statements\Table\RenameDefinition;
 use Kirameki\Database\Schema\Statements\Table\RenameTableStatement;
 use Kirameki\Database\Schema\Statements\Table\TruncateTableStatement;
 use Kirameki\Database\Syntax;

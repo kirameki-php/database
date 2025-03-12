@@ -5,7 +5,7 @@ namespace Kirameki\Database\Query\Statements;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Override;
 
-class DeleteStatement extends ConditionsStatement
+class DeleteStatement extends ConditionStatement
 {
     /**
      * @param string $table

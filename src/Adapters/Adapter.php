@@ -2,7 +2,6 @@
 
 namespace Kirameki\Database\Adapters;
 
-use Closure;
 use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
 use Kirameki\Database\Exceptions\ConnectionException;

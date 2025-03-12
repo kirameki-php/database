@@ -2,7 +2,6 @@
 
 namespace Kirameki\Database\Schema\Statements\Column;
 
-use Kirameki\Database\Connection;
 use Kirameki\Database\Schema\SchemaHandler;
 
 class AlterColumnBuilder extends ColumnBuilder

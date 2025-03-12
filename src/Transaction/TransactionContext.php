@@ -93,7 +93,7 @@ class TransactionContext implements TransactionInfo
 
         $currentLevel = $this->options?->isolationLevel;
 
-        if($level === $currentLevel) {
+        if ($level === $currentLevel) {
             return $this;
         }
 

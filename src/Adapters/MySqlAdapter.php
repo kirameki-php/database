@@ -181,7 +181,7 @@ class MySqlAdapter extends PdoAdapter
                 $ifNotExist ? 'IF NOT EXISTS' : null,
                 $database,
                 $config->charset ? "CHARACTER SET {$config->charset}" : null,
-                $config->collation ? "COLLATE {$config->collation}"  : null,
+                $config->collation ? "COLLATE {$config->collation}" : null,
             ]))));
         } catch (SchemaException $e) {
             if (str_ends_with($e->getMessage(), "1007 Can't create database '{$database}'; database exists")) {

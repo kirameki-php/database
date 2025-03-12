@@ -5,7 +5,7 @@ namespace Kirameki\Database\Query\Statements;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 use Override;
 
-class UpdateStatement extends ConditionsStatement
+class UpdateStatement extends ConditionStatement
 {
     /**
      * @param string $table

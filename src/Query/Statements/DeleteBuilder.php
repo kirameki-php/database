@@ -7,9 +7,9 @@ use function array_is_list;
 use function array_values;
 
 /**
- * @extends ConditionsBuilder<DeleteStatement>
+ * @extends WhereBuilder<DeleteStatement>
  */
-class DeleteBuilder extends ConditionsBuilder
+class DeleteBuilder extends WhereBuilder
 {
     /**
      * @param QueryHandler $handler

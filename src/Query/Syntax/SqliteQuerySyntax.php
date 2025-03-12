@@ -55,6 +55,7 @@ class SqliteQuerySyntax extends QuerySyntax
             NullOrder::Last => 'NULLS LAST',
         };
     }
+
     /**
      * @inheritDoc
      */

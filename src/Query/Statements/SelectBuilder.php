@@ -21,16 +21,22 @@ use Kirameki\Database\Query\QueryHandler;
 use Kirameki\Database\Query\QueryResult;
 use function array_is_list;
 use function array_values;
-use function dump;
 use function is_array;
 use function min;
 use function property_exists;
 
 /**
- * @extends ConditionsBuilder<SelectStatement>
+ * @extends WhereBuilder<SelectStatement>
  */
-class SelectBuilder extends ConditionsBuilder
+class SelectBuilder extends WhereBuilder
 {
+    /**
+     * @var ConditionContext
+     */
+    protected ConditionContext $havingContext {
+        get => $this->havingContext ??= new ConditionContext();
+    }
+
     /**
      * @param QueryHandler $handler
      */
@@ -229,7 +235,7 @@ class SelectBuilder extends ConditionsBuilder
     protected function addJoinToStatement(JoinBuilder $builder): static
     {
         $this->statement->joins ??= [];
-        $this->statement->joins[] = $builder->getDefinition();
+        $this->statement->joins[] = $builder->join;
         return $this;
     }
 
@@ -248,15 +254,14 @@ class SelectBuilder extends ConditionsBuilder
     }
 
     /**
-     * @see ConditionsBuilder::where()
      * @param mixed ...$args
      * @return $this
+     * @see WhereBuilder::where()
      */
     public function having(mixed ...$args): static
     {
-        $statement = $this->statement;
-        $statement->having ??= [];
-        $statement->having[] = $this->buildCondition(...$args)->getDefinition();
+        $this->linkCondition($this->havingContext, Logic::And, $args);
+        $this->statement->having = $this->havingContext->root;
         return $this;
     }
 
@@ -381,7 +386,7 @@ class SelectBuilder extends ConditionsBuilder
      */
     protected function setCompoundOperator(CompoundType $operator, SelectBuilder $query): CompoundBuilder
     {
-        return new CompoundBuilder($this->handler, $operator, $this->statement, $query->statement);
+        return new CompoundBuilder($this->handler, $operator, $this->statement, clone $query->statement);
     }
 
     #endregion compounding ---------------------------------------------------------------------------------------------
@@ -489,7 +494,7 @@ class SelectBuilder extends ConditionsBuilder
      */
     public function pluck(string $column): Vec
     {
-        return $this->copy()->columns($column)->execute()->map(static fn ($row) => $row->$column ?? null);
+        return $this->copy()->columns($column)->execute()->map(static fn($row) => $row->$column ?? null);
     }
 
     /**

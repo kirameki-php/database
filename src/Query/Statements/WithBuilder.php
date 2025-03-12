@@ -8,9 +8,9 @@ use Kirameki\Database\Query\QueryHandler;
 readonly class WithBuilder
 {
     /**
-     * @var WithDefinition
+     * @var With
      */
-    protected WithDefinition $definition;
+    public protected(set) With $with;
 
     /**
      * @param QueryHandler $handler
@@ -23,7 +23,7 @@ readonly class WithBuilder
         bool $recursive = false,
     )
     {
-        $this->definition = new WithDefinition($name, $recursive);
+        $this->with = new With($name, $recursive);
     }
 
     /**
@@ -37,18 +37,10 @@ readonly class WithBuilder
         }
 
         if ($subquery instanceof SelectBuilder) {
-            $subquery = $subquery->statement;
+            $subquery = clone $subquery->statement;
         }
 
-        $this->definition->statement = $subquery;
+        $this->with->statement = $subquery;
         return $this;
-    }
-
-    /**
-     * @return WithDefinition
-     */
-    public function getDefinition(): WithDefinition
-    {
-        return $this->definition;
     }
 }

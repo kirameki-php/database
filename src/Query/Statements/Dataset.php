@@ -12,11 +12,11 @@ use function array_keys;
 class Dataset implements IteratorAggregate
 {
     /**
-     * @param list<array<string, mixed>> $list
+     * @param list<array<string, mixed>> $rows
      * @param array<string, null> $columns
      */
     public function __construct(
-        protected array $list = [],
+        protected array $rows = [],
         protected array $columns = [],
     )
     {
@@ -27,7 +27,7 @@ class Dataset implements IteratorAggregate
      */
     public function getIterator(): Traversable
     {
-        return yield from $this->list;
+        return yield from $this->rows;
     }
 
     /**
@@ -50,7 +50,7 @@ class Dataset implements IteratorAggregate
                 $row[$key] = $value;
                 $this->columns[$key] = null;
             }
-            $this->list[] = $row;
+            $this->rows[] = $row;
         }
         return $this;
     }

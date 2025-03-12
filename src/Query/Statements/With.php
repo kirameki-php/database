@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Query\Statements;
 
-class WithDefinition
+class With
 {
     public QueryStatement $statement;
 

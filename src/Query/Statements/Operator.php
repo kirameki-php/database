@@ -5,14 +5,17 @@ namespace Kirameki\Database\Query\Statements;
 enum Operator: string
 {
     case Equals = '=';
+    case NotEquals = '!=';
     case LessThan = '<';
     case LessThanOrEqualTo = '<=';
     case GreaterThan = '>';
     case GreaterThanOrEqualTo = '>=';
     case In = 'IN';
+    case NotIn = 'NOT IN';
     case Between = 'BETWEEN';
-    case Exists = 'EXISTS';
+    case NotBetween = 'NOT BETWEEN';
     case Like = 'LIKE';
-    case Raw = '_RAW_';
-    case Range = '_RANGE_';
+    case NotLike = 'NOT LIKE';
+    case InRange = '_RANGE_';
+    case NotInRange = '_NOT_RANGE_';
 }

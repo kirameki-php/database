@@ -2,7 +2,6 @@
 
 namespace Kirameki\Database\Query;
 
-use Closure;
 use Kirameki\Collections\Vec;
 use Kirameki\Database\Exceptions\QueryException;
 use Kirameki\Database\Query\Statements\QueryStatement as QueryStatement;

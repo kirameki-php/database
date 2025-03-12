@@ -47,11 +47,9 @@ class CreateIndexBuilder extends SchemaBuilder
         foreach ($columns as $column => $order) {
             if (is_string($column) && $order instanceof SortOrder) {
                 $this->column($column, $order);
-            }
-            elseif (is_string($order)) {
+            } elseif (is_string($order)) {
                 $this->column($order);
-            }
-            else {
+            } else {
                 throw new UnreachableException('Invalid primary key column definition.');
             }
         }

@@ -9,7 +9,10 @@ use Kirameki\Database\Query\QueryHandler;
  */
 class CompoundBuilder extends QueryBuilder
 {
-    protected CompoundDefinition $definition;
+    /**
+     * @var Compound
+     */
+    protected Compound $compound;
 
     /**
      * @param QueryHandler $handler
@@ -26,8 +29,8 @@ class CompoundBuilder extends QueryBuilder
     {
         parent::__construct($handler, $root);
 
-        $this->definition = new CompoundDefinition($operator, $query);
-        $root->compound = $this->definition;
+        $this->compound = new Compound($operator, $query);
+        $root->compound = $this->compound;
     }
 
     #region sorting ----------------------------------------------------------------------------------------------------
@@ -44,8 +47,8 @@ class CompoundBuilder extends QueryBuilder
         ?NullOrder $nulls = null,
     ): static
     {
-        $this->definition->orderBy ??= [];
-        $this->definition->orderBy[$column] = new Ordering($sort, $nulls);
+        $this->compound->orderBy ??= [];
+        $this->compound->orderBy[$column] = new Ordering($sort, $nulls);
         return $this;
     }
 
@@ -74,7 +77,7 @@ class CompoundBuilder extends QueryBuilder
      */
     public function reorder(): static
     {
-        $this->definition->orderBy = null;
+        $this->compound->orderBy = null;
         return $this;
     }
 
@@ -88,7 +91,7 @@ class CompoundBuilder extends QueryBuilder
      */
     public function limit(int $count): static
     {
-        $this->definition->limit = $count;
+        $this->compound->limit = $count;
         return $this;
     }
 

@@ -4,297 +4,357 @@ namespace Tests\Kirameki\Database\Query\Statements;
 
 use Kirameki\Core\Exceptions\InvalidArgumentException;
 use Kirameki\Core\Exceptions\LogicException;
-use Kirameki\Database\Functions\CurrentTimestamp;
-use Kirameki\Database\Query\Expressions\Column;
 use Kirameki\Database\Query\Statements\Bounds;
 use Kirameki\Database\Query\Statements\ConditionBuilder;
-use Kirameki\Database\Query\Statements\ConditionDefinition;
+use Kirameki\Database\Query\Statements\RawCondition;
+use Kirameki\Database\Query\Statements\WhereBuilder;
+use Kirameki\Database\Query\Statements\FilteringCondition;
 use Kirameki\Database\Query\Statements\Logic;
 use Kirameki\Database\Query\Statements\Operator;
 use Kirameki\Database\Raw;
 use Tests\Kirameki\Database\Query\QueryTestCase;
+use ValueError;
 use function dump;
 
-class ConditionBuilderTest extends QueryTestCase
+class WhereBuilderTest extends QueryTestCase
 {
     protected string $useConnection = 'mysql';
 
-    public function test_fromArgs__with_zero_args(): void
+    public function test_where__with_zero_args(): void
     {
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('Invalid number of arguments. Expected: <= 2. Got: 0');
-        ConditionBuilder::fromArgs();
+        $this->connect()->query()->select()->from('t')->where();
     }
 
-    public function test_fromArgs__with_one_arg__itself(): void
+    public function test_where__with_one_arg__itself(): void
     {
-        $self = ConditionBuilder::fromArgs('id', 1);
-        $builder = ConditionBuilder::fromArgs($self);
-        $this->assertSame($self, $builder);
+        $query = $this->connect()->query();
+        $select = $query->select()->from('t');
+        $select->where('id', 1);
 
-        $def = $builder->getDefinition();
+        $it = $query->select()->where($select->statement->where);
+        $this->assertSame($select, $it);
+
+        $def = $it->statement->where;
+        $this->assertInstanceOf(FilteringCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame(1, $def->value);
         $this->assertSame(Operator::Equals, $def->operator);
-        $this->assertFalse($def->negated);
-        $this->assertNull($def->nextLogic);
+        $this->assertNull($def->logic);
         $this->assertNull($def->next);
+        $this->assertSame(0, $def->nestLevel);
     }
 
-    public function test_fromArgs__with_one_arg__invalid(): void
+    public function test_where__with_1_arg__closure(): void
+    {
+        $query = $this->connect()->query()->select()->from('t');
+        $query->where('id', 1);
+        $query->where(fn(ConditionBuilder $q) => $q->where('id', 2)->or('id', 3));
+        $query->where('id', 4);
+
+        $def = $query->statement->where;
+        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertSame('id', $def->column);
+        $this->assertSame(1, $def->value);
+        $this->assertSame(Operator::Equals, $def->operator);
+        $this->assertNull($def->logic);
+        $this->assertInstanceOf(FilteringCondition::class, $def->next);
+        $this->assertSame(0, $def->nestLevel);
+
+        $def = $def->next;
+        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertSame('id', $def->column);
+        $this->assertSame(2, $def->value);
+        $this->assertSame(Operator::Equals, $def->operator);
+        $this->assertSame(Logic::And, $def->logic);
+        $this->assertInstanceOf(FilteringCondition::class, $def->next);
+        $this->assertSame(1, $def->nestLevel);
+
+        $def = $def->next;
+        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertSame('id', $def->column);
+        $this->assertSame(3, $def->value);
+        $this->assertSame(Operator::Equals, $def->operator);
+        $this->assertSame(Logic::Or, $def->logic);
+        $this->assertInstanceOf(FilteringCondition::class, $def->next);
+        $this->assertSame(1, $def->nestLevel);
+
+        $def = $def->next;
+        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertSame('id', $def->column);
+        $this->assertSame(4, $def->value);
+        $this->assertSame(Operator::Equals, $def->operator);
+        $this->assertSame(Logic::And, $def->logic);
+        $this->assertNull($def->next);
+        $this->assertSame(0, $def->nestLevel);
+    }
+
+    public function test_where__with_one_arg__invalid(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Expected: Kirameki\Database\Query\Statements\ConditionBuilder. Got: string.');
-        ConditionBuilder::fromArgs('id');
+        $this->expectExceptionMessage('Expected: Closure|ConditionDefinition. Got: string.');
+        $query = $this->connect()->query()->select()->from('t');
+        $query->where('id');
     }
 
-    public function test_fromArgs__with_two_arg__named_column(): void
+    public function test_where__with_two_args__named_column(): void
     {
-        $def = ConditionBuilder::fromArgs(lt: 1, column: 'id')->getDefinition();
+        $query = $this->connect()->query()->select()->from('t');
+        $def = $query->where(lt: 1, column: 'id')->statement->where;
+        $this->assertInstanceOf(FilteringCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame(1, $def->value);
         $this->assertSame(Operator::LessThan, $def->operator);
-        $this->assertFalse($def->negated);
     }
 
-    public function test_fromArgs__with_two_arg__no_column(): void
+    public function test_where__with_two_args__no_column(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Missing column parameter.');
-        $def = ConditionBuilder::fromArgs(lt: 1, a: 'id')->getDefinition();
-        $this->assertSame('id', $def->column);
-        $this->assertSame(1, $def->value);
-        $this->assertSame(Operator::LessThan, $def->operator);
-        $this->assertFalse($def->negated);
+        $query = $this->connect()->query()->select()->from('t');
+        $query->where(lt: 1, not: 1);
     }
 
-    public function test_fromArgs__positional_scalar(): void
+    public function test_where__with_two_args__positional_scalar(): void
     {
-        $def = ConditionBuilder::fromArgs('id', 1)->getDefinition();
-        $this->assertSame('id', $def->column);
-        $this->assertSame(1, $def->value);
-        $this->assertSame(Operator::Equals, $def->operator);
-        $this->assertFalse($def->negated);
-    }
-
-    public function test_fromArgs__positional_iterable(): void
-    {
-        $def = ConditionBuilder::fromArgs('id', [1, 2, 3])->getDefinition();
-        $this->assertSame('id', $def->column);
-        $this->assertSame([1, 2, 3], $def->value);
-        $this->assertSame(Operator::In, $def->operator);
-        $this->assertFalse($def->negated);
-    }
-
-    public function test_fromArgs__positional_range(): void
-    {
-        $bounds = Bounds::excluded(1, 10);
-        $def = ConditionBuilder::fromArgs('id', $bounds)->getDefinition();
-        $this->assertSame('id', $def->column);
-        $this->assertSame($bounds, $def->value);
-        $this->assertSame(Operator::Range, $def->operator);
-        $this->assertFalse($def->negated);
-    }
-
-    public function test_fromArgs__not_with_scalar(): void
-    {
-        $def = ConditionBuilder::fromArgs('id', not: 1)->getDefinition();
+        $query = $this->connect()->query()->select()->from('t');
+        $def = $query->where('id', 1)->statement->where;
+        $this->assertInstanceOf(FilteringCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame(1, $def->value);
         $this->assertSame(Operator::Equals, $def->operator);
-        $this->assertTrue($def->negated);
     }
 
-    public function test_fromArgs__not_with_iterable(): void
+    public function test_where__with_two_args__positional_iterable(): void
     {
-        $def = ConditionBuilder::fromArgs('id', not: [1, 2, 3])->getDefinition();
+        $query = $this->connect()->query()->select()->from('t');
+        $def = $query->where('id', [1, 2, 3])->statement->where;
+        $this->assertInstanceOf(FilteringCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame([1, 2, 3], $def->value);
         $this->assertSame(Operator::In, $def->operator);
-        $this->assertTrue($def->negated);
     }
 
-    public function test_fromArgs__not_with_range(): void
+    public function test_where__with_two_args__positional_range(): void
     {
         $bounds = Bounds::excluded(1, 10);
-        $def = ConditionBuilder::fromArgs('id', not: $bounds)->getDefinition();
+        $query = $this->connect()->query()->select()->from('t');
+        $def = $query->where('id', $bounds)->statement->where;
+        $this->assertInstanceOf(FilteringCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame($bounds, $def->value);
-        $this->assertSame(Operator::Range, $def->operator);
-        $this->assertTrue($def->negated);
+        $this->assertSame(Operator::InRange, $def->operator);
     }
 
-    public function test_fromArgs__lt_with_scalar(): void
+    public function test_where__with_two_args__not_with_scalar(): void
     {
-        $def = ConditionBuilder::fromArgs('id', lt: 1)->getDefinition();
+        $query = $this->connect()->query()->select()->from('t');
+        $def = $query->where('id', not: 1)->statement->where;
+        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertSame('id', $def->column);
+        $this->assertSame(1, $def->value);
+        $this->assertSame(Operator::NotEquals, $def->operator);
+    }
+
+    public function test_where__with_two_args__not_with_iterable(): void
+    {
+        $query = $this->connect()->query()->select()->from('t');
+        $def = $query->where('id', not: [1, 2, 3])->statement->where;
+        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertSame('id', $def->column);
+        $this->assertSame([1, 2, 3], $def->value);
+        $this->assertSame(Operator::NotIn, $def->operator);
+    }
+
+    public function test_where__with_two_args__not_with_range(): void
+    {
+        $bounds = Bounds::excluded(1, 10);
+        $query = $this->connect()->query()->select()->from('t');
+        $def = $query->where('id', not: $bounds)->statement->where;
+        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertSame('id', $def->column);
+        $this->assertSame($bounds, $def->value);
+        $this->assertSame(Operator::NotInRange, $def->operator);
+    }
+
+    public function test_where__with_two_args__lt_with_scalar(): void
+    {
+        $query = $this->connect()->query()->select()->from('t');
+        $def = $query->where('id', lt: 1)->statement->where;
+        $this->assertInstanceOf(FilteringCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame(1, $def->value);
         $this->assertSame(Operator::LessThan, $def->operator);
-        $this->assertFalse($def->negated);
     }
 
-    public function test_fromArgs__lte_with_scalar(): void
+    public function test_where__with_two_args__lte_with_scalar(): void
     {
-        $def = ConditionBuilder::fromArgs('id', lte: 1)->getDefinition();
+        $query = $this->connect()->query()->select()->from('t');
+        $def = $query->where('id', lte: 1)->statement->where;
+        $this->assertInstanceOf(FilteringCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame(1, $def->value);
         $this->assertSame(Operator::LessThanOrEqualTo, $def->operator);
-        $this->assertFalse($def->negated);
     }
 
-    public function test_fromArgs__gt_with_scalar(): void
+    public function test_where__with_two_args__gt_with_scalar(): void
     {
-        $def = ConditionBuilder::fromArgs('id', gt: 1)->getDefinition();
+        $query = $this->connect()->query()->select()->from('t');
+        $def = $query->where('id', gt: 1)->statement->where;
+        $this->assertInstanceOf(FilteringCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame(1, $def->value);
         $this->assertSame(Operator::GreaterThan, $def->operator);
-        $this->assertFalse($def->negated);
     }
 
-    public function test_fromArgs__gte_with_scalar(): void
+    public function test_where__with_two_args__gte_with_scalar(): void
     {
-        $def = ConditionBuilder::fromArgs('id', gte: 1)->getDefinition();
+        $query = $this->connect()->query()->select()->from('t');
+        $def = $query->where('id', gte: 1)->statement->where;
+        $this->assertInstanceOf(FilteringCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame(1, $def->value);
         $this->assertSame(Operator::GreaterThanOrEqualTo, $def->operator);
-        $this->assertFalse($def->negated);
     }
 
-    public function test_fromArgs__in_with_iterable(): void
+    public function test_where__with_two_args__in_with_iterable(): void
     {
-        $def = ConditionBuilder::fromArgs('id', in: [1, 2, 3])->getDefinition();
+        $query = $this->connect()->query()->select()->from('t');
+        $def = $query->where('id', in: [1, 2, 3])->statement->where;
+        $this->assertInstanceOf(FilteringCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame([1, 2, 3], $def->value);
         $this->assertSame(Operator::In, $def->operator);
-        $this->assertFalse($def->negated);
     }
 
-    public function test_fromArgs__not_in_with_iterable(): void
+    public function test_where__with_two_args__not_in_with_iterable(): void
     {
-        $def = ConditionBuilder::fromArgs('id', notIn: [1, 2, 3])->getDefinition();
+        $query = $this->connect()->query()->select()->from('t');
+        $def = $query->where('id', notIn: [1, 2, 3])->statement->where;
+        $this->assertInstanceOf(FilteringCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame([1, 2, 3], $def->value);
-        $this->assertSame(Operator::In, $def->operator);
-        $this->assertTrue($def->negated);
+        $this->assertSame(Operator::NotIn, $def->operator);
     }
 
-    public function test_fromArgs__between(): void
+    public function test_where__with_two_args__between(): void
     {
-        $def = ConditionBuilder::fromArgs('id', between: [1, 10])->getDefinition();
+        $query = $this->connect()->query()->select()->from('t');
+        $def = $query->where('id', between: [1, 10])->statement->where;
+        $this->assertInstanceOf(FilteringCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame([1, 10], $def->value);
         $this->assertSame(Operator::Between, $def->operator);
-        $this->assertFalse($def->negated);
     }
 
-    public function test_fromArgs__not_between(): void
+    public function test_where__with_two_args__not_between(): void
     {
-        $def = ConditionBuilder::fromArgs('id', notBetween: [1, 10])->getDefinition();
+        $query = $this->connect()->query()->select()->from('t');
+        $def = $query->where('id', notBetween: [1, 10])->statement->where;
+        $this->assertInstanceOf(FilteringCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame([1, 10], $def->value);
-        $this->assertSame(Operator::Between, $def->operator);
-        $this->assertTrue($def->negated);
+        $this->assertSame(Operator::NotBetween, $def->operator);
     }
 
-    public function test_fromArgs__like(): void
+    public function test_where__with_two_args__like(): void
     {
-        $def = ConditionBuilder::fromArgs('name', like: 'John%')->getDefinition();
+        $query = $this->connect()->query()->select()->from('t');
+        $def = $query->where('name', like: 'John%')->statement->where;
+        $this->assertInstanceOf(FilteringCondition::class, $def);
         $this->assertSame('name', $def->column);
         $this->assertSame('John%', $def->value);
         $this->assertSame(Operator::Like, $def->operator);
-        $this->assertFalse($def->negated);
     }
 
-    public function test_fromArgs__not_like(): void
+    public function test_where__with_two_args__not_like(): void
     {
-        $def = ConditionBuilder::fromArgs('name', notLike: 'John%')->getDefinition();
+        $query = $this->connect()->query()->select()->from('t');
+        $def = $query->where('name', notLike: 'John%')->statement->where;
+        $this->assertInstanceOf(FilteringCondition::class, $def);
         $this->assertSame('name', $def->column);
         $this->assertSame('John%', $def->value);
-        $this->assertSame(Operator::Like, $def->operator);
-        $this->assertTrue($def->negated);
+        $this->assertSame(Operator::NotLike, $def->operator);
     }
 
-    public function test_fromArgs__unknown_operator(): void
+    public function test_where__with_two_args__unknown_operator(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Unknown operator: "t".');
-        ConditionBuilder::fromArgs('id', t: 1);
+        $this->connect()->query()->select()->from('t')->where('id', t: 1);
     }
 
-    public function test_for__with_string(): void
+    public function test_where__with_three_args(): void
     {
-        $def = ConditionBuilder::for('id')->equals(1)->getDefinition();
+        $query = $this->connect()->query()->select()->from('t');
+        $def = $query->where('id', Operator::NotEquals, 2)->statement->where;
+        $this->assertInstanceOf(FilteringCondition::class, $def);
         $this->assertSame('id', $def->column);
-        $this->assertSame(1, $def->value);
-        $this->assertSame(Operator::Equals, $def->operator);
-        $this->assertFalse($def->negated);
+        $this->assertSame(2, $def->value);
+        $this->assertSame(Operator::NotEquals, $def->operator);
+        $this->assertNull($def->logic);
+        $this->assertNull($def->next);
     }
 
-    public function test_for__with_iterable(): void
+    public function test_where__with_three_args__invalid_operator(): void
     {
-        $def = ConditionBuilder::for(['a', 'b'])->equals(1)->getDefinition();
-        $this->assertSame(['a', 'b'], $def->column);
-        $this->assertSame(1, $def->value);
-        $this->assertSame(Operator::Equals, $def->operator);
-        $this->assertFalse($def->negated);
+        $this->expectException(ValueError::class);
+        $this->expectExceptionMessage('"T" is not a valid backing value for enum ' . Operator::class);
+        $this->connect()->query()->select()->from('t')->where('id', 't', 1);
     }
 
-    public function test_for__with_expression(): void
+    public function test_where__with_expression_column(): void
     {
         $expr = new Raw('id');
-        $def = ConditionBuilder::for($expr)->equals(1)->getDefinition();
+        $query = $this->connect()->query()->select()->from('t');
+        $def = $query->where($expr, 1)->statement->where;
+        $this->assertInstanceOf(FilteringCondition::class, $def);
         $this->assertSame($expr, $def->column);
         $this->assertSame(1, $def->value);
         $this->assertSame(Operator::Equals, $def->operator);
-        $this->assertFalse($def->negated);
     }
 
-    public function test_with__with_string_column(): void
+    public function test_where__with_iterable_column(): void
     {
-        $def = ConditionBuilder::with('id', Operator::LessThan, 1)->getDefinition();
-        $this->assertSame('id', $def->column);
-        $this->assertSame(1, $def->value);
-        $this->assertSame(Operator::LessThan, $def->operator);
-        $this->assertFalse($def->negated);
-    }
-
-    public function test_with__with_iterable_column(): void
-    {
-        $def = ConditionBuilder::with(['a', 'b'], Operator::LessThan, 1)->getDefinition();
+        $query = $this->connect()->query()->select()->from('t');
+        $def = $query->where(['a', 'b'], Operator::LessThan, 1)->statement->where;
+        $this->assertInstanceOf(FilteringCondition::class, $def);
         $this->assertSame(['a', 'b'], $def->column);
         $this->assertSame(1, $def->value);
         $this->assertSame(Operator::LessThan, $def->operator);
-        $this->assertFalse($def->negated);
     }
 
-    public function test_with__with_expression_column(): void
+    public function test_where__compound__with_another_where(): void
     {
-        $expr = new Raw('id');
-        $def = ConditionBuilder::with($expr, Operator::LessThan, 1)->getDefinition();
-        $this->assertSame($expr, $def->column);
+        $query = $this->connect()->query()->select()->from('t');
+        $def = $query->where('id', 1)->where('name', not: 'a')->statement->where;
+        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertSame('id', $def->column);
         $this->assertSame(1, $def->value);
-        $this->assertSame(Operator::LessThan, $def->operator);
-        $this->assertFalse($def->negated);
+        $this->assertSame(Operator::Equals, $def->operator);
+        $this->assertNull($def->logic);
+        $this->assertInstanceOf(FilteringCondition::class, $def->next);
+        $this->assertSame('name', $def->next->column);
+        $this->assertSame('a', $def->next->value);
+        $this->assertSame(Operator::NotEquals, $def->next->operator);
+        $this->assertSame(Logic::And, $def->next->logic);
     }
 
-    public function test_raw__with_string(): void
+    public function test_whereRaw__with_string(): void
     {
-        $def = ConditionBuilder::raw('id = 1')->getDefinition();
-        $this->assertSame('_UNUSED_', $def->column);
-        $this->assertInstanceOf(Raw::class, $def->value);
-        $this->assertSame(Operator::Raw, $def->operator);
-        $this->assertFalse($def->negated);
+        $query = $this->connect()->query()->select()->from('t');
+        $def = $query->whereRaw('id = 1')->statement->where;
+        $this->assertInstanceOf(RawCondition::class, $def);
+        $this->assertIsString($def->value);
     }
 
     public function test_raw__with_expression(): void
     {
         $expr = new Raw('id = 1');
-        $cond = ConditionBuilder::raw($expr);
+        $cond = WhereBuilder::raw($expr);
         $def = $cond->getDefinition();
-        $this->assertSame('_UNUSED_', $def->column);
         $this->assertSame($expr, $def->value);
-        $this->assertSame(Operator::Raw, $def->operator);
-        $this->assertFalse($def->negated);
 
         $conn = $this->sqliteConnection();
         $q = $conn->query()->select()->from('t')->where($cond);
@@ -305,11 +365,9 @@ class ConditionBuilderTest extends QueryTestCase
     {
         $conn = $this->sqliteConnection();
         $subquery = $conn->query()->select('id')->from('t2');
-        $cond = ConditionBuilder::exists($subquery);
+        $cond = WhereBuilder::exists($subquery);
         $def = $cond->getDefinition();
-        $this->assertSame('_UNUSED_', $def->column);
         $this->assertSame($subquery->statement, $def->value);
-        $this->assertSame(Operator::Exists, $def->operator);
         $this->assertFalse($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
@@ -320,12 +378,10 @@ class ConditionBuilderTest extends QueryTestCase
     {
         $conn = $this->sqliteConnection();
         $subquery = $conn->query()->select('id')->from('t2');
-        $cond = ConditionBuilder::notExists($subquery);
+        $cond = WhereBuilder::notExists($subquery);
         $def = $cond->getDefinition();
-        $this->assertSame('_UNUSED_', $def->column);
         $this->assertSame($subquery->statement, $def->value);
-        $this->assertSame(Operator::Exists, $def->operator);
-        $this->assertTrue($def->negated);
+        $this->assertTrue($def->negate);
 
         $q = $conn->query()->select()->from('t')->where($cond);
         $this->assertSame('SELECT * FROM "t" WHERE NOT EXISTS (SELECT "id" FROM "t2")', $q->toSql());
@@ -333,7 +389,7 @@ class ConditionBuilderTest extends QueryTestCase
 
     public function test___clone(): void
     {
-        $current = ConditionBuilder::for('id')->equals(1);
+        $current = WhereBuilder::for('id')->equals(1);
         $next = $current->or()->equals(2);
         $cloned = clone $current;
         $this->assertNotSame($current, $cloned);
@@ -352,7 +408,7 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_and__without_column(): void
     {
         $conn = $this->sqliteConnection();
-        $current = ConditionBuilder::for('id')->equals(1);
+        $current = WhereBuilder::for('id')->equals(1);
         $def = $current->getDefinition();
         $next = $current->and()->equals(2);
         $this->assertSame($current, $next);
@@ -372,7 +428,7 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_and__with_column(): void
     {
         $conn = $this->sqliteConnection();
-        $current = ConditionBuilder::for('id')->equals(1);
+        $current = WhereBuilder::for('id')->equals(1);
         $next = $current->and('name')->equals('a');
         $this->assertSame($current, $next);
 
@@ -383,7 +439,7 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_or__without_column(): void
     {
         $conn = $this->sqliteConnection();
-        $current = ConditionBuilder::for('id')->equals(1);
+        $current = WhereBuilder::for('id')->equals(1);
         $def = $current->getDefinition();
         $next = $current->or()->equals(2);
         $this->assertSame($current, $next);
@@ -403,7 +459,7 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_and_or_multi_define(): void
     {
         $conn = $this->sqliteConnection();
-        $current = ConditionBuilder::for('id')->equals(1)
+        $current = WhereBuilder::for('id')->equals(1)
             ->and()->greaterThan(2)
             ->or()->lessThan(3);
 
@@ -414,7 +470,7 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_equals__with_scalar(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = ConditionBuilder::for('b')->equals(true);
+        $cond = WhereBuilder::for('b')->equals(true);
         $def = $cond->getDefinition();
         $this->assertSame('b', $def->column);
         $this->assertTrue($def->value);
@@ -429,13 +485,13 @@ class ConditionBuilderTest extends QueryTestCase
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Iterable should use in(iterable $iterable) method.');
-        ConditionBuilder::for('b')->equals([1, 2]);
+        WhereBuilder::for('b')->equals([1, 2]);
     }
 
     public function test_notEquals(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = ConditionBuilder::for('b')->notEquals(true);
+        $cond = WhereBuilder::for('b')->notEquals(true);
         $def = $cond->getDefinition();
         $this->assertSame('b', $def->column);
         $this->assertTrue($def->value);
@@ -449,7 +505,7 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_greaterThanOrEquals(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = ConditionBuilder::for('b')->greaterThanOrEqualTo(1);
+        $cond = WhereBuilder::for('b')->greaterThanOrEqualTo(1);
         $def = $cond->getDefinition();
         $this->assertSame('b', $def->column);
         $this->assertSame(1, $def->value);
@@ -463,7 +519,7 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_greaterThan(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = ConditionBuilder::for('b')->greaterThan(1);
+        $cond = WhereBuilder::for('b')->greaterThan(1);
         $def = $cond->getDefinition();
         $this->assertSame('b', $def->column);
         $this->assertSame(1, $def->value);
@@ -477,7 +533,7 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_lessThanOrEqualTo(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = ConditionBuilder::for('b')->lessThanOrEqualTo(1);
+        $cond = WhereBuilder::for('b')->lessThanOrEqualTo(1);
         $def = $cond->getDefinition();
         $this->assertSame('b', $def->column);
         $this->assertSame(1, $def->value);
@@ -491,7 +547,7 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_lessThan(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = ConditionBuilder::for('b')->lessThan(1);
+        $cond = WhereBuilder::for('b')->lessThan(1);
         $def = $cond->getDefinition();
         $this->assertSame('b', $def->column);
         $this->assertSame(1, $def->value);
@@ -505,7 +561,7 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_isNull(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = ConditionBuilder::for('b')->isNull();
+        $cond = WhereBuilder::for('b')->isNull();
         $def = $cond->getDefinition();
         $this->assertSame('b', $def->column);
         $this->assertNull($def->value);
@@ -519,7 +575,7 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_isNotNull(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = ConditionBuilder::for('b')->isNotNull();
+        $cond = WhereBuilder::for('b')->isNotNull();
         $def = $cond->getDefinition();
         $this->assertSame('b', $def->column);
         $this->assertNull($def->value);
@@ -533,7 +589,7 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_like(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = ConditionBuilder::for('name')->like('John%');
+        $cond = WhereBuilder::for('name')->like('John%');
         $def = $cond->getDefinition();
         $this->assertSame('name', $def->column);
         $this->assertSame('John%', $def->value);
@@ -547,7 +603,7 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_notLike(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = ConditionBuilder::for('name')->notLike('John%');
+        $cond = WhereBuilder::for('name')->notLike('John%');
         $def = $cond->getDefinition();
         $this->assertSame('name', $def->column);
         $this->assertSame('John%', $def->value);
@@ -561,7 +617,7 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_in__with_array(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = ConditionBuilder::for('b')->in([1, 2]);
+        $cond = WhereBuilder::for('b')->in([1, 2]);
         $def = $cond->getDefinition();
         $this->assertSame('b', $def->column);
         $this->assertSame([1, 2], $def->value);
@@ -575,7 +631,7 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_in__with_empty_array(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = ConditionBuilder::for('b')->in([]);
+        $cond = WhereBuilder::for('b')->in([]);
         $q = $conn->query()->select()->from('t')->where($cond);
         $this->assertSame('SELECT * FROM "t" WHERE 1 = 0', $q->toSql());
     }
@@ -584,7 +640,7 @@ class ConditionBuilderTest extends QueryTestCase
     {
         $conn = $this->sqliteConnection();
         $subquery = $conn->query()->select('id')->from('t2');
-        $cond = ConditionBuilder::for('b')->in($subquery);
+        $cond = WhereBuilder::for('b')->in($subquery);
         $def = $cond->getDefinition();
         $this->assertSame('b', $def->column);
         $this->assertSame($subquery->statement, $def->value);
@@ -598,7 +654,7 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_notIn__with_array(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = ConditionBuilder::for('b')->notIn([1, 2]);
+        $cond = WhereBuilder::for('b')->notIn([1, 2]);
         $def = $cond->getDefinition();
         $this->assertSame('b', $def->column);
         $this->assertSame([1, 2], $def->value);
@@ -613,7 +669,7 @@ class ConditionBuilderTest extends QueryTestCase
     {
         $conn = $this->sqliteConnection();
         $subquery = $conn->query()->select('id')->from('t2');
-        $cond = ConditionBuilder::for('b')->notIn($subquery);
+        $cond = WhereBuilder::for('b')->notIn($subquery);
         $def = $cond->getDefinition();
         $this->assertSame('b', $def->column);
         $this->assertSame($subquery->statement, $def->value);
@@ -627,7 +683,7 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_notIn__with_empty_array(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = ConditionBuilder::for('b')->notIn([]);
+        $cond = WhereBuilder::for('b')->notIn([]);
         $q = $conn->query()->select()->from('t')->where($cond);
         $this->assertSame('SELECT * FROM "t" WHERE 1 = 0', $q->toSql());
     }
@@ -635,7 +691,7 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_between(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = ConditionBuilder::for('b')->between(1, 10);
+        $cond = WhereBuilder::for('b')->between(1, 10);
         $def = $cond->getDefinition();
         $this->assertSame('b', $def->column);
         $this->assertSame([1, 10], $def->value);
@@ -649,7 +705,7 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_notBetween(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = ConditionBuilder::for('b')->notBetween(1, 10);
+        $cond = WhereBuilder::for('b')->notBetween(1, 10);
         $def = $cond->getDefinition();
         $this->assertSame('b', $def->column);
         $this->assertSame([1, 10], $def->value);
@@ -663,11 +719,11 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_inRange(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = ConditionBuilder::for('b')->inRange(Bounds::excluded(1, 10));
+        $cond = WhereBuilder::for('b')->inRange(Bounds::excluded(1, 10));
         $def = $cond->getDefinition();
         $this->assertSame('b', $def->column);
         $this->assertInstanceOf(Bounds::class, $def->value);
-        $this->assertSame(Operator::Range, $def->operator);
+        $this->assertSame(Operator::InRange, $def->operator);
         $this->assertFalse($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
@@ -677,11 +733,11 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_notInRange(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = ConditionBuilder::for('b')->notInRange(Bounds::excluded(1, 10));
+        $cond = WhereBuilder::for('b')->notInRange(Bounds::excluded(1, 10));
         $def = $cond->getDefinition();
         $this->assertSame('b', $def->column);
         $this->assertInstanceOf(Bounds::class, $def->value);
-        $this->assertSame(Operator::Range, $def->operator);
+        $this->assertSame(Operator::InRange, $def->operator);
         $this->assertTrue($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
@@ -690,8 +746,8 @@ class ConditionBuilderTest extends QueryTestCase
 
     public function test_apply(): void
     {
-        $cond = ConditionBuilder::for('a')->equals(1);
-        $cond->apply(ConditionBuilder::for('b')->greaterThan(2));
+        $cond = WhereBuilder::for('a')->equals(1);
+        $cond->apply(WhereBuilder::for('b')->greaterThan(2));
         $def = $cond->getDefinition();
         $this->assertSame('b', $def->column);
         $this->assertSame(2, $def->value);
@@ -708,7 +764,7 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_negate_equals(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = ConditionBuilder::for('b')->equals(1)->negate();
+        $cond = WhereBuilder::for('b')->equals(1)->negate();
         $def = $cond->getDefinition();
         $this->assertSame(Operator::Equals, $def->operator);
         $this->assertTrue($def->negated);
@@ -720,7 +776,7 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_negate_greaterThanOrEquals(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = ConditionBuilder::for('b')->greaterThanOrEqualTo(1)->negate();
+        $cond = WhereBuilder::for('b')->greaterThanOrEqualTo(1)->negate();
         $def = $cond->getDefinition();
         $this->assertSame(Operator::GreaterThanOrEqualTo, $def->operator);
         $this->assertTrue($def->negated);
@@ -732,7 +788,7 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_negate_greaterThan(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = ConditionBuilder::for('b')->greaterThan(1)->negate();
+        $cond = WhereBuilder::for('b')->greaterThan(1)->negate();
         $def = $cond->getDefinition();
         $this->assertSame(Operator::GreaterThan, $def->operator);
         $this->assertTrue($def->negated);
@@ -744,7 +800,7 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_negate_lessThanOrEqualTo(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = ConditionBuilder::for('b')->lessThanOrEqualTo(1)->negate();
+        $cond = WhereBuilder::for('b')->lessThanOrEqualTo(1)->negate();
         $def = $cond->getDefinition();
         $this->assertSame(Operator::LessThanOrEqualTo, $def->operator);
         $this->assertTrue($def->negated);
@@ -756,7 +812,7 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_negate_lessThan(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = ConditionBuilder::for('b')->lessThan(1)->negate();
+        $cond = WhereBuilder::for('b')->lessThan(1)->negate();
         $def = $cond->getDefinition();
         $this->assertSame(Operator::LessThan, $def->operator);
         $this->assertTrue($def->negated);
@@ -768,7 +824,7 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_negate_isNull(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = ConditionBuilder::for('b')->isNull()->negate();
+        $cond = WhereBuilder::for('b')->isNull()->negate();
         $def = $cond->getDefinition();
         $this->assertSame(Operator::Equals, $def->operator);
         $this->assertTrue($def->negated);
@@ -780,7 +836,7 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_negate_isNotNull(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = ConditionBuilder::for('b')->isNotNull()->negate();
+        $cond = WhereBuilder::for('b')->isNotNull()->negate();
         $def = $cond->getDefinition();
         $this->assertSame(Operator::Equals, $def->operator);
         $this->assertFalse($def->negated);
@@ -792,7 +848,7 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_negate_like(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = ConditionBuilder::for('name')->like('John%')->negate();
+        $cond = WhereBuilder::for('name')->like('John%')->negate();
         $def = $cond->getDefinition();
         $this->assertSame(Operator::Like, $def->operator);
         $this->assertTrue($def->negated);
@@ -804,7 +860,7 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_negate_in(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = ConditionBuilder::for('b')->in([1, 2])->negate();
+        $cond = WhereBuilder::for('b')->in([1, 2])->negate();
         $def = $cond->getDefinition();
         $this->assertSame(Operator::In, $def->operator);
         $this->assertTrue($def->negated);
@@ -816,7 +872,7 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_negate_between(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = ConditionBuilder::for('b')->between(1, 10)->negate();
+        $cond = WhereBuilder::for('b')->between(1, 10)->negate();
         $def = $cond->getDefinition();
         $this->assertSame(Operator::Between, $def->operator);
         $this->assertTrue($def->negated);
@@ -828,9 +884,9 @@ class ConditionBuilderTest extends QueryTestCase
     public function test_negate_inRange(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = ConditionBuilder::for('b')->inRange(Bounds::excluded(1, 10))->negate();
+        $cond = WhereBuilder::for('b')->inRange(Bounds::excluded(1, 10))->negate();
         $def = $cond->getDefinition();
-        $this->assertSame(Operator::Range, $def->operator);
+        $this->assertSame(Operator::InRange, $def->operator);
         $this->assertTrue($def->negated);
 
         $q = $conn->query()->select()->from('t')->where($cond);
@@ -839,15 +895,15 @@ class ConditionBuilderTest extends QueryTestCase
 
     public function test_getDefinition(): void
     {
-        $cond = ConditionBuilder::for('id')->equals(1);
+        $cond = WhereBuilder::for('id')->equals(1);
         $def = $cond->getDefinition();
-        $this->assertInstanceOf(ConditionDefinition::class, $def);
+        $this->assertInstanceOf(FilteringCondition::class, $def);
     }
 
     public function test_define_more_than_once(): void
     {
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('Tried to set condition when it was already set!');
-        ConditionBuilder::for('id')->equals(1)->equals(2);
+        WhereBuilder::for('id')->equals(1)->equals(2);
     }
 }

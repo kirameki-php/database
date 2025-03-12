@@ -12,7 +12,7 @@ enum SortOrder: string
      */
     public function reverse(): self
     {
-        return match($this) {
+        return match ($this) {
             self::Ascending => self::Descending,
             self::Descending => self::Ascending,
         };
