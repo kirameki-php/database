@@ -56,7 +56,7 @@ class MySqlQuerySyntax extends QuerySyntax
     {
         $columns = $this->asIdentifiers($columns);
         $columns = array_map(static fn(string $column): string => "{$column} = new.{$column}", $columns);
-        return 'ON DUPLICATE KEY UPDATE' . implode(', ', $columns);
+        return 'ON DUPLICATE KEY UPDATE' . $this->asCsv($columns);
     }
 
     /**
@@ -134,7 +134,7 @@ class MySqlQuerySyntax extends QuerySyntax
     {
         $database = $this->asLiteral($this->connectionConfig->getTableSchema());
         $table = $this->asLiteral($statement->table);
-        $columns = implode(', ', [
+        $columns = $this->asCsv([
             "INDEX_NAME AS `name`",
             "CASE WHEN `INDEX_NAME` = 'PRIMARY' THEN 'primary' WHEN `NON_UNIQUE` = 0 THEN 'unique' ELSE 'index' END AS `type`",
             "GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX) AS `columns`",
@@ -155,7 +155,7 @@ class MySqlQuerySyntax extends QuerySyntax
     {
         $database = $this->asLiteral($this->connectionConfig->getTableSchema());
         $table = $this->asLiteral($statement->table);
-        $columns = implode(', ', [
+        $columns = $this->asCsv([
             "t1.CONSTRAINT_NAME AS `name`",
             "GROUP_CONCAT(t1.COLUMN_NAME ORDER BY ORDINAL_POSITION) AS `columns`",
             "t1.REFERENCED_TABLE_NAME AS `referencedTable`",

@@ -81,7 +81,7 @@ class SqliteQuerySyntax extends QuerySyntax
     #[Override]
     public function prepareTemplateForListColumns(ListColumnsStatement $statement): string
     {
-        $columns = implode(', ', [
+        $columns = $this->asCsv([
             'name',
             'type',
             'NOT "notnull" as `nullable`',
@@ -151,7 +151,7 @@ class SqliteQuerySyntax extends QuerySyntax
     public function prepareTemplateForListForeignKeys(ListForeignKeysStatement $statement): string
     {
         $table = $this->asLiteral($statement->table);
-        $columns = implode(', ', [
+        $columns = $this->asCsv([
             'cast(id as text) as "name"',
             'group_concat("from") AS "columns"',
             '"table" AS "referencedTable"',

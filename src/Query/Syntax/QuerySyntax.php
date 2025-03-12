@@ -300,7 +300,7 @@ abstract class QuerySyntax extends Syntax
     protected function formatWithPart(ConditionStatement $statement): string
     {
         return $statement->with !== null
-            ? 'WITH ' . implode(', ', array_map($this->formatWithDefinition(...), $statement->with))
+            ? 'WITH ' . $this->asCsv(array_map($this->formatWithDefinition(...), $statement->with))
             : '';
     }
 
@@ -538,7 +538,7 @@ abstract class QuerySyntax extends Syntax
     {
         $columns = $this->asIdentifiers($columns);
         $columns = array_map(static fn(string $column): string => "{$column} = EXCLUDED.{$column}", $columns);
-        return 'DO UPDATE SET ' . implode(', ', $columns);
+        return 'DO UPDATE SET ' . $this->asCsv($columns);
     }
 
     /**
@@ -623,6 +623,26 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
+     * @param CheckingCondition $def
+     * @return string
+     */
+    protected function formatConditionForExists(CheckingCondition $def): string
+    {
+        $value = $def->value;
+        $operator = $def->negated ? 'NOT EXISTS' : 'EXISTS';
+
+        if ($value instanceof QueryStatement) {
+            return "{$operator} {$this->formatSubQuery($value)}";
+        }
+
+        $message = 'Value for WHERE ' . $operator . '. ';
+        $message .= 'Expected: SelectStatement. Got: ' . Value::getType($value) . '.';
+        throw new NotSupportedException($message, [
+            'definition' => $def,
+        ]);
+    }
+
+    /**
      * @param FilteringCondition $def
      * @return string
      */
@@ -673,26 +693,6 @@ abstract class QuerySyntax extends Syntax
             $this->asPlaceholder($def->value[0]),
             Logic::And->value,
             $this->asPlaceholder($def->value[1]),
-        ]);
-    }
-
-    /**
-     * @param CheckingCondition $def
-     * @return string
-     */
-    protected function formatConditionForExists(CheckingCondition $def): string
-    {
-        $value = $def->value;
-        $operator = $def->negated ? 'NOT EXISTS' : 'EXISTS';
-
-        if ($value instanceof QueryStatement) {
-            return "{$operator} {$this->formatSubQuery($value)}";
-        }
-
-        $message = 'Value for WHERE ' . $operator . '. ';
-        $message .= 'Expected: SelectStatement. Got: ' . Value::getType($value) . '.';
-        throw new NotSupportedException($message, [
-            'definition' => $def,
         ]);
     }
 
@@ -949,7 +949,7 @@ abstract class QuerySyntax extends Syntax
     protected function formatTagsForLogs(Tags $tags): string
     {
         $fields = Arr::map($tags, static fn(mixed $v, string $k) => rawurlencode($k) . '=' . rawurlencode((string) $v));
-        return $this->asBlockComment(implode(',', $fields));
+        return $this->asBlockComment($this->asCsv($fields));
     }
 
     /**
@@ -959,7 +959,7 @@ abstract class QuerySyntax extends Syntax
     protected function formatTagsForOpenTelemetry(Tags $tags): string
     {
         $fields = Arr::map($tags, static fn(mixed $v, string $k) => rawurlencode($k) . "='" . rawurlencode((string) $v) . "'");
-        return $this->asBlockComment(implode(',', $fields));
+        return $this->asBlockComment($this->asCsv($fields));
     }
 
     /**
@@ -1104,7 +1104,7 @@ abstract class QuerySyntax extends Syntax
     {
         $database = $this->asLiteral($this->connectionConfig->getTableSchema());
         $table = $this->asLiteral($statement->table);
-        $columns = implode(', ', [
+        $columns = $this->asCsv([
             "COLUMN_NAME AS `name`",
             "DATA_TYPE AS `type`",
             "IS_NULLABLE AS `nullable`",
