@@ -4,6 +4,9 @@ namespace Kirameki\Database\Query\Statements;
 
 class With
 {
+    /**
+     * @var QueryStatement
+     */
     public QueryStatement $statement;
 
     /**

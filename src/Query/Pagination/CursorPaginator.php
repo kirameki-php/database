@@ -42,7 +42,7 @@ class CursorPaginator extends Paginator
     /**
      * @return Cursor|null
      */
-    public function generateNextCursor(): ?Cursor
+    public function generateNextCursorOrNull(): ?Cursor
     {
         return $this->hasNext
             ? $this->cursor->toNext($this->last())

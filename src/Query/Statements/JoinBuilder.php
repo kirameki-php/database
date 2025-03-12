@@ -61,7 +61,7 @@ class JoinBuilder
     {
         assert(func_num_args() >= 2 && func_num_args() <= 3);
         array_splice($args, -1, 1, [new Column(end($args))]);
-        $this->linkCondition($this->joinContext, Logic::And, $args);
+        $this->applyCondition($this->joinContext, Logic::And, $args);
         $this->join->condition = $this->joinContext->root;
         return $this;
     }

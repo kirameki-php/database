@@ -23,7 +23,7 @@ trait HandlesCondition
      * @param array<mixed> $args
      * @return void
      */
-    protected function linkCondition(ConditionContext $context, Logic $logic, array $args): void
+    protected function applyCondition(ConditionContext $context, Logic $logic, array $args): void
     {
         $condition = $this->createConditionOrNull($args);
 

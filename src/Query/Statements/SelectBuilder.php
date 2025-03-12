@@ -260,7 +260,7 @@ class SelectBuilder extends WhereBuilder
      */
     public function having(mixed ...$args): static
     {
-        $this->linkCondition($this->havingContext, Logic::And, $args);
+        $this->applyCondition($this->havingContext, Logic::And, $args);
         $this->statement->having = $this->havingContext->root;
         return $this;
     }
@@ -449,6 +449,7 @@ class SelectBuilder extends WhereBuilder
             throw new InvalidArgumentException("Invalid page size. Expected: > 0. Got: {$size}.", [
                 'statement' => $this->statement,
                 'size' => $size,
+                'cursor' => $cursor,
             ]);
         }
 
@@ -656,7 +657,7 @@ class SelectBuilder extends WhereBuilder
                 }
             }
 
-            $cursor = $paginator->generateNextCursor();
+            $cursor = $paginator->generateNextCursorOrNull();
         } while ($cursor !== null);
     }
 

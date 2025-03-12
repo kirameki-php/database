@@ -388,7 +388,7 @@ final class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
         $query->insertInto('User')->values([['id' => 1], ['id' => 2], ['id' => 3]])->execute();
         $paginator = $query->select()->from('User')->orderBy('id')->cursorPaginate(2);
         $this->assertInstanceOf(CursorPaginator::class, $paginator);
-        $this->assertSame(['id' => 2], $paginator->generateNextCursor()?->parameters);
+        $this->assertSame(['id' => 2], $paginator->generateNextCursorOrNull()?->parameters);
     }
 
     public function test_cursorPaginate__with__invalid_size(): void

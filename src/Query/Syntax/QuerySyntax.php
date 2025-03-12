@@ -52,6 +52,7 @@ use function array_push;
 use function assert;
 use function count;
 use function current;
+use function dump;
 use function explode;
 use function implode;
 use function is_bool;
@@ -949,7 +950,7 @@ abstract class QuerySyntax extends Syntax
     protected function formatTagsForLogs(Tags $tags): string
     {
         $fields = Arr::map($tags, static fn(mixed $v, string $k) => rawurlencode($k) . '=' . rawurlencode((string) $v));
-        return $this->asBlockComment($this->asCsv($fields));
+        return $this->asBlockComment(implode(',', $fields));
     }
 
     /**

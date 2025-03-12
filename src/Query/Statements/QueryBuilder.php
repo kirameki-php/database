@@ -23,6 +23,7 @@ abstract class QueryBuilder
 
     /**
      * Do a deep clone of object types
+     *
      * @return void
      */
     public function __clone()
@@ -56,6 +57,11 @@ abstract class QueryBuilder
         return $this->addWithDefinition($name, true);
     }
 
+    /**
+     * @param string $name
+     * @param bool $recursive
+     * @return WithBuilder
+     */
     protected function addWithDefinition(string $name, bool $recursive): WithBuilder
     {
         $builder = new WithBuilder($this->handler, $name, $recursive);

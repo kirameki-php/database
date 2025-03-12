@@ -2,6 +2,8 @@
 
 namespace Kirameki\Database\Query\Statements;
 
+use Kirameki\Database\Raw;
+
 class RawCondition extends Condition
 {
     /**
@@ -9,6 +11,6 @@ class RawCondition extends Condition
      */
     public function __construct(string $value)
     {
-        parent::__construct($value);
+        parent::__construct(new Raw($value));
     }
 }

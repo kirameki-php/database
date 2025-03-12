@@ -6,6 +6,7 @@ use Kirameki\Core\Exceptions\InvalidArgumentException;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Query\Statements\Bounds;
 use Kirameki\Database\Query\Statements\ConditionBuilder;
+use Kirameki\Database\Query\Statements\NestedCondition;
 use Kirameki\Database\Query\Statements\RawCondition;
 use Kirameki\Database\Query\Statements\WhereBuilder;
 use Kirameki\Database\Query\Statements\FilteringCondition;
@@ -23,7 +24,7 @@ class WhereBuilderTest extends QueryTestCase
     public function test_where__with_zero_args(): void
     {
         $this->expectException(LogicException::class);
-        $this->expectExceptionMessage('Invalid number of arguments. Expected: <= 2. Got: 0');
+        $this->expectExceptionMessage('Invalid number of arguments. Expected: <= 3. Got: 0');
         $this->connect()->query()->select()->from('t')->where();
     }
 
@@ -34,7 +35,7 @@ class WhereBuilderTest extends QueryTestCase
         $select->where('id', 1);
 
         $it = $query->select()->where($select->statement->where);
-        $this->assertSame($select, $it);
+        $this->assertNotSame($select, $it);
 
         $def = $it->statement->where;
         $this->assertInstanceOf(FilteringCondition::class, $def);
@@ -43,7 +44,6 @@ class WhereBuilderTest extends QueryTestCase
         $this->assertSame(Operator::Equals, $def->operator);
         $this->assertNull($def->logic);
         $this->assertNull($def->next);
-        $this->assertSame(0, $def->nestLevel);
     }
 
     public function test_where__with_1_arg__closure(): void
@@ -58,42 +58,40 @@ class WhereBuilderTest extends QueryTestCase
         $this->assertSame('id', $def->column);
         $this->assertSame(1, $def->value);
         $this->assertSame(Operator::Equals, $def->operator);
-        $this->assertNull($def->logic);
-        $this->assertInstanceOf(FilteringCondition::class, $def->next);
-        $this->assertSame(0, $def->nestLevel);
-
-        $def = $def->next;
-        $this->assertInstanceOf(FilteringCondition::class, $def);
-        $this->assertSame('id', $def->column);
-        $this->assertSame(2, $def->value);
-        $this->assertSame(Operator::Equals, $def->operator);
         $this->assertSame(Logic::And, $def->logic);
-        $this->assertInstanceOf(FilteringCondition::class, $def->next);
-        $this->assertSame(1, $def->nestLevel);
+        $this->assertInstanceOf(NestedCondition::class, $def->next);
 
         $def = $def->next;
-        $this->assertInstanceOf(FilteringCondition::class, $def);
-        $this->assertSame('id', $def->column);
-        $this->assertSame(3, $def->value);
-        $this->assertSame(Operator::Equals, $def->operator);
-        $this->assertSame(Logic::Or, $def->logic);
+        $cond = $def->value;
+        $this->assertInstanceOf(NestedCondition::class, $def);
+        $this->assertInstanceOf(FilteringCondition::class, $cond);
+        $this->assertSame('id', $cond->column);
+        $this->assertSame(2, $cond->value);
+        $this->assertSame(Operator::Equals, $cond->operator);
+        $this->assertSame(Logic::Or, $cond->logic);
         $this->assertInstanceOf(FilteringCondition::class, $def->next);
-        $this->assertSame(1, $def->nestLevel);
+
+        $cond = $cond->next;
+        $this->assertInstanceOf(FilteringCondition::class, $cond);
+        $this->assertSame('id', $cond->column);
+        $this->assertSame(3, $cond->value);
+        $this->assertSame(Operator::Equals, $cond->operator);
+        $this->assertNull($cond->logic);
+        $this->assertNull($cond->next);
 
         $def = $def->next;
         $this->assertInstanceOf(FilteringCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame(4, $def->value);
         $this->assertSame(Operator::Equals, $def->operator);
-        $this->assertSame(Logic::And, $def->logic);
+        $this->assertNull($def->logic);
         $this->assertNull($def->next);
-        $this->assertSame(0, $def->nestLevel);
     }
 
     public function test_where__with_one_arg__invalid(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Expected: Closure|ConditionDefinition. Got: string.');
+        $this->expectExceptionMessage('Expected: Condition|ConditionBuilder|Closure. Got: string.');
         $query = $this->connect()->query()->select()->from('t');
         $query->where('id');
     }
@@ -333,12 +331,12 @@ class WhereBuilderTest extends QueryTestCase
         $this->assertSame('id', $def->column);
         $this->assertSame(1, $def->value);
         $this->assertSame(Operator::Equals, $def->operator);
-        $this->assertNull($def->logic);
+        $this->assertSame(Logic::And, $def->logic);
         $this->assertInstanceOf(FilteringCondition::class, $def->next);
         $this->assertSame('name', $def->next->column);
         $this->assertSame('a', $def->next->value);
         $this->assertSame(Operator::NotEquals, $def->next->operator);
-        $this->assertSame(Logic::And, $def->next->logic);
+        $this->assertNull($def->next->logic);
     }
 
     public function test_whereRaw__with_string(): void
@@ -346,7 +344,8 @@ class WhereBuilderTest extends QueryTestCase
         $query = $this->connect()->query()->select()->from('t');
         $def = $query->whereRaw('id = 1')->statement->where;
         $this->assertInstanceOf(RawCondition::class, $def);
-        $this->assertIsString($def->value);
+        $this->assertInstanceOf(Raw::class, $def->value);
+        $this->assertSame('id = 1', $def->value->value);
     }
 
     public function test_raw__with_expression(): void

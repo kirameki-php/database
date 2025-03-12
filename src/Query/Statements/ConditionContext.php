@@ -4,6 +4,10 @@ namespace Kirameki\Database\Query\Statements;
 
 class ConditionContext
 {
+    /**
+     * @param Condition|null $root
+     * @param Condition|null $latest
+     */
     public function __construct(
         public ?Condition $root = null,
         public ?Condition $latest = null,
@@ -25,12 +29,21 @@ class ConditionContext
         }
     }
 
+    /**
+     * @param Logic $Logic
+     * @param Condition $condition
+     * @return void
+     */
     public function apply(Logic $Logic, Condition $condition): void
     {
         $this->setRootOnce($condition);
         $this->updateLatest($Logic, $condition);
     }
 
+    /**
+     * @param Condition $condition
+     * @return void
+     */
     protected function setRootOnce(Condition $condition): void
     {
         if ($this->root === null) {
@@ -39,6 +52,7 @@ class ConditionContext
     }
 
     /**
+     * @param Logic $logic
      * @param Condition $condition
      * @return void
      */

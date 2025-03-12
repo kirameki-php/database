@@ -49,9 +49,9 @@ class Cursor
 
     /**
      * @param object $next
-     * @return static|null
+     * @return static
      */
-    public function toNext(object $next): ?static
+    public function toNext(object $next): static
     {
         $columns = array_keys($this->parameters);
         $parameters = static::extractParameters($columns, $next);

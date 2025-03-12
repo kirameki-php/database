@@ -3,10 +3,7 @@
 namespace Kirameki\Database\Query\Statements;
 
 use Kirameki\Database\Query\Expressions\Column;
-use Kirameki\Database\Raw;
-use function assert;
-use function count;
-use function key;
+use function array_key_last;
 
 /**
  * @template TConditionStatement of ConditionStatement
@@ -55,7 +52,7 @@ abstract class WhereBuilder extends QueryBuilder
      */
     public function where(mixed ...$args): static
     {
-        $this->linkCondition($this->whereContext, Logic::And, $args);
+        $this->applyCondition($this->whereContext, Logic::And, $args);
         $this->statement->where ??= $this->whereContext->root;
         return $this;
     }
@@ -70,8 +67,7 @@ abstract class WhereBuilder extends QueryBuilder
      */
     public function whereColumn(string $column, string ...$args): static
     {
-        assert(count($args) === 1);
-        $key = key($args);
+        $key = array_key_last($args);
         $args[$key] = new Column($args[$key]);
         return $this->where($column, ...$args);
     }

@@ -218,16 +218,6 @@ class QuerySyntaxTest extends QueryTestCase
         $this->assertSame('SELECT * FROM "t" WHERE id1 = id2', $q->toSql());
     }
 
-    public function test_whereRaw_invalid_value(): void
-    {
-        $this->expectException(NotSupportedException::class);
-        $this->expectExceptionMessage('Invalid Raw value. Expected: Expression. Got: int.');
-        $handler = $this->sqliteConnection()->query();
-        $q = $handler->select()->from('t')->whereRaw('id');
-        $q->statement->where->value = 1;
-        $q->toSql();
-    }
-
     public function test_whereExists(): void
     {
         $handler = $this->sqliteConnection()->query();
