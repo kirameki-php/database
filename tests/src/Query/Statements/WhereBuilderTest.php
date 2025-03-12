@@ -10,7 +10,7 @@ use Kirameki\Database\Query\Statements\ConditionBuilder;
 use Kirameki\Database\Query\Statements\NestedCondition;
 use Kirameki\Database\Query\Statements\RawCondition;
 use Kirameki\Database\Query\Statements\WhereBuilder;
-use Kirameki\Database\Query\Statements\FilteringCondition;
+use Kirameki\Database\Query\Statements\ComparingCondition;
 use Kirameki\Database\Query\Statements\Logic;
 use Kirameki\Database\Query\Statements\Operator;
 use Kirameki\Database\Raw;
@@ -39,7 +39,7 @@ class WhereBuilderTest extends QueryTestCase
         $this->assertNotSame($select, $it);
 
         $def = $it->statement->where;
-        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertInstanceOf(ComparingCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame(1, $def->value);
         $this->assertSame(Operator::Equals, $def->operator);
@@ -55,7 +55,7 @@ class WhereBuilderTest extends QueryTestCase
         $query->where('id', 4);
 
         $def = $query->statement->where;
-        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertInstanceOf(ComparingCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame(1, $def->value);
         $this->assertSame(Operator::Equals, $def->operator);
@@ -65,15 +65,15 @@ class WhereBuilderTest extends QueryTestCase
         $def = $def->next;
         $cond = $def->value;
         $this->assertInstanceOf(NestedCondition::class, $def);
-        $this->assertInstanceOf(FilteringCondition::class, $cond);
+        $this->assertInstanceOf(ComparingCondition::class, $cond);
         $this->assertSame('id', $cond->column);
         $this->assertSame(2, $cond->value);
         $this->assertSame(Operator::Equals, $cond->operator);
         $this->assertSame(Logic::Or, $cond->logic);
-        $this->assertInstanceOf(FilteringCondition::class, $def->next);
+        $this->assertInstanceOf(ComparingCondition::class, $def->next);
 
         $cond = $cond->next;
-        $this->assertInstanceOf(FilteringCondition::class, $cond);
+        $this->assertInstanceOf(ComparingCondition::class, $cond);
         $this->assertSame('id', $cond->column);
         $this->assertSame(3, $cond->value);
         $this->assertSame(Operator::Equals, $cond->operator);
@@ -81,7 +81,7 @@ class WhereBuilderTest extends QueryTestCase
         $this->assertNull($cond->next);
 
         $def = $def->next;
-        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertInstanceOf(ComparingCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame(4, $def->value);
         $this->assertSame(Operator::Equals, $def->operator);
@@ -101,7 +101,7 @@ class WhereBuilderTest extends QueryTestCase
     {
         $query = $this->connect()->query()->select()->from('t');
         $def = $query->where(lt: 1, column: 'id')->statement->where;
-        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertInstanceOf(ComparingCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame(1, $def->value);
         $this->assertSame(Operator::LessThan, $def->operator);
@@ -119,7 +119,7 @@ class WhereBuilderTest extends QueryTestCase
     {
         $query = $this->connect()->query()->select()->from('t');
         $def = $query->where('id', 1)->statement->where;
-        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertInstanceOf(ComparingCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame(1, $def->value);
         $this->assertSame(Operator::Equals, $def->operator);
@@ -129,7 +129,7 @@ class WhereBuilderTest extends QueryTestCase
     {
         $query = $this->connect()->query()->select()->from('t');
         $def = $query->where('id', [1, 2, 3])->statement->where;
-        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertInstanceOf(ComparingCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame([1, 2, 3], $def->value);
         $this->assertSame(Operator::In, $def->operator);
@@ -140,7 +140,7 @@ class WhereBuilderTest extends QueryTestCase
         $bounds = Bounds::excluded(1, 10);
         $query = $this->connect()->query()->select()->from('t');
         $def = $query->where('id', $bounds)->statement->where;
-        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertInstanceOf(ComparingCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame($bounds, $def->value);
         $this->assertSame(Operator::InRange, $def->operator);
@@ -150,7 +150,7 @@ class WhereBuilderTest extends QueryTestCase
     {
         $query = $this->connect()->query()->select()->from('t');
         $def = $query->where('id', not: 1)->statement->where;
-        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertInstanceOf(ComparingCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame(1, $def->value);
         $this->assertSame(Operator::NotEquals, $def->operator);
@@ -160,7 +160,7 @@ class WhereBuilderTest extends QueryTestCase
     {
         $query = $this->connect()->query()->select()->from('t');
         $def = $query->where('id', not: [1, 2, 3])->statement->where;
-        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertInstanceOf(ComparingCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame([1, 2, 3], $def->value);
         $this->assertSame(Operator::NotIn, $def->operator);
@@ -171,7 +171,7 @@ class WhereBuilderTest extends QueryTestCase
         $bounds = Bounds::excluded(1, 10);
         $query = $this->connect()->query()->select()->from('t');
         $def = $query->where('id', not: $bounds)->statement->where;
-        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertInstanceOf(ComparingCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame($bounds, $def->value);
         $this->assertSame(Operator::NotInRange, $def->operator);
@@ -181,7 +181,7 @@ class WhereBuilderTest extends QueryTestCase
     {
         $query = $this->connect()->query()->select()->from('t');
         $def = $query->where('id', lt: 1)->statement->where;
-        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertInstanceOf(ComparingCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame(1, $def->value);
         $this->assertSame(Operator::LessThan, $def->operator);
@@ -191,7 +191,7 @@ class WhereBuilderTest extends QueryTestCase
     {
         $query = $this->connect()->query()->select()->from('t');
         $def = $query->where('id', lte: 1)->statement->where;
-        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertInstanceOf(ComparingCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame(1, $def->value);
         $this->assertSame(Operator::LessThanOrEqualTo, $def->operator);
@@ -201,7 +201,7 @@ class WhereBuilderTest extends QueryTestCase
     {
         $query = $this->connect()->query()->select()->from('t');
         $def = $query->where('id', gt: 1)->statement->where;
-        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertInstanceOf(ComparingCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame(1, $def->value);
         $this->assertSame(Operator::GreaterThan, $def->operator);
@@ -211,7 +211,7 @@ class WhereBuilderTest extends QueryTestCase
     {
         $query = $this->connect()->query()->select()->from('t');
         $def = $query->where('id', gte: 1)->statement->where;
-        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertInstanceOf(ComparingCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame(1, $def->value);
         $this->assertSame(Operator::GreaterThanOrEqualTo, $def->operator);
@@ -221,7 +221,7 @@ class WhereBuilderTest extends QueryTestCase
     {
         $query = $this->connect()->query()->select()->from('t');
         $def = $query->where('id', in: [1, 2, 3])->statement->where;
-        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertInstanceOf(ComparingCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame([1, 2, 3], $def->value);
         $this->assertSame(Operator::In, $def->operator);
@@ -231,7 +231,7 @@ class WhereBuilderTest extends QueryTestCase
     {
         $query = $this->connect()->query()->select()->from('t');
         $def = $query->where('id', notIn: [1, 2, 3])->statement->where;
-        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertInstanceOf(ComparingCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame([1, 2, 3], $def->value);
         $this->assertSame(Operator::NotIn, $def->operator);
@@ -241,7 +241,7 @@ class WhereBuilderTest extends QueryTestCase
     {
         $query = $this->connect()->query()->select()->from('t');
         $def = $query->where('id', between: [1, 10])->statement->where;
-        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertInstanceOf(ComparingCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame([1, 10], $def->value);
         $this->assertSame(Operator::Between, $def->operator);
@@ -251,7 +251,7 @@ class WhereBuilderTest extends QueryTestCase
     {
         $query = $this->connect()->query()->select()->from('t');
         $def = $query->where('id', notBetween: [1, 10])->statement->where;
-        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertInstanceOf(ComparingCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame([1, 10], $def->value);
         $this->assertSame(Operator::NotBetween, $def->operator);
@@ -261,7 +261,7 @@ class WhereBuilderTest extends QueryTestCase
     {
         $query = $this->connect()->query()->select()->from('t');
         $def = $query->where('name', like: 'John%')->statement->where;
-        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertInstanceOf(ComparingCondition::class, $def);
         $this->assertSame('name', $def->column);
         $this->assertSame('John%', $def->value);
         $this->assertSame(Operator::Like, $def->operator);
@@ -271,7 +271,7 @@ class WhereBuilderTest extends QueryTestCase
     {
         $query = $this->connect()->query()->select()->from('t');
         $def = $query->where('name', notLike: 'John%')->statement->where;
-        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertInstanceOf(ComparingCondition::class, $def);
         $this->assertSame('name', $def->column);
         $this->assertSame('John%', $def->value);
         $this->assertSame(Operator::NotLike, $def->operator);
@@ -288,7 +288,7 @@ class WhereBuilderTest extends QueryTestCase
     {
         $query = $this->connect()->query()->select()->from('t');
         $def = $query->where('id', Operator::NotEquals, 2)->statement->where;
-        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertInstanceOf(ComparingCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame(2, $def->value);
         $this->assertSame(Operator::NotEquals, $def->operator);
@@ -308,7 +308,7 @@ class WhereBuilderTest extends QueryTestCase
         $expr = new Raw('id');
         $query = $this->connect()->query()->select()->from('t');
         $def = $query->where($expr, 1)->statement->where;
-        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertInstanceOf(ComparingCondition::class, $def);
         $this->assertSame($expr, $def->column);
         $this->assertSame(1, $def->value);
         $this->assertSame(Operator::Equals, $def->operator);
@@ -318,7 +318,7 @@ class WhereBuilderTest extends QueryTestCase
     {
         $query = $this->connect()->query()->select()->from('t');
         $def = $query->where(['a', 'b'], Operator::LessThan, 1)->statement->where;
-        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertInstanceOf(ComparingCondition::class, $def);
         $this->assertSame(['a', 'b'], $def->column);
         $this->assertSame(1, $def->value);
         $this->assertSame(Operator::LessThan, $def->operator);
@@ -328,12 +328,12 @@ class WhereBuilderTest extends QueryTestCase
     {
         $query = $this->connect()->query()->select()->from('t');
         $def = $query->where('id', 1)->where('name', not: 'a')->statement->where;
-        $this->assertInstanceOf(FilteringCondition::class, $def);
+        $this->assertInstanceOf(ComparingCondition::class, $def);
         $this->assertSame('id', $def->column);
         $this->assertSame(1, $def->value);
         $this->assertSame(Operator::Equals, $def->operator);
         $this->assertSame(Logic::And, $def->logic);
-        $this->assertInstanceOf(FilteringCondition::class, $def->next);
+        $this->assertInstanceOf(ComparingCondition::class, $def->next);
         $this->assertSame('name', $def->next->column);
         $this->assertSame('a', $def->next->value);
         $this->assertSame(Operator::NotEquals, $def->next->operator);

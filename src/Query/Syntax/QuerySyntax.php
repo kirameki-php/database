@@ -19,7 +19,7 @@ use Kirameki\Database\Query\Expressions\QueryFunction;
 use Kirameki\Database\Query\Statements\Bounds;
 use Kirameki\Database\Query\Statements\CheckingCondition;
 use Kirameki\Database\Query\Statements\Compound;
-use Kirameki\Database\Query\Statements\FilteringCondition;
+use Kirameki\Database\Query\Statements\ComparingCondition;
 use Kirameki\Database\Query\Statements\ConditionStatement;
 use Kirameki\Database\Query\Statements\Dataset;
 use Kirameki\Database\Query\Statements\DeleteStatement;
@@ -564,7 +564,7 @@ abstract class QuerySyntax extends Syntax
         $parts = [];
         do {
             $part = match(true) {
-                $def instanceof FilteringCondition => $this->formatConditionSegment($def),
+                $def instanceof ComparingCondition => $this->formatConditionSegment($def),
                 $def instanceof NestedCondition => $this->formatNestedConditionSegment($def),
                 $def instanceof CheckingCondition => $this->formatConditionForExists($def),
                 $def instanceof RawCondition => $this->formatConditionForRaw($def),
@@ -584,10 +584,10 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param FilteringCondition $def
+     * @param ComparingCondition $def
      * @return string
      */
-    protected function formatConditionSegment(FilteringCondition $def): string
+    protected function formatConditionSegment(ComparingCondition $def): string
     {
         return match ($def->operator) {
             Operator::Equals,
@@ -646,10 +646,10 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param FilteringCondition $def
+     * @param ComparingCondition $def
      * @return string
      */
-    protected function formatConditionForEquals(FilteringCondition $def): string
+    protected function formatConditionForEquals(ComparingCondition $def): string
     {
         return $def->value !== null
             ? $this->formatConditionForOperator($def)
@@ -657,10 +657,10 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param FilteringCondition $def
+     * @param ComparingCondition $def
      * @return string
      */
-    protected function formatConditionForIn(FilteringCondition $def): string
+    protected function formatConditionForIn(ComparingCondition $def): string
     {
         $column = $this->asColumn($def->column);
         $operator = $def->operator->value;
@@ -685,10 +685,10 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param FilteringCondition $def
+     * @param ComparingCondition $def
      * @return string
      */
-    protected function formatConditionForBetween(FilteringCondition $def): string
+    protected function formatConditionForBetween(ComparingCondition $def): string
     {
         if (is_countable($def->value) && count($def->value) !== 2) {
             throw new InvalidArgumentException('Expected: 2 values for BETWEEN condition. Got: ' . count($def->value) . '.', [
@@ -706,10 +706,10 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param FilteringCondition $def
+     * @param ComparingCondition $def
      * @return string
      */
-    protected function formatConditionForRange(FilteringCondition $def): string
+    protected function formatConditionForRange(ComparingCondition $def): string
     {
         $column = $this->asColumn($def->column);
         $negated = $def->operator === Operator::NotInRange;
@@ -735,10 +735,10 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param FilteringCondition $def
+     * @param ComparingCondition $def
      * @return string
      */
-    protected function formatConditionForOperator(FilteringCondition $def): string
+    protected function formatConditionForOperator(ComparingCondition $def): string
     {
         if (is_iterable($def->column) && is_iterable($def->value)) {
             return $this->formatConditionForTupleComparison($def);
@@ -751,7 +751,7 @@ abstract class QuerySyntax extends Syntax
         ]);
     }
 
-    protected function formatConditionForTupleComparison(FilteringCondition $def): string
+    protected function formatConditionForTupleComparison(ComparingCondition $def): string
     {
         assert(is_iterable($def->column));
         assert(is_iterable($def->value));
@@ -764,10 +764,10 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param FilteringCondition $def
+     * @param ComparingCondition $def
      * @return string
      */
-    protected function formatConditionForNull(FilteringCondition $def): string
+    protected function formatConditionForNull(ComparingCondition $def): string
     {
         return $this->asColumn($def->column) . match ($def->operator) {
             Operator::Equals => ' IS NULL',

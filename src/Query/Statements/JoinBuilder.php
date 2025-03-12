@@ -27,9 +27,9 @@ class JoinBuilder
     }
 
     /**
-     * @var FilteringCondition|null
+     * @var ComparingCondition|null
      */
-    protected ?FilteringCondition $condition = null;
+    protected ?ComparingCondition $condition = null;
 
     /**
      * @param JoinType $type

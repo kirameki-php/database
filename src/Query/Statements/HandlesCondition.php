@@ -70,9 +70,9 @@ trait HandlesCondition
 
     /**
      * @param array<mixed> $args
-     * @return FilteringCondition
+     * @return ComparingCondition
      */
-    protected function createConditionFromTwoArgs(array $args): FilteringCondition
+    protected function createConditionFromTwoArgs(array $args): ComparingCondition
     {
         assert(count($args) <= 2, 'Missing column parameter');
 
@@ -127,13 +127,13 @@ trait HandlesCondition
      * @param string|iterable<int, string>|Expression $column
      * @param Operator $operator
      * @param mixed $value
-     * @return FilteringCondition
+     * @return ComparingCondition
      */
     protected function createConditionThreeArgs(
         string|iterable|Expression $column,
         string|Operator $operator,
         mixed $value,
-    ): FilteringCondition
+    ): ComparingCondition
     {
         if (is_string($operator)) {
             $operator = Operator::from(strtoupper($operator));
@@ -143,7 +143,7 @@ trait HandlesCondition
             $value = $value->statement;
         }
 
-        return new FilteringCondition($column, $operator, $value);
+        return new ComparingCondition($column, $operator, $value);
     }
 
     /**

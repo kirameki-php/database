@@ -4,7 +4,7 @@ namespace Kirameki\Database\Query\Pagination;
 
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\LogicException;
-use Kirameki\Database\Query\Statements\FilteringCondition;
+use Kirameki\Database\Query\Statements\ComparingCondition;
 use Kirameki\Database\Query\Statements\Operator;
 use Kirameki\Database\Query\Statements\SelectBuilder;
 use Kirameki\Database\Query\Statements\SelectStatement;
@@ -70,7 +70,7 @@ class Cursor
         $values = array_values($parameters);
         $operator = $this->getOperator($builder->statement);
 
-        $builder->where(new FilteringCondition($columns, $operator, $values));
+        $builder->where(new ComparingCondition($columns, $operator, $values));
 
         return $this;
     }

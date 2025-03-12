@@ -4,7 +4,7 @@ namespace Kirameki\Database\Query\Statements;
 
 use Kirameki\Database\Expression;
 
-class FilteringCondition extends Condition
+class ComparingCondition extends Condition
 {
     /**
      * @param string|iterable<int, string>|Expression $column
