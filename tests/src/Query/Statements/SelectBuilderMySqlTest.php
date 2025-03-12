@@ -206,19 +206,19 @@ final class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
         $this->assertSame("SELECT * FROM `User` WHERE (`id`, `status`) IN ((1, 1), (2, 3))", $sql);
     }
 
-    public function test_and__from_two_wheres(): void
+    public function test_where__and__from_two_wheres(): void
     {
         $sql = $this->selectBuilder()->from('User')->where('id', 1)->where('status', not: 0)->toSql();
         $this->assertSame("SELECT * FROM `User` WHERE `id` = 1 AND `status` != 0", $sql);
     }
 
-    public function test_or(): void
+    public function test_where__or(): void
     {
         $sql = $this->selectBuilder()->from('User')->where(fn(ConditionBuilder $q) => $q('id', 1)->or('status', 0))->toSql();
         $this->assertSame("SELECT * FROM `User` WHERE (`id` = 1 OR `status` = 0)", $sql);
     }
 
-    public function test_and_or(): void
+    public function test_where__and_plus_or(): void
     {
         $sql = $this->selectBuilder()->from('User')
             ->where('id', 1)
@@ -227,7 +227,7 @@ final class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
         $this->assertSame("SELECT * FROM `User` WHERE `id` = 1 AND (`status` = 0 OR `name` = \"John\")", $sql);
     }
 
-    public function test_and__with_nested_or(): void
+    public function test_where__and__with_nested_or(): void
     {
         $sql = $this->selectBuilder()->from('User')
             ->where(static fn(ConditionBuilder $q) => $q->or('status', 1)->or('status', 2))

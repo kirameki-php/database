@@ -59,13 +59,13 @@ abstract class SelectBuilderTestAbstract extends QueryTestCase
 
     abstract public function test_where__tuple(): void;
 
-    abstract public function test_and__from_two_wheres(): void;
+    abstract public function test_where__and__from_two_wheres(): void;
 
-    abstract public function test_or(): void;
+    abstract public function test_where__or(): void;
 
-    abstract public function test_and_or(): void;
+    abstract public function test_where__and_plus_or(): void;
 
-    abstract public function test_and__with_nested_or(): void;
+    abstract public function test_where__and__with_nested_or(): void;
 
     abstract public function test_orderBy(): void;
 

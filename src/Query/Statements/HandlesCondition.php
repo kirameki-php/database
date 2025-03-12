@@ -25,7 +25,7 @@ trait HandlesCondition
      */
     protected function applyCondition(ConditionContext $context, Logic $logic, array $args): void
     {
-        $condition = $this->createConditionOrNull($args);
+        $condition = $this->tryCreatingCondition($args);
 
         if ($condition !== null) {
             $context->apply($logic, $condition);
@@ -36,12 +36,12 @@ trait HandlesCondition
      * @param array<mixed> $args
      * @return Condition|null
      */
-    protected function createConditionOrNull(array $args): ?Condition
+    protected function tryCreatingCondition(array $args): ?Condition
     {
         $num = count($args);
 
         return match ($num) {
-            1 => $this->createConditionFromSingle($args),
+            1 => $this->createConditionFromOneArg($args),
             2 => $this->createConditionFromTwoArgs($args),
             3 => $this->createConditionThreeArgs(...$args),
             default => throw new LogicException("Invalid number of arguments. Expected: <= 3. Got: {$num}.", [
@@ -54,7 +54,7 @@ trait HandlesCondition
      * @param array<mixed> $args
      * @return Condition|null
      */
-    protected function createConditionFromSingle(array $args): ?Condition
+    protected function createConditionFromOneArg(array $args): ?Condition
     {
         $value = $args[0];
 
@@ -166,7 +166,7 @@ trait HandlesCondition
         $root = null;
         $current = null;
         foreach ($builder->entries as $entry) {
-            $condition = $this->createConditionOrNull($entry['args']);
+            $condition = $this->tryCreatingCondition($entry['args']);
             $root ??= $condition;
             if ($current !== null) {
                 $current->logic = $entry['logic'];

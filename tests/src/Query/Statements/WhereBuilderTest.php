@@ -5,6 +5,7 @@ namespace Tests\Kirameki\Database\Query\Statements;
 use Kirameki\Core\Exceptions\InvalidArgumentException;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Query\Statements\Bounds;
+use Kirameki\Database\Query\Statements\CheckingCondition;
 use Kirameki\Database\Query\Statements\ConditionBuilder;
 use Kirameki\Database\Query\Statements\NestedCondition;
 use Kirameki\Database\Query\Statements\RawCondition;
@@ -339,7 +340,7 @@ class WhereBuilderTest extends QueryTestCase
         $this->assertNull($def->next->logic);
     }
 
-    public function test_whereRaw__with_string(): void
+    public function test_whereRaw(): void
     {
         $query = $this->connect()->query()->select()->from('t');
         $def = $query->whereRaw('id = 1')->statement->where;
@@ -348,290 +349,158 @@ class WhereBuilderTest extends QueryTestCase
         $this->assertSame('id = 1', $def->value->value);
     }
 
-    public function test_raw__with_expression(): void
-    {
-        $expr = new Raw('id = 1');
-        $cond = WhereBuilder::raw($expr);
-        $def = $cond->getDefinition();
-        $this->assertSame($expr, $def->value);
-
-        $conn = $this->sqliteConnection();
-        $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE id = 1', $q->toSql());
-    }
-
-    public function test_exists(): void
+    public function test_whereExists(): void
     {
         $conn = $this->sqliteConnection();
         $subquery = $conn->query()->select('id')->from('t2');
-        $cond = WhereBuilder::exists($subquery);
-        $def = $cond->getDefinition();
-        $this->assertSame($subquery->statement, $def->value);
-        $this->assertFalse($def->negated);
-
-        $q = $conn->query()->select()->from('t')->where($cond);
+        $q = $conn->query()->select()->from('t')->whereExists($subquery);
+        $def = $q->statement->where;
+        $this->assertInstanceOf(CheckingCondition::class, $def);
+        $this->assertNotSame($subquery->statement, $def->value);
         $this->assertSame('SELECT * FROM "t" WHERE EXISTS (SELECT "id" FROM "t2")', $q->toSql());
     }
 
-    public function test_notExists(): void
+    public function test_whereNotExists(): void
     {
         $conn = $this->sqliteConnection();
         $subquery = $conn->query()->select('id')->from('t2');
-        $cond = WhereBuilder::notExists($subquery);
-        $def = $cond->getDefinition();
-        $this->assertSame($subquery->statement, $def->value);
-        $this->assertTrue($def->negate);
-
-        $q = $conn->query()->select()->from('t')->where($cond);
+        $q = $conn->query()->select()->from('t')->whereNotExists($subquery);
+        $def = $q->statement->where;
+        $this->assertInstanceOf(CheckingCondition::class, $def);
+        $this->assertNotSame($subquery->statement, $def->value);
         $this->assertSame('SELECT * FROM "t" WHERE NOT EXISTS (SELECT "id" FROM "t2")', $q->toSql());
     }
 
     public function test___clone(): void
     {
-        $current = WhereBuilder::for('id')->equals(1);
-        $next = $current->or()->equals(2);
-        $cloned = clone $current;
-        $this->assertNotSame($current, $cloned);
+        $conn = $this->sqliteConnection();
+        $query = $conn->query()->select('id')->from('t2')->where('id', 1);
+        $cloned = clone $query;
+        $next = $query->where('id', 2);
+        $this->assertSame($query, $next);
+        $this->assertSame($query->statement, $next->statement);
+        $this->assertNotSame($query, $cloned);
+        $this->assertNotSame($query->statement, $cloned->statement);
         $this->assertNotSame($next, $cloned);
-        $this->assertNotSame($current->getDefinition(), $cloned->getDefinition());
-        $this->assertNotSame($next->getDefinition(), $cloned->getDefinition());
-        $this->assertSame($current->getDefinition()->column, $cloned->getDefinition()->column);
-        $this->assertSame($current->getDefinition()->value, $cloned->getDefinition()->value);
-        $this->assertSame($current->getDefinition()->operator, $cloned->getDefinition()->operator);
-        $this->assertSame($current->getDefinition()->negated, $cloned->getDefinition()->negated);
-        $this->assertSame(2, $cloned->getDefinition()->next?->value);
-        $this->assertSame($current->getDefinition()->column, $cloned->getDefinition()->next->column);
-        $this->assertNull($cloned->getDefinition()->next->next);
+        $this->assertNotSame($next->statement, $cloned->statement);
     }
 
-    public function test_and__without_column(): void
+    public function test_where__equals__with_scalar_value(): void
     {
         $conn = $this->sqliteConnection();
-        $current = WhereBuilder::for('id')->equals(1);
-        $def = $current->getDefinition();
-        $next = $current->and()->equals(2);
-        $this->assertSame($current, $next);
-
-        $next = $def->next;
-        $this->assertNotNull($next);
-        $this->assertSame('id', $next->column);
-        $this->assertSame(2, $next->value);
-        $this->assertSame(Operator::Equals, $next->operator);
-        $this->assertFalse($next->negated);
-        $this->assertSame(Logic::And, $def->nextLogic);
-
-        $q = $conn->query()->select()->from('t')->where($current);
-        $this->assertSame('SELECT * FROM "t" WHERE ("id" = 1 AND "id" = 2)', $q->toSql());
-    }
-
-    public function test_and__with_column(): void
-    {
-        $conn = $this->sqliteConnection();
-        $current = WhereBuilder::for('id')->equals(1);
-        $next = $current->and('name')->equals('a');
-        $this->assertSame($current, $next);
-
-        $q = $conn->query()->select()->from('t')->where($current);
-        $this->assertSame('SELECT * FROM "t" WHERE ("id" = 1 AND "name" = \'a\')', $q->toSql());
-    }
-
-    public function test_or__without_column(): void
-    {
-        $conn = $this->sqliteConnection();
-        $current = WhereBuilder::for('id')->equals(1);
-        $def = $current->getDefinition();
-        $next = $current->or()->equals(2);
-        $this->assertSame($current, $next);
-
-        $next = $def->next;
-        $this->assertNotNull($next);
-        $this->assertSame('id', $next->column);
-        $this->assertSame(2, $next->value);
-        $this->assertSame(Operator::Equals, $next->operator);
-        $this->assertFalse($next->negated);
-        $this->assertSame(Logic::Or, $def->nextLogic);
-
-        $q = $conn->query()->select()->from('t')->where($current);
-        $this->assertSame('SELECT * FROM "t" WHERE ("id" = 1 OR "id" = 2)', $q->toSql());
-    }
-
-    public function test_and_or_multi_define(): void
-    {
-        $conn = $this->sqliteConnection();
-        $current = WhereBuilder::for('id')->equals(1)
-            ->and()->greaterThan(2)
-            ->or()->lessThan(3);
-
-        $q = $conn->query()->select()->from('t')->where($current);
-        $this->assertSame('SELECT * FROM "t" WHERE ("id" = 1 AND "id" > 2 OR "id" < 3)', $q->toSql());
-    }
-
-    public function test_equals__with_scalar(): void
-    {
-        $conn = $this->sqliteConnection();
-        $cond = WhereBuilder::for('b')->equals(true);
-        $def = $cond->getDefinition();
-        $this->assertSame('b', $def->column);
-        $this->assertTrue($def->value);
-        $this->assertSame(Operator::Equals, $def->operator);
-        $this->assertFalse($def->negated);
-
-        $q = $conn->query()->select()->from('t')->where($cond);
+        $q = $conn->query()->select()->from('t')->where('b', true);
         $this->assertSame('SELECT * FROM "t" WHERE "b" = TRUE', $q->toSql());
     }
 
-    public function test_equals__with_iterable_and_fail(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Iterable should use in(iterable $iterable) method.');
-        WhereBuilder::for('b')->equals([1, 2]);
-    }
-
-    public function test_notEquals(): void
+    public function test_where__equals__with_iterable_as_tuple(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = WhereBuilder::for('b')->notEquals(true);
-        $def = $cond->getDefinition();
-        $this->assertSame('b', $def->column);
-        $this->assertTrue($def->value);
-        $this->assertSame(Operator::Equals, $def->operator);
-        $this->assertTrue($def->negated);
-
-        $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" != TRUE', $q->toSql());
+        $q = $conn->query()->select()->from('t')->where('b', eq: [1, 2]);
+        $this->assertSame('SELECT * FROM "t" WHERE "b" = (1, 2)', $q->toSql());
     }
 
-    public function test_greaterThanOrEquals(): void
+    public function test_where__notEquals__with_scalar_value(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = WhereBuilder::for('b')->greaterThanOrEqualTo(1);
-        $def = $cond->getDefinition();
-        $this->assertSame('b', $def->column);
-        $this->assertSame(1, $def->value);
-        $this->assertSame(Operator::GreaterThanOrEqualTo, $def->operator);
-        $this->assertFalse($def->negated);
+        $q = $conn->query()->select()->from('t')->where('b', ne: 1);
+        $this->assertSame('SELECT * FROM "t" WHERE "b" != 1', $q->toSql());
+    }
 
-        $q = $conn->query()->select()->from('t')->where($cond);
+    public function test_where__notEquals__with_iterable_as_tuple(): void
+    {
+        $conn = $this->sqliteConnection();
+        $q = $conn->query()->select()->from('t')->where(["a", "b"], ne: [1, 2]);
+        $this->assertSame('SELECT * FROM "t" WHERE ("a", "b") != (1, 2)', $q->toSql());
+    }
+
+    public function test_greaterThanOrEqualTo__with_scalar_value(): void
+    {
+        $conn = $this->sqliteConnection();
+        $q = $conn->query()->select()->from('t')->where('b', gte: 1);
         $this->assertSame('SELECT * FROM "t" WHERE "b" >= 1', $q->toSql());
     }
 
-    public function test_greaterThan(): void
+    public function test_greaterThanOrEqualTo__with_iterable_as_tuple(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = WhereBuilder::for('b')->greaterThan(1);
-        $def = $cond->getDefinition();
-        $this->assertSame('b', $def->column);
-        $this->assertSame(1, $def->value);
-        $this->assertSame(Operator::GreaterThan, $def->operator);
-        $this->assertFalse($def->negated);
+        $q = $conn->query()->select()->from('t')->where(['a', 'b'], gte: [1, 2]);
+        $this->assertSame('SELECT * FROM "t" WHERE ("a", "b") >= (1, 2)', $q->toSql());
+    }
 
-        $q = $conn->query()->select()->from('t')->where($cond);
+    public function test_greaterThan__with_scalar_value(): void
+    {
+        $conn = $this->sqliteConnection();
+        $q = $conn->query()->select()->from('t')->where('b', gt: 1);
         $this->assertSame('SELECT * FROM "t" WHERE "b" > 1', $q->toSql());
     }
 
-    public function test_lessThanOrEqualTo(): void
+    public function test_greaterThan__with_iterable_as_tuple(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = WhereBuilder::for('b')->lessThanOrEqualTo(1);
-        $def = $cond->getDefinition();
-        $this->assertSame('b', $def->column);
-        $this->assertSame(1, $def->value);
-        $this->assertSame(Operator::LessThanOrEqualTo, $def->operator);
-        $this->assertFalse($def->negated);
+        $q = $conn->query()->select()->from('t')->where(['a', 'b'], gt: [1, 2]);
+        $this->assertSame('SELECT * FROM "t" WHERE ("a", "b") > (1, 2)', $q->toSql());
+    }
 
-        $q = $conn->query()->select()->from('t')->where($cond);
+    public function test_lessThanOrEqualTo__with_scalar_value(): void
+    {
+        $conn = $this->sqliteConnection();
+        $q = $conn->query()->select()->from('t')->where('b', lte: 1);
         $this->assertSame('SELECT * FROM "t" WHERE "b" <= 1', $q->toSql());
+    }
+
+    public function test_lessThanOrEqualTo__with_iterable_as_tuple(): void
+    {
+        $conn = $this->sqliteConnection();
+        $q = $conn->query()->select()->from('t')->where(['a', 'b'], lte: [1, 2]);
+        $this->assertSame('SELECT * FROM "t" WHERE ("a", "b") <= (1, 2)', $q->toSql());
     }
 
     public function test_lessThan(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = WhereBuilder::for('b')->lessThan(1);
-        $def = $cond->getDefinition();
-        $this->assertSame('b', $def->column);
-        $this->assertSame(1, $def->value);
-        $this->assertSame(Operator::LessThan, $def->operator);
-        $this->assertFalse($def->negated);
-
-        $q = $conn->query()->select()->from('t')->where($cond);
+        $q = $conn->query()->select()->from('t')->where('b', lt: 1);
         $this->assertSame('SELECT * FROM "t" WHERE "b" < 1', $q->toSql());
     }
 
     public function test_isNull(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = WhereBuilder::for('b')->isNull();
-        $def = $cond->getDefinition();
-        $this->assertSame('b', $def->column);
-        $this->assertNull($def->value);
-        $this->assertSame(Operator::Equals, $def->operator);
-        $this->assertFalse($def->negated);
-
-        $q = $conn->query()->select()->from('t')->where($cond);
+        $q = $conn->query()->select()->from('t')->where('b', null);
         $this->assertSame('SELECT * FROM "t" WHERE "b" IS NULL', $q->toSql());
     }
 
     public function test_isNotNull(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = WhereBuilder::for('b')->isNotNull();
-        $def = $cond->getDefinition();
-        $this->assertSame('b', $def->column);
-        $this->assertNull($def->value);
-        $this->assertSame(Operator::Equals, $def->operator);
-        $this->assertTrue($def->negated);
-
-        $q = $conn->query()->select()->from('t')->where($cond);
+        $q = $conn->query()->select()->from('t')->where('b', not: null);
         $this->assertSame('SELECT * FROM "t" WHERE "b" IS NOT NULL', $q->toSql());
     }
 
     public function test_like(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = WhereBuilder::for('name')->like('John%');
-        $def = $cond->getDefinition();
-        $this->assertSame('name', $def->column);
-        $this->assertSame('John%', $def->value);
-        $this->assertSame(Operator::Like, $def->operator);
-        $this->assertFalse($def->negated);
-
-        $q = $conn->query()->select()->from('t')->where($cond);
+        $q = $conn->query()->select()->from('t')->where('name', like: 'John%');
         $this->assertSame('SELECT * FROM "t" WHERE "name" LIKE \'John%\'', $q->toSql());
     }
 
     public function test_notLike(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = WhereBuilder::for('name')->notLike('John%');
-        $def = $cond->getDefinition();
-        $this->assertSame('name', $def->column);
-        $this->assertSame('John%', $def->value);
-        $this->assertSame(Operator::Like, $def->operator);
-        $this->assertTrue($def->negated);
-
-        $q = $conn->query()->select()->from('t')->where($cond);
+        $q = $conn->query()->select()->from('t')->where('name', notLike: 'John%');
         $this->assertSame('SELECT * FROM "t" WHERE "name" NOT LIKE \'John%\'', $q->toSql());
     }
 
     public function test_in__with_array(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = WhereBuilder::for('b')->in([1, 2]);
-        $def = $cond->getDefinition();
-        $this->assertSame('b', $def->column);
-        $this->assertSame([1, 2], $def->value);
-        $this->assertSame(Operator::In, $def->operator);
-        $this->assertFalse($def->negated);
-
-        $q = $conn->query()->select()->from('t')->where($cond);
+        $q = $conn->query()->select()->from('t')->where('b', in: [1, 2]);
         $this->assertSame('SELECT * FROM "t" WHERE "b" IN (1, 2)', $q->toSql());
     }
 
     public function test_in__with_empty_array(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = WhereBuilder::for('b')->in([]);
-        $q = $conn->query()->select()->from('t')->where($cond);
+        $q = $conn->query()->select()->from('t')->where('b', in: []);
         $this->assertSame('SELECT * FROM "t" WHERE 1 = 0', $q->toSql());
     }
 
@@ -639,28 +508,14 @@ class WhereBuilderTest extends QueryTestCase
     {
         $conn = $this->sqliteConnection();
         $subquery = $conn->query()->select('id')->from('t2');
-        $cond = WhereBuilder::for('b')->in($subquery);
-        $def = $cond->getDefinition();
-        $this->assertSame('b', $def->column);
-        $this->assertSame($subquery->statement, $def->value);
-        $this->assertSame(Operator::In, $def->operator);
-        $this->assertFalse($def->negated);
-
-        $q = $conn->query()->select()->from('t')->where($cond);
+        $q = $conn->query()->select()->from('t')->where('b', in: $subquery);
         $this->assertSame('SELECT * FROM "t" WHERE "b" IN (SELECT "id" FROM "t2")', $q->toSql());
     }
 
     public function test_notIn__with_array(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = WhereBuilder::for('b')->notIn([1, 2]);
-        $def = $cond->getDefinition();
-        $this->assertSame('b', $def->column);
-        $this->assertSame([1, 2], $def->value);
-        $this->assertSame(Operator::In, $def->operator);
-        $this->assertTrue($def->negated);
-
-        $q = $conn->query()->select()->from('t')->where($cond);
+        $q = $conn->query()->select()->from('t')->where('b', notIn: [1, 2]);
         $this->assertSame('SELECT * FROM "t" WHERE "b" NOT IN (1, 2)', $q->toSql());
     }
 
@@ -668,241 +523,76 @@ class WhereBuilderTest extends QueryTestCase
     {
         $conn = $this->sqliteConnection();
         $subquery = $conn->query()->select('id')->from('t2');
-        $cond = WhereBuilder::for('b')->notIn($subquery);
-        $def = $cond->getDefinition();
-        $this->assertSame('b', $def->column);
-        $this->assertSame($subquery->statement, $def->value);
-        $this->assertSame(Operator::In, $def->operator);
-        $this->assertTrue($def->negated);
-
-        $q = $conn->query()->select()->from('t')->where($cond);
+        $q = $conn->query()->select()->from('t')->where('b', notIn: $subquery);
         $this->assertSame('SELECT * FROM "t" WHERE "b" NOT IN (SELECT "id" FROM "t2")', $q->toSql());
     }
 
     public function test_notIn__with_empty_array(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = WhereBuilder::for('b')->notIn([]);
-        $q = $conn->query()->select()->from('t')->where($cond);
+        $q = $conn->query()->select()->from('t')->where('b', notIn: []);
         $this->assertSame('SELECT * FROM "t" WHERE 1 = 0', $q->toSql());
     }
 
     public function test_between(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = WhereBuilder::for('b')->between(1, 10);
-        $def = $cond->getDefinition();
-        $this->assertSame('b', $def->column);
-        $this->assertSame([1, 10], $def->value);
-        $this->assertSame(Operator::Between, $def->operator);
-        $this->assertFalse($def->negated);
-
-        $q = $conn->query()->select()->from('t')->where($cond);
+        $q = $conn->query()->select()->from('t')->where('b', between: [1, 10]);
         $this->assertSame('SELECT * FROM "t" WHERE "b" BETWEEN 1 AND 10', $q->toSql());
+    }
+
+    public function test_between__with_less_than_2_values_in_list(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Expected: 2 values for BETWEEN condition. Got: 1.');
+        $conn = $this->sqliteConnection();
+        $conn->query()->select()->from('t')->where('b', between: [1])->toSql();
+    }
+
+    public function test_between__with_more_than_2_values_in_list(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Expected: 2 values for BETWEEN condition. Got: 3.');
+        $conn = $this->sqliteConnection();
+        $conn->query()->select()->from('t')->where('b', between: [1, 2, 3])->toSql();
     }
 
     public function test_notBetween(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = WhereBuilder::for('b')->notBetween(1, 10);
-        $def = $cond->getDefinition();
-        $this->assertSame('b', $def->column);
-        $this->assertSame([1, 10], $def->value);
-        $this->assertSame(Operator::Between, $def->operator);
-        $this->assertTrue($def->negated);
-
-        $q = $conn->query()->select()->from('t')->where($cond);
+        $q = $conn->query()->select()->from('t')->where('b', notBetween: [1, 10]);
         $this->assertSame('SELECT * FROM "t" WHERE "b" NOT BETWEEN 1 AND 10', $q->toSql());
+    }
+
+    public function test_notBetween__with_less_than_2_values_in_list(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Expected: 2 values for BETWEEN condition. Got: 1.');
+        $conn = $this->sqliteConnection();
+        $conn->query()->select()->from('t')->where('b', notBetween: [1])->toSql();
+    }
+
+    public function test_notBetween__with_more_than_2_values_in_list(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Expected: 2 values for BETWEEN condition. Got: 3.');
+        $conn = $this->sqliteConnection();
+        $conn->query()->select()->from('t')->where('b', notBetween: [1, 2, 3])->toSql();
     }
 
     public function test_inRange(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = WhereBuilder::for('b')->inRange(Bounds::excluded(1, 10));
-        $def = $cond->getDefinition();
-        $this->assertSame('b', $def->column);
-        $this->assertInstanceOf(Bounds::class, $def->value);
-        $this->assertSame(Operator::InRange, $def->operator);
-        $this->assertFalse($def->negated);
-
-        $q = $conn->query()->select()->from('t')->where($cond);
+        $bounds = Bounds::excluded(1, 10);
+        $q = $conn->query()->select()->from('t')->where('b', $bounds);
         $this->assertSame('SELECT * FROM "t" WHERE "b" > 1 AND "b" < 10', $q->toSql());
     }
 
     public function test_notInRange(): void
     {
         $conn = $this->sqliteConnection();
-        $cond = WhereBuilder::for('b')->notInRange(Bounds::excluded(1, 10));
-        $def = $cond->getDefinition();
-        $this->assertSame('b', $def->column);
-        $this->assertInstanceOf(Bounds::class, $def->value);
-        $this->assertSame(Operator::InRange, $def->operator);
-        $this->assertTrue($def->negated);
-
-        $q = $conn->query()->select()->from('t')->where($cond);
+        $bounds = Bounds::excluded(1, 10);
+        $q = $conn->query()->select()->from('t')->where('b', not: $bounds);
         $this->assertSame('SELECT * FROM "t" WHERE "b" <= 1 OR "b" >= 10', $q->toSql());
-    }
-
-    public function test_apply(): void
-    {
-        $cond = WhereBuilder::for('a')->equals(1);
-        $cond->apply(WhereBuilder::for('b')->greaterThan(2));
-        $def = $cond->getDefinition();
-        $this->assertSame('b', $def->column);
-        $this->assertSame(2, $def->value);
-        $this->assertSame(Operator::GreaterThan, $def->operator);
-        $this->assertFalse($def->negated);
-        $this->assertSame(null, $def->nextLogic);
-        $this->assertSame(null, $def->next);
-
-        $conn = $this->sqliteConnection();
-        $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" > 2', $q->toSql());
-    }
-
-    public function test_negate_equals(): void
-    {
-        $conn = $this->sqliteConnection();
-        $cond = WhereBuilder::for('b')->equals(1)->negate();
-        $def = $cond->getDefinition();
-        $this->assertSame(Operator::Equals, $def->operator);
-        $this->assertTrue($def->negated);
-
-        $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" != 1', $q->toSql());
-    }
-
-    public function test_negate_greaterThanOrEquals(): void
-    {
-        $conn = $this->sqliteConnection();
-        $cond = WhereBuilder::for('b')->greaterThanOrEqualTo(1)->negate();
-        $def = $cond->getDefinition();
-        $this->assertSame(Operator::GreaterThanOrEqualTo, $def->operator);
-        $this->assertTrue($def->negated);
-
-        $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" < 1', $q->toSql());
-    }
-
-    public function test_negate_greaterThan(): void
-    {
-        $conn = $this->sqliteConnection();
-        $cond = WhereBuilder::for('b')->greaterThan(1)->negate();
-        $def = $cond->getDefinition();
-        $this->assertSame(Operator::GreaterThan, $def->operator);
-        $this->assertTrue($def->negated);
-
-        $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" <= 1', $q->toSql());
-    }
-
-    public function test_negate_lessThanOrEqualTo(): void
-    {
-        $conn = $this->sqliteConnection();
-        $cond = WhereBuilder::for('b')->lessThanOrEqualTo(1)->negate();
-        $def = $cond->getDefinition();
-        $this->assertSame(Operator::LessThanOrEqualTo, $def->operator);
-        $this->assertTrue($def->negated);
-
-        $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" > 1', $q->toSql());
-    }
-
-    public function test_negate_lessThan(): void
-    {
-        $conn = $this->sqliteConnection();
-        $cond = WhereBuilder::for('b')->lessThan(1)->negate();
-        $def = $cond->getDefinition();
-        $this->assertSame(Operator::LessThan, $def->operator);
-        $this->assertTrue($def->negated);
-
-        $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" >= 1', $q->toSql());
-    }
-
-    public function test_negate_isNull(): void
-    {
-        $conn = $this->sqliteConnection();
-        $cond = WhereBuilder::for('b')->isNull()->negate();
-        $def = $cond->getDefinition();
-        $this->assertSame(Operator::Equals, $def->operator);
-        $this->assertTrue($def->negated);
-
-        $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" IS NOT NULL', $q->toSql());
-    }
-
-    public function test_negate_isNotNull(): void
-    {
-        $conn = $this->sqliteConnection();
-        $cond = WhereBuilder::for('b')->isNotNull()->negate();
-        $def = $cond->getDefinition();
-        $this->assertSame(Operator::Equals, $def->operator);
-        $this->assertFalse($def->negated);
-
-        $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" IS NULL', $q->toSql());
-    }
-
-    public function test_negate_like(): void
-    {
-        $conn = $this->sqliteConnection();
-        $cond = WhereBuilder::for('name')->like('John%')->negate();
-        $def = $cond->getDefinition();
-        $this->assertSame(Operator::Like, $def->operator);
-        $this->assertTrue($def->negated);
-
-        $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "name" NOT LIKE \'John%\'', $q->toSql());
-    }
-
-    public function test_negate_in(): void
-    {
-        $conn = $this->sqliteConnection();
-        $cond = WhereBuilder::for('b')->in([1, 2])->negate();
-        $def = $cond->getDefinition();
-        $this->assertSame(Operator::In, $def->operator);
-        $this->assertTrue($def->negated);
-
-        $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" NOT IN (1, 2)', $q->toSql());
-    }
-
-    public function test_negate_between(): void
-    {
-        $conn = $this->sqliteConnection();
-        $cond = WhereBuilder::for('b')->between(1, 10)->negate();
-        $def = $cond->getDefinition();
-        $this->assertSame(Operator::Between, $def->operator);
-        $this->assertTrue($def->negated);
-
-        $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" NOT BETWEEN 1 AND 10', $q->toSql());
-    }
-
-    public function test_negate_inRange(): void
-    {
-        $conn = $this->sqliteConnection();
-        $cond = WhereBuilder::for('b')->inRange(Bounds::excluded(1, 10))->negate();
-        $def = $cond->getDefinition();
-        $this->assertSame(Operator::InRange, $def->operator);
-        $this->assertTrue($def->negated);
-
-        $q = $conn->query()->select()->from('t')->where($cond);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" <= 1 OR "b" >= 10', $q->toSql());
-    }
-
-    public function test_getDefinition(): void
-    {
-        $cond = WhereBuilder::for('id')->equals(1);
-        $def = $cond->getDefinition();
-        $this->assertInstanceOf(FilteringCondition::class, $def);
-    }
-
-    public function test_define_more_than_once(): void
-    {
-        $this->expectException(LogicException::class);
-        $this->expectExceptionMessage('Tried to set condition when it was already set!');
-        WhereBuilder::for('id')->equals(1)->equals(2);
     }
 }

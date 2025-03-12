@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Query\Syntax;
 
 use Kirameki\Collections\Utils\Arr;
+use Kirameki\Core\Exceptions\InvalidArgumentException;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Exceptions\NotSupportedException;
 use Kirameki\Core\Func;
@@ -56,6 +57,7 @@ use function dump;
 use function explode;
 use function implode;
 use function is_bool;
+use function is_countable;
 use function is_iterable;
 use function is_string;
 use function iterator_to_array;
@@ -688,6 +690,12 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForBetween(FilteringCondition $def): string
     {
+        if (is_countable($def->value) && count($def->value) !== 2) {
+            throw new InvalidArgumentException('Expected: 2 values for BETWEEN condition. Got: ' . count($def->value) . '.', [
+                'definition' => $def,
+            ]);
+        }
+
         return implode(' ', [
             $this->asColumn($def->column),
             $def->operator->value,
