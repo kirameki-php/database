@@ -7,14 +7,14 @@ use Kirameki\Database\Expression;
 class ComparingCondition extends Condition
 {
     /**
-     * @param string|iterable<int, string>|Expression $column
+     * @param string|Tuple|Expression $column
      * @param Operator $operator
      * @param mixed $value
      * @param Logic|null $link
      * @param Condition|null $next
      */
     public function __construct(
-        public string|iterable|Expression $column,
+        public string|Tuple|Expression $column,
         public Operator $operator,
         mixed $value,
         ?Logic $link = null,

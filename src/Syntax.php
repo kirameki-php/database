@@ -7,6 +7,7 @@ use DateTimeInterface;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
+use Kirameki\Database\Query\Statements\Tuple;
 use function array_filter;
 use function array_map;
 use function implode;
@@ -69,7 +70,7 @@ abstract class Syntax
      * @param string $escaping
      * @return string
      */
-    protected function escape(string $string, string $escaping): string
+    public function escape(string $string, string $escaping): string
     {
         return str_replace($escaping, '\\' . $escaping, $string);
     }
@@ -78,7 +79,7 @@ abstract class Syntax
      * @param array<scalar> $values
      * @return string
      */
-    protected function asCsv(array $values): string
+    public function asCsv(array $values): string
     {
         return implode(', ', $values);
     }
@@ -87,13 +88,13 @@ abstract class Syntax
      * @param array<scalar> $values
      * @return string
      */
-    protected function asEnclosedCsv(array $values): string
+    public function asEnclosedCsv(array $values): string
     {
         return '(' . $this->asCsv($values) . ')';
     }
 
     /**
-     * @param iterable<int, string|iterable<int, string>|Expression> $columns
+     * @param iterable<int, string|Expression> $columns
      * @param bool $withAlias
      * @return list<string>
      */
@@ -107,18 +108,18 @@ abstract class Syntax
     }
 
     /**
-     * @param string|iterable<int, string>|Expression $name
+     * @param string|Tuple|Expression $name
      * @param bool $withAlias
      * @return string
      */
-    public function asColumn(string|iterable|Expression $name, bool $withAlias = false): string
+    public function asColumn(string|Tuple|Expression $name, bool $withAlias = false): string
     {
-        if ($name instanceof Expression) {
-            return $name->toValue($this);
-        }
-
         if (is_iterable($name)) {
             return $this->asEnclosedCsv($this->asColumns($name));
+        }
+
+        if ($name instanceof Expression) {
+            return $name->toValue($this);
         }
 
         $table = null;

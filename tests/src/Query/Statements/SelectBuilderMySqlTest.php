@@ -14,6 +14,7 @@ use Kirameki\Database\Query\Statements\Bounds;
 use Kirameki\Database\Query\Statements\ConditionBuilder;
 use Kirameki\Database\Query\Statements\JoinBuilder;
 use Kirameki\Database\Query\Statements\LockOption;
+use Kirameki\Database\Query\Statements\Tuple;
 use Kirameki\Database\Raw;
 use Kirameki\Time\Time;
 use stdClass;
@@ -202,7 +203,7 @@ final class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
 
     public function test_where__tuple(): void
     {
-        $sql = $this->selectBuilder()->from('User')->where(['id', 'status'], [[1, 1], [2, 3]])->toSql();
+        $sql = $this->selectBuilder()->from('User')->where(new Tuple('id', 'status'), new Tuple([1, 1], [2, 3]))->toSql();
         $this->assertSame("SELECT * FROM `User` WHERE (`id`, `status`) IN ((1, 1), (2, 3))", $sql);
     }
 

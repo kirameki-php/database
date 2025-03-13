@@ -50,10 +50,8 @@ use function array_key_exists;
 use function array_keys;
 use function array_map;
 use function array_push;
-use function assert;
 use function count;
 use function current;
-use function dump;
 use function explode;
 use function implode;
 use function is_bool;
@@ -740,26 +738,10 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatConditionForOperator(ComparingCondition $def): string
     {
-        if (is_iterable($def->column) && is_iterable($def->value)) {
-            return $this->formatConditionForTupleComparison($def);
-        }
-
         return implode(' ', [
             $this->asColumn($def->column),
             $def->operator->value,
             $this->asPlaceholder($def->value),
-        ]);
-    }
-
-    protected function formatConditionForTupleComparison(ComparingCondition $def): string
-    {
-        assert(is_iterable($def->column));
-        assert(is_iterable($def->value));
-
-        return implode(' ', [
-            $this->asEnclosedCsv($this->asColumns($def->column)),
-            $def->operator->value,
-            $this->asEnclosedCsv($this->asPlaceholders($def->value)),
         ]);
     }
 
@@ -1007,8 +989,8 @@ abstract class QuerySyntax extends Syntax
     protected function asPlaceholder(mixed $value): string
     {
         return match (true) {
-            $value instanceof Expression => $value->toValue($this),
             is_iterable($value) => $this->asEnclosedCsv($this->asPlaceholders($value)),
+            $value instanceof Expression => $value->toValue($this),
             default => '?',
         };
     }

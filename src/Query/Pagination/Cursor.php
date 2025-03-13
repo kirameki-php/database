@@ -9,6 +9,8 @@ use Kirameki\Database\Query\Statements\Operator;
 use Kirameki\Database\Query\Statements\SelectBuilder;
 use Kirameki\Database\Query\Statements\SelectStatement;
 use Kirameki\Database\Query\Statements\SortOrder;
+use Kirameki\Database\Query\Statements\TupleColumns;
+use Kirameki\Database\Query\Statements\Tuple;
 use function array_keys;
 use function array_values;
 use function count;
@@ -66,11 +68,11 @@ class Cursor
     public function applyTo(SelectBuilder $builder): static
     {
         $parameters = $this->parameters;
-        $columns = array_keys($parameters);
-        $values = array_values($parameters);
+        $columns = new Tuple(...array_keys($parameters));
+        $values = new Tuple(...array_values($parameters));
         $operator = $this->getOperator($builder->statement);
 
-        $builder->where(new ComparingCondition($columns, $operator, $values));
+        $builder->where($columns, $operator, $values);
 
         return $this;
     }

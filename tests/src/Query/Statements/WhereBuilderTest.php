@@ -9,6 +9,7 @@ use Kirameki\Database\Query\Statements\CheckingCondition;
 use Kirameki\Database\Query\Statements\ConditionBuilder;
 use Kirameki\Database\Query\Statements\NestedCondition;
 use Kirameki\Database\Query\Statements\RawCondition;
+use Kirameki\Database\Query\Statements\Tuple;
 use Kirameki\Database\Query\Statements\WhereBuilder;
 use Kirameki\Database\Query\Statements\ComparingCondition;
 use Kirameki\Database\Query\Statements\Logic;
@@ -17,6 +18,7 @@ use Kirameki\Database\Raw;
 use Tests\Kirameki\Database\Query\QueryTestCase;
 use ValueError;
 use function dump;
+use function iterator_to_array;
 
 class WhereBuilderTest extends QueryTestCase
 {
@@ -314,12 +316,13 @@ class WhereBuilderTest extends QueryTestCase
         $this->assertSame(Operator::Equals, $def->operator);
     }
 
-    public function test_where__with_iterable_column(): void
+    public function test_where__with_tuple_column(): void
     {
         $query = $this->connect()->query()->select()->from('t');
-        $def = $query->where(['a', 'b'], Operator::LessThan, 1)->statement->where;
+        $def = $query->where(new Tuple('a', 'b'), Operator::LessThan, 1)->statement->where;
         $this->assertInstanceOf(ComparingCondition::class, $def);
-        $this->assertSame(['a', 'b'], $def->column);
+        $this->assertInstanceOf(Tuple::class, $def->column);
+        $this->assertSame(['a', 'b'], $def->column->values);
         $this->assertSame(1, $def->value);
         $this->assertSame(Operator::LessThan, $def->operator);
     }
@@ -392,11 +395,11 @@ class WhereBuilderTest extends QueryTestCase
         $this->assertSame('SELECT * FROM "t" WHERE "b" = TRUE', $q->toSql());
     }
 
-    public function test_where__equals__with_iterable_as_tuple(): void
+    public function test_where__equals__with_tuple(): void
     {
         $conn = $this->sqliteConnection();
-        $q = $conn->query()->select()->from('t')->where('b', eq: [1, 2]);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" = (1, 2)', $q->toSql());
+        $q = $conn->query()->select()->from('t')->where(new Tuple('a', 'b'), eq: new Tuple(1, 2));
+        $this->assertSame('SELECT * FROM "t" WHERE ("a", "b") = (1, 2)', $q->toSql());
     }
 
     public function test_where__notEquals__with_scalar_value(): void
@@ -406,10 +409,10 @@ class WhereBuilderTest extends QueryTestCase
         $this->assertSame('SELECT * FROM "t" WHERE "b" != 1', $q->toSql());
     }
 
-    public function test_where__notEquals__with_iterable_as_tuple(): void
+    public function test_where__notEquals__with_tuple(): void
     {
         $conn = $this->sqliteConnection();
-        $q = $conn->query()->select()->from('t')->where(["a", "b"], ne: [1, 2]);
+        $q = $conn->query()->select()->from('t')->where(new Tuple('a', 'b'), ne: new Tuple(1, 2));
         $this->assertSame('SELECT * FROM "t" WHERE ("a", "b") != (1, 2)', $q->toSql());
     }
 
@@ -420,10 +423,10 @@ class WhereBuilderTest extends QueryTestCase
         $this->assertSame('SELECT * FROM "t" WHERE "b" >= 1', $q->toSql());
     }
 
-    public function test_greaterThanOrEqualTo__with_iterable_as_tuple(): void
+    public function test_greaterThanOrEqualTo__with_tuple(): void
     {
         $conn = $this->sqliteConnection();
-        $q = $conn->query()->select()->from('t')->where(['a', 'b'], gte: [1, 2]);
+        $q = $conn->query()->select()->from('t')->where(new Tuple('a', 'b'), gte: new Tuple(1, 2));
         $this->assertSame('SELECT * FROM "t" WHERE ("a", "b") >= (1, 2)', $q->toSql());
     }
 
@@ -434,10 +437,10 @@ class WhereBuilderTest extends QueryTestCase
         $this->assertSame('SELECT * FROM "t" WHERE "b" > 1', $q->toSql());
     }
 
-    public function test_greaterThan__with_iterable_as_tuple(): void
+    public function test_greaterThan__with_tuple(): void
     {
         $conn = $this->sqliteConnection();
-        $q = $conn->query()->select()->from('t')->where(['a', 'b'], gt: [1, 2]);
+        $q = $conn->query()->select()->from('t')->where(new Tuple('a', 'b'), gt: new Tuple(1, 2));
         $this->assertSame('SELECT * FROM "t" WHERE ("a", "b") > (1, 2)', $q->toSql());
     }
 
@@ -448,10 +451,10 @@ class WhereBuilderTest extends QueryTestCase
         $this->assertSame('SELECT * FROM "t" WHERE "b" <= 1', $q->toSql());
     }
 
-    public function test_lessThanOrEqualTo__with_iterable_as_tuple(): void
+    public function test_lessThanOrEqualTo__with_tuple(): void
     {
         $conn = $this->sqliteConnection();
-        $q = $conn->query()->select()->from('t')->where(['a', 'b'], lte: [1, 2]);
+        $q = $conn->query()->select()->from('t')->where(new Tuple('a', 'b'), lte: new Tuple(1, 2));
         $this->assertSame('SELECT * FROM "t" WHERE ("a", "b") <= (1, 2)', $q->toSql());
     }
 

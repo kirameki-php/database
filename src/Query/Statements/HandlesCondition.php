@@ -124,13 +124,13 @@ trait HandlesCondition
     }
 
     /**
-     * @param string|iterable<int, string>|Expression $column
+     * @param string|Tuple|Expression $column
      * @param Operator $operator
      * @param mixed $value
      * @return ComparingCondition
      */
     protected function createConditionThreeArgs(
-        string|iterable|Expression $column,
+        string|Tuple|Expression $column,
         string|Operator $operator,
         mixed $value,
     ): ComparingCondition
