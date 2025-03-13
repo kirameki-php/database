@@ -665,10 +665,25 @@ abstract class QuerySyntax extends Syntax
         $value = $def->value;
 
         if (is_iterable($value)) {
-            $placeholders = $this->asPlaceholders($value);
-            return count($placeholders) > 0
-                ? "{$column} {$operator} {$this->asEnclosedCsv($placeholders)}"
-                : '1 = 0';
+            $placeholders = [];
+            $containsNull = false;
+            foreach ($value as $v) {
+                if ($v !== null) {
+                    $placeholders[] = $this->asPlaceholder($v);
+                } else {
+                    $containsNull = true;
+                }
+            }
+
+            if (count($placeholders) === 0) {
+                return '1 = 0';
+            }
+
+            $sql = "{$column} {$operator} {$this->asEnclosedCsv($placeholders)}";
+
+            return $containsNull
+                ? "({$sql} OR {$column} IS NULL)"
+                : $sql;
         }
 
         if ($value instanceof QueryStatement) {

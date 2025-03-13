@@ -513,7 +513,7 @@ class WhereBuilderTest extends QueryTestCase
     {
         $conn = $this->sqliteConnection();
         $q = $conn->query()->select()->from('t')->where('b', in: [1, null]);
-        $this->assertSame('SELECT * FROM "t" WHERE "b" IN (1, 2)', $q->toSql());
+        $this->assertSame('SELECT * FROM "t" WHERE ("b" IN (1) OR "b" IS NULL)', $q->toSql());
     }
 
     public function test_in__with_empty_array(): void
