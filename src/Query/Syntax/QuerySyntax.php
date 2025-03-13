@@ -674,9 +674,8 @@ abstract class QuerySyntax extends Syntax
                     $containsNull = true;
                 }
             }
-
             if (count($placeholders) === 0) {
-                return '1 = 0';
+                $placeholders[] = 'NULL';
             }
 
             $sql = "{$column} {$operator} {$this->asEnclosedCsv($placeholders)}";
