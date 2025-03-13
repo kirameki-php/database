@@ -419,7 +419,7 @@ abstract class QuerySyntax extends Syntax
                 $expr .= ' USING ' . $this->asEnclosedCsv($this->asColumns($def->using));
             }
             if ($def->condition !== null) {
-                $expr .= ' ON ' . $this->formatConditionDefinition($def->condition);
+                $expr .= ' ON ' . $this->formatCondition($def->condition);
             }
             return $expr;
         }, $joins));
@@ -549,7 +549,7 @@ abstract class QuerySyntax extends Syntax
     protected function formatWherePart(ConditionStatement $statement): string
     {
         return $statement->where !== null
-            ? 'WHERE ' . $this->formatConditionDefinition($statement->where)
+            ? 'WHERE ' . $this->formatCondition($statement->where)
             : '';
     }
 
@@ -557,15 +557,15 @@ abstract class QuerySyntax extends Syntax
      * @param Condition $def
      * @return string
      */
-    protected function formatConditionDefinition(Condition $def): string
+    protected function formatCondition(Condition $def): string
     {
         $parts = [];
         do {
             $part = match(true) {
-                $def instanceof ComparingCondition => $this->formatConditionSegment($def),
-                $def instanceof NestedCondition => $this->formatNestedConditionSegment($def),
-                $def instanceof CheckingCondition => $this->formatConditionForExists($def),
-                $def instanceof RawCondition => $this->formatConditionForRaw($def),
+                $def instanceof ComparingCondition => $this->formatComparingCondition($def),
+                $def instanceof NestedCondition => $this->formatNestedCondition($def),
+                $def instanceof CheckingCondition => $this->formatCheckingCondition($def),
+                $def instanceof RawCondition => $this->formatRawCondition($def),
                 default => throw new LogicException('Invalid condition definition.', [
                     'definition' => $def,
                 ]),
@@ -585,7 +585,7 @@ abstract class QuerySyntax extends Syntax
      * @param ComparingCondition $def
      * @return string
      */
-    protected function formatConditionSegment(ComparingCondition $def): string
+    protected function formatComparingCondition(ComparingCondition $def): string
     {
         return match ($def->operator) {
             Operator::Equals,
@@ -609,16 +609,16 @@ abstract class QuerySyntax extends Syntax
      * @param NestedCondition $def
      * @return string
      */
-    protected function formatNestedConditionSegment(NestedCondition $def): string
+    protected function formatNestedCondition(NestedCondition $def): string
     {
-        return '(' . $this->formatConditionDefinition($def->value) . ')';
+        return '(' . $this->formatCondition($def->value) . ')';
     }
 
     /**
      * @param RawCondition $def
      * @return string
      */
-    protected function formatConditionForRaw(RawCondition $def): string
+    protected function formatRawCondition(RawCondition $def): string
     {
         return $this->stringifyExpression($def->value);
     }
@@ -627,7 +627,7 @@ abstract class QuerySyntax extends Syntax
      * @param CheckingCondition $def
      * @return string
      */
-    protected function formatConditionForExists(CheckingCondition $def): string
+    protected function formatCheckingCondition(CheckingCondition $def): string
     {
         $value = $def->value;
         $operator = $def->negated ? 'NOT EXISTS' : 'EXISTS';
@@ -787,7 +787,7 @@ abstract class QuerySyntax extends Syntax
     protected function formatHavingPart(SelectStatement $statement): string
     {
         return $statement->having !== null
-            ? 'HAVING ' . $this->formatConditionDefinition($statement->having)
+            ? 'HAVING ' . $this->formatCondition($statement->having)
             : '';
     }
 

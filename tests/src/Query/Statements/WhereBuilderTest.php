@@ -4,6 +4,7 @@ namespace Tests\Kirameki\Database\Query\Statements;
 
 use Kirameki\Core\Exceptions\InvalidArgumentException;
 use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Core\Exceptions\NotSupportedException;
 use Kirameki\Database\Query\Statements\Bounds;
 use Kirameki\Database\Query\Statements\CheckingCondition;
 use Kirameki\Database\Query\Statements\ConditionBuilder;
@@ -493,10 +494,25 @@ class WhereBuilderTest extends QueryTestCase
         $this->assertSame('SELECT * FROM "t" WHERE "name" NOT LIKE \'John%\'', $q->toSql());
     }
 
+    public function test_in__with_null(): void
+    {
+        $this->expectException(NotSupportedException::class);
+        $this->expectExceptionMessage('Value for WHERE IN. Expected: iterable|SelectStatement. Got: null.');
+        $conn = $this->sqliteConnection();
+        $conn->query()->select()->from('t')->where('b', in: null)->toSql();
+    }
+
     public function test_in__with_array(): void
     {
         $conn = $this->sqliteConnection();
         $q = $conn->query()->select()->from('t')->where('b', in: [1, 2]);
+        $this->assertSame('SELECT * FROM "t" WHERE "b" IN (1, 2)', $q->toSql());
+    }
+
+    public function test_in__with_array_containing_null(): void
+    {
+        $conn = $this->sqliteConnection();
+        $q = $conn->query()->select()->from('t')->where('b', in: [1, null]);
         $this->assertSame('SELECT * FROM "t" WHERE "b" IN (1, 2)', $q->toSql());
     }
 
