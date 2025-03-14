@@ -550,7 +550,7 @@ class WhereBuilderTest extends QueryTestCase
     {
         $conn = $this->sqliteConnection();
         $q = $conn->query()->select()->from('t')->where('b', notIn: []);
-        $this->assertSame('SELECT * FROM "t" WHERE 1 = 0', $q->toSql());
+        $this->assertSame('SELECT * FROM "t" WHERE "b" NOT IN (NULL)', $q->toSql());
     }
 
     public function test_between(): void

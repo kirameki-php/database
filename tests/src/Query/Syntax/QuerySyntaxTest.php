@@ -123,7 +123,7 @@ class QuerySyntaxTest extends QueryTestCase
     {
         $handler = $this->sqliteConnection()->query();
         $q = $handler->select()->from('t')->where('id', in: []);
-        $this->assertSame('SELECT * FROM "t" WHERE 1 = 0', $q->toSql());
+        $this->assertSame('SELECT * FROM "t" WHERE "id" IN (NULL)', $q->toSql());
     }
 
     public function test_where_in_invalid(): void
@@ -156,7 +156,7 @@ class QuerySyntaxTest extends QueryTestCase
     {
         $handler = $this->sqliteConnection()->query();
         $q = $handler->select()->from('t')->where('id', notIn: []);
-        $this->assertSame('SELECT * FROM "t" WHERE 1 = 0', $q->toSql());
+        $this->assertSame('SELECT * FROM "t" WHERE "id" NOT IN (NULL)', $q->toSql());
     }
 
     public function test_where_between(): void
