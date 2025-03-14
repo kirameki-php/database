@@ -323,7 +323,7 @@ class WhereBuilderTest extends QueryTestCase
         $def = $query->where(new Tuple('a', 'b'), Operator::LessThan, 1)->statement->where;
         $this->assertInstanceOf(ComparingCondition::class, $def);
         $this->assertInstanceOf(Tuple::class, $def->column);
-        $this->assertSame(['a', 'b'], $def->column->values);
+        $this->assertSame(['a', 'b'], $def->column->items);
         $this->assertSame(1, $def->value);
         $this->assertSame(Operator::LessThan, $def->operator);
     }

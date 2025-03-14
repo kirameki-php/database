@@ -14,14 +14,14 @@ class Tuple implements IteratorAggregate
     /**
      * @var list<mixed>
      */
-    public readonly array $values;
+    public readonly array $items;
 
     /**
      * @param mixed ...$values
      */
     public function __construct(mixed ...$values)
     {
-        $this->values = array_values($values);
+        $this->items = array_values($values);
     }
 
     /**
@@ -29,6 +29,6 @@ class Tuple implements IteratorAggregate
      */
     public function getIterator(): Traversable
     {
-        yield from $this->values;
+        yield from $this->items;
     }
 }
