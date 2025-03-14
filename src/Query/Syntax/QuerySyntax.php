@@ -315,7 +315,7 @@ abstract class QuerySyntax extends Syntax
             $this->asIdentifier($with->name),
             $with->recursive ? 'RECURSIVE' : null,
             'AS',
-            $this->formatSubQuery($with->statement),
+            $this->formatSubQuery($with->as),
         ]);
     }
 

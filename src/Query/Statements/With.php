@@ -7,7 +7,7 @@ class With
     /**
      * @var QueryStatement
      */
-    public QueryStatement $statement;
+    public QueryStatement $as;
 
     /**
      * @param string $name

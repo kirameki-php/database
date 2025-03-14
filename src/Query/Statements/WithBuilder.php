@@ -40,7 +40,7 @@ readonly class WithBuilder
             $subquery = clone $subquery->statement;
         }
 
-        $this->with->statement = $subquery;
+        $this->with->as = $subquery;
         return $this;
     }
 }

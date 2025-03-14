@@ -11,15 +11,12 @@ use Kirameki\Database\Query\Statements\ConditionBuilder;
 use Kirameki\Database\Query\Statements\NestedCondition;
 use Kirameki\Database\Query\Statements\RawCondition;
 use Kirameki\Database\Query\Statements\Tuple;
-use Kirameki\Database\Query\Statements\WhereBuilder;
 use Kirameki\Database\Query\Statements\ComparingCondition;
 use Kirameki\Database\Query\Statements\Logic;
 use Kirameki\Database\Query\Statements\Operator;
 use Kirameki\Database\Raw;
 use Tests\Kirameki\Database\Query\QueryTestCase;
 use ValueError;
-use function dump;
-use function iterator_to_array;
 
 class WhereBuilderTest extends QueryTestCase
 {
