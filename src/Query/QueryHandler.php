@@ -2,6 +2,7 @@
 
 namespace Kirameki\Database\Query;
 
+use Closure;
 use Kirameki\Database\Connection;
 use Kirameki\Database\Events\QueryExecuted;
 use Kirameki\Database\Expression;
@@ -13,6 +14,7 @@ use Kirameki\Database\Query\Statements\SelectBuilder;
 use Kirameki\Database\Query\Statements\Tags;
 use Kirameki\Database\Query\Statements\UpdateBuilder;
 use Kirameki\Database\Query\Statements\UpsertBuilder;
+use Kirameki\Database\Query\Statements\WithBuilder;
 use Kirameki\Event\EventEmitter;
 
 readonly class QueryHandler
@@ -73,6 +75,26 @@ readonly class QueryHandler
     public function deleteFrom(string $table): DeleteBuilder
     {
         return new DeleteBuilder($this, $table);
+    }
+
+    /**
+     * @param string $name
+     * @param SelectBuilder|Closure(SelectBuilder): mixed $as
+     * @return WithBuilder
+     */
+    public function with(string $name, SelectBuilder|Closure $as): WithBuilder
+    {
+        return new WithBuilder($this)->with($name, $as);
+    }
+
+    /**
+     * @param string $name
+     * @param SelectBuilder|Closure(SelectBuilder): mixed $as
+     * @return WithBuilder
+     */
+    public function withRecursive(string $name, SelectBuilder|Closure $as): WithBuilder
+    {
+        return new WithBuilder($this)->withRecursive($name, $as);
     }
 
     /**
