@@ -64,6 +64,91 @@ class QueryHandlerTest extends QueryTestCase
         $this->assertInstanceOf(DeleteBuilder::class, $builder);
     }
 
+    public function test_raw(): void
+    {
+        $connection = $this->sqliteConnection();
+        $table = $connection->schema()->createTable('users');
+        $table->id();
+        $table->execute();
+
+        $connection->query()->insertInto('users')
+            ->value(['id' => 1])
+            ->execute();
+
+        $this->listenToQueryExecuted();
+
+        $handler = $connection->query();
+        $connection->tags->set('a', 1);
+        $result = $handler->raw('SELECT * FROM users')->execute();
+        $this->assertSame('SELECT * FROM users /* a=1 */', $result->template);
+        $this->assertSame([], $result->parameters);
+        $this->assertSame(['id' => 1], (array) $result->first());
+        $this->assertCount(1, $this->eventTriggers);
+    }
+
+    public function test_raw_with_parameters(): void
+    {
+        $connection = $this->sqliteConnection();
+        $table = $connection->schema()->createTable('users');
+        $table->id();
+        $table->execute();
+
+        $connection->query()->insertInto('users')
+            ->value(['id' => 1])
+            ->execute();
+
+        $handler = $connection->query();
+        $connection->tags->set('a', 1);
+        $result = $handler->raw('SELECT * FROM users WHERE id = ?', [1])->execute();
+        $this->assertSame('SELECT * FROM users WHERE id = ? /* a=1 */', $result->template);
+        $this->assertSame([1], $result->parameters);
+        $this->assertSame(['id' => 1], (array) $result->first());
+    }
+
+    public function test_raw_with_casts(): void
+    {
+        $connection = $this->sqliteConnection();
+        $table = $connection->schema()->createTable('users');
+        $table->id();
+        $table->datetime('time');
+        $table->int('status');
+        $table->execute();
+
+        $time = new Time('2021-01-01 00:00:00.000');
+        $status = StatusEnum::Active;
+        $connection->query()->insertInto('users')
+            ->value(['id' => 1, 'time' => $time, 'status' => $status])
+            ->execute();
+
+        $handler = $connection->query();
+        $result = $handler->raw('SELECT * FROM users')->casts([
+            'time' => Time::class,
+            'status' => StatusEnum::class,
+        ])->execute();
+        $this->assertSame('SELECT * FROM users', $result->template);
+        $this->assertSame([], $result->parameters);
+        $this->assertEquals(['id' => 1, 'time' => $time, 'status' => $status], (array) $result->first());
+    }
+
+    public function test_raw_with_tags(): void
+    {
+        $connection = $this->sqliteConnection();
+        $table = $connection->schema()->createTable('users');
+        $table->id();
+        $table->execute();
+
+        $connection->query()->insertInto('users')
+            ->value(['id' => 1])
+            ->execute();
+
+        $handler = $connection->query();
+        $connection->tags->set('a', 1);
+        $result = $handler->raw('SELECT * FROM users')->setTag('b', 2)->execute();
+        $this->assertSame('SELECT * FROM users /* b=2,a=1 */', $result->template);
+        $this->assertSame([], $result->parameters);
+        $this->assertSame(['id' => 1], (array) $result->first());
+    }
+
     public function test_execute(): void
     {
         $connection = $this->sqliteConnection();
@@ -85,91 +170,6 @@ class QueryHandlerTest extends QueryTestCase
         $this->assertSame('SELECT * FROM users /* b=2,a=1 */', $result->template);
         $this->assertSame(['id' => 1], (array) $result->first());
         $this->assertCount(1, $this->eventTriggers);
-    }
-
-    public function test_executeRaw(): void
-    {
-        $connection = $this->sqliteConnection();
-        $table = $connection->schema()->createTable('users');
-        $table->id();
-        $table->execute();
-
-        $connection->query()->insertInto('users')
-            ->value(['id' => 1])
-            ->execute();
-
-        $this->listenToQueryExecuted();
-
-        $handler = $connection->query();
-        $connection->tags->set('a', 1);
-        $result = $handler->executeRaw('SELECT * FROM users');
-        $this->assertSame('SELECT * FROM users /* a=1 */', $result->template);
-        $this->assertSame([], $result->parameters);
-        $this->assertSame(['id' => 1], (array) $result->first());
-        $this->assertCount(1, $this->eventTriggers);
-    }
-
-    public function test_executeRaw_with_parameters(): void
-    {
-        $connection = $this->sqliteConnection();
-        $table = $connection->schema()->createTable('users');
-        $table->id();
-        $table->execute();
-
-        $connection->query()->insertInto('users')
-            ->value(['id' => 1])
-            ->execute();
-
-        $handler = $connection->query();
-        $connection->tags->set('a', 1);
-        $result = $handler->executeRaw('SELECT * FROM users WHERE id = ?', [1]);
-        $this->assertSame('SELECT * FROM users WHERE id = ? /* a=1 */', $result->template);
-        $this->assertSame([1], $result->parameters);
-        $this->assertSame(['id' => 1], (array) $result->first());
-    }
-
-    public function test_executeRaw_with_casts(): void
-    {
-        $connection = $this->sqliteConnection();
-        $table = $connection->schema()->createTable('users');
-        $table->id();
-        $table->datetime('time');
-        $table->int('status');
-        $table->execute();
-
-        $time = new Time('2021-01-01 00:00:00.000');
-        $status = StatusEnum::Active;
-        $connection->query()->insertInto('users')
-            ->value(['id' => 1, 'time' => $time, 'status' => $status])
-            ->execute();
-
-        $handler = $connection->query();
-        $result = $handler->executeRaw('SELECT * FROM users', casts: [
-            'time' => Time::class,
-            'status' => StatusEnum::class,
-        ]);
-        $this->assertSame('SELECT * FROM users', $result->template);
-        $this->assertSame([], $result->parameters);
-        $this->assertEquals(['id' => 1, 'time' => $time, 'status' => $status], (array) $result->first());
-    }
-
-    public function test_executeRaw_with_tags(): void
-    {
-        $connection = $this->sqliteConnection();
-        $table = $connection->schema()->createTable('users');
-        $table->id();
-        $table->execute();
-
-        $connection->query()->insertInto('users')
-            ->value(['id' => 1])
-            ->execute();
-
-        $handler = $connection->query();
-        $connection->tags->set('a', 1);
-        $result = $handler->executeRaw('SELECT * FROM users', tags: new Tags(['b' => 2]));
-        $this->assertSame('SELECT * FROM users /* b=2,a=1 */', $result->template);
-        $this->assertSame([], $result->parameters);
-        $this->assertSame(['id' => 1], (array) $result->first());
     }
 
     public function test_cursor(): void

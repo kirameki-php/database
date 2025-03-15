@@ -9,6 +9,7 @@ use Kirameki\Database\Expression;
 use Kirameki\Database\Query\Statements\DeleteBuilder;
 use Kirameki\Database\Query\Statements\InsertBuilder;
 use Kirameki\Database\Query\Statements\QueryStatement;
+use Kirameki\Database\Query\Statements\RawBuilder;
 use Kirameki\Database\Query\Statements\RawStatement;
 use Kirameki\Database\Query\Statements\SelectBuilder;
 use Kirameki\Database\Query\Statements\Tags;
@@ -100,6 +101,16 @@ readonly class QueryHandler
     }
 
     /**
+     * @param string $template
+     * @param iterable<int, mixed> $parameters
+     * @return RawBuilder
+     */
+    public function raw(string $template, iterable $parameters = []): RawBuilder
+    {
+        return new RawBuilder($this, $template, $parameters);
+    }
+
+    /**
      * @template TQueryStatement of QueryStatement
      * @param TQueryStatement $statement
      * @return QueryResult<TQueryStatement, mixed>
@@ -109,18 +120,6 @@ readonly class QueryHandler
         $this->preProcess($statement);
         $result = $this->connection->adapter->runQuery($statement);
         return $this->postProcess($result);
-    }
-
-    /**
-     * @param string $query
-     * @param iterable<array-key, mixed> $parameters
-     * @param array<string, string>|null $casts
-     * @param Tags|null $tags
-     * @return QueryResult<RawStatement, mixed>
-     */
-    public function executeRaw(string $query, iterable $parameters = [], ?array $casts = null, ?Tags $tags = null): QueryResult
-    {
-        return $this->execute(new RawStatement($query, $parameters, $casts, $tags));
     }
 
     /**

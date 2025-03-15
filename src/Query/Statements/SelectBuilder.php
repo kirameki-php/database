@@ -48,13 +48,12 @@ class SelectBuilder extends WhereBuilder
     #region selecting --------------------------------------------------------------------------------------------------
 
     /**
-     * @param string|Expression ...$tables
+     * @param string|Expression ...$columns
      * @return $this
      */
-    public function from(string|Expression ...$tables): static
+    public function __invoke(string|Expression ...$columns): static
     {
-        $this->statement->tables = array_is_list($tables) ? $tables : array_values($tables);
-        return $this;
+        return $this->columns(...$columns);
     }
 
     /**
@@ -64,6 +63,16 @@ class SelectBuilder extends WhereBuilder
     public function columns(string|Expression ...$columns): static
     {
         $this->statement->columns = array_is_list($columns) ? $columns : array_values($columns);
+        return $this;
+    }
+
+    /**
+     * @param string|Expression ...$tables
+     * @return $this
+     */
+    public function from(string|Expression ...$tables): static
+    {
+        $this->statement->tables = array_is_list($tables) ? $tables : array_values($tables);
         return $this;
     }
 
