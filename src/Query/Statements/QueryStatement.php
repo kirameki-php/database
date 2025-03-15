@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Query\Statements;
 
 use Kirameki\Database\Query\Syntax\QuerySyntax;
+use function dump;
 
 abstract class QueryStatement
 {

@@ -3,14 +3,15 @@
 namespace Kirameki\Database;
 
 use Override;
+use Stringable;
 
 class Raw implements Expression
 {
     /**
-     * @param string $value
+     * @param int|float|string $value
      */
     public function __construct(
-        public readonly string $value,
+        public readonly int|float|string|Stringable $value,
     )
     {
     }
@@ -21,6 +22,6 @@ class Raw implements Expression
     #[Override]
     public function toValue(Syntax $syntax): string
     {
-        return $this->value;
+        return (string) $this->value;
     }
 }

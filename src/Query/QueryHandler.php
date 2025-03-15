@@ -79,22 +79,24 @@ readonly class QueryHandler
 
     /**
      * @param string $name
-     * @param SelectBuilder|Closure(SelectBuilder): mixed $as
+     * @param list<string> $columns
+     * @param SelectBuilder|Closure(SelectBuilder): mixed|null $as
      * @return WithBuilder
      */
-    public function with(string $name, SelectBuilder|Closure $as): WithBuilder
+    public function with(string $name, iterable $columns = [], SelectBuilder|Closure|null $as = null): WithBuilder
     {
-        return new WithBuilder($this)->with($name, $as);
+        return new WithBuilder($this)->with($name, $columns, $as);
     }
 
     /**
      * @param string $name
-     * @param SelectBuilder|Closure(SelectBuilder): mixed $as
+     * @param list<string> $columns
+     * @param SelectBuilder|Closure(SelectBuilder): mixed|null $as
      * @return WithBuilder
      */
-    public function withRecursive(string $name, SelectBuilder|Closure $as): WithBuilder
+    public function withRecursive(string $name, iterable $columns = [], SelectBuilder|Closure|null $as = null): WithBuilder
     {
-        return new WithBuilder($this)->withRecursive($name, $as);
+        return new WithBuilder($this)->withRecursive($name, $columns, $as);
     }
 
     /**

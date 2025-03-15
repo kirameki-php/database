@@ -27,7 +27,7 @@ class InsertStatement extends QueryStatement
     #[Override]
     public function generateTemplate(QuerySyntax $syntax): string
     {
-        return $syntax->prepareTemplateForInsert($this, $this->dataset->getColumns());
+        return $syntax->prepareTemplateForInsert($this);
     }
 
     /**
@@ -36,6 +36,6 @@ class InsertStatement extends QueryStatement
     #[Override]
     public function generateParameters(QuerySyntax $syntax): array
     {
-        return $syntax->prepareParametersForInsert($this, $this->dataset->getColumns());
+        return $syntax->prepareParametersForInsert($this);
     }
 }

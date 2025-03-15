@@ -29,7 +29,7 @@ class UpsertStatement extends QueryStatement
     #[Override]
     public function generateTemplate(QuerySyntax $syntax): string
     {
-        return $syntax->prepareTemplateForUpsert($this, $this->dataset->getColumns());
+        return $syntax->prepareTemplateForUpsert($this);
     }
 
     /**
@@ -38,6 +38,6 @@ class UpsertStatement extends QueryStatement
     #[Override]
     public function generateParameters(QuerySyntax $syntax): array
     {
-        return $syntax->prepareParametersForUpsert($this, $this->dataset->getColumns());
+        return $syntax->prepareParametersForUpsert($this);
     }
 }

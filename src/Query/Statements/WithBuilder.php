@@ -3,9 +3,12 @@
 namespace Kirameki\Database\Query\Statements;
 
 use Closure;
+use Kirameki\Collections\Utils\Arr;
+use Kirameki\Core\Exceptions\InvalidArgumentException;
 use Kirameki\Database\Expression;
 use Kirameki\Database\Query\QueryHandler;
 use function array_map;
+use function iterator_to_array;
 
 class WithBuilder
 {
@@ -22,22 +25,24 @@ class WithBuilder
 
     /**
      * @param string $name
-     * @param SelectBuilder|Closure(SelectBuilder): mixed $as
+     * @param list<string> $columns
+     * @param SelectBuilder|Closure(SelectBuilder): mixed|null $as
      * @return static
      */
-    public function with(string $name, SelectBuilder|Closure $as): static
+    public function with(string $name, iterable $columns = [], SelectBuilder|Closure|null $as = null): static
     {
-        return $this->append($name, false, $as);
+        return $this->append($name, false, $columns, $as);
     }
 
     /**
      * @param string $name
-     * @param SelectBuilder|Closure(SelectBuilder): mixed $as
+     * @param list<string> $columns
+     * @param SelectBuilder|Closure(SelectBuilder): mixed|null $as
      * @return static
      */
-    public function withRecursive(string $name, SelectBuilder|Closure $as): static
+    public function withRecursive(string $name, iterable $columns = [], SelectBuilder|Closure|null $as = null): static
     {
-        return $this->append($name, true, $as);
+        return $this->append($name, true, $columns, $as);
     }
 
     /**
@@ -88,17 +93,34 @@ class WithBuilder
     /**
      * @param string $name
      * @param bool $recursive
-     * @param SelectBuilder|Closure(SelectBuilder): mixed $as
+     * @param iterable<int, string> $columns
+     * @param SelectBuilder|Closure(SelectBuilder): mixed|null $as
+     * This is nullable so that named arguments can be used to skip the columns.
      * @return $this
      */
-    protected function append(string $name, bool $recursive, SelectBuilder|Closure $as): static
+    protected function append(string $name, bool $recursive, iterable $columns, SelectBuilder|Closure|null $as = null): static
     {
+        if ($as === null) {
+            throw new InvalidArgumentException('The "as" argument must be provided.', [
+                'name' => $name,
+                'recursive' => $recursive,
+                'columns' => iterator_to_array($columns),
+            ]);
+        }
+
         if ($as instanceof Closure) {
             $builder = new SelectBuilder($this->handler);
             $as($builder);
             $as = $builder;
         }
-        $this->with[] = new With($name, $recursive, clone $as->statement);
+
+        $this->with[] = new With(
+            $name,
+            $recursive,
+            Arr::values($columns),
+            clone $as->statement,
+        );
+
         return $this;
     }
 
@@ -109,7 +131,7 @@ class WithBuilder
      */
     protected function apply(QueryBuilder $builder): QueryBuilder
     {
-        $builder->statement->with = (clone $this)->with;
+        $builder->statement->with = $this->with;
         return $builder;
     }
 

@@ -144,19 +144,31 @@ abstract class QuerySyntax extends Syntax
     public function prepareParametersForSelect(SelectStatement $statement): array
     {
         $parameters = [];
-        $this->addParametersForJoins($parameters, $statement);
-        $this->addParametersForWhere($parameters, $statement);
-        $this->addParametersForHaving($parameters, $statement);
+        $this->addParametersForSelect($parameters, $statement);
         return $this->stringifyParameters($parameters);
     }
 
     /**
+     * @param list<mixed> $parameters
+     * @param SelectStatement $statement
+     */
+    protected function addParametersForSelect(array &$parameters, SelectStatement $statement): void
+    {
+        $this->addParametersForCte($parameters, $statement);
+        $this->addParametersForJoins($parameters, $statement);
+        $this->addParametersForWhere($parameters, $statement);
+        $this->addParametersForHaving($parameters, $statement);
+        $this->addParametersForCompound($parameters, $statement);
+    }
+
+    /**
      * @param InsertStatement $statement
-     * @param list<string> $columns
      * @return string
      */
-    public function prepareTemplateForInsert(InsertStatement $statement, array $columns): string
+    public function prepareTemplateForInsert(InsertStatement $statement): string
     {
+        $columns = $statement->dataset->getColumns();
+
         if ($columns === []) {
             return "INSERT INTO {$this->asIdentifier($statement->table)} DEFAULT VALUES";
         }
@@ -173,21 +185,33 @@ abstract class QuerySyntax extends Syntax
 
     /**
      * @param InsertStatement $statement
-     * @param list<string> $columns
      * @return list<mixed>
      */
-    public function prepareParametersForInsert(InsertStatement $statement, array $columns): array
+    public function prepareParametersForInsert(InsertStatement $statement): array
     {
-        return $this->formatDatasetParameters($statement, $statement->dataset, $columns);
+        $parameters = [];
+        $this->addParametersForInsert($parameters, $statement);
+        return $this->stringifyParameters($parameters);
+    }
+
+    /**
+     * @param list<mixed> $parameters
+     * @param InsertStatement $statement
+     */
+    protected function addParametersForInsert(array &$parameters, InsertStatement $statement): void
+    {
+        $this->addParametersForCte($parameters, $statement);
+        $this->addParametersForDataset($parameters, $statement->dataset);
     }
 
     /**
      * @param UpsertStatement $statement
-     * @param list<string> $columns
      * @return string
      */
-    public function prepareTemplateForUpsert(UpsertStatement $statement, array $columns): string
+    public function prepareTemplateForUpsert(UpsertStatement $statement): string
     {
+        $columns = $statement->dataset->getColumns();
+
         return 'INSERT INTO ' . $this->concat([
             $this->asIdentifier($statement->table),
             $this->formatDatasetColumnsPart($columns),
@@ -202,12 +226,23 @@ abstract class QuerySyntax extends Syntax
 
     /**
      * @param UpsertStatement $statement
-     * @param list<string> $columns
      * @return list<mixed>
      */
-    public function prepareParametersForUpsert(UpsertStatement $statement, array $columns): array
+    public function prepareParametersForUpsert(UpsertStatement $statement): array
     {
-        return $this->formatDatasetParameters($statement, $statement->dataset, $columns);
+        $parameters = [];
+        $this->addParametersForCte($parameters, $statement);
+        $this->addParametersForUpsert($parameters, $statement);
+        return $this->stringifyParameters($parameters);
+    }
+
+    /**
+     * @param list<mixed> $parameters
+     * @param UpsertStatement $statement
+     */
+    protected function addParametersForUpsert(array &$parameters, UpsertStatement $statement): void
+    {
+        $this->addParametersForDataset($parameters, $statement->dataset);
     }
 
     /**
@@ -234,10 +269,25 @@ abstract class QuerySyntax extends Syntax
      */
     public function prepareParametersForUpdate(UpdateStatement $statement): array
     {
-        $parameters = $statement->set ?? throw new LogicException('No values to update', ['statement' => $statement]);
-        $parameters = array_values($parameters);
-        $this->addParametersForWhere($parameters, $statement);
+        $parameters = [];
+        $this->addParametersForUpdate($parameters, $statement);
         return $this->stringifyParameters($parameters);
+    }
+
+    /**
+     * @param list<mixed> $parameters
+     * @param UpdateStatement $statement
+     */
+    protected function addParametersForUpdate(array &$parameters, UpdateStatement $statement): void
+    {
+        $this->addParametersForCte($parameters, $statement);
+
+        $set = $statement->set ?? throw new LogicException('No values to update', ['statement' => $statement]);
+        foreach ($set as $value) {
+            $parameters[] = $value;
+        }
+
+        $this->addParametersForWhere($parameters, $statement);
     }
 
     /**
@@ -269,8 +319,18 @@ abstract class QuerySyntax extends Syntax
     public function prepareParametersForDelete(DeleteStatement $statement): array
     {
         $parameters = [];
-        $this->addParametersForWhere($parameters, $statement);
+        $this->addParametersForDelete($parameters, $statement);
         return $this->stringifyParameters($parameters);
+    }
+
+    /**
+     * @param list<mixed> $parameters
+     * @param DeleteStatement $statement
+     */
+    protected function addParametersForDelete(array &$parameters, DeleteStatement $statement): void
+    {
+        $this->addParametersForCte($parameters, $statement);
+        $this->addParametersForWhere($parameters, $statement);
     }
 
     /**
@@ -291,7 +351,21 @@ abstract class QuerySyntax extends Syntax
      */
     public function prepareParametersForRaw(RawStatement $statement): array
     {
-        return $this->stringifyParameters($statement->parameters);
+        $parameters = [];
+        $this->addParametersForRaw($parameters, $statement);
+        return $this->stringifyParameters($parameters);
+    }
+
+    /**
+     * @param list<mixed> $parameters
+     * @param RawStatement $statement
+     */
+    protected function addParametersForRaw(array &$parameters, RawStatement $statement): void
+    {
+        $this->addParametersForCte($parameters, $statement);
+        foreach ($statement->parameters as $value) {
+            $parameters[] = $value;
+        }
     }
 
     /**
@@ -312,8 +386,11 @@ abstract class QuerySyntax extends Syntax
     protected function formatWithDefinition(With $with): string
     {
         return $this->concat([
-            $this->asIdentifier($with->name),
             $with->recursive ? 'RECURSIVE' : null,
+            $this->asIdentifier($with->name),
+            count($with->columns) > 0
+                ? $this->asEnclosedCsv($this->asColumns($with->columns))
+                : null,
             'AS',
             $this->formatSubQuery($with->as),
         ]);
@@ -457,25 +534,6 @@ abstract class QuerySyntax extends Syntax
     protected function formatDatasetColumnsPart(array $columns): string
     {
         return $this->asEnclosedCsv($this->asColumns($columns));
-    }
-
-    /**
-     * @param QueryStatement $statement
-     * @param Dataset $dataset
-     * @param list<string> $columns
-     * @return list<mixed>
-     */
-    protected function formatDatasetParameters(QueryStatement $statement, Dataset $dataset, array $columns): array
-    {
-        $parameters = [];
-        foreach ($dataset as $data) {
-            foreach ($columns as $column) {
-                if (array_key_exists($column, $data)) {
-                    $parameters[] = $data[$column];
-                }
-            }
-        }
-        return $this->stringifyParameters($parameters);
     }
 
     /**
@@ -1020,6 +1078,27 @@ abstract class QuerySyntax extends Syntax
 
     /**
      * @param list<mixed> $parameters
+     * @param QueryStatement $as
+     * @return void
+     */
+    protected function addParametersForCte(array &$parameters, QueryStatement $as): void
+    {
+        if ($as->with !== null) {
+            foreach ($as->with as $with) {
+                $as = $with->as;
+                match (true) {
+                    $as instanceof SelectStatement => $this->addParametersForSelect($parameters, $as),
+                    $as instanceof RawStatement => $this->addParametersForRaw($parameters, $as),
+                    default => throw new LogicException('Invalid CTE statement.', [
+                        'statement' => $as,
+                    ]),
+                };
+            }
+        }
+    }
+
+    /**
+     * @param list<mixed> $parameters
      * @param SelectStatement $statement
      */
     protected function addParametersForJoins(array &$parameters, SelectStatement $statement): void
@@ -1059,6 +1138,18 @@ abstract class QuerySyntax extends Syntax
 
     /**
      * @param list<mixed> $parameters
+     * @param SelectStatement $statement
+     * @return void
+     */
+    protected function addParametersForCompound(array &$parameters, SelectStatement $statement): void
+    {
+        if ($statement->compound !== null) {
+            $this->addParametersForSelect($parameters, $statement->compound->query);
+        }
+    }
+
+    /**
+     * @param list<mixed> $parameters
      * @param Condition $def
      * @return void
      */
@@ -1074,6 +1165,23 @@ abstract class QuerySyntax extends Syntax
                 default => $parameters[] = $value,
             };
         } while ($def = $def->next);
+    }
+
+    /**
+     * @param list<mixed> $parameters
+     * @param Dataset $dataset
+     * @return void
+     */
+    protected function addParametersForDataset(array &$parameters, Dataset $dataset): void
+    {
+        $columns = $dataset->getColumns();
+        foreach ($dataset as $data) {
+            foreach ($columns as $column) {
+                if (array_key_exists($column, $data)) {
+                    $parameters[] = $data[$column];
+                }
+            }
+        }
     }
 
     /**
