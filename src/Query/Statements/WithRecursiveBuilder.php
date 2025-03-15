@@ -5,14 +5,14 @@ namespace Kirameki\Database\Query\Statements;
 use Closure;
 use Kirameki\Database\Query\QueryHandler;
 
-class WithBuilder extends CteBuilder
+class WithRecursiveBuilder extends CteBuilder
 {
     /**
      * @param QueryHandler $handler
      */
     public function __construct(QueryHandler $handler)
     {
-        parent::__construct($handler, false);
+        parent::__construct($handler, true);
     }
 
     /**
@@ -21,7 +21,7 @@ class WithBuilder extends CteBuilder
      * @param SelectBuilder|Closure(SelectBuilder): mixed|null $as
      * @return static
      */
-    public function with(string $name, iterable $columns = [], SelectBuilder|Closure|null $as = null): static
+    public function withRecursive(string $name, iterable $columns = [], SelectBuilder|Closure|null $as = null): static
     {
         return $this->addCte($name, $columns, $as);
     }

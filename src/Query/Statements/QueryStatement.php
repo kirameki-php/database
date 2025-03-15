@@ -8,12 +8,12 @@ use function dump;
 abstract class QueryStatement
 {
     /**
-     * @param list<With>|null $with
+     * @param CteAggregate|null $with
      * @param array<string, string>|null $casts
      * @param Tags|null $tags
      */
     public function __construct(
-        public ?array $with = null,
+        public ?CteAggregate $with = null,
         public ?array $casts = null,
         public ?Tags $tags = null,
     )

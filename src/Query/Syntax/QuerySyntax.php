@@ -42,7 +42,7 @@ use Kirameki\Database\Query\Statements\Tags;
 use Kirameki\Database\Query\Statements\TagsFormat;
 use Kirameki\Database\Query\Statements\UpdateStatement;
 use Kirameki\Database\Query\Statements\UpsertStatement;
-use Kirameki\Database\Query\Statements\With;
+use Kirameki\Database\Query\Statements\Cte;
 use Kirameki\Database\Syntax;
 use stdClass;
 use function array_filter;
@@ -374,19 +374,26 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatWithPart(ConditionStatement $statement): string
     {
-        return $statement->with !== null
-            ? 'WITH ' . $this->asCsv(array_map($this->formatWithDefinition(...), $statement->with))
-            : '';
+        $with = $statement->with;
+
+        if ($with === null) {
+            return '';
+        }
+
+        return $this->concat([
+            'WITH',
+            $with->recursive ? 'RECURSIVE' : null,
+            $this->asCsv(array_map($this->formatCte(...), $with->items)),
+        ]);
     }
 
     /**
-     * @param With $with
+     * @param Cte $with
      * @return string
      */
-    protected function formatWithDefinition(With $with): string
+    protected function formatCte(Cte $with): string
     {
         return $this->concat([
-            $with->recursive ? 'RECURSIVE' : null,
             $this->asIdentifier($with->name),
             count($with->columns) > 0
                 ? $this->asEnclosedCsv($this->asColumns($with->columns))
@@ -1078,13 +1085,13 @@ abstract class QuerySyntax extends Syntax
 
     /**
      * @param list<mixed> $parameters
-     * @param QueryStatement $as
+     * @param QueryStatement $statement
      * @return void
      */
-    protected function addParametersForCte(array &$parameters, QueryStatement $as): void
+    protected function addParametersForCte(array &$parameters, QueryStatement $statement): void
     {
-        if ($as->with !== null) {
-            foreach ($as->with as $with) {
+        if ($statement->with !== null) {
+            foreach ($statement->with as $with) {
                 $as = $with->as;
                 match (true) {
                     $as instanceof SelectStatement => $this->addParametersForSelect($parameters, $as),

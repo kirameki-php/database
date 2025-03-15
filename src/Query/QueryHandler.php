@@ -10,12 +10,12 @@ use Kirameki\Database\Query\Statements\DeleteBuilder;
 use Kirameki\Database\Query\Statements\InsertBuilder;
 use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Statements\RawBuilder;
-use Kirameki\Database\Query\Statements\RawStatement;
 use Kirameki\Database\Query\Statements\SelectBuilder;
 use Kirameki\Database\Query\Statements\Tags;
 use Kirameki\Database\Query\Statements\UpdateBuilder;
 use Kirameki\Database\Query\Statements\UpsertBuilder;
 use Kirameki\Database\Query\Statements\WithBuilder;
+use Kirameki\Database\Query\Statements\WithRecursiveBuilder;
 use Kirameki\Event\EventEmitter;
 
 readonly class QueryHandler
@@ -93,11 +93,11 @@ readonly class QueryHandler
      * @param string $name
      * @param list<string> $columns
      * @param SelectBuilder|Closure(SelectBuilder): mixed|null $as
-     * @return WithBuilder
+     * @return WithRecursiveBuilder
      */
-    public function withRecursive(string $name, iterable $columns = [], SelectBuilder|Closure|null $as = null): WithBuilder
+    public function withRecursive(string $name, iterable $columns = [], SelectBuilder|Closure|null $as = null): WithRecursiveBuilder
     {
-        return new WithBuilder($this)->withRecursive($name, $columns, $as);
+        return new WithRecursiveBuilder($this)->withRecursive($name, $columns, $as);
     }
 
     /**
