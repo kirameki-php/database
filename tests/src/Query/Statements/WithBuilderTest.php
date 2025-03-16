@@ -32,7 +32,7 @@ class WithBuilderTest extends QueryTestCase
             ->select()->from('cte1')
             ->unionAll($handler->select()->from('cte2'));
 
-        dump($query->toSql());
-        $this->assertSame([5], $query->pluck('a')->all());
+        dump($query->execute());
+        $this->assertSame([5, 5], $query->pluck('a')->all());
     }
 }

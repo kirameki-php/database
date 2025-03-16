@@ -30,6 +30,8 @@ use function property_exists;
  */
 class SelectBuilder extends WhereBuilder
 {
+    use ResultHelpers;
+
     /**
      * @var ConditionContext
      */
@@ -467,70 +469,12 @@ class SelectBuilder extends WhereBuilder
     }
 
     /**
-     * @return mixed
-     */
-    public function first(): mixed
-    {
-        return $this->copy()->limit(1)->execute()->first();
-    }
-
-    /**
-     * @return mixed
-     */
-    public function firstOrNull(): mixed
-    {
-        return $this->copy()->limit(1)->execute()->firstOrNull();
-    }
-
-    /**
-     * @return mixed
-     */
-    public function single(): mixed
-    {
-        return $this->copy()->limit(2)->execute()->single();
-    }
-
-    /**
      * @param string $column
      * @return Vec<mixed>
      */
     public function pluck(string $column): Vec
     {
         return $this->copy()->columns($column)->execute()->map(static fn($row) => $row->$column ?? null);
-    }
-
-    /**
-     * @param string $column
-     * @return mixed
-     */
-    public function value(string $column): mixed
-    {
-        $first = $this->firstOrNull();
-
-        if ($first === null) {
-            throw new LogicException("Expected query to return a row, but none was returned.", [
-                'column' => $column,
-                'statement' => $this->statement,
-            ]);
-        }
-
-        if (!property_exists($first, $column)) {
-            throw new InvalidArgumentException("Column '$column' does not exist.", [
-                'column' => $column,
-                'statement' => $this->statement,
-            ]);
-        }
-
-        return $first->$column;
-    }
-
-    /**
-     * @param string $column
-     * @return mixed
-     */
-    public function valueOrNull(string $column): mixed
-    {
-        return $this->firstOrNull()->$column ?? null;
     }
 
     /**

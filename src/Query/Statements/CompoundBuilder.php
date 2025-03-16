@@ -9,6 +9,8 @@ use Kirameki\Database\Query\QueryHandler;
  */
 class CompoundBuilder extends QueryBuilder
 {
+    use ResultHelpers;
+
     /**
      * @var Compound
      */
