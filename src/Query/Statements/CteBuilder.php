@@ -77,11 +77,15 @@ abstract class CteBuilder
     /**
      * @param string $name
      * @param iterable<int, string> $columns
-     * @param SelectBuilder|Closure(SelectBuilder): mixed|null $as
+     * @param SelectBuilder|CompoundBuilder|Closure(SelectBuilder): mixed|null $as
      * This is nullable so that named arguments can be used to skip the columns.
      * @return $this
      */
-    protected function addCte(string $name, iterable $columns, SelectBuilder|Closure|null $as = null): static
+    protected function addCte(
+        string $name,
+        iterable $columns,
+        SelectBuilder|CompoundBuilder|Closure|null $as = null,
+    ): static
     {
         if ($as === null) {
             throw new InvalidArgumentException('The "as" argument must be provided.', [
@@ -99,8 +103,8 @@ abstract class CteBuilder
         $this->cteAggregate->add(new Cte(
             $name,
             Arr::values($columns),
-            clone $as->statement),
-        );
+            clone $as->statement,
+        ));
 
         return $this;
     }
