@@ -403,14 +403,6 @@ class SelectBuilder extends WhereBuilder
     #region execution --------------------------------------------------------------------------------------------------
 
     /**
-     * @return QueryResult<SelectStatement, mixed>
-     */
-    public function cursor(): QueryResult
-    {
-        return $this->handler->cursor($this->statement);
-    }
-
-    /**
      * @param int $size
      * @return QueryResult<SelectStatement, mixed>
      */
