@@ -6,7 +6,6 @@ use Kirameki\Database\Query\Statements\SelectBuilder;
 use Kirameki\Database\Raw;
 use Tests\Kirameki\Database\Query\QueryTestCase;
 use function dump;
-use function implode;
 
 class WithBuilderTest extends QueryTestCase
 {

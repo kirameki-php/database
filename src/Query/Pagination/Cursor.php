@@ -4,12 +4,10 @@ namespace Kirameki\Database\Query\Pagination;
 
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\LogicException;
-use Kirameki\Database\Query\Statements\ComparingCondition;
 use Kirameki\Database\Query\Statements\Operator;
 use Kirameki\Database\Query\Statements\SelectBuilder;
 use Kirameki\Database\Query\Statements\SelectStatement;
 use Kirameki\Database\Query\Statements\SortOrder;
-use Kirameki\Database\Query\Statements\TupleColumns;
 use Kirameki\Database\Query\Statements\Tuple;
 use function array_keys;
 use function array_values;
