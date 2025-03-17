@@ -48,4 +48,15 @@ class CursorTest extends PaginatorTestCase
             $builder->toSql(),
         );
     }
+
+    public function test_applyTo__without_ordering(): void
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('Cannot paginate with cursor without an order by clause.');
+        $builder = $this->getCachedConnection()->query()->select()->from('t')
+            ->orderByAsc('id');
+        $object = (object) ['id' => 1, 'name' => 'foo'];
+        $cursor = Cursor::init($builder, $object);
+        $cursor->applyTo($builder->reorder());
+    }
 }

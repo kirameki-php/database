@@ -32,7 +32,11 @@ class WithBuilderTest extends QueryTestCase
             ->select()->from('cte1')
             ->unionAll($handler->select()->from('cte2'));
 
-        dump($query->execute());
+        $this->assertSame(implode('', [
+            "WITH `cte1` (`a`, `b`) AS (SELECT 5, 6), ",
+                 "`cte2` (`a`, `b`) AS (SELECT 5, 6) ",
+            "(SELECT * FROM `cte1`) UNION ALL (SELECT * FROM `cte2`)",
+        ]), $query->toSql());
         $this->assertSame([5, 5], $query->pluck('a')->all());
     }
 }

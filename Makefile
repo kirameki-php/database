@@ -34,3 +34,7 @@ bash:
 .PHONY: update
 update:
 	docker compose run --rm app composer update
+
+.PHONY: mysql
+mysql:
+	docker compose exec mysql mysql -h mysql -u root

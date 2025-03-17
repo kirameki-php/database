@@ -3,7 +3,6 @@
 namespace Tests\Kirameki\Database\Query\Pagination;
 
 use Kirameki\Database\Connection;
-use Kirameki\Database\Query\Pagination\Paginator;
 use Kirameki\Database\Query\QueryResult;
 use Kirameki\Database\Query\Statements\SelectStatement;
 use stdClass;

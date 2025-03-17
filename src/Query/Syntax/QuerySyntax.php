@@ -118,7 +118,6 @@ abstract class QuerySyntax extends Syntax
     public function prepareTemplateForSelect(SelectStatement $statement): string
     {
         $query = $this->concat([
-            $this->formatWithPart($statement),
             $this->formatSelectPart($statement),
             $this->formatFromPart($statement),
             $this->formatJoinPart($statement),
@@ -132,6 +131,7 @@ abstract class QuerySyntax extends Syntax
         ]);
 
         return $this->concat([
+            $this->formatWithPart($statement),
             $this->formatCompoundPart($query, $statement->compound),
             $this->formatTags($statement->tags),
         ]);
