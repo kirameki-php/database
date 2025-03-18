@@ -14,6 +14,7 @@ use Kirameki\Database\Query\Statements\Bounds;
 use Kirameki\Database\Query\Statements\ConditionBuilder;
 use Kirameki\Database\Query\Statements\JoinBuilder;
 use Kirameki\Database\Query\Statements\LockOption;
+use Kirameki\Database\Query\Statements\SelectBuilder;
 use Kirameki\Database\Query\Statements\Tuple;
 use Kirameki\Database\Raw;
 use Kirameki\Time\Time;
@@ -912,8 +913,39 @@ final class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
         $this->assertSame(IntCastEnum::B, $result->single()->c2);
     }
 
-    public function test_whereColumn_aliased(): void
+    public function test___clone__on_bare(): void
     {
-        // TODO: Implement test_whereColumn_aliased() method.
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->execute();
+
+        $query = $conn->query()->select()->from('User AS u');
+        $copy = clone $query;
+
+        $this->assertInstanceOf(SelectBuilder::class, $copy);
+        $this->assertSame($query->toSql(), $copy->toSql());
+        $this->assertNotSame($query->statement, $copy->statement);
+    }
+
+    public function test___clone__with_where(): void
+    {
+        $conn = $this->connect();
+        $table = $conn->schema()->createTable('User');
+        $table->id();
+        $table->execute();
+
+        $query = $conn->query()
+            ->select()->from('User AS u')
+            ->where(fn(ConditionBuilder $q) => $q->or('u.id', 1)->and('u.id', 2))
+            ->orderBy('u.id');
+        $copy = clone $query;
+
+        $this->assertInstanceOf(SelectBuilder::class, $copy);
+        $this->assertSame($query->toSql(), $copy->toSql());
+        $this->assertNotSame($query->statement, $copy->statement);
+        $this->assertNotSame($query->statement->where, $copy->statement->where);
+        $this->assertNotSame($query->statement->where?->value, $copy->statement->where?->value);
+        $this->assertSame($query->statement->orderBy, $copy->statement->orderBy);
     }
 }
