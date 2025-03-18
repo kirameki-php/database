@@ -20,6 +20,16 @@ abstract class QueryStatement
     {
     }
 
+    public function __clone(): void
+    {
+        if ($this->with !== null) {
+            $this->with = clone $this->with;
+        }
+        if ($this->tags !== null) {
+            $this->tags = clone $this->tags;
+        }
+    }
+
     /**
      * @param QuerySyntax $syntax
      * @return string

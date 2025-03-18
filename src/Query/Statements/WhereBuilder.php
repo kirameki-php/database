@@ -14,11 +14,9 @@ abstract class WhereBuilder extends QueryBuilder
     use HandlesCondition;
 
     /**
-     * @var ConditionContext
+     * @var ConditionContext|null
      */
-    protected ConditionContext $whereContext {
-        get => $this->whereContext ??= new ConditionContext();
-    }
+    protected ?ConditionContext $whereContext = null;
 
     /**
      * Do a deep clone of object types
@@ -27,7 +25,9 @@ abstract class WhereBuilder extends QueryBuilder
     {
         parent::__clone();
 
-        $this->whereContext = clone $this->whereContext;
+        if ($this->whereContext !== null) {
+            $this->whereContext = clone $this->whereContext;
+        }
     }
 
     /**
@@ -52,8 +52,9 @@ abstract class WhereBuilder extends QueryBuilder
      */
     public function where(mixed ...$args): static
     {
-        $this->applyCondition($this->whereContext, Logic::And, $args);
-        $this->statement->where ??= $this->whereContext->root;
+        $context = $this->getWhereContext();
+        $this->applyCondition($context, Logic::And, $args);
+        $this->statement->where ??= $context->root;
         return $this;
     }
 
@@ -97,5 +98,13 @@ abstract class WhereBuilder extends QueryBuilder
     public function whereNotExists(SelectBuilder $query): static
     {
         return $this->where(new CheckingCondition(clone $query->statement, true));
+    }
+
+    /**
+     * @return ConditionContext
+     */
+    protected function getWhereContext(): ConditionContext
+    {
+        return $this->whereContext ??= new ConditionContext();
     }
 }

@@ -20,11 +20,9 @@ class JoinBuilder
     public protected(set) JoinDefinition $join;
 
     /**
-     * @var ConditionContext
+     * @var ConditionContext|null
      */
-    protected ConditionContext $joinContext {
-        get => $this->joinContext ??= new ConditionContext();
-    }
+    protected ?ConditionContext $joinContext = null;
 
     /**
      * @var ComparingCondition|null
@@ -61,8 +59,17 @@ class JoinBuilder
     {
         assert(func_num_args() >= 2 && func_num_args() <= 3);
         array_splice($args, -1, 1, [new Column(end($args))]);
-        $this->applyCondition($this->joinContext, Logic::And, $args);
-        $this->join->condition = $this->joinContext->root;
+        $context = $this->getJoinContext();
+        $this->applyCondition($context, Logic::And, $args);
+        $this->join->condition = $context->root;
         return $this;
+    }
+
+    /**
+     * @return ConditionContext
+     */
+    protected function getJoinContext(): ConditionContext
+    {
+        return $this->joinContext ??= new ConditionContext();
     }
 }

@@ -40,6 +40,18 @@ class SelectStatement extends ConditionStatement
         parent::__construct();
     }
 
+    public function __clone(): void
+    {
+        parent::__clone();
+
+        if ($this->having !== null) {
+            $this->having = clone $this->having;
+        }
+        if ($this->compound !== null) {
+            $this->compound = clone $this->compound;
+        }
+    }
+
     /**
      * @inheritDoc
      */

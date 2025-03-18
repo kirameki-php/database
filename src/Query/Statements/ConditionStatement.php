@@ -14,6 +14,8 @@ abstract class ConditionStatement extends QueryStatement
      */
     public function __clone(): void
     {
+        parent::__clone();
+
         if ($this->where !== null) {
             $this->where = clone $this->where;
         }

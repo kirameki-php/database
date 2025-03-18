@@ -23,7 +23,6 @@ use function array_is_list;
 use function array_values;
 use function is_array;
 use function min;
-use function property_exists;
 
 /**
  * @extends WhereBuilder<SelectStatement>
@@ -33,11 +32,9 @@ class SelectBuilder extends WhereBuilder
     use ResultHelpers;
 
     /**
-     * @var ConditionContext
+     * @var ConditionContext|null
      */
-    protected ConditionContext $havingContext {
-        get => $this->havingContext ??= new ConditionContext();
-    }
+    protected ?ConditionContext $havingContext = null;
 
     /**
      * @param QueryHandler $handler
@@ -45,6 +42,15 @@ class SelectBuilder extends WhereBuilder
     public function __construct(QueryHandler $handler)
     {
         parent::__construct($handler, new SelectStatement());
+    }
+
+    public function __clone()
+    {
+        parent::__clone();
+
+        if ($this->statement->having !== null) {
+            $this->statement->having = clone $this->statement->having;
+        }
     }
 
     #region selecting --------------------------------------------------------------------------------------------------
@@ -271,9 +277,18 @@ class SelectBuilder extends WhereBuilder
      */
     public function having(mixed ...$args): static
     {
-        $this->applyCondition($this->havingContext, Logic::And, $args);
-        $this->statement->having = $this->havingContext->root;
+        $context = $this->getHavingContext();
+        $this->applyCondition($context, Logic::And, $args);
+        $this->statement->having = $context->root;
         return $this;
+    }
+
+    /**
+     * @return ConditionContext
+     */
+    protected function getHavingContext(): ConditionContext
+    {
+        return $this->havingContext ??= new ConditionContext();
     }
 
     #endregion grouping ------------------------------------------------------------------------------------------------
