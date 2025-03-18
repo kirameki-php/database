@@ -11,7 +11,6 @@ use Kirameki\Database\Query\Statements\InsertBuilder;
 use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Statements\RawBuilder;
 use Kirameki\Database\Query\Statements\SelectBuilder;
-use Kirameki\Database\Query\Statements\Tags;
 use Kirameki\Database\Query\Statements\UpdateBuilder;
 use Kirameki\Database\Query\Statements\UpsertBuilder;
 use Kirameki\Database\Query\Statements\WithBuilder;
@@ -23,12 +22,10 @@ readonly class QueryHandler
     /**
      * @param Connection $connection
      * @param EventEmitter|null $events
-     * @param Tags|null $tags
      */
     public function __construct(
         public Connection $connection,
         protected ?EventEmitter $events = null,
-        protected ?Tags $tags = null,
     )
     {
     }
@@ -183,10 +180,8 @@ readonly class QueryHandler
      */
     protected function mergeConnectionTags(QueryStatement $statement): void
     {
-        if ($this->tags !== null) {
-            $statement->tags !== null
-                ? $statement->tags->merge($this->tags)
-                : $statement->tags = $this->tags;
-        }
+        $statement->tags !== null
+            ? $statement->tags->merge($this->connection->tags)
+            : $statement->tags = $this->connection->tags;
     }
 }

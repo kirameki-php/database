@@ -149,7 +149,7 @@ class Connection
      */
     public function query(): QueryHandler
     {
-        return $this->queryHandler ??= new QueryHandler($this, $this->events, $this->tags);
+        return $this->queryHandler ??= new QueryHandler($this, $this->events);
     }
 
     /**
