@@ -125,9 +125,9 @@ class SchemaHandler
      */
     public function execute(SchemaStatement $statement): SchemaResult
     {
-        $this->preprocess($statement);
+        $this->preProcess($statement);
         $result = $this->connection->adapter->runSchema($statement);
-        return $this->postprocess($result);
+        return $this->postProcess($result);
     }
 
     /**
@@ -144,7 +144,7 @@ class SchemaHandler
      * @template TSchemaStatement of SchemaStatement
      * @param TSchemaStatement $statement
      */
-    protected function preprocess(SchemaStatement $statement): void
+    protected function preProcess(SchemaStatement $statement): void
     {
         $this->connection->connectIfNotConnected();
     }
@@ -154,7 +154,7 @@ class SchemaHandler
      * @param SchemaResult<TSchemaStatement> $result
      * @return SchemaResult<TSchemaStatement>
      */
-    protected function postprocess(SchemaResult $result): SchemaResult
+    protected function postProcess(SchemaResult $result): SchemaResult
     {
         $this->events?->emit(new SchemaExecuted($this->connection, $result));
         return $result;
