@@ -9,7 +9,7 @@ use function array_values;
 /**
  * @implements IteratorAggregate<string>
  */
-class Tuple implements IteratorAggregate
+final class Tuple implements IteratorAggregate
 {
     /**
      * @var list<mixed>
