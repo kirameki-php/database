@@ -2,6 +2,7 @@
 
 namespace Kirameki\Database\Query\Statements;
 
+use Closure;
 use Kirameki\Database\Query\QueryHandler;
 use Kirameki\Database\Query\QueryResult;
 
@@ -114,6 +115,17 @@ abstract class QueryBuilder
         foreach ($casts as $column => $type) {
             $this->statement->casts[$column] = $type;
         }
+        return $this;
+    }
+
+    /**
+     * @param Closure(QueryResult<TQueryStatement, mixed>): mixed $callback
+     * @return $this
+     */
+    public function afterQuery(Closure $callback): static
+    {
+        $this->statement->callback ??= [];
+        $this->statement->callback[] = $callback;
         return $this;
     }
 }

@@ -16,6 +16,7 @@ use Kirameki\Database\Query\Statements\UpsertBuilder;
 use Kirameki\Database\Query\Statements\WithBuilder;
 use Kirameki\Database\Query\Statements\WithRecursiveBuilder;
 use Kirameki\Event\EventEmitter;
+use function array_walk;
 
 class QueryHandler
 {
@@ -116,7 +117,7 @@ class QueryHandler
     {
         $this->preProcess($statement);
         $result = $this->connection->adapter->runQuery($statement);
-        return $this->postProcess($result);
+        return $this->postProcess($statement, $result);
     }
 
     /**
@@ -128,7 +129,7 @@ class QueryHandler
     {
         $this->preProcess($statement);
         $result = $this->connection->adapter->runQueryWithCursor($statement);
-        return $this->postProcess($result);
+        return $this->postProcess($statement, $result);
     }
 
     /**
@@ -140,7 +141,7 @@ class QueryHandler
     {
         $this->preProcess($statement);
         $result = $this->connection->adapter->explainQuery($statement);
-        return $this->postProcess($result);
+        return $this->postProcess($statement, $result);
     }
 
     /**
@@ -165,13 +166,29 @@ class QueryHandler
     /**
      * @template TQueryStatement of QueryStatement
      * @template TRow of mixed
+     * @param TQueryStatement $statement
      * @param QueryResult<TQueryStatement, TRow> $result
      * @return QueryResult<TQueryStatement, TRow>
      */
-    protected function postProcess(QueryResult $result): QueryResult
+    protected function postProcess(QueryStatement $statement, QueryResult $result): QueryResult
     {
+        $this->runCallback($statement, $result);
         $this->events?->emit(new QueryExecuted($this->connection, $result));
         return $result;
+    }
+
+    /**
+     * @template TQueryStatement of QueryStatement
+     * @template TRow of mixed
+     * @param TQueryStatement $statement
+     * @param QueryResult<TQueryStatement, TRow> $result
+     * @return void
+     */
+    protected function runCallback(QueryStatement $statement, QueryResult $result): void
+    {
+        if ($statement->callback !== null) {
+            array_walk($statement->callback, $result->pipe(...));
+        }
     }
 
     /**

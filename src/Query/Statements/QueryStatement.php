@@ -2,6 +2,8 @@
 
 namespace Kirameki\Database\Query\Statements;
 
+use Closure;
+use Kirameki\Database\Query\QueryResult;
 use Kirameki\Database\Query\Syntax\QuerySyntax;
 
 abstract class QueryStatement
@@ -10,11 +12,13 @@ abstract class QueryStatement
      * @param CteAggregate|null $with
      * @param array<string, string>|null $casts
      * @param Tags|null $tags
+     * @param list<Closure(QueryResult<static, mixed>): mixed>|null $callback
      */
     public function __construct(
         public ?CteAggregate $with = null,
         public ?array $casts = null,
         public ?Tags $tags = null,
+        public ?array $callback = null,
     )
     {
     }
