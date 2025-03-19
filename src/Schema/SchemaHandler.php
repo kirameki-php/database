@@ -28,7 +28,7 @@ class SchemaHandler
      * @param Randomizer|null $randomizer
      */
     public function __construct(
-        public readonly Connection $connection,
+        protected readonly Connection $connection,
         protected readonly ?EventEmitter $events = null,
         ?Randomizer $randomizer = null,
     )

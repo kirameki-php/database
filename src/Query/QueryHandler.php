@@ -17,15 +17,15 @@ use Kirameki\Database\Query\Statements\WithBuilder;
 use Kirameki\Database\Query\Statements\WithRecursiveBuilder;
 use Kirameki\Event\EventEmitter;
 
-readonly class QueryHandler
+class QueryHandler
 {
     /**
      * @param Connection $connection
      * @param EventEmitter|null $events
      */
     public function __construct(
-        public Connection $connection,
-        protected ?EventEmitter $events = null,
+        protected readonly Connection $connection,
+        protected readonly ?EventEmitter $events = null,
     )
     {
     }

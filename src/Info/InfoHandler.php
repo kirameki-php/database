@@ -11,13 +11,13 @@ use Kirameki\Database\Info\Statements\ListTablesStatement;
 use Kirameki\Database\Info\Statements\TableExistsStatement;
 use stdClass;
 
-readonly class InfoHandler
+class InfoHandler
 {
     /**
      * @param Connection $connection
      */
     public function __construct(
-        public Connection $connection,
+        protected readonly Connection $connection,
     )
     {
     }
@@ -49,19 +49,16 @@ readonly class InfoHandler
      */
     public function getTableInfo(string $name): TableInfo
     {
-        $connection = $this->connection;
+        $handler = $this->connection->query();
 
-        $columns = $connection->query()
-            ->execute(new ListColumnsStatement($name))
+        $columns = $handler->execute(new ListColumnsStatement($name))
             ->map(static fn(stdClass $r) => new ColumnInfo($r->name, $r->type, $r->nullable, $r->position))
             ->keyBy(static fn(ColumnInfo $c) => $c->name);
 
-        $indexes = $connection->query()
-            ->execute(new ListIndexesStatement($name))
+        $indexes = $handler->execute(new ListIndexesStatement($name))
             ->map(static fn(stdClass $r) => new IndexInfo($r->name, $r->columns, $r->type));
 
-        $foreignKeys = $connection->query()
-            ->execute(new ListForeignKeysStatement($name))
+        $foreignKeys = $handler->execute(new ListForeignKeysStatement($name))
             ->map(static fn(stdClass $r) => new ForeignKeyInfo($r->name, $r->columns, $r->referencedTable, $r->referencedColumns));
 
         return new TableInfo($name, $columns, $indexes, $foreignKeys);
