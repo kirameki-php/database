@@ -41,25 +41,13 @@ abstract class QueryBuilder
     }
 
     /**
-     * @param string $key
-     * @param scalar $value
+     * @param Closure(QueryResult<TQueryStatement, mixed>): mixed $callback
      * @return $this
      */
-    public function setTag(string $key, mixed $value): static
+    public function afterQuery(Closure $callback): static
     {
-        return $this->withTags([$key => $value]);
-    }
-
-    /**
-     * @param iterable<string, scalar> $tags
-     * @return $this
-     */
-    public function withTags(iterable $tags): static
-    {
-        $_tags = $this->statement->tags ??= new Tags();
-        foreach ($tags as $key => $value) {
-            $_tags->set($key, $value);
-        }
+        $this->statement->callback ??= [];
+        $this->statement->callback[] = $callback;
         return $this;
     }
 
@@ -119,13 +107,25 @@ abstract class QueryBuilder
     }
 
     /**
-     * @param Closure(QueryResult<TQueryStatement, mixed>): mixed $callback
+     * @param string $key
+     * @param scalar $value
      * @return $this
      */
-    public function afterQuery(Closure $callback): static
+    public function setTag(string $key, mixed $value): static
     {
-        $this->statement->callback ??= [];
-        $this->statement->callback[] = $callback;
+        return $this->withTags([$key => $value]);
+    }
+
+    /**
+     * @param iterable<string, scalar> $tags
+     * @return $this
+     */
+    public function withTags(iterable $tags): static
+    {
+        $_tags = $this->statement->tags ??= new Tags();
+        foreach ($tags as $key => $value) {
+            $_tags->set($key, $value);
+        }
         return $this;
     }
 }

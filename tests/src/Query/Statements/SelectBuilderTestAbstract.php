@@ -194,10 +194,4 @@ abstract class SelectBuilderTestAbstract extends QueryTestCase
     }
 
     abstract public function test_explain(): void;
-
-    abstract public function test_cast_to_time_from_string(): void;
-
-    abstract public function test_cast_to_int_backed_enum(): void;
-
-    abstract public function test_casts_to_different_casts(): void;
 }
