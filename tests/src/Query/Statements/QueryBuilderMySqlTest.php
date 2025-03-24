@@ -18,20 +18,17 @@ final class QueryBuilderMySqlTest extends QueryTestCase
 
         $handler = $conn->query();
         $handler->insertInto('User')->values([['id' => 1], ['id' => 2]])->execute();
-
         $query = $handler->select()->from('User')->where('id', 1);
         $result = [];
-        $query->afterQuery(function ($r) use (&$result) {
-            $result[] = $r;
-        });
-        $query->afterQuery(function ($r) use (&$result) {
-            $result[] = $r;
-        });
+        $query->afterQuery(function ($r) use (&$result) { $result[] = $r; });
+        $query->afterQuery(function ($r) use (&$result) { $result[] = $r; });
         $this->assertEmpty($result);
         $query->execute();
 
         $this->assertCount(2, $result);
-        $this->assertInstanceOf(QueryResult::class, $result[0]);
-        $this->assertSame([1], $result[0]->pluck('id')->all());
+        foreach ($result as $r) {
+            $this->assertInstanceOf(QueryResult::class, $r);
+            $this->assertSame([1], $result[0]->pluck('id')->all());
+        }
     }
 }
