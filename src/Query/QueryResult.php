@@ -11,7 +11,7 @@ use function property_exists;
 
 /**
  * @template TQueryStatement of QueryStatement
- * @template TRow of mixed
+ * @template TRow of mixed = mixed
  * @extends Vec<TRow>
  */
 class QueryResult extends Vec
