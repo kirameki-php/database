@@ -5,9 +5,12 @@ namespace Kirameki\Database\Query;
 use Closure;
 use Kirameki\Database\Connection;
 use Kirameki\Database\Events\QueryExecuted;
+use Kirameki\Database\Exceptions\DropProtectionException;
 use Kirameki\Database\Expression;
 use Kirameki\Database\Query\Statements\DeleteBuilder;
+use Kirameki\Database\Query\Statements\DeleteStatement;
 use Kirameki\Database\Query\Statements\InsertBuilder;
+use Kirameki\Database\Query\Statements\QueryBuilder;
 use Kirameki\Database\Query\Statements\QueryStatement;
 use Kirameki\Database\Query\Statements\RawBuilder;
 use Kirameki\Database\Query\Statements\SelectBuilder;
@@ -79,10 +82,10 @@ class QueryHandler
     /**
      * @param string $name
      * @param list<string> $columns
-     * @param SelectBuilder|Closure(SelectBuilder): mixed|null $as
+     * @param QueryBuilder|Closure(SelectBuilder): mixed|null $as
      * @return WithBuilder
      */
-    public function with(string $name, iterable $columns = [], SelectBuilder|Closure|null $as = null): WithBuilder
+    public function with(string $name, iterable $columns = [], QueryBuilder|Closure|null $as = null): WithBuilder
     {
         return new WithBuilder($this)->with($name, $columns, $as);
     }
@@ -90,10 +93,10 @@ class QueryHandler
     /**
      * @param string $name
      * @param list<string> $columns
-     * @param SelectBuilder|Closure(SelectBuilder): mixed|null $as
+     * @param QueryBuilder|Closure(SelectBuilder): mixed|null $as
      * @return WithRecursiveBuilder
      */
-    public function withRecursive(string $name, iterable $columns = [], SelectBuilder|Closure|null $as = null): WithRecursiveBuilder
+    public function withRecursive(string $name, iterable $columns = [], QueryBuilder|Closure|null $as = null): WithRecursiveBuilder
     {
         return new WithRecursiveBuilder($this)->withRecursive($name, $columns, $as);
     }
@@ -160,6 +163,7 @@ class QueryHandler
     protected function preProcess(QueryStatement $statement): void
     {
         $this->mergeConnectionTags($statement);
+        $this->checkForDropProtection($statement);
         $this->connection->connectIfNotConnected();
     }
 
@@ -200,5 +204,18 @@ class QueryHandler
         $statement->tags !== null
             ? $statement->tags->merge($this->connection->tags)
             : $statement->tags = $this->connection->tags;
+    }
+
+    protected function checkForDropProtection(QueryStatement $statement): void
+    {
+        if (
+            $statement instanceof DeleteStatement &&
+            $statement->where === null &&
+            $this->connection->adapter->databaseConfig->dropProtection
+        ) {
+            throw new DropProtectionException('DELETE without a WHERE clause is prohibited by configuration.', [
+                'statement' => $statement,
+            ]);
+        }
     }
 }

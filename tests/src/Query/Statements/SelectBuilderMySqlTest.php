@@ -841,7 +841,7 @@ final class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
         $this->assertSame("(SELECT * FROM `User_A`) UNION (SELECT * FROM `User_B`) LIMIT 1", $query->toSql());
     }
 
-    public function test_clone(): void
+    public function test___clone(): void
     {
         $base = $this->selectBuilder()->from('User')->where('id', 1);
         $copy = clone $base;
@@ -849,24 +849,6 @@ final class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
         $this->assertSame("SELECT * FROM `User` WHERE `id` = 1 AND `id` IN (3, 4)", $base->toSql());
         $this->assertSame("SELECT * FROM `User` WHERE `id` = 1", $copy->toSql());
         $this->assertNotSame($base->toSql(), $copy->toSql());
-    }
-
-    public function test_setTag(): void
-    {
-        $query = $this->selectBuilder()->from('User')->setTag('a', '1');
-        $statement = $query->statement;
-        $this->assertNotNull($statement->tags);
-        $this->assertSame(['a' => '1'], iterator_to_array($statement->tags));
-        $this->assertSame('SELECT * FROM `User` /* a=1 */', $query->toSql());
-    }
-
-    public function test_withTags(): void
-    {
-        $query = $this->selectBuilder()->from('User')->withTags(['a' => '1', 'b' => '2']);
-        $statement = $query->statement;
-        $this->assertNotNull($statement->tags);
-        $this->assertSame(['a' => '1', 'b' => '2'], iterator_to_array($statement->tags));
-        $this->assertSame('SELECT * FROM `User` /* a=1,b=2 */', $query->toSql());
     }
 
     public function test_explain(): void

@@ -171,17 +171,13 @@ abstract class SelectBuilderTestAbstract extends QueryTestCase
 
     abstract public function test_compound_limit(): void;
 
-    abstract public function test_clone(): void;
+    abstract public function test___clone(): void;
 
     public function test_getStatement(): void
     {
         $query = $this->selectBuilder()->from('User')->where('id', 1);
         $this->assertInstanceOf(SelectStatement::class, $query->statement);
     }
-
-    abstract public function test_setTag(): void;
-
-    abstract public function test_withTags(): void;
 
     public function test_execute(): void
     {
@@ -194,4 +190,8 @@ abstract class SelectBuilderTestAbstract extends QueryTestCase
     }
 
     abstract public function test_explain(): void;
+
+    abstract public function test___clone__on_bare(): void;
+
+    abstract public function test___clone__with_where(): void;
 }

@@ -18,13 +18,13 @@ class WithBuilder extends CteBuilder
     /**
      * @param string $name
      * @param list<string> $columns
-     * @param SelectBuilder|CompoundBuilder|Closure(SelectBuilder): mixed|null $as
+     * @param QueryBuilder|Closure(SelectBuilder): mixed|null $as
      * @return static
      */
     public function with(
         string $name,
         iterable $columns = [],
-        SelectBuilder|CompoundBuilder|Closure|null $as = null,
+        QueryBuilder|Closure|null $as = null,
     ): static
     {
         return $this->addCte($name, $columns, $as);

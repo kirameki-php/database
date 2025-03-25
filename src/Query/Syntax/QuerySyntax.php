@@ -6,6 +6,7 @@ use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\InvalidArgumentException;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Exceptions\NotSupportedException;
+use Kirameki\Core\Exceptions\UnreachableException;
 use Kirameki\Core\Func;
 use Kirameki\Core\Value;
 use Kirameki\Database\Exceptions\DropProtectionException;
@@ -52,6 +53,7 @@ use function array_map;
 use function array_push;
 use function count;
 use function current;
+use function dump;
 use function explode;
 use function implode;
 use function is_bool;
@@ -296,12 +298,6 @@ abstract class QuerySyntax extends Syntax
      */
     public function prepareTemplateForDelete(DeleteStatement $statement): string
     {
-        if ($this->databaseConfig->dropProtection && $statement->where === null) {
-            throw new DropProtectionException('DELETE without a WHERE clause is prohibited by configuration.', [
-                'statement' => $statement,
-            ]);
-        }
-
         return $this->concat([
             $this->formatWithPart($statement),
             'DELETE FROM',
@@ -631,9 +627,9 @@ abstract class QuerySyntax extends Syntax
                 $def instanceof NestedCondition => $this->formatNestedCondition($def),
                 $def instanceof CheckingCondition => $this->formatCheckingCondition($def),
                 $def instanceof RawCondition => $this->formatRawCondition($def),
-                default => throw new LogicException('Invalid condition definition.', [
-                    'definition' => $def,
-                ]),
+                // @codeCoverageIgnoreStart
+                default => throw new UnreachableException(),
+                // @codeCoverageIgnoreEnd
             };
 
             if ($def->logic !== null) {
@@ -1096,7 +1092,7 @@ abstract class QuerySyntax extends Syntax
                 match (true) {
                     $as instanceof SelectStatement => $this->addParametersForSelect($parameters, $as),
                     $as instanceof RawStatement => $this->addParametersForRaw($parameters, $as),
-                    default => throw new LogicException('Invalid CTE statement.', [
+                    default => throw new LogicException('Invalid CTE statement: ' . $as::class, [
                         'statement' => $as,
                     ]),
                 };

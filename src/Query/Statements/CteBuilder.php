@@ -77,14 +77,14 @@ abstract class CteBuilder
     /**
      * @param string $name
      * @param iterable<int, string> $columns
-     * @param SelectBuilder|CompoundBuilder|Closure(SelectBuilder): mixed|null $as
+     * @param QueryBuilder|Closure(SelectBuilder): mixed|null $as
      * This is nullable so that named arguments can be used to skip the columns.
      * @return $this
      */
     protected function addCte(
         string $name,
         iterable $columns,
-        SelectBuilder|CompoundBuilder|Closure|null $as = null,
+        QueryBuilder|Closure|null $as = null,
     ): static
     {
         if ($as === null) {

@@ -7,7 +7,7 @@ use Kirameki\Database\Query\QueryHandler;
 use Kirameki\Database\Query\QueryResult;
 
 /**
- * @template TQueryStatement of QueryStatement
+ * @template TQueryStatement of QueryStatement = QueryStatement
  */
 abstract class QueryBuilder
 {
