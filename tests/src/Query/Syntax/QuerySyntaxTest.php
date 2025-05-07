@@ -2,6 +2,7 @@
 
 namespace Tests\Kirameki\Database\Query\Syntax;
 
+use DateTime;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Exceptions\NotSupportedException;
 use Kirameki\Database\Adapters\SqliteAdapter;
@@ -12,8 +13,9 @@ use Kirameki\Database\Query\Statements\NullOrder;
 use Kirameki\Database\Query\Statements\RawStatement;
 use Kirameki\Database\Query\Statements\SortOrder;
 use Kirameki\Database\Query\Statements\TagsFormat;
+use Tests\Kirameki\Database\Query\_Support\MyString;
+use Tests\Kirameki\Database\Query\_Support\StatusEnum;
 use Tests\Kirameki\Database\Query\QueryTestCase;
-use function dump;
 
 class QuerySyntaxTest extends QueryTestCase
 {
@@ -392,5 +394,40 @@ class QuerySyntaxTest extends QueryTestCase
         $handler = $this->sqliteConnection()->query();
         $q = $handler->select()->from('db.t as a');
         $this->assertSame('SELECT * FROM "db"."t" AS "a"', $q->toSql());
+    }
+
+    public function test_stringifyParameters(): void
+    {
+        $syntax = $this->sqliteConnection()->adapter->querySyntax;
+        $this->assertSame([1, 'a'], $syntax->stringifyParameters([1, 'a']));
+        $this->assertSame([1, 2], $syntax->stringifyParameters(['a' => 1, 'b' => 2]));
+    }
+
+    public function test_stringifyParameter(): void
+    {
+        $syntax = $this->sqliteConnection()->adapter->querySyntax;
+        $excepted = [
+            1,
+            false,
+            0,
+            'a',
+            'z',
+            '2023-01-01T00:00:00.000000+00:00',
+            [2, true, '_', 0, 'b', 'y', '2024-01-01T00:00:00.000000+00:00'],
+        ];
+
+        $actual = [
+            1,
+            false,
+            StatusEnum::Inactive,
+            new MyString('a'),
+            'z',
+            new DateTime('2023-01-01'),
+            [2, true, '_', StatusEnum::Inactive, new MyString('b'), 'y', new DateTime('2024-01-01')],
+        ];
+
+        foreach ($actual as $i => $value) {
+            $this->assertSame($excepted[$i], $syntax->stringifyParameter($value));
+        }
     }
 }

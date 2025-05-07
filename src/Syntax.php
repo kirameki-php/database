@@ -8,6 +8,7 @@ use Kirameki\Collections\Utils\Arr;
 use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
 use Kirameki\Database\Query\Statements\Tuple;
+use Stringable;
 use function array_filter;
 use function array_map;
 use function implode;
@@ -207,6 +208,10 @@ abstract class Syntax
 
         if ($value instanceof BackedEnum) {
             return $value->value;
+        }
+
+        if ($value instanceof Stringable) {
+            return $value->__toString();
         }
 
         return $value;
