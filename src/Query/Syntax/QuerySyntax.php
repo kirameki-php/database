@@ -9,7 +9,6 @@ use Kirameki\Core\Exceptions\NotSupportedException;
 use Kirameki\Core\Exceptions\UnreachableException;
 use Kirameki\Core\Func;
 use Kirameki\Core\Value;
-use Kirameki\Database\Exceptions\DropProtectionException;
 use Kirameki\Database\Expression;
 use Kirameki\Database\Info\Statements\ListColumnsStatement;
 use Kirameki\Database\Info\Statements\ListForeignKeysStatement;
@@ -19,14 +18,15 @@ use Kirameki\Database\Info\Statements\TableExistsStatement;
 use Kirameki\Database\Query\Expressions\QueryFunction;
 use Kirameki\Database\Query\Statements\Bounds;
 use Kirameki\Database\Query\Statements\CheckingCondition;
-use Kirameki\Database\Query\Statements\Compound;
 use Kirameki\Database\Query\Statements\ComparingCondition;
+use Kirameki\Database\Query\Statements\Compound;
+use Kirameki\Database\Query\Statements\Condition;
 use Kirameki\Database\Query\Statements\ConditionStatement;
+use Kirameki\Database\Query\Statements\Cte;
 use Kirameki\Database\Query\Statements\Dataset;
 use Kirameki\Database\Query\Statements\DeleteStatement;
 use Kirameki\Database\Query\Statements\InsertStatement;
 use Kirameki\Database\Query\Statements\JoinDefinition;
-use Kirameki\Database\Query\Statements\Condition;
 use Kirameki\Database\Query\Statements\Lock;
 use Kirameki\Database\Query\Statements\LockOption;
 use Kirameki\Database\Query\Statements\LockType;
@@ -43,7 +43,6 @@ use Kirameki\Database\Query\Statements\Tags;
 use Kirameki\Database\Query\Statements\TagsFormat;
 use Kirameki\Database\Query\Statements\UpdateStatement;
 use Kirameki\Database\Query\Statements\UpsertStatement;
-use Kirameki\Database\Query\Statements\Cte;
 use Kirameki\Database\Syntax;
 use stdClass;
 use function array_filter;
@@ -53,7 +52,6 @@ use function array_map;
 use function array_push;
 use function count;
 use function current;
-use function dump;
 use function explode;
 use function implode;
 use function is_bool;
@@ -622,7 +620,7 @@ abstract class QuerySyntax extends Syntax
     {
         $parts = [];
         do {
-            $part = match(true) {
+            $part = match (true) {
                 $def instanceof ComparingCondition => $this->formatComparingCondition($def),
                 $def instanceof NestedCondition => $this->formatNestedCondition($def),
                 $def instanceof CheckingCondition => $this->formatCheckingCondition($def),

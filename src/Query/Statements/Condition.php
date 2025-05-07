@@ -13,7 +13,8 @@ abstract class Condition
         public mixed $value,
         public ?Logic $logic = null,
         public ?self $next = null,
-    ) {
+    )
+    {
     }
 
     /**
