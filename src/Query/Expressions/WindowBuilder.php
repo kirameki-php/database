@@ -19,12 +19,13 @@ class WindowBuilder implements Expression
 {
     /**
      * @param QueryFunction $func
+     * @param WindowDefinition $definition
      */
     public function __construct(
         public readonly QueryFunction $func,
+        public readonly WindowDefinition $definition,
     )
     {
-        $func->isWindowFunction = true;
     }
 
     /**
@@ -33,7 +34,7 @@ class WindowBuilder implements Expression
      */
     public function partitionBy(string ...$column): static
     {
-        $this->func->partitionBy = array_is_list($column) ? $column : array_values($column);
+        $this->definition->partitionBy = array_is_list($column) ? $column : array_values($column);
         return $this;
     }
 
@@ -49,8 +50,8 @@ class WindowBuilder implements Expression
         ?NullOrder $nulls = null,
     ): static
     {
-        $this->func->orderBy ??= [];
-        $this->func->orderBy[$column] = new Ordering($sort, $nulls);
+        $this->definition->orderBy ??= [];
+        $this->definition->orderBy[$column] = new Ordering($sort, $nulls);
         return $this;
     }
 

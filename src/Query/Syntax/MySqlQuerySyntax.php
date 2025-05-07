@@ -118,9 +118,11 @@ class MySqlQuerySyntax extends QuerySyntax
             'datetime' => 'datetime',
             'json' => 'json',
             'binary' => 'binary',
+            // @codeCoverageIgnoreStart
             default => throw new LogicException('Unsupported column type: ' . $row->type, [
                 'type' => $row->type,
             ]),
+            // @codeCoverageIgnoreEnd
         };
         $row->nullable = $row->nullable === 'YES';
         return $row;

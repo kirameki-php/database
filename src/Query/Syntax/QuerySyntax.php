@@ -16,6 +16,7 @@ use Kirameki\Database\Info\Statements\ListIndexesStatement;
 use Kirameki\Database\Info\Statements\ListTablesStatement;
 use Kirameki\Database\Info\Statements\TableExistsStatement;
 use Kirameki\Database\Query\Expressions\QueryFunction;
+use Kirameki\Database\Query\Expressions\WindowDefinition;
 use Kirameki\Database\Query\Statements\Bounds;
 use Kirameki\Database\Query\Statements\CheckingCondition;
 use Kirameki\Database\Query\Statements\ComparingCondition;
@@ -946,7 +947,7 @@ abstract class QuerySyntax extends Syntax
     {
         return $this->concat([
             $this->formatFunctionNamePart($func),
-            $this->formatWindowFunctionPart($func),
+            $this->formatWindowFunctionPart($func->window?->definition),
             $func->as !== null ? 'AS ' . $this->asIdentifier($func->as) : null,
         ]);
     }
@@ -964,22 +965,22 @@ abstract class QuerySyntax extends Syntax
     }
 
     /**
-     * @param QueryFunction $func
+     * @param WindowDefinition|null $def
      * @return string
      */
-    protected function formatWindowFunctionPart(QueryFunction $func): string
+    protected function formatWindowFunctionPart(?WindowDefinition $def): string
     {
-        if (!$func->isWindowFunction) {
+        if ($def === null) {
             return '';
         }
 
         $parts = [];
-        if ($func->partitionBy) {
-            $parts[] = 'PARTITION BY ' . $this->asCsv($this->asIdentifiers($func->partitionBy));
+        if ($def->partitionBy) {
+            $parts[] = 'PARTITION BY ' . $this->asCsv($this->asIdentifiers($def->partitionBy));
         }
-        if ($func->orderBy !== null) {
+        if ($def->orderBy !== null) {
             $clauses = [];
-            foreach ($func->orderBy as $column => $ordering) {
+            foreach ($def->orderBy as $column => $ordering) {
                 $clauses[] = $this->concat([
                     $this->asIdentifier($column),
                     $this->formatSortOrderingPart($column, $ordering),
@@ -988,7 +989,7 @@ abstract class QuerySyntax extends Syntax
             }
             $parts[] = 'ORDER BY ' . $this->asCsv($clauses);
         }
-        return 'OVER(' . implode(' ', $parts) . ')';
+        return 'OVER (' . implode(' ', $parts) . ')';
     }
 
     /**

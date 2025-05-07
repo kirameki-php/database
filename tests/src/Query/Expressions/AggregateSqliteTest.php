@@ -245,7 +245,7 @@ class AggregateSqliteTest extends AggregateTestAbstract
             ->select(new RowNumber()->over()->orderBy('id'))
             ->from('t');
 
-        $this->assertSame('SELECT ROW_NUMBER() OVER(ORDER BY "id") AS "row" FROM "t"', $query->toSql());
+        $this->assertSame('SELECT ROW_NUMBER() OVER (ORDER BY "id") AS "row" FROM "t"', $query->toSql());
         $this->assertSame([1, 2, 3], $query->execute()->map(fn($d) => $d->row)->all());
     }
 }

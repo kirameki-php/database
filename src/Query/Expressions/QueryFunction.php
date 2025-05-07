@@ -24,19 +24,9 @@ abstract class QueryFunction implements Expression
     public static string $defaultAlias;
 
     /**
-     * @var bool
+     * @var WindowBuilder|null
      */
-    public bool $isWindowFunction = false;
-
-    /**
-     * @var list<string>|null
-     */
-    public ?array $partitionBy = null;
-
-    /**
-     * @var array<string, Ordering>|null
-     */
-    public ?array $orderBy = null;
+    public ?WindowBuilder $window = null;
 
     /**
      * @param string|Expression|null $column
@@ -55,7 +45,7 @@ abstract class QueryFunction implements Expression
      */
     public function over(): WindowBuilder
     {
-        return new WindowBuilder($this);
+        return $this->window = new WindowBuilder($this, new WindowDefinition());
     }
 
     /**

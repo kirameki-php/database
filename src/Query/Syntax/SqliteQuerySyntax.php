@@ -118,9 +118,11 @@ class SqliteQuerySyntax extends QuerySyntax
             'UUID_TEXT' => 'uuid',
             'JSON_TEXT' => 'json',
             'BLOB' => 'binary',
+            // @codeCoverageIgnoreStart
             default => throw new LogicException('Unsupported column type: ' . $row->type, [
                 'type' => $row->type,
             ]),
+            // @codeCoverageIgnoreEnd
         };
         $row->nullable = (bool) $row->nullable;
         return $row;

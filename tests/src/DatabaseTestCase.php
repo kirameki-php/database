@@ -58,19 +58,30 @@ class DatabaseTestCase extends TestCase
     /**
      * @template TConnectionConfig of ConnectionConfig
      * @template TAdapter of Adapter<TConnectionConfig>
+     * @param string $driver
      * @param TAdapter|null $adapter
+     * @return Connection
      */
     public function createTempConnection(string $driver, ?Adapter $adapter = null): Connection
     {
-        $adapter ??= match ($driver) {
-            'mysql' => $this->createMySqlAdapter($adapter),
-            'sqlite' => $this->createSqliteAdapter(),
-            default => throw new RuntimeException("Unsupported driver: $driver"),
-        };
+        $adapter ??= $this->resolveAdapter($driver);
         $adapter->createDatabase();
         $this->runAfterTearDown(static fn() => $adapter->dropDatabase());
 
         return new Connection('temp', $adapter, $this->getEventManager());
+    }
+
+    /**
+     * @param string $driver
+     * @return Adapter<covariant ConnectionConfig>
+     */
+    public function resolveAdapter(string $driver): Adapter
+    {
+        return match ($driver) {
+            'mysql' => $this->createMySqlAdapter(),
+            'sqlite' => $this->createSqliteAdapter(),
+            default => throw new RuntimeException("Unsupported driver: $driver"),
+        };
     }
 
     public function createMySqlAdapter(
