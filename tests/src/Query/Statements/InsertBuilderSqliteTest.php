@@ -47,7 +47,7 @@ class InsertBuilderSqliteTest extends InsertBuilderTestAbstract
     public function test_insert_DateTime(): void
     {
         $sql = $this->insertBuilder('User')->value(['createdAt' => new Time('2020-01-01T01:12:34.56789Z')])->toSql();
-        $this->assertSame('INSERT INTO "User" ("createdAt") VALUES (\'2020-01-01T01:12:34.567890+00:00\')', $sql);
+        $this->assertSame('INSERT INTO "User" ("createdAt") VALUES (\'2020-01-01 01:12:34.567890\')', $sql);
     }
 
     public function test_returning(): void

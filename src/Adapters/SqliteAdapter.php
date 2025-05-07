@@ -26,14 +26,6 @@ use function unlink;
 class SqliteAdapter extends PdoAdapter
 {
     /**
-     * p is changed to P to prevent 00:00 from being converted to 'Z' which will cause problems
-     * when sorting since SQLite will treat datetime as string.
-     *
-     * @inheritdoc
-     */
-    protected string $dateTimeFormat = 'Y-m-d\TH:i:s.uP';
-
-    /**
      * @inheritDoc
      */
     #[Override]

@@ -44,11 +44,6 @@ class MySqlAdapter extends PdoAdapter
     protected string $literalDelimiter = '"';
 
     /**
-     * @inheritdoc
-     */
-    protected string $dateTimeFormat = 'Y-m-d H:i:s.u';
-
-    /**
      * @var bool
      */
     protected bool $omitDatabaseOnConnect = false;

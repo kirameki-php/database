@@ -37,7 +37,7 @@ abstract class Adapter
     /**
      * @var string
      */
-    protected string $dateTimeFormat = 'Y-m-d\TH:i:s.up';
+    protected string $dateTimeFormat = 'Y-m-d H:i:s.u';
 
     /**
      * @var QuerySyntax
