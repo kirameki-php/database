@@ -3,6 +3,7 @@
 namespace Tests\Kirameki\Database\Query\Syntax;
 
 use DateTime;
+use Kirameki\Core\Exceptions\InvalidArgumentException;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Exceptions\NotSupportedException;
 use Kirameki\Database\Adapters\SqliteAdapter;
@@ -394,6 +395,26 @@ class QuerySyntaxTest extends QueryTestCase
         $handler = $this->sqliteConnection()->query();
         $q = $handler->select()->from('db.t as a');
         $this->assertSame('SELECT * FROM "db"."t" AS "a"', $q->toSql());
+    }
+
+    public function test_asSingleLineComment(): void
+    {
+        $syntax = $this->sqliteConnection()->adapter->querySyntax;
+        $this->assertSame('-- a', $syntax->asSingleLineComment('a'));
+    }
+
+    public function test_asSingleLineComment__with_newline(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Single line comment must not contain new line.');
+        $syntax = $this->sqliteConnection()->adapter->querySyntax;
+        $this->assertSame('-- a' . PHP_EOL, $syntax->asSingleLineComment('a' . PHP_EOL));
+    }
+
+    public function test_asBlockComment(): void
+    {
+        $syntax = $this->sqliteConnection()->adapter->querySyntax;
+        $this->assertSame('/* a */', $syntax->asBlockComment('a'));
     }
 
     public function test_stringifyParameters(): void

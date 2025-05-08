@@ -6,6 +6,7 @@ use BackedEnum;
 use Closure;
 use DateTimeInterface;
 use Kirameki\Collections\Utils\Arr;
+use Kirameki\Core\Exceptions\InvalidArgumentException;
 use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
 use Kirameki\Database\Query\Statements\Tuple;
@@ -153,6 +154,24 @@ abstract class Syntax
         return $name;
     }
 
+    /**
+     * @param string $comment
+     * @return string
+     */
+    public function asSingleLineComment(string $comment): string
+    {
+        if (str_contains($comment, "\n")) {
+            throw new InvalidArgumentException('Single line comment must not contain new line.', [
+                'comment' => $comment,
+            ]);
+        }
+        return "-- {$comment}";
+    }
+
+    /**
+     * @param string $comment
+     * @return string
+     */
     public function asBlockComment(string $comment): string
     {
         return "/* {$comment} */";
