@@ -46,7 +46,8 @@ abstract class Syntax
     public function asIdentifier(string $string): string
     {
         $delimiter = $this->identifierDelimiter;
-        return $delimiter . $this->escape($string, $delimiter) . $delimiter;
+        $escaped = str_replace($delimiter, '\\' . $delimiter, $string);
+        return $delimiter . $escaped . $delimiter;
     }
 
     /**
@@ -65,16 +66,6 @@ abstract class Syntax
     public function asLiteral(string $string): string
     {
         return ($this->quoteFunction)($string);
-    }
-
-    /**
-     * @param string $string
-     * @param string $escaping
-     * @return string
-     */
-    public function escape(string $string, string $escaping): string
-    {
-        return str_replace($escaping, '\\' . $escaping, $string);
     }
 
     /**
