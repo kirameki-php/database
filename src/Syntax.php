@@ -26,14 +26,14 @@ abstract class Syntax
      * @param DatabaseConfig $databaseConfig
      * @param ConnectionConfig $connectionConfig
      * @param string $identifierDelimiter
-     * @param Closure(string): string $quoteFunction
+     * @param Closure(string): string $quoteLiteralFn
      * @param string $dateTimeFormat
      */
     public function __construct(
         protected readonly DatabaseConfig $databaseConfig,
         protected readonly ConnectionConfig $connectionConfig,
         protected readonly string $identifierDelimiter,
-        protected readonly Closure $quoteFunction,
+        protected readonly Closure $quoteLiteralFn,
         protected readonly string $dateTimeFormat,
     )
     {
@@ -65,7 +65,7 @@ abstract class Syntax
      */
     public function asLiteral(string $string): string
     {
-        return ($this->quoteFunction)($string);
+        return ($this->quoteLiteralFn)($string);
     }
 
     /**
