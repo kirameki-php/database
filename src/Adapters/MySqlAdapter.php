@@ -34,16 +34,6 @@ use function substr;
 class MySqlAdapter extends PdoAdapter
 {
     /**
-     * @inheritdoc
-     */
-    protected string $identifierDelimiter = '`';
-
-    /**
-     * @inheritdoc
-     */
-    protected string $literalDelimiter = '"';
-
-    /**
      * @var bool
      */
     protected bool $omitDatabaseOnConnect = false;
@@ -112,16 +102,15 @@ class MySqlAdapter extends PdoAdapter
             . ($connectionConfig->isReadOnly() ? ', READ ONLY' : '');
 
         $vars = $connectionConfig->systemVariables ?? [];
+        $vars['sql_mode'] = 'ANSI';
         if ($connectionConfig->transactionLockWaitTimeoutSeconds) {
             $vars['innodb_lock_wait_timeout'] = $connectionConfig->transactionLockWaitTimeoutSeconds;
         }
 
         try {
             $this->executeRawStatement($setTransaction);
-            if ($vars !== []) {
-                $parts = array_map(static fn($k, $v) => "{$k}={$v}", array_keys($vars), $vars);
-                $this->executeRawStatement('SET ' . implode(',', $parts));
-            }
+            $parts = array_map(static fn($k, $v) => "{$k}={$v}", array_keys($vars), $vars);
+            $this->executeRawStatement('SET ' . implode(',', $parts));
         } catch (PDOException $e) {
             $this->throwConnectionException($e);
         }
@@ -139,7 +128,7 @@ class MySqlAdapter extends PdoAdapter
             $this->databaseConfig,
             $this->connectionConfig,
             $this->identifierDelimiter,
-            $this->literalDelimiter,
+            $this->getPdo()->quote(...),
             $this->dateTimeFormat,
         );
     }
@@ -154,7 +143,7 @@ class MySqlAdapter extends PdoAdapter
             $this->databaseConfig,
             $this->connectionConfig,
             $this->identifierDelimiter,
-            $this->literalDelimiter,
+            $this->getPdo()->quote(...),
             $this->dateTimeFormat,
         );
     }

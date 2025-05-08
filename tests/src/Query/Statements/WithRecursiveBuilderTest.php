@@ -27,7 +27,7 @@ class WithRecursiveBuilderTest extends QueryTestCase
             ->select()
             ->from('cte');
 
-        $this->assertSame("WITH RECURSIVE `cte` (`n`) AS ((SELECT 1) UNION ALL (SELECT n + 1 FROM `cte` WHERE `n` < 3)) SELECT * FROM `cte`", $query->toSql());
+        $this->assertSame('WITH RECURSIVE "cte" ("n") AS ((SELECT 1) UNION ALL (SELECT n + 1 FROM "cte" WHERE "n" < 3)) SELECT * FROM "cte"', $query->toSql());
         $this->assertSame([1, 2, 3], $query->pluck('n')->all());
     }
 
@@ -54,9 +54,9 @@ class WithRecursiveBuilderTest extends QueryTestCase
             ->joinOn('cte2', 'cte1.n', 'cte2.m');
 
         $this->assertSame(implode('', [
-            "WITH RECURSIVE `cte1` (`n`) AS ((SELECT 1) UNION ALL (SELECT n + 1 FROM `cte1` WHERE `n` < 3)), ",
-                           "`cte2` (`m`) AS ((SELECT 1) UNION ALL (SELECT m + 1 FROM `cte2` WHERE `m` < 3)) ",
-            "SELECT * FROM `cte1` JOIN `cte2` ON `cte1`.`n` = `cte2`.`m`",
+            'WITH RECURSIVE "cte1" ("n") AS ((SELECT 1) UNION ALL (SELECT n + 1 FROM "cte1" WHERE "n" < 3)), ',
+                           '"cte2" ("m") AS ((SELECT 1) UNION ALL (SELECT m + 1 FROM "cte2" WHERE "m" < 3)) ',
+            'SELECT * FROM "cte1" JOIN "cte2" ON "cte1"."n" = "cte2"."m"',
         ]), $query->toSql());
         $this->assertSame([1, 2, 3], $query->pluck('n')->all());
     }
@@ -69,7 +69,7 @@ class WithRecursiveBuilderTest extends QueryTestCase
             ->select()
             ->from('cte');
 
-        $this->assertSame("WITH RECURSIVE `cte` AS (SELECT 5 AS a) SELECT * FROM `cte`", $query->toSql());
+        $this->assertSame('WITH RECURSIVE "cte" AS (SELECT 5 AS a) SELECT * FROM "cte"', $query->toSql());
         $this->assertSame([5], $query->pluck('a')->all());
     }
 

@@ -6,11 +6,27 @@ use Tests\Kirameki\Database\Query\QueryTestCase;
 
 abstract class UpdateBuilderTestAbstract extends QueryTestCase
 {
-    abstract public function test_update_value(): void;
+    public function test_update_value(): void
+    {
+        $sql = $this->updateBuilder('User')->set(['status'=> 1])->toSql();
+        $this->assertSame('UPDATE "User" SET "status" = 1', $sql);
+    }
 
-    abstract public function test_update_values(): void;
+    public function test_update_values(): void
+    {
+        $sql = $this->updateBuilder('User')->set(['status'=> 1, 'name' => 'abc'])->toSql();
+        $this->assertSame('UPDATE "User" SET "status" = 1, "name" = \'abc\'', $sql);
+    }
 
-    abstract public function test_update_with_where(): void;
+    public function test_update_with_where(): void
+    {
+        $sql = $this->updateBuilder('User')->set(['status'=> 1])->where('lock', 1)->toSql();
+        $this->assertSame('UPDATE "User" SET "status" = 1 WHERE "lock" = 1', $sql);
+    }
 
-    abstract public function test_returning(): void;
+    public function test_returning(): void
+    {
+        $sql = $this->updateBuilder('User')->set(['status'=> 1])->returning('id', 'status')->toSql();
+        $this->assertSame('UPDATE "User" SET "status" = 1 RETURNING "id", "status"', $sql);
+    }
 }

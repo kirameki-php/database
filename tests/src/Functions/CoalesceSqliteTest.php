@@ -19,12 +19,4 @@ class CoalesceSqliteTest extends CoalesceTestAbstract
         $result = Arr::first((array)$q->first());
         $this->assertSame(1, $result);
     }
-
-    public function test_columns_construct(): void
-    {
-        $connection = $this->getConnection();
-
-        $q = $connection->query()->select(Coalesce::columns('a', 'b'));
-        $this->assertSame('SELECT COALESCE("a", "b")', $q->toSql());
-    }
 }

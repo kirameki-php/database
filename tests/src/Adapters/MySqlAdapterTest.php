@@ -85,9 +85,9 @@ class MySqlAdapterTest extends PdoAdapterTestAbstract
         $this->runAfterTearDown(static fn() => $adapter1->dropDatabase());
 
         $adapter1->runSchema(new SchemaRawStatement('CREATE TABLE test (id INT PRIMARY KEY, name VARCHAR(255))'));
-        $adapter1->runQuery(new RawStatement('INSERT INTO test (id, name) VALUES (1, "a")'));
+        $adapter1->runQuery(new RawStatement("INSERT INTO test (id, name) VALUES (1, 'a')"));
         $adapter1->beginTransaction(new TransactionOptions(IsolationLevel::Serializable));
-        $adapter1->runQuery(new RawStatement('UPDATE test SET name = "b" WHERE id = 1'));
+        $adapter1->runQuery(new RawStatement('UPDATE test SET name = \'b\' WHERE id = 1'));
 
         $adapter2 = $this->createMySqlAdapter($name);
         $adapter2->beginTransaction(new TransactionOptions(IsolationLevel::ReadUncommitted));

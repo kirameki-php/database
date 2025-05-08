@@ -96,7 +96,7 @@ class SqliteAdapter extends PdoAdapter
             $this->databaseConfig,
             $this->connectionConfig,
             $this->identifierDelimiter,
-            $this->literalDelimiter,
+            $this->getPdo()->quote(...),
             $this->dateTimeFormat,
         );
     }
@@ -111,7 +111,7 @@ class SqliteAdapter extends PdoAdapter
             $this->databaseConfig,
             $this->connectionConfig,
             $this->identifierDelimiter,
-            $this->literalDelimiter,
+            $this->getPdo()->quote(...),
             $this->dateTimeFormat,
         );
     }

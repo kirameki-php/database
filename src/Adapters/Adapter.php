@@ -32,11 +32,6 @@ abstract class Adapter
     /**
      * @var string
      */
-    protected string $literalDelimiter = "'";
-
-    /**
-     * @var string
-     */
     protected string $dateTimeFormat = 'Y-m-d H:i:s.u';
 
     /**

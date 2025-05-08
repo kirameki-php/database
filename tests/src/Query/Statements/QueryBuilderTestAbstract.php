@@ -7,6 +7,7 @@ use Kirameki\Database\Raw;
 use Kirameki\Time\Time;
 use Tests\Kirameki\Database\Adapters\_Support\IntCastEnum;
 use Tests\Kirameki\Database\Query\QueryTestCase;
+use function iterator_to_array;
 
 abstract class QueryBuilderTestAbstract extends QueryTestCase
 {
@@ -37,7 +38,7 @@ abstract class QueryBuilderTestAbstract extends QueryTestCase
 
     public function test_cast_to_time_from_string(): void
     {
-        $casting = new Raw('"2020-01-01" as c');
+        $casting = new Raw("'2020-01-01' as c");
         $result = $this->selectBuilder()->columns($casting)->cast('c', Time::class)->execute();
         $value = $result->single()->c;
         $this->assertInstanceOf(Time::class, $value);
@@ -55,7 +56,7 @@ abstract class QueryBuilderTestAbstract extends QueryTestCase
 
     public function test_casts_to_different_casts(): void
     {
-        $castings = [new Raw('"2020-01-01" as c1'), new Raw('2 as c2')];
+        $castings = [new Raw("'2020-01-01' as c1"), new Raw('2 as c2')];
         $result = $this->selectBuilder()->columns(...$castings)->casts([
             'c1' => Time::class,
             'c2' => IntCastEnum::class,
@@ -64,7 +65,21 @@ abstract class QueryBuilderTestAbstract extends QueryTestCase
         $this->assertSame(IntCastEnum::B, $result->single()->c2);
     }
 
-    abstract public function test_setTag(): void;
+    public function test_setTag(): void
+    {
+        $query = $this->selectBuilder()->from('User')->setTag('a', '1');
+        $statement = $query->statement;
+        $this->assertNotNull($statement->tags);
+        $this->assertSame(['a' => '1'], iterator_to_array($statement->tags));
+        $this->assertSame('SELECT * FROM "User" /* a=1 */', $query->toSql());
+    }
 
-    abstract public function test_withTags(): void;
+    public function test_withTags(): void
+    {
+        $query = $this->selectBuilder()->from('User')->withTags(['a' => '1', 'b' => '2']);
+        $statement = $query->statement;
+        $this->assertNotNull($statement->tags);
+        $this->assertSame(['a' => '1', 'b' => '2'], iterator_to_array($statement->tags));
+        $this->assertSame('SELECT * FROM "User" /* a=1,b=2 */', $query->toSql());
+    }
 }

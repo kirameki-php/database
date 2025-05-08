@@ -21,7 +21,7 @@ class JsonExtractMySqlTest extends JsonExtractTestAbstract
         $q = $connection->query()
             ->select(JsonExtract::column('attrs', '$.users[1]', 't'))
             ->from('test');
-        $this->assertSame('SELECT `attrs` -> "$.users[1]" AS `t` FROM `test`', $q->toSql());
+        $this->assertSame('SELECT "attrs" -> \'$.users[1]\' AS "t" FROM "test"', $q->toSql());
 
         $result = Arr::first((array)$q->first());
         $this->assertSame('2', $result);
@@ -39,7 +39,7 @@ class JsonExtractMySqlTest extends JsonExtractTestAbstract
         $q = $connection->query()
             ->select(JsonExtract::column('attrs', '$.users', 't'))
             ->from('test');
-        $this->assertSame('SELECT `attrs` -> "$.users" AS `t` FROM `test`', $q->toSql());
+        $this->assertSame('SELECT "attrs" -> \'$.users\' AS "t" FROM "test"', $q->toSql());
 
         $result = (array)$q->first();
         $this->assertSame(['t' => '[1, 2, 3]'], $result);

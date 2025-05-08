@@ -3,6 +3,7 @@
 namespace Kirameki\Database;
 
 use BackedEnum;
+use Closure;
 use DateTimeInterface;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Database\Config\ConnectionConfig;
@@ -24,14 +25,14 @@ abstract class Syntax
      * @param DatabaseConfig $databaseConfig
      * @param ConnectionConfig $connectionConfig
      * @param string $identifierDelimiter
-     * @param string $literalDelimiter
+     * @param Closure(string): string $quoteFunction
      * @param string $dateTimeFormat
      */
     public function __construct(
         protected readonly DatabaseConfig $databaseConfig,
         protected readonly ConnectionConfig $connectionConfig,
         protected readonly string $identifierDelimiter,
-        protected readonly string $literalDelimiter,
+        protected readonly Closure $quoteFunction,
         protected readonly string $dateTimeFormat,
     )
     {
@@ -62,8 +63,7 @@ abstract class Syntax
      */
     public function asLiteral(string $string): string
     {
-        $delimiter = $this->literalDelimiter;
-        return $delimiter . $this->escape($string, $delimiter) . $delimiter;
+        return ($this->quoteFunction)($string);
     }
 
     /**

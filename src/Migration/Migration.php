@@ -35,9 +35,9 @@ abstract class Migration
     protected ?string $connection = null;
 
     /**
-     * @var list<SchemaResult<covariant SchemaStatement>>|null
+     * @var list<SchemaResult<covariant SchemaStatement>>
      */
-    private ?array $schemaResults = null;
+    private array $schemaResults = [];
 
     /**
      * @internal For internal use only
@@ -207,7 +207,6 @@ abstract class Migration
             $callback($builder);
         }
         $result = $builder->execute();
-        $this->schemaResults ??= [];
         $this->schemaResults[] = $result;
         return $result;
     }

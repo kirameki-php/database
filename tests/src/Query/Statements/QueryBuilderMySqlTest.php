@@ -26,23 +26,4 @@ final class QueryBuilderMySqlTest extends QueryBuilderTestAbstract
         $this->assertNotSame($query->statement->with, $copy->statement->with);
         $this->assertNotSame($query->statement->tags, $copy->statement->tags);
     }
-
-    public function test_setTag(): void
-    {
-        $query = $this->selectBuilder()->from('User')->setTag('a', '1');
-        $statement = $query->statement;
-        $this->assertNotNull($statement->tags);
-        $this->assertSame(['a' => '1'], iterator_to_array($statement->tags));
-        $this->assertSame('SELECT * FROM `User` /* a=1 */', $query->toSql());
-    }
-
-    public function test_withTags(): void
-    {
-        $query = $this->selectBuilder()->from('User')->withTags(['a' => '1', 'b' => '2']);
-        $statement = $query->statement;
-        $this->assertNotNull($statement->tags);
-        $this->assertSame(['a' => '1', 'b' => '2'], iterator_to_array($statement->tags));
-        $this->assertSame('SELECT * FROM `User` /* a=1,b=2 */', $query->toSql());
-    }
-
 }

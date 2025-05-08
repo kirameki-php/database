@@ -21,7 +21,7 @@ class WithBuilderTest extends QueryTestCase
             ->select()
             ->from('cte');
 
-        $this->assertSame("WITH `cte` AS (SELECT 5 AS a) SELECT * FROM `cte`", $query->toSql());
+        $this->assertSame('WITH "cte" AS (SELECT 5 AS a) SELECT * FROM "cte"', $query->toSql());
         $this->assertSame([5], $query->pluck('a')->all());
     }
 
@@ -35,9 +35,9 @@ class WithBuilderTest extends QueryTestCase
             ->unionAll($handler->select()->from('cte2'));
 
         $this->assertSame(implode('', [
-            "WITH `cte1` (`a`, `b`) AS (SELECT 5, 6), ",
-            "`cte2` (`a`, `b`) AS (SELECT 5, 6) ",
-            "(SELECT * FROM `cte1`) UNION ALL (SELECT * FROM `cte2`)",
+            'WITH "cte1" ("a", "b") AS (SELECT 5, 6), ',
+            '"cte2" ("a", "b") AS (SELECT 5, 6) ',
+            '(SELECT * FROM "cte1") UNION ALL (SELECT * FROM "cte2")',
         ]), $query->toSql());
         $this->assertSame([5, 5], $query->pluck('a')->all());
     }
@@ -50,7 +50,7 @@ class WithBuilderTest extends QueryTestCase
             ->select()
             ->from('cte');
 
-        $this->assertSame("WITH `cte` AS (SELECT 5 AS a) SELECT * FROM `cte`", $query->toSql());
+        $this->assertSame('WITH "cte" AS (SELECT 5 AS a) SELECT * FROM "cte"', $query->toSql());
         $this->assertSame([5], $query->pluck('a')->all());
     }
 
