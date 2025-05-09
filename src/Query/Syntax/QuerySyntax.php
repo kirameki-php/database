@@ -546,7 +546,14 @@ abstract class QuerySyntax extends Syntax
         foreach ($dataset as $data) {
             $binders = [];
             foreach ($columns as $column) {
-                $binders[] = array_key_exists($column, $data) ? '?' : 'DEFAULT';
+                if (array_key_exists($column, $data)) {
+                    $value = $data[$column];
+                    $binders[] = ($value instanceof Expression)
+                        ? $value->toValue($this)
+                        : '?';
+                } else {
+                    $binders[] = 'DEFAULT';
+                }
             }
             $placeholders[] = $this->asEnclosedCsv($binders);
         }
@@ -1177,7 +1184,12 @@ abstract class QuerySyntax extends Syntax
         foreach ($dataset as $data) {
             foreach ($columns as $column) {
                 if (array_key_exists($column, $data)) {
-                    $parameters[] = $data[$column];
+                    $value = $data[$column];
+                    if ($value instanceof Expression) {
+                        // expression is already evaluated to string
+                    } else {
+                        $parameters[] = $value;
+                    }
                 }
             }
         }
