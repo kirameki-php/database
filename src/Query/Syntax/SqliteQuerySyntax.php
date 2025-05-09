@@ -9,7 +9,9 @@ use Kirameki\Database\Info\Statements\ListForeignKeysStatement;
 use Kirameki\Database\Info\Statements\ListIndexesStatement;
 use Kirameki\Database\Info\Statements\ListTablesStatement;
 use Kirameki\Database\Info\Statements\TableExistsStatement;
+use Kirameki\Database\Query\Statements\Lock;
 use Kirameki\Database\Query\Statements\LockOption;
+use Kirameki\Database\Query\Statements\LockType;
 use Kirameki\Database\Query\Statements\NullOrder;
 use Kirameki\Database\Query\Statements\Ordering;
 use Kirameki\Database\Query\Statements\SelectStatement;
@@ -36,11 +38,15 @@ class SqliteQuerySyntax extends QuerySyntax
      * @inheritDoc
      */
     #[Override]
-    protected function formatSelectLockOptionPart(?LockOption $option): string
+    protected function formatSelectLockPart(?Lock $lock): string
     {
-        throw new LogicException('Sqlite does not support NOWAIT or SKIP LOCKED!', [
-            'option' => $option,
-        ]);
+        if ($lock?->option === LockOption::SkipLocked) {
+            throw new LogicException('SQLite does not support SKIP LOCKED!', [
+                'lock' => $lock,
+            ]);
+        }
+
+        return '';
     }
 
     /**

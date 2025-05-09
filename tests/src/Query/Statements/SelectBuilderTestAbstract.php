@@ -89,11 +89,7 @@ abstract class SelectBuilderTestAbstract extends QueryTestCase
         $this->assertSame('SELECT DISTINCT "id" FROM "User"', $sql);
     }
     
-    public function test_forceIndex(): void
-    {
-        $sql = $this->selectBuilder()->from('User')->columns('id')->forceIndex('force')->toSql();
-        $this->assertSame('SELECT "id" FROM "User" FORCE INDEX ("force")', $sql);
-    }
+    abstract public function test_forceIndex(): void;
 
     public function test_join_using_on(): void
     {
@@ -834,20 +830,7 @@ abstract class SelectBuilderTestAbstract extends QueryTestCase
         $this->assertNotSame($base->toSql(), $copy->toSql());
     }
 
-    public function test_explain(): void
-    {
-        $conn = $this->createTempConnection($this->useConnection);
-        $table = $conn->schema()->createTable('t');
-        $table->id();
-        $table->execute();
-        $conn->query()->insertInto('t')->value(['id' => 1])->execute();
-        $result = $conn->query()->select()->from('t')->where('id', 1)->explain();
-        $explain = (array) $result->first();
-        $this->assertSame(1, $explain['id']);
-        $this->assertSame('SIMPLE', $explain['select_type']);
-        $this->assertSame('t', $explain['table']);
-        $this->assertSame('PRIMARY', $explain['key']);
-    }
+    abstract public function test_explain(): void;
 
     public function test___clone__on_bare(): void
     {

@@ -433,13 +433,10 @@ abstract class QuerySyntax extends Syntax
     {
         $type = $lock?->type;
 
-        if ($type === null) {
-            return '';
-        }
-
         return match ($type) {
-            LockType::Exclusive => $type->value . $this->formatSelectLockOptionPart($lock->option),
+            LockType::Exclusive => $type->value . $this->formatSelectLockOptionPart($lock?->option),
             LockType::Shared => $type->value,
+            null => '',
         };
     }
 
