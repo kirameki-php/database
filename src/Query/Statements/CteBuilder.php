@@ -40,29 +40,11 @@ abstract class CteBuilder
 
     /**
      * @param string $table
-     * @return InsertBuilder
-     */
-    public function insertInto(string $table): InsertBuilder
-    {
-        return $this->apply(new InsertBuilder($this->handler, $table));
-    }
-
-    /**
-     * @param string $table
      * @return UpdateBuilder
      */
     public function update(string $table): UpdateBuilder
     {
         return $this->apply(new UpdateBuilder($this->handler, $table));
-    }
-
-    /**
-     * @param string $table
-     * @return UpsertBuilder
-     */
-    public function upsertInto(string $table): UpsertBuilder
-    {
-        return $this->apply(new UpsertBuilder($this->handler, $table));
     }
 
     /**
@@ -110,11 +92,11 @@ abstract class CteBuilder
     }
 
     /**
-     * @template TQueryBuilder as QueryBuilder
+     * @template TQueryBuilder as WhereBuilder
      * @param TQueryBuilder $builder
      * @return TQueryBuilder
      */
-    protected function apply(QueryBuilder $builder): QueryBuilder
+    protected function apply(WhereBuilder $builder): WhereBuilder
     {
         $builder->statement->with = $this->cteAggregate;
         return $builder;
