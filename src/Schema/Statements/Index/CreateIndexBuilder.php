@@ -16,6 +16,7 @@ class CreateIndexBuilder extends SchemaBuilder
     /**
      * @param SchemaHandler $handler
      * @param string $table
+     * @param bool $unique
      */
     public function __construct(
         SchemaHandler $handler,
@@ -25,6 +26,16 @@ class CreateIndexBuilder extends SchemaBuilder
     {
         parent::__construct($handler, new CreateIndexStatement($table));
         $this->statement->unique = $unique;
+    }
+
+    /**
+     * @param string|null $name
+     * @return $this
+     */
+    public function name(?string $name = null): static
+    {
+        $this->statement->name = $name;
+        return $this;
     }
 
     /**

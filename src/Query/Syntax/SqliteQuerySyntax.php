@@ -11,7 +11,6 @@ use Kirameki\Database\Info\Statements\ListTablesStatement;
 use Kirameki\Database\Info\Statements\TableExistsStatement;
 use Kirameki\Database\Query\Statements\Lock;
 use Kirameki\Database\Query\Statements\LockOption;
-use Kirameki\Database\Query\Statements\LockType;
 use Kirameki\Database\Query\Statements\NullOrder;
 use Kirameki\Database\Query\Statements\Ordering;
 use Kirameki\Database\Query\Statements\SelectStatement;

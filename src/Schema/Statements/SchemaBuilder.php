@@ -16,17 +16,9 @@ abstract class SchemaBuilder
      */
     public function __construct(
         protected readonly SchemaHandler $handler,
-        protected SchemaStatement $statement,
+        public protected(set) SchemaStatement $statement,
     )
     {
-    }
-
-    /**
-     * @return TSchemaStatement
-     */
-    public function getStatement(): SchemaStatement
-    {
-        return $this->statement;
     }
 
     /**

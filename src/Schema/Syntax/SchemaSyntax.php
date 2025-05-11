@@ -95,19 +95,11 @@ abstract class SchemaSyntax extends Syntax
      */
     protected function formatCreateTableIndexParts(CreateTableStatement $statement): array
     {
-        return array_map(function(CreateIndexStatement $index) {
-            $parts = [];
-            if ($index->unique) {
-                $parts[] = 'UNIQUE';
-            }
-            $parts[] = 'INDEX';
-            $columnParts = [];
-            foreach ($index->columns as $column => $order) {
-                $columnParts[] = "$column {$order->value}";
-            }
-            $parts[] = $this->asEnclosedCsv($columnParts);
-            return implode(' ', $parts);
-        }, $statement->indexes);
+        return array_map(fn(CreateIndexStatement $index) => $this->concat([
+            $index->unique ? 'UNIQUE' : '',
+            'INDEX',
+            $this->formatCreateIndexColumnsPart($index),
+        ]), $statement->indexes);
     }
 
     /**
@@ -235,21 +227,37 @@ abstract class SchemaSyntax extends Syntax
      */
     protected function formatCreateIndexStatement(CreateIndexStatement $statement): string
     {
-        $parts = [];
-        $parts[] = 'CREATE';
-        if ($statement->unique) {
-            $parts[] = 'UNIQUE';
-        }
-        $parts[] = 'INDEX';
-        $parts[] = $statement->name ?? implode('_', array_merge([$statement->table], array_keys($statement->columns)));
-        $parts[] = 'ON';
-        $parts[] = $statement->table;
+        return $this->concat([
+            'CREATE',
+            $statement->unique ? 'UNIQUE' : '',
+            'INDEX',
+            $this->asIdentifier($statement->name ?? $this->generateIndexNameFromColumns($statement)),
+            'ON',
+            $this->asIdentifier($statement->table),
+            $this->formatCreateIndexColumnsPart($statement),
+        ]);
+    }
+
+    /**
+     * @param CreateIndexStatement $index
+     * @return string
+     */
+    protected function generateIndexNameFromColumns(CreateIndexStatement $index): string
+    {
+        return implode('_', array_merge([$index->table], array_keys($index->columns)));
+    }
+
+    /**
+     * @param CreateIndexStatement $index
+     * @return string
+     */
+    protected function formatCreateIndexColumnsPart(CreateIndexStatement $index): string
+    {
         $columnParts = [];
-        foreach ($statement->columns as $column => $order) {
+        foreach ($index->columns as $column => $order) {
             $columnParts[] = "$column {$order->value}";
         }
-        $parts[] = $this->asEnclosedCsv($columnParts);
-        return implode(' ', $parts);
+        return $this->asEnclosedCsv($columnParts);
     }
 
     /**

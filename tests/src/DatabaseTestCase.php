@@ -52,7 +52,7 @@ class DatabaseTestCase extends TestCase
         $conn = $this->connections[$connection] ??= $this->createTempConnection($connection);
         $builder = new CreateTableBuilder($conn->schema(), $table, false);
         $callback($builder);
-        $conn->schema()->execute($builder->getStatement());
+        $conn->schema()->execute($builder->statement);
     }
 
     /**

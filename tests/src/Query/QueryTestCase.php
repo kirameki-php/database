@@ -8,6 +8,7 @@ use Kirameki\Database\Query\Statements\InsertBuilder;
 use Kirameki\Database\Query\Statements\QueryBuilder;
 use Kirameki\Database\Query\Statements\SelectBuilder;
 use Kirameki\Database\Query\Statements\UpdateBuilder;
+use Kirameki\Database\Query\Statements\UpsertBuilder;
 use Tests\Kirameki\Database\DatabaseTestCase;
 
 class QueryTestCase extends DatabaseTestCase
@@ -32,6 +33,11 @@ class QueryTestCase extends DatabaseTestCase
     protected function updateBuilder(string $table): UpdateBuilder
     {
         return new UpdateBuilder($this->connect()->query(), $table);
+    }
+
+    protected function upsertBuilder(string $table): UpsertBuilder
+    {
+        return new UpsertBuilder($this->connect()->query(), $table);
     }
 
     protected function deleteBuilder(string $table): DeleteBuilder

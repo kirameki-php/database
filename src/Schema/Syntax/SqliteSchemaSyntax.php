@@ -5,6 +5,7 @@ namespace Kirameki\Database\Schema\Syntax;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Functions\Syntax\SqliteFunctionSyntax;
 use Kirameki\Database\Schema\Statements\Column\ColumnDefinition;
+use Kirameki\Database\Schema\Statements\Index\CreateIndexStatement;
 use Kirameki\Database\Schema\Statements\Table\CreateTableStatement;
 use Kirameki\Database\Schema\Statements\Table\TruncateTableStatement;
 use Override;
@@ -102,6 +103,15 @@ class SqliteSchemaSyntax extends SchemaSyntax
             return 'PRIMARY KEY (' . implode(', ', $pkParts) . ')';
         }
         return null;
+    }
+
+    /**
+     * @param CreateIndexStatement $index
+     * @return string
+     */
+    protected function formatCreateIndexColumnsPart(CreateIndexStatement $index): string
+    {
+        return $this->asEnclosedCsv(array_keys($index->columns));
     }
 
     /**

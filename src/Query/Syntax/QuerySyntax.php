@@ -588,11 +588,11 @@ abstract class QuerySyntax extends Syntax
      */
     protected function formatUpsertOnConflictPart(array $onConflict): string
     {
-        $clause = 'ON CONFLICT ';
+        $clause = 'ON CONFLICT';
         if (count($onConflict) === 0) {
             return $clause;
         }
-        return $clause . $this->asEnclosedCsv($this->asIdentifiers($onConflict));
+        return $clause . ' ' . $this->asEnclosedCsv($this->asIdentifiers($onConflict));
     }
 
     /**

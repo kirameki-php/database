@@ -2,6 +2,7 @@
 
 namespace Tests\Kirameki\Database\Query\Statements;
 
+use Kirameki\Core\Exceptions\InvalidArgumentException;
 use Kirameki\Database\Query\Statements\InsertStatement;
 use Kirameki\Database\Query\Statements\SelectBuilder;
 use Kirameki\Database\Raw;
@@ -61,6 +62,18 @@ class WithBuilderTest extends QueryTestCase
 
         $handler = $this->connect()->query();
         $handler->with('cte', as: $handler->insertInto('User')->values([['id' => 1]]))
+            ->select()
+            ->from('cte')
+            ->toSql();
+    }
+
+    public function test_with__without_as(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('The "as" argument must be provided.');
+
+        $handler = $this->connect()->query();
+        $handler->with('cte', [])
             ->select()
             ->from('cte')
             ->toSql();
