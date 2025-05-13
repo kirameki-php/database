@@ -82,6 +82,10 @@ In SQLite the sum is returned as an integer/float and will return an error if in
 > [!NOTE]
 > On a related note, SUM will return NULL if no rows are found. This is the same for all databases.
 
+## NULL Ordering
+
+SQLite and MySQL will treat NULL as the lowest value when ordering, while PostgreSQL will treat NULL as the highest value.
+
 ## License
 
 This is an open-sourced software licensed under the [MIT License](LICENSE).

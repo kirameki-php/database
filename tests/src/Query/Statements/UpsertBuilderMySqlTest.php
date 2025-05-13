@@ -2,11 +2,9 @@
 
 namespace Tests\Kirameki\Database\Query\Statements;
 
-use function dump;
-
-class UpsertBuilderSqliteTest extends UpsertBuilderTestAbstract
+class UpsertBuilderMySqlTest extends UpsertBuilderTestAbstract
 {
-    protected string $useConnection = 'sqlite';
+    protected string $useConnection = 'mysql';
 
     public function test_upsert_value(): void
     {
@@ -21,7 +19,7 @@ class UpsertBuilderSqliteTest extends UpsertBuilderTestAbstract
         $select = $query->upsertInto('User')
             ->value(['id'=> 1, 'name' => 'b'])
             ->value(['id'=> 2, 'name' => 'c']);
-        $this->assertSame('INSERT INTO "User" ("id", "name") VALUES (1, \'b\'), (2, \'c\') ON CONFLICT DO UPDATE SET "id" = EXCLUDED."id", "name" = EXCLUDED."name"', $select->toSql());
+        $this->assertSame('INSERT INTO "User" ("id", "name") VALUES (1, \'b\'), (2, \'c\') AS new ON DUPLICATE KEY UPDATE "id" = new."id", "name" = new."name"', $select->toSql());
         $this->assertSame(2, $select->execute()->affectedRowCount);
         $result = $query->select()->from('User')->execute()->all();
         $this->assertCount(2, $result);
@@ -43,7 +41,7 @@ class UpsertBuilderSqliteTest extends UpsertBuilderTestAbstract
             ['id'=> 1, 'name' => 'b'],
             ['id'=> 2, 'name' => 'c'],
         ]);
-        $this->assertSame('INSERT INTO "User" ("id", "name") VALUES (1, \'b\'), (2, \'c\') ON CONFLICT DO UPDATE SET "id" = EXCLUDED."id", "name" = EXCLUDED."name"', $select->toSql());
+        $this->assertSame('INSERT INTO "User" ("id", "name") VALUES (1, \'b\'), (2, \'c\') AS new ON DUPLICATE KEY UPDATE "id" = new."id", "name" = new."name"', $select->toSql());
         $this->assertSame(2, $select->execute()->affectedRowCount);
         $result = $query->select()->from('User')->execute()->all();
         $this->assertCount(2, $result);
@@ -66,11 +64,11 @@ class UpsertBuilderSqliteTest extends UpsertBuilderTestAbstract
             ['id'=> 3, 'name' => 'a'],
             ['id'=> 2, 'name' => 'c'],
         ]);
-        $this->assertSame('INSERT INTO "User" ("id", "name") VALUES (3, \'a\'), (2, \'c\') ON CONFLICT ("name") DO UPDATE SET "id" = EXCLUDED."id", "name" = EXCLUDED."name"', $select->toSql());
+        $this->assertSame('INSERT INTO "User" ("id", "name") VALUES (3, \'a\'), (2, \'c\') AS new ON DUPLICATE KEY UPDATE "id" = new."id", "name" = new."name"', $select->toSql());
         $this->assertSame(2, $select->execute()->affectedRowCount);
         $result = $query->select()->from('User')->execute()->all();
         $this->assertCount(2, $result);
-        $this->assertSame(['id' => 2, 'name' => 'c'],  (array) $result[0]);
-        $this->assertSame(['id' => 3, 'name' => 'a'],  (array) $result[1]);
+        $this->assertSame(['id' => 3, 'name' => 'a'],  (array) $result[0]);
+        $this->assertSame(['id' => 2, 'name' => 'c'],  (array) $result[1]);
     }
 }

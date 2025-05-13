@@ -3,6 +3,7 @@
 namespace Tests\Kirameki\Database\Query\Statements;
 
 use Kirameki\Database\Query\Statements\LockOption;
+use Kirameki\Database\Query\Statements\NullOrder;
 
 final class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
 {
@@ -51,5 +52,11 @@ final class SelectBuilderMySqlTest extends SelectBuilderTestAbstract
         $this->assertSame('SIMPLE', $explain['select_type']);
         $this->assertSame('t', $explain['table']);
         $this->assertSame('PRIMARY', $explain['key']);
+    }
+
+    public function test_orderBy_with_nulls_last(): void
+    {
+        $sql = $this->selectBuilder()->from('User')->where('id', 1)->orderByAsc('id', NullOrder::Last)->toSql();
+        $this->assertSame('SELECT * FROM "User" WHERE "id" = 1 ORDER BY "id" IS NULL, "id"', $sql);
     }
 }

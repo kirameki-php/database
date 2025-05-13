@@ -43,6 +43,7 @@ abstract class SchemaSyntax extends Syntax
     {
         return [
             $this->formatCreateTableStatement($statement),
+            ...array_map($this->formatCreateIndexStatement(...), $statement->indexes),
         ];
     }
 
@@ -52,19 +53,17 @@ abstract class SchemaSyntax extends Syntax
      */
     protected function formatCreateTableStatement(CreateTableStatement $statement): string
     {
-        $parts = [];
-        $parts[] = 'CREATE';
-        if ($statement->temporary) {
-            $parts[] = 'TEMPORARY';
-        }
-        $parts[] = 'TABLE';
-        $parts[] = $this->asIdentifier($statement->table);
-        $subParts = array_map($this->formatColumnDefinition(...), $statement->columns);
-        $subParts[] = $this->formatCreateTablePrimaryKeyPart($statement);
-        $subParts[] = $this->formatCreateTableIndexParts($statement);
-        $subParts[] = $this->formatCreateTableForeignKeyParts($statement);
-        $parts[] = $this->asEnclosedCsv(array_filter(Arr::flatten($subParts), Func::notNull()));
-        return implode(' ', $parts);
+        return $this->concat([
+            'CREATE',
+            $statement->temporary ? 'TEMPORARY' : '',
+            'TABLE',
+            $this->asIdentifier($statement->table),
+            $this->asEnclosedCsv(array_filter([
+                ...array_map($this->formatColumnDefinition(...), $statement->columns),
+                $this->formatCreateTablePrimaryKeyPart($statement),
+                ...$this->formatCreateTableForeignKeyParts($statement),
+            ])),
+        ]);
     }
 
     /**
@@ -87,19 +86,6 @@ abstract class SchemaSyntax extends Syntax
             return 'PRIMARY KEY (' . implode(', ', $pkParts) . ')';
         }
         return null;
-    }
-
-    /**
-     * @param CreateTableStatement $statement
-     * @return list<string>
-     */
-    protected function formatCreateTableIndexParts(CreateTableStatement $statement): array
-    {
-        return array_map(fn(CreateIndexStatement $index) => $this->concat([
-            $index->unique ? 'UNIQUE' : '',
-            'INDEX',
-            $this->formatCreateIndexColumnsPart($index),
-        ]), $statement->indexes);
     }
 
     /**

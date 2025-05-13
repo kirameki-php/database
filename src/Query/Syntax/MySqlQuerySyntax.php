@@ -36,7 +36,7 @@ class MySqlQuerySyntax extends QuerySyntax
     #[Override]
     protected function formatUpsertDatasetValuesPart(Dataset $dataset, array $columns): string
     {
-        return parent::formatUpsertDatasetValuesPart($dataset, $columns) . 'AS new';
+        return parent::formatUpsertDatasetValuesPart($dataset, $columns) . ' AS new';
     }
 
     /**
@@ -56,7 +56,7 @@ class MySqlQuerySyntax extends QuerySyntax
     {
         $columns = $this->asIdentifiers($columns);
         $columns = array_map(static fn(string $column): string => "{$column} = new.{$column}", $columns);
-        return 'ON DUPLICATE KEY UPDATE' . $this->asCsv($columns);
+        return 'ON DUPLICATE KEY UPDATE ' . $this->asCsv($columns);
     }
 
     /**
@@ -91,7 +91,7 @@ class MySqlQuerySyntax extends QuerySyntax
         // However, MySql does not support the standard clause so we have to use
         // "$column IS NULL ASC, ..." to get the same effect.
         return $ordering->nulls === NullOrder::Last
-            ? " IS NULL, {$this->asIdentifier($column)}"
+            ? "IS NULL, {$this->asIdentifier($column)}"
             : '';
     }
 

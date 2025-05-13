@@ -13,6 +13,7 @@ use Kirameki\Database\Query\QueryResult;
 use Kirameki\Database\Query\Statements\Bounds;
 use Kirameki\Database\Query\Statements\ConditionBuilder;
 use Kirameki\Database\Query\Statements\JoinBuilder;
+use Kirameki\Database\Query\Statements\NullOrder;
 use Kirameki\Database\Query\Statements\SelectBuilder;
 use Kirameki\Database\Query\Statements\SelectStatement;
 use Kirameki\Database\Query\Statements\Tuple;
@@ -233,6 +234,18 @@ abstract class SelectBuilderTestAbstract extends QueryTestCase
     {
         $sql = $this->selectBuilder()->from('User')->where('id', 1)->orderByDesc('id')->toSql();
         $this->assertSame('SELECT * FROM "User" WHERE "id" = 1 ORDER BY "id" DESC', $sql);
+    }
+
+    public function test_orderBy_with_nulls_first(): void
+    {
+        $sql = $this->selectBuilder()->from('User')->where('id', 1)->orderByAsc('id', NullOrder::First)->toSql();
+        $this->assertSame('SELECT * FROM "User" WHERE "id" = 1 ORDER BY "id"', $sql);
+    }
+
+    public function test_orderBy_with_nulls_last(): void
+    {
+        $sql = $this->selectBuilder()->from('User')->where('id', 1)->orderByAsc('id', NullOrder::Last)->toSql();
+        $this->assertSame('SELECT * FROM "User" WHERE "id" = 1 ORDER BY "id" NULLS LAST', $sql);
     }
 
     public function test_groupBy(): void
