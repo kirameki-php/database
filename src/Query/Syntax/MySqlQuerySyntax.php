@@ -143,7 +143,7 @@ class MySqlQuerySyntax extends QuerySyntax
 
     /**
      * @param stdClass $row
-     * @return string
+     * @return ColumnType
      */
     protected function resolveColumnType(stdClass $row): ColumnType
     {

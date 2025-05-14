@@ -105,7 +105,7 @@ class MySql_CreateTableBuilderTest extends SchemaTestCase
     {
         $builder = $this->createTableBuilder('users');
         $builder->int('id')->nullable()->primaryKey();
-        $builder->datetime('loginAt')->nullable()->default(new Raw('CURRENT_TIMESTAMP'));
+        $builder->timestamp('loginAt')->nullable()->default(new Raw('CURRENT_TIMESTAMP'));
         $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE "users" ("id" BIGINT PRIMARY KEY, "loginAt" DATETIME(6) DEFAULT CURRENT_TIMESTAMP);', $schema);
     }

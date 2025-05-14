@@ -90,7 +90,7 @@ class CreateTableBuilder extends SchemaBuilder
      * @param int|null $precision
      * @return TimestampColumnBuilder
      */
-    public function datetime(string $column, ?int $precision = null): ColumnBuilder
+    public function timestamp(string $column, ?int $precision = null): ColumnBuilder
     {
         return new TimestampColumnBuilder($this->handler, $this->addDefinition($column, __FUNCTION__, $precision));
     }
@@ -148,8 +148,8 @@ class CreateTableBuilder extends SchemaBuilder
     public function timestamps(?int $precision = null): ColumnBuilderAggregate
     {
         return new ColumnBuilderAggregate([
-            $this->datetime('createdAt', $precision)->currentAsDefault(),
-            $this->datetime('updatedAt', $precision)->currentAsDefault(),
+            $this->timestamp('createdAt', $precision)->currentAsDefault(),
+            $this->timestamp('updatedAt', $precision)->currentAsDefault(),
         ]);
     }
 

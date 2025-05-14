@@ -135,7 +135,7 @@ class InfoHandlerTestAbstract extends QueryTestCase
         $connection = $this->getConnection();
         $connection->schema()->createTable('Test')->run(static function (CreateTableBuilder $t) {
             $t->int('i')->primaryKey();
-            $t->datetime('t');
+            $t->timestamp('t');
         });
 
         $column = $connection->info()->getTableInfo('Test')->columns->get('t');

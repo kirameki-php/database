@@ -110,7 +110,7 @@ class QueryHandlerTest extends QueryTestCase
         $connection = $this->sqliteConnection();
         $table = $connection->schema()->createTable('users');
         $table->id();
-        $table->datetime('time');
+        $table->timestamp('time');
         $table->int('status');
         $table->execute();
 

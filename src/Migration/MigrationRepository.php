@@ -44,7 +44,7 @@ readonly class MigrationRepository
         $builder = $this->getConnection()->schema()->createTable($this->getTableName());
         $builder->int('id')->autoIncrement()->primaryKey();
         $builder->string('name');
-        $builder->datetime('createdAt')->currentAsDefault();
+        $builder->timestamp('createdAt')->currentAsDefault();
         $builder->uniqueIndex('name');
         $builder->execute();
     }
