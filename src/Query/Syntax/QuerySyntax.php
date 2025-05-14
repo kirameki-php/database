@@ -1224,23 +1224,7 @@ abstract class QuerySyntax extends Syntax
      * @param ListColumnsStatement $statement
      * @return string
      */
-    public function prepareTemplateForListColumns(ListColumnsStatement $statement): string
-    {
-        $database = $this->asLiteral($this->connectionConfig->getTableSchema());
-        $table = $this->asLiteral($statement->table);
-        $columns = $this->asCsv([
-            "COLUMN_NAME AS `name`",
-            "DATA_TYPE AS `type`",
-            "IS_NULLABLE AS `nullable`",
-            "ORDINAL_POSITION AS `position`",
-        ]);
-        return implode(' ', [
-            "SELECT {$columns} FROM INFORMATION_SCHEMA.COLUMNS",
-            "WHERE TABLE_SCHEMA = {$database}",
-            "AND TABLE_NAME = {$table}",
-            "ORDER BY ORDINAL_POSITION ASC",
-        ]);
-    }
+    abstract public function prepareTemplateForListColumns(ListColumnsStatement $statement): string;
 
     /**
      * @param stdClass $row

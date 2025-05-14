@@ -3,6 +3,7 @@
 namespace Tests\Kirameki\Database\Info;
 
 use Kirameki\Database\Connection;
+use Kirameki\Database\Info\Statements\ColumnType;
 use Kirameki\Database\Schema\Statements\Table\CreateTableBuilder;
 use Tests\Kirameki\Database\Query\QueryTestCase;
 
@@ -37,53 +38,22 @@ class InfoHandlerTestAbstract extends QueryTestCase
         });
         $schema->createTable('TestB')->run(static function (CreateTableBuilder $t) {
             $t->int('id')->primaryKey();
-            $t->float('f');
             $t->decimal('d');
             $t->string('t');
-            $t->datetime('dt');
-            $t->json('j');
-            $t->binary('n');
             $t->int('testAId')->references('TestA', 'id');
         });
 
         $tableInfo = $connection->info()->getTableInfo('TestB');
         $this->assertSame('TestB', $tableInfo->table);
 
-        $column = $tableInfo->columns->get('id');
-        $this->assertSame('id', $column->name);
-        $this->assertSame('int', $column->type);
-        $this->assertSame(false, $column->nullable);
-        $this->assertSame(1, $column->position);
-
-        $column = $tableInfo->columns->get('f');
-        $this->assertSame('f', $column->name);
-        $this->assertSame('float', $column->type);
-        $this->assertSame(2, $column->position);
-
         $column = $tableInfo->columns->get('d');
         $this->assertSame('d', $column->name);
-        $this->assertSame('decimal', $column->type);
-        $this->assertSame(3, $column->position);
+        $this->assertSame(2, $column->position);
 
         $column = $tableInfo->columns->get('t');
         $this->assertSame('t', $column->name);
-        $this->assertSame('string', $column->type);
-        $this->assertSame(4, $column->position);
+        $this->assertSame(3, $column->position);
 
-        $column = $tableInfo->columns->get('dt');
-        $this->assertSame('dt', $column->name);
-        $this->assertSame('datetime', $column->type);
-        $this->assertSame(5, $column->position);
-
-        $column = $tableInfo->columns->get('j');
-        $this->assertSame('j', $column->name);
-        $this->assertSame('json', $column->type);
-        $this->assertSame(6, $column->position);
-
-        $column = $tableInfo->columns->get('n');
-        $this->assertSame('n', $column->name);
-        $this->assertSame('binary', $column->type);
-        $this->assertSame(7, $column->position);
 
         $index = $tableInfo->indexes->offsetGet(0);
         $this->assertSame('PRIMARY', $index->name);
@@ -94,5 +64,108 @@ class InfoHandlerTestAbstract extends QueryTestCase
         $this->assertSame('TestA', $foreignKey->referencedTable);
         $this->assertSame(['id'], $foreignKey->referencedColumns);
         $this->assertSame(['testAId'], $foreignKey->columns);
+    }
+
+    public function test_getTableColumns_type_int(): void
+    {
+        $connection = $this->getConnection();
+        $connection->schema()->createTable('Test')->run(static function (CreateTableBuilder $t) {
+            $t->int('t')->primaryKey();
+        });
+
+        $column = $connection->info()->getTableInfo('Test')->columns->get('t');
+        $this->assertSame('t', $column->name);
+        $this->assertSame(ColumnType::Int, $column->type);
+    }
+
+    public function test_getTableColumns_type_float(): void
+    {
+        $connection = $this->getConnection();
+        $connection->schema()->createTable('Test')->run(static function (CreateTableBuilder $t) {
+            $t->int('i')->primaryKey();
+            $t->float('t');
+        });
+
+        $column = $connection->info()->getTableInfo('Test')->columns->get('t');
+        $this->assertSame('t', $column->name);
+        $this->assertSame(ColumnType::Float, $column->type);
+    }
+
+    public function test_getTableColumns_type_decimal(): void
+    {
+        $connection = $this->getConnection();
+        $connection->schema()->createTable('Test')->run(static function (CreateTableBuilder $t) {
+            $t->int('i')->primaryKey();
+            $t->decimal('t');
+        });
+
+        $column = $connection->info()->getTableInfo('Test')->columns->get('t');
+        $this->assertSame('t', $column->name);
+        $this->assertSame(ColumnType::Decimal, $column->type);
+    }
+
+    public function test_getTableColumns_type_bool(): void
+    {
+        $connection = $this->getConnection();
+        $connection->schema()->createTable('Test')->run(static function (CreateTableBuilder $t) {
+            $t->int('i')->primaryKey();
+            $t->bool('t');
+        });
+
+        $column = $connection->info()->getTableInfo('Test')->columns->get('t');
+        $this->assertSame('t', $column->name);
+        $this->assertSame(ColumnType::Bool, $column->type);
+    }
+
+    public function test_getTableColumns_type_string(): void
+    {
+        $connection = $this->getConnection();
+        $connection->schema()->createTable('Test')->run(static function (CreateTableBuilder $t) {
+            $t->int('i')->primaryKey();
+            $t->string('t');
+        });
+
+        $column = $connection->info()->getTableInfo('Test')->columns->get('t');
+        $this->assertSame('t', $column->name);
+        $this->assertSame(ColumnType::String, $column->type);
+    }
+
+    public function test_getTableColumns_type_datetime(): void
+    {
+        $connection = $this->getConnection();
+        $connection->schema()->createTable('Test')->run(static function (CreateTableBuilder $t) {
+            $t->int('i')->primaryKey();
+            $t->datetime('t');
+        });
+
+        $column = $connection->info()->getTableInfo('Test')->columns->get('t');
+        $this->assertSame('t', $column->name);
+        $this->assertSame(ColumnType::Timestamp, $column->type);
+    }
+
+    public function test_getTableColumns_type_json(): void
+    {
+        $connection = $this->getConnection();
+        $connection->schema()->createTable('Test')->run(static function (CreateTableBuilder $t) {
+            $t->int('i')->primaryKey();
+            $t->json('t');
+        });
+
+        $column = $connection->info()->getTableInfo('Test')->columns->get('t');
+        $this->assertSame('t', $column->name);
+        $this->assertSame(ColumnType::Json, $column->type);
+    }
+
+    public function test_getTableColumns_type_binary(): void
+    {
+        $connection = $this->getConnection();
+        $connection->schema()->createTable('Test')->run(static function (CreateTableBuilder $t) {
+            $t->int('i')->primaryKey();
+            $t->binary('t');
+        });
+
+        $column = $connection->info()->getTableInfo('Test')->columns->get('t');
+        $this->assertSame('t', $column->name);
+        $this->assertSame(ColumnType::Blob, $column->type);
     }
 }

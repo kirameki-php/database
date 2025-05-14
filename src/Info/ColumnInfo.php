@@ -2,17 +2,19 @@
 
 namespace Kirameki\Database\Info;
 
+use Kirameki\Database\Info\Statements\ColumnType;
+
 readonly class ColumnInfo
 {
     /**
      * @param string $name
-     * @param string $type
+     * @param ColumnType $type
      * @param bool $nullable
      * @param int $position
      */
     public function __construct(
         public string $name,
-        public string $type,
+        public ColumnType $type,
         public bool $nullable,
         public int $position,
     )

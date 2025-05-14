@@ -77,7 +77,7 @@ class MySqlSchemaSyntax extends SchemaSyntax
             return 'DECIMAL' . (!empty($args) ? $this->asEnclosedCsv($args) : '');
         }
         if ($type === 'bool') {
-            return 'BOOL';
+            return 'BIT(1)';
         }
         if ($type === 'datetime') {
             return 'DATETIME(' . ($size ?? self::DEFAULT_TIME_PRECISION) . ')';

@@ -4,6 +4,8 @@ namespace Kirameki\Database\Query\Syntax;
 
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Functions\Syntax\MySqlFunctionSyntax;
+use Kirameki\Database\Info\Statements\ColumnType;
+use Kirameki\Database\Info\Statements\ListColumnsStatement;
 use Kirameki\Database\Info\Statements\ListForeignKeysStatement;
 use Kirameki\Database\Info\Statements\ListIndexesStatement;
 use Kirameki\Database\Query\Statements\Dataset;
@@ -14,6 +16,7 @@ use Override;
 use stdClass;
 use function array_map;
 use function implode;
+use function in_array;
 
 class MySqlQuerySyntax extends QuerySyntax
 {
@@ -96,6 +99,29 @@ class MySqlQuerySyntax extends QuerySyntax
     }
 
     /**
+     * @param ListColumnsStatement $statement
+     * @return string
+     */
+    public function prepareTemplateForListColumns(ListColumnsStatement $statement): string
+    {
+        $database = $this->asLiteral($this->connectionConfig->getTableSchema());
+        $table = $this->asLiteral($statement->table);
+        $columns = $this->asCsv([
+            "COLUMN_NAME AS `name`",
+            "DATA_TYPE AS `type`",
+            "COLUMN_TYPE AS `column_type`",
+            "IS_NULLABLE AS `nullable`",
+            "ORDINAL_POSITION AS `position`",
+        ]);
+        return implode(' ', [
+            "SELECT {$columns} FROM INFORMATION_SCHEMA.COLUMNS",
+            "WHERE TABLE_SCHEMA = {$database}",
+            "AND TABLE_NAME = {$table}",
+            "ORDER BY ORDINAL_POSITION ASC",
+        ]);
+    }
+
+    /**
      * @inheritDoc
      */
     #[Override]
@@ -110,22 +136,48 @@ class MySqlQuerySyntax extends QuerySyntax
     #[Override]
     public function normalizeListColumns(stdClass $row): ?stdClass
     {
-        $row->type = match ($row->type) {
-            'int', 'mediumint', 'tinyint', 'smallint', 'bigint' => 'int',
-            'float', 'double' => 'float',
-            'decimal' => 'decimal',
-            'varchar' => 'string',
-            'datetime' => 'datetime',
-            'json' => 'json',
-            'binary' => 'binary',
-            // @codeCoverageIgnoreStart
-            default => throw new LogicException('Unsupported column type: ' . $row->type, [
-                'type' => $row->type,
-            ]),
-            // @codeCoverageIgnoreEnd
-        };
+        $row->type = $this->resolveColumnType($row);
         $row->nullable = $row->nullable === 'YES';
         return $row;
+    }
+
+    /**
+     * @param stdClass $row
+     * @return string
+     */
+    protected function resolveColumnType(stdClass $row): ColumnType
+    {
+        $type = $row->type;
+
+        if (in_array($type, ['int', 'mediumint', 'tinyint', 'smallint', 'bigint'], true)) {
+            return ColumnType::Int;
+        }
+        if (in_array($type, ['float', 'double'], true)) {
+            return ColumnType::Float;
+        }
+        if ($type === 'decimal') {
+            return ColumnType::Decimal;
+        }
+        if ($row->column_type === 'bit(1)') {
+            return ColumnType::Bool;
+        }
+        if ($type === 'varchar') {
+            return ColumnType::String;
+        }
+        if ($type === 'datetime') {
+            return ColumnType::Timestamp;
+        }
+        if ($type === 'json') {
+            return ColumnType::Json;
+        }
+        if ($type === 'binary') {
+            return ColumnType::Blob;
+        }
+        // @codeCoverageIgnoreStart
+        throw new LogicException('Unsupported column type: ' . $row->type, [
+            'type' => $row->type,
+        ]);
+        // @codeCoverageIgnoreEnd
     }
 
     /**

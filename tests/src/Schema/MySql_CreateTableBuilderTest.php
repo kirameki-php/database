@@ -71,7 +71,7 @@ class MySql_CreateTableBuilderTest extends SchemaTestCase
         $builder->int('id')->primaryKey();
         $builder->bool('enabled')->nullable()->default(true);
         $schema = $builder->toDdl();
-        $this->assertSame('CREATE TABLE "users" ("id" BIGINT NOT NULL PRIMARY KEY, "enabled" BOOL DEFAULT TRUE);', $schema);
+        $this->assertSame('CREATE TABLE "users" ("id" BIGINT NOT NULL PRIMARY KEY, "enabled" BIT(1) DEFAULT TRUE);', $schema);
     }
 
     public function test_notNull(): void

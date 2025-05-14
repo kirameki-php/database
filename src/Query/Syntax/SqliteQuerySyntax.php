@@ -4,6 +4,7 @@ namespace Kirameki\Database\Query\Syntax;
 
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Functions\Syntax\SqliteFunctionSyntax;
+use Kirameki\Database\Info\Statements\ColumnType;
 use Kirameki\Database\Info\Statements\ListColumnsStatement;
 use Kirameki\Database\Info\Statements\ListForeignKeysStatement;
 use Kirameki\Database\Info\Statements\ListIndexesStatement;
@@ -114,15 +115,14 @@ class SqliteQuerySyntax extends QuerySyntax
     public function normalizeListColumns(stdClass $row): ?stdClass
     {
         $row->type = match ($row->type) {
-            'INTEGER' => 'int',
-            'REAL' => 'float',
-            'NUMERIC' => 'decimal',
-            'BOOLEAN' => 'bool',
-            'TEXT' => 'string',
-            'DATETIME' => 'datetime',
-            'UUID_TEXT' => 'uuid',
-            'JSON_TEXT' => 'json',
-            'BLOB' => 'binary',
+            'INTEGER' => ColumnType::Int,
+            'REAL' => ColumnType::Float,
+            'NUMERIC' => ColumnType::Decimal,
+            'BOOLEAN' => ColumnType::Bool,
+            'UUID_TEXT', 'TEXT' => ColumnType::String,
+            'DATETIME' => ColumnType::Timestamp,
+            'JSON_TEXT' => ColumnType::Json,
+            'BLOB' => ColumnType::Blob,
             // @codeCoverageIgnoreStart
             default => throw new LogicException('Unsupported column type: ' . $row->type, [
                 'type' => $row->type,
