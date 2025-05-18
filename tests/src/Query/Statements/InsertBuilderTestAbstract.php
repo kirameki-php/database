@@ -2,6 +2,7 @@
 
 namespace Tests\Kirameki\Database\Query\Statements;
 
+use Kirameki\Database\Functions\CurrentTimestamp;
 use Kirameki\Time\Time;
 use Tests\Kirameki\Database\Query\QueryTestCase;
 
@@ -24,6 +25,8 @@ abstract class InsertBuilderTestAbstract extends QueryTestCase
         $sql = $this->insertBuilder('User')->values([['status'=> 1], ['name' => 'abc']])->toSql();
         $this->assertSame('INSERT INTO "User" ("status", "name") VALUES (1, DEFAULT), (DEFAULT, \'abc\')', $sql);
     }
+
+    abstract public function test_insert_values_with_expression(): void;
 
     public function test_insert_with_no_value(): void
     {

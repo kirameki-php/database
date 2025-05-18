@@ -79,7 +79,7 @@ class MySqlSchemaSyntax extends SchemaSyntax
         if ($type === 'bool') {
             return 'BIT(1)';
         }
-        if ($type === 'datetime') {
+        if ($type === 'timestamp') {
             return 'DATETIME(' . ($size ?? self::DEFAULT_TIME_PRECISION) . ')';
         }
         if ($type === 'string') {
