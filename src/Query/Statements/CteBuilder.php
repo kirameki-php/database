@@ -39,24 +39,6 @@ abstract class CteBuilder
     }
 
     /**
-     * @param string $table
-     * @return UpdateBuilder
-     */
-    public function update(string $table): UpdateBuilder
-    {
-        return $this->apply(new UpdateBuilder($this->handler, $table));
-    }
-
-    /**
-     * @param string $table
-     * @return DeleteBuilder
-     */
-    public function deleteFrom(string $table): DeleteBuilder
-    {
-        return $this->apply(new DeleteBuilder($this->handler, $table));
-    }
-
-    /**
      * @param string $name
      * @param iterable<int, string> $columns
      * @param QueryBuilder|Closure(SelectBuilder): mixed|null $as

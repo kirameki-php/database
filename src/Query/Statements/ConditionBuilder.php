@@ -11,16 +11,6 @@ class ConditionBuilder
 
     /**
      * @param mixed ...$args
-     */
-    public function __construct(mixed ...$args)
-    {
-        if (count($args) > 0) {
-            $this->and(...$args);
-        }
-    }
-
-    /**
-     * @param mixed ...$args
      * @return $this
      */
     public function __invoke(mixed ...$args): static

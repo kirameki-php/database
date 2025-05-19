@@ -92,6 +92,12 @@ abstract class SelectBuilderTestAbstract extends QueryTestCase
     
     abstract public function test_forceIndex(): void;
 
+    public function test_join_using_using(): void
+    {
+        $sql = $this->selectBuilder()->from('Order')->join('Inventory', fn(JoinBuilder $join) => $join->using('itemId'))->toSql();
+        $this->assertSame('SELECT * FROM "Order" JOIN "Inventory" USING ("itemId")', $sql);
+    }
+
     public function test_join_using_on(): void
     {
         $sql = $this->selectBuilder()->from('User')->join('Device', fn(JoinBuilder $join) => $join->on('User.id', 'Device.userId'))->toSql();
@@ -836,10 +842,11 @@ abstract class SelectBuilderTestAbstract extends QueryTestCase
     public function test___clone(): void
     {
         $base = $this->selectBuilder()->from('User')->where('id', 1);
+        $base->having('id', 1);
         $copy = clone $base;
         $base->where('id', in: [3, 4]); // change $base but should not be reflected on copy
-        $this->assertSame('SELECT * FROM "User" WHERE "id" = 1 AND "id" IN (3, 4)', $base->toSql());
-        $this->assertSame('SELECT * FROM "User" WHERE "id" = 1', $copy->toSql());
+        $this->assertSame('SELECT * FROM "User" WHERE "id" = 1 AND "id" IN (3, 4) HAVING "id" = 1', $base->toSql());
+        $this->assertSame('SELECT * FROM "User" WHERE "id" = 1 HAVING "id" = 1', $copy->toSql());
         $this->assertNotSame($base->toSql(), $copy->toSql());
     }
 
