@@ -142,12 +142,14 @@ class SelectBuilder extends WhereBuilder
 
     /**
      * @param string $table
-     * @param Closure(JoinBuilder): JoinBuilder $callback
+     * @param Closure(JoinBuilder): mixed $callback
      * @return $this
      */
     public function join(string $table, Closure $callback): static
     {
-        return $this->addJoinToStatement($callback(new JoinBuilder(JoinType::Inner, $table)));
+        $builder = new JoinBuilder(JoinType::Inner, $table);
+        $callback($builder);
+        return $this->addJoinToStatement($builder);
     }
 
     /**
@@ -163,12 +165,14 @@ class SelectBuilder extends WhereBuilder
 
     /**
      * @param string $table
-     * @param Closure(JoinBuilder): JoinBuilder $callback
+     * @param Closure(JoinBuilder): mixed $callback
      * @return $this
      */
     public function crossJoin(string $table, Closure $callback): static
     {
-        return $this->addJoinToStatement($callback(new JoinBuilder(JoinType::Cross, $table)));
+        $builder = new JoinBuilder(JoinType::Cross, $table);
+        $callback($builder);
+        return $this->addJoinToStatement($builder);
     }
 
     /**
@@ -184,12 +188,14 @@ class SelectBuilder extends WhereBuilder
 
     /**
      * @param string $table
-     * @param Closure(JoinBuilder): JoinBuilder $callback
+     * @param Closure(JoinBuilder): mixed $callback
      * @return $this
      */
     public function leftJoin(string $table, Closure $callback): static
     {
-        return $this->addJoinToStatement($callback(new JoinBuilder(JoinType::Left, $table)));
+        $builder = new JoinBuilder(JoinType::Left, $table);
+        $callback($builder);
+        return $this->addJoinToStatement($builder);
     }
 
     /**
@@ -205,12 +211,14 @@ class SelectBuilder extends WhereBuilder
 
     /**
      * @param string $table
-     * @param Closure(JoinBuilder): JoinBuilder $callback
+     * @param Closure(JoinBuilder): mixed $callback
      * @return $this
      */
     public function rightJoin(string $table, Closure $callback): static
     {
-        return $this->addJoinToStatement($callback(new JoinBuilder(JoinType::Right, $table)));
+        $builder = new JoinBuilder(JoinType::Right, $table);
+        $callback($builder);
+        return $this->addJoinToStatement($builder);
     }
 
     /**
@@ -231,7 +239,9 @@ class SelectBuilder extends WhereBuilder
      */
     public function fullJoin(string $table, Closure $callback): static
     {
-        return $this->addJoinToStatement($callback(new JoinBuilder(JoinType::Full, $table)));
+        $builder = new JoinBuilder(JoinType::Full, $table);
+        $callback($builder);
+        return $this->addJoinToStatement($builder);
     }
 
     /**
