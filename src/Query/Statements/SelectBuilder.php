@@ -165,6 +165,16 @@ class SelectBuilder extends WhereBuilder
 
     /**
      * @param string $table
+     * @param string ...$column
+     * @return $this
+     */
+    public function joinUsing(string $table, string ...$column): static
+    {
+        return $this->addJoinToStatement(new JoinBuilder(JoinType::Inner, $table)->using(...$column));
+    }
+
+    /**
+     * @param string $table
      * @param Closure(JoinBuilder): mixed $callback
      * @return $this
      */
@@ -184,6 +194,16 @@ class SelectBuilder extends WhereBuilder
     public function crossJoinOn(string $table, string $column1, string $column2): static
     {
         return $this->addJoinToStatement(new JoinBuilder(JoinType::Cross, $table)->on($column1, $column2));
+    }
+
+    /**
+     * @param string $table
+     * @param string ...$column
+     * @return $this
+     */
+    public function crossJoinUsing(string $table, string ...$column): static
+    {
+        return $this->addJoinToStatement(new JoinBuilder(JoinType::Cross, $table)->using(...$column));
     }
 
     /**
@@ -211,6 +231,16 @@ class SelectBuilder extends WhereBuilder
 
     /**
      * @param string $table
+     * @param string ...$column
+     * @return $this
+     */
+    public function leftJoinUsing(string $table, string ...$column): static
+    {
+        return $this->addJoinToStatement(new JoinBuilder(JoinType::Left, $table)->using(...$column));
+    }
+
+    /**
+     * @param string $table
      * @param Closure(JoinBuilder): mixed $callback
      * @return $this
      */
@@ -234,6 +264,16 @@ class SelectBuilder extends WhereBuilder
 
     /**
      * @param string $table
+     * @param string ...$column
+     * @return $this
+     */
+    public function rightJoinUsing(string $table, string ...$column): static
+    {
+        return $this->addJoinToStatement(new JoinBuilder(JoinType::Right, $table)->using(...$column));
+    }
+
+    /**
+     * @param string $table
      * @param Closure(JoinBuilder): JoinBuilder $callback
      * @return $this
      */
@@ -253,6 +293,16 @@ class SelectBuilder extends WhereBuilder
     public function fullJoinOn(string $table, string $column1, string $column2): static
     {
         return $this->addJoinToStatement(new JoinBuilder(JoinType::Full, $table)->on($column1, $column2));
+    }
+
+    /**
+     * @param string $table
+     * @param string ...$column
+     * @return $this
+     */
+    public function fullJoinUsing(string $table, string ...$column): static
+    {
+        return $this->addJoinToStatement(new JoinBuilder(JoinType::Full, $table)->using(...$column));
     }
 
     /**
