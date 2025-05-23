@@ -119,6 +119,124 @@ abstract class SelectBuilderTestAbstract extends QueryTestCase
         $this->assertSame('SELECT * FROM "User" AS "u" JOIN "Device" AS "d" ON "u"."id" = "d"."userId"', $sql);
     }
 
+    public function test_joinUsing(): void
+    {
+        $sql = $this->selectBuilder()->from('User AS u')->joinUsing('Device AS d', 'userId')->toSql();
+        $this->assertSame('SELECT * FROM "User" AS "u" JOIN "Device" AS "d" USING ("userId")', $sql);
+    }
+
+    public function test_crossJoin_using_on(): void
+    {
+        $sql = $this->selectBuilder()->from('User')
+            ->crossJoin('Device', fn(JoinBuilder $join) => $join->on('User.id', 'Device.userId'))
+            ->toSql();
+        $this->assertSame('SELECT * FROM "User" CROSS JOIN "Device" ON "User"."id" = "Device"."userId"', $sql);
+    }
+
+    public function test_crossJoin_using_using(): void
+    {
+        $sql = $this->selectBuilder()->from('User')
+            ->crossJoin('Device', fn(JoinBuilder $join) => $join->using('itemId'))
+            ->toSql();
+        $this->assertSame('SELECT * FROM "User" CROSS JOIN "Device" USING ("itemId")', $sql);
+    }
+
+    public function test_crossJoinOn(): void
+    {
+        $sql = $this->selectBuilder()->from('User AS u')->crossJoinOn('Device AS d', 'u.id', 'd.userId')->toSql();
+        $this->assertSame('SELECT * FROM "User" AS "u" CROSS JOIN "Device" AS "d" ON "u"."id" = "d"."userId"', $sql);
+    }
+
+    public function test_crossJoinUsing(): void
+    {
+        $sql = $this->selectBuilder()->from('User AS u')->crossJoinUsing('Device AS d', 'userId')->toSql();
+        $this->assertSame('SELECT * FROM "User" AS "u" CROSS JOIN "Device" AS "d" USING ("userId")', $sql);
+    }
+
+    public function test_leftJoin_using_on(): void
+    {
+        $sql = $this->selectBuilder()->from('User')
+            ->leftJoin('Device', fn(JoinBuilder $join) => $join->on('User.id', 'Device.userId'))
+            ->toSql();
+        $this->assertSame('SELECT * FROM "User" LEFT JOIN "Device" ON "User"."id" = "Device"."userId"', $sql);
+    }
+
+    public function test_leftJoin_using_using(): void
+    {
+        $sql = $this->selectBuilder()->from('User')
+            ->leftJoin('Device', fn(JoinBuilder $join) => $join->using('itemId'))
+            ->toSql();
+        $this->assertSame('SELECT * FROM "User" LEFT JOIN "Device" USING ("itemId")', $sql);
+    }
+
+    public function test_leftJoinOn(): void
+    {
+        $sql = $this->selectBuilder()->from('User AS u')->leftJoinOn('Device AS d', 'u.id', 'd.userId')->toSql();
+        $this->assertSame('SELECT * FROM "User" AS "u" LEFT JOIN "Device" AS "d" ON "u"."id" = "d"."userId"', $sql);
+    }
+
+    public function test_leftJoinUsing(): void
+    {
+        $sql = $this->selectBuilder()->from('User AS u')->leftJoinUsing('Device AS d', 'userId')->toSql();
+        $this->assertSame('SELECT * FROM "User" AS "u" LEFT JOIN "Device" AS "d" USING ("userId")', $sql);
+    }
+
+    public function test_rightJoin_using_on(): void
+    {
+        $sql = $this->selectBuilder()->from('User')
+            ->rightJoin('Device', fn(JoinBuilder $join) => $join->on('User.id', 'Device.userId'))
+            ->toSql();
+        $this->assertSame('SELECT * FROM "User" RIGHT JOIN "Device" ON "User"."id" = "Device"."userId"', $sql);
+    }
+
+    public function test_rightJoin_using_using(): void
+    {
+        $sql = $this->selectBuilder()->from('User')
+            ->rightJoin('Device', fn(JoinBuilder $join) => $join->using('itemId'))
+            ->toSql();
+        $this->assertSame('SELECT * FROM "User" RIGHT JOIN "Device" USING ("itemId")', $sql);
+    }
+
+    public function test_rightJoinOn(): void
+    {
+        $sql = $this->selectBuilder()->from('User AS u')->rightJoinOn('Device AS d', 'u.id', 'd.userId')->toSql();
+        $this->assertSame('SELECT * FROM "User" AS "u" RIGHT JOIN "Device" AS "d" ON "u"."id" = "d"."userId"', $sql);
+    }
+
+    public function test_rightJoinUsing(): void
+    {
+        $sql = $this->selectBuilder()->from('User AS u')->rightJoinUsing('Device AS d', 'userId')->toSql();
+        $this->assertSame('SELECT * FROM "User" AS "u" RIGHT JOIN "Device" AS "d" USING ("userId")', $sql);
+    }
+
+    public function test_fullJoin_using_on(): void
+    {
+        $sql = $this->selectBuilder()->from('User')
+            ->fullJoin('Device', fn(JoinBuilder $join) => $join->on('User.id', 'Device.userId'))
+            ->toSql();
+        $this->assertSame('SELECT * FROM "User" FULL JOIN "Device" ON "User"."id" = "Device"."userId"', $sql);
+    }
+
+    public function test_fullJoin_using_using(): void
+    {
+        $sql = $this->selectBuilder()->from('User')
+            ->fullJoin('Device', fn(JoinBuilder $join) => $join->using('itemId'))
+            ->toSql();
+        $this->assertSame('SELECT * FROM "User" FULL JOIN "Device" USING ("itemId")', $sql);
+    }
+
+    public function test_fullJoinOn(): void
+    {
+        $sql = $this->selectBuilder()->from('User AS u')->fullJoinOn('Device AS d', 'u.id', 'd.userId')->toSql();
+        $this->assertSame('SELECT * FROM "User" AS "u" FULL JOIN "Device" AS "d" ON "u"."id" = "d"."userId"', $sql);
+    }
+
+    public function test_fullJoinUsing(): void
+    {
+        $sql = $this->selectBuilder()->from('User AS u')->fullJoinUsing('Device AS d', 'userId')->toSql();
+        $this->assertSame('SELECT * FROM "User" AS "u" FULL JOIN "Device" AS "d" USING ("userId")', $sql);
+    }
+
     abstract public function test_lockForUpdate(): void;
 
     abstract public function test_lockForUpdate_with_option_nowait(): void;
