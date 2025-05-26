@@ -130,13 +130,14 @@ class SqliteSchemaSyntax extends SchemaSyntax
             if ($size === 8) {
                 return $ddl;
             }
-            if (!in_array($size, [2, 4], true)) {
-                throw new LogicException("Invalid int size for {$name}. Expected: [2, 4, 8]. Got: {$size}.", [
+            if (!in_array($size, [1, 2, 4], true)) {
+                throw new LogicException("Invalid int size for {$name}. Expected: [1, 2, 4, 8]. Got: {$size}.", [
                     'definition' => $def,
                 ]);
             }
-            $min = pow(-2, 8 * $size);
-            $max = pow(2, 8 * $size) - 1;
+            $limit = pow(2, 8 * $size);
+            $min = $limit * -1;
+            $max = $limit - 1;
             $ddl .= " CHECK ({$this->asIdentifier($name)} BETWEEN {$min} AND {$max})";
             return $ddl;
         }

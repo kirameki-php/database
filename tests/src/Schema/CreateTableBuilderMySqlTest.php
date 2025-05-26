@@ -2,20 +2,11 @@
 
 namespace Tests\Kirameki\Database\Schema;
 
-use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Raw;
-use function dump;
 
-class MySql_CreateTableBuilderTest extends SchemaTestCase
+class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
 {
     protected string $connection = 'mysql';
-
-    public function test_with_no_column(): void
-    {
-        $this->expectException(LogicException::class);
-        $this->expectExceptionMessage('Table requires at least one column to be defined.');
-        $this->createTableBuilder('users')->toDdl();
-    }
 
     public function test_string_column(): void
     {
