@@ -4,6 +4,7 @@ namespace Tests\Kirameki\Database\Schema;
 
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Raw;
+use stdClass;
 
 abstract class CreateTableBuilderTestAbstract extends SchemaTestCase
 {
@@ -32,7 +33,22 @@ abstract class CreateTableBuilderTestAbstract extends SchemaTestCase
 
     abstract public function test_autoIncrement(): void;
 
-    abstract public function test_defaultValue(): void;
+    abstract public function test_defaultValue_int(): void;
+
+    abstract public function test_defaultValue_bool(): void;
+
+    abstract public function test_defaultValue_float(): void;
+
+    abstract public function test_defaultValue_string(): void;
 
     abstract public function test_defaultValue_using_Raw(): void;
+
+    public function test_defaultValue_invalid_value(): void
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('Unknown default value type: stdClass');
+        $builder = $this->createTableBuilder('users');
+        $builder->uuid('id')->nullable()->primaryKey()->default(new stdClass());
+        $builder->toDdl();
+    }
 }

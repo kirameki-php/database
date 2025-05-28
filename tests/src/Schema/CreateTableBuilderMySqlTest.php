@@ -84,7 +84,31 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         , $schema);
     }
 
-    public function test_defaultValue(): void
+    public function test_defaultValue_int(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->nullable()->primaryKey()->default(1);
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "users" ("id" BIGINT DEFAULT 1 PRIMARY KEY);', $schema);
+    }
+
+    public function test_defaultValue_bool(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->bool('id')->nullable()->primaryKey()->default(false);
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "users" ("id" BIT(1) DEFAULT FALSE PRIMARY KEY);', $schema);
+    }
+
+    public function test_defaultValue_float(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->float('id')->nullable()->primaryKey()->default(1.1);
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "users" ("id" FLOAT DEFAULT 1.1 PRIMARY KEY);', $schema);
+    }
+
+    public function test_defaultValue_string(): void
     {
         $builder = $this->createTableBuilder('users');
         $builder->uuid('id')->nullable()->primaryKey()->default('ABC');

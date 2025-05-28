@@ -3,6 +3,7 @@
 namespace Tests\Kirameki\Database\Schema;
 
 use Kirameki\Database\Raw;
+use stdClass;
 use function dump;
 use const PHP_EOL;
 
@@ -86,7 +87,31 @@ class CreateTableBuilderSqliteTest extends CreateTableBuilderTestAbstract
             , $schema);
     }
 
-    public function test_defaultValue(): void
+    public function test_defaultValue_int(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->nullable()->primaryKey()->default(1);
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "users" ("id" INTEGER DEFAULT 1 PRIMARY KEY) WITHOUT ROWID;', $schema);
+    }
+
+    public function test_defaultValue_bool(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->bool('id')->nullable()->primaryKey()->default(false);
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "users" ("id" BOOLEAN CHECK ("id" IN (TRUE, FALSE)) DEFAULT FALSE PRIMARY KEY) WITHOUT ROWID;', $schema);
+    }
+
+    public function test_defaultValue_float(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->float('id')->nullable()->primaryKey()->default(1.1);
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "users" ("id" REAL DEFAULT 1.1 PRIMARY KEY) WITHOUT ROWID;', $schema);
+    }
+
+    public function test_defaultValue_string(): void
     {
         $builder = $this->createTableBuilder('users');
         $builder->uuid('id')->nullable()->primaryKey()->default('ABC');
