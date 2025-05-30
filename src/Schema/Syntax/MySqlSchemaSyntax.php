@@ -7,6 +7,7 @@ use Kirameki\Database\Functions\Syntax\MySqlFunctionSyntax;
 use Kirameki\Database\Schema\Statements\Column\ColumnDefinition;
 use Kirameki\Database\Schema\Statements\Table\CreateTableStatement;
 use Kirameki\Database\Schema\Statements\Table\RenameTableStatement;
+use Kirameki\Database\Schema\Statements\Table\TruncateTableStatement;
 use Override;
 use function array_filter;
 use function array_map;
@@ -140,6 +141,17 @@ class MySqlSchemaSyntax extends SchemaSyntax
         }
         return [
             "RENAME TABLE {$this->asCsv($parts)}",
+        ];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    protected function formatTruncateStatement(TruncateTableStatement $statement): array
+    {
+        return [
+            "TRUNCATE TABLE {$this->asIdentifier($statement->table)}",
         ];
     }
 

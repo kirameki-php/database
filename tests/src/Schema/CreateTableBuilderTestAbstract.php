@@ -51,4 +51,10 @@ abstract class CreateTableBuilderTestAbstract extends SchemaTestCase
         $builder->uuid('id')->nullable()->primaryKey()->default(new stdClass());
         $builder->toDdl();
     }
+
+    abstract public function test_references(): void;
+
+    abstract public function test_references_with_delete_options(): void;
+
+    abstract public function test_references_with_delete_and_update_options(): void;
 }

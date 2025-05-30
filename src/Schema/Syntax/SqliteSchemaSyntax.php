@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Schema\Syntax;
 
 use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Database\Exceptions\DropProtectionException;
 use Kirameki\Database\Functions\Syntax\SqliteFunctionSyntax;
 use Kirameki\Database\Schema\Statements\Column\ColumnDefinition;
 use Kirameki\Database\Schema\Statements\Index\CreateIndexStatement;
@@ -188,7 +189,7 @@ class SqliteSchemaSyntax extends SchemaSyntax
      * @inheritDoc
      */
     #[Override]
-    public function compileTruncateTable(TruncateTableStatement $statement): array
+    protected function formatTruncateStatement(TruncateTableStatement $statement): array
     {
         $statements = [];
         $statements[] = 'DELETE FROM "sqlite_sequence" WHERE "name" = ' . $this->asLiteral($statement->table);

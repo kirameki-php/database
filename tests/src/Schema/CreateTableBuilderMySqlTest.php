@@ -3,6 +3,7 @@
 namespace Tests\Kirameki\Database\Schema;
 
 use Kirameki\Database\Raw;
+use Kirameki\Database\Schema\Statements\ForeignKey\ReferenceOption;
 
 class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
 {
@@ -123,5 +124,35 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $builder->timestamp('loginAt')->nullable()->default(new Raw('CURRENT_TIMESTAMP'));
         $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE "users" ("id" BIGINT PRIMARY KEY, "loginAt" DATETIME(6) DEFAULT CURRENT_TIMESTAMP);', $schema);
+    }
+
+    public function test_references(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->nullable()->primaryKey();
+        $builder->int('roleId')->nullable()->references('roles', 'id');
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "users" ("id" BIGINT PRIMARY KEY, "roleId" BIGINT REFERENCES "roles" ("id"));', $schema);
+    }
+
+    public function test_references_with_delete_options(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->nullable()->primaryKey();
+        $builder->int('roleId')->nullable()->references('roles', 'id', ReferenceOption::NoAction);
+        $schema = $builder->toDdl();
+        $this->assertSame(
+            'CREATE TABLE "users" ("id" BIGINT PRIMARY KEY, "roleId" BIGINT REFERENCES "roles" ("id") ON DELETE NO ACTION);',
+            $schema
+        );
+    }
+
+    public function test_references_with_delete_and_update_options(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->nullable()->primaryKey();
+        $builder->int('roleId')->nullable()->references('roles', 'id', ReferenceOption::Cascade, ReferenceOption::SetNull);
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "users" ("id" BIGINT PRIMARY KEY, "roleId" BIGINT REFERENCES "roles" ("id") ON DELETE CASCADE ON UPDATE SET NULL);', $schema);
     }
 }

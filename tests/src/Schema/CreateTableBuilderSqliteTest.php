@@ -3,6 +3,7 @@
 namespace Tests\Kirameki\Database\Schema;
 
 use Kirameki\Database\Raw;
+use Kirameki\Database\Schema\Statements\ForeignKey\ReferenceOption;
 use stdClass;
 use function dump;
 use const PHP_EOL;
@@ -126,5 +127,32 @@ class CreateTableBuilderSqliteTest extends CreateTableBuilderTestAbstract
         $builder->timestamp('loginAt')->nullable()->default(new Raw('CURRENT_TIMESTAMP'));
         $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE "users" ("id" INTEGER PRIMARY KEY, "loginAt" DATETIME CHECK (datetime("loginAt") IS NOT NULL) DEFAULT CURRENT_TIMESTAMP) WITHOUT ROWID;', $schema);
+    }
+
+    public function test_references(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->nullable()->primaryKey();
+        $builder->int('roleId')->nullable()->references('roles', 'id');
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "users" ("id" INTEGER PRIMARY KEY, "roleId" INTEGER REFERENCES "roles" ("id")) WITHOUT ROWID;', $schema);
+    }
+
+    public function test_references_with_delete_options(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->nullable()->primaryKey();
+        $builder->int('roleId')->nullable()->references('roles', 'id', onDelete: ReferenceOption::NoAction);
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "users" ("id" INTEGER PRIMARY KEY, "roleId" INTEGER REFERENCES "roles" ("id") ON DELETE NO ACTION) WITHOUT ROWID;', $schema);
+    }
+
+    public function test_references_with_delete_and_update_options(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->nullable()->primaryKey();
+        $builder->int('roleId')->nullable()->references('roles', 'id', ReferenceOption::Cascade, ReferenceOption::SetNull);
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "users" ("id" INTEGER PRIMARY KEY, "roleId" INTEGER REFERENCES "roles" ("id") ON DELETE CASCADE ON UPDATE SET NULL) WITHOUT ROWID;', $schema);
     }
 }

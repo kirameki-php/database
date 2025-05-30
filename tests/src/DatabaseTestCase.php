@@ -57,7 +57,7 @@ class DatabaseTestCase extends TestCase
 
     /**
      * @template TConnectionConfig of ConnectionConfig
-     * @template TAdapter of Adapter<TConnectionConfig>
+     * @template TAdapter of Adapter<covariant TConnectionConfig>
      * @param string $driver
      * @param TAdapter|null $adapter
      * @return Connection

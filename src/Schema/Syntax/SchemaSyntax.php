@@ -380,10 +380,14 @@ abstract class SchemaSyntax extends Syntax
             ]);
         }
 
-        return [
-            "TRUNCATE TABLE {$this->asIdentifier($statement->table)}",
-        ];
+        return $this->formatTruncateStatement($statement);
     }
+
+    /**
+     * @param TruncateTableStatement $statement
+     * @return list<string>
+     */
+    abstract protected function formatTruncateStatement(TruncateTableStatement $statement): array;
 
     /**
      * @return bool
