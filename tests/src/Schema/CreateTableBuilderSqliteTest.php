@@ -5,8 +5,6 @@ namespace Tests\Kirameki\Database\Schema;
 use Kirameki\Database\Query\Statements\SortOrder;
 use Kirameki\Database\Raw;
 use Kirameki\Database\Schema\Statements\ForeignKey\ReferenceOption;
-use stdClass;
-use function dump;
 use const PHP_EOL;
 
 class CreateTableBuilderSqliteTest extends CreateTableBuilderTestAbstract
@@ -17,6 +15,7 @@ class CreateTableBuilderSqliteTest extends CreateTableBuilderTestAbstract
     {
         $builder = $this->createTableBuilder('users');
         $builder->uuid('id')->primaryKey();
+        $builder->execute();
         $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE "users" ("id" TEXT CHECK (length("id") = 36) NOT NULL PRIMARY KEY) WITHOUT ROWID;', $schema);
     }
@@ -25,6 +24,7 @@ class CreateTableBuilderSqliteTest extends CreateTableBuilderTestAbstract
     {
         $builder = $this->createTableBuilder('users');
         $builder->int('id')->primaryKey();
+        $builder->execute();
         $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE "users" ("id" INTEGER NOT NULL PRIMARY KEY) WITHOUT ROWID;', $schema);
     }
@@ -33,6 +33,7 @@ class CreateTableBuilderSqliteTest extends CreateTableBuilderTestAbstract
     {
         $builder = $this->createTableBuilder('users');
         $builder->int('id', 1)->primaryKey();
+        $builder->execute();
         $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE "users" ("id" INTEGER CHECK ("id" BETWEEN -256 AND 255) NOT NULL PRIMARY KEY) WITHOUT ROWID;', $schema);
     }
@@ -41,6 +42,7 @@ class CreateTableBuilderSqliteTest extends CreateTableBuilderTestAbstract
     {
         $builder = $this->createTableBuilder('users');
         $builder->int('id', 2)->primaryKey();
+        $builder->execute();
         $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE "users" ("id" INTEGER CHECK ("id" BETWEEN -65536 AND 65535) NOT NULL PRIMARY KEY) WITHOUT ROWID;', $schema);
     }
@@ -49,6 +51,7 @@ class CreateTableBuilderSqliteTest extends CreateTableBuilderTestAbstract
     {
         $builder = $this->createTableBuilder('users');
         $builder->int('id', 4)->primaryKey();
+        $builder->execute();
         $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE "users" ("id" INTEGER CHECK ("id" BETWEEN -4294967296 AND 4294967295) NOT NULL PRIMARY KEY) WITHOUT ROWID;', $schema);
     }
@@ -57,6 +60,7 @@ class CreateTableBuilderSqliteTest extends CreateTableBuilderTestAbstract
     {
         $builder = $this->createTableBuilder('users');
         $builder->int('id', 8)->primaryKey();
+        $builder->execute();
         $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE "users" ("id" INTEGER NOT NULL PRIMARY KEY) WITHOUT ROWID;', $schema);
     }
@@ -66,6 +70,7 @@ class CreateTableBuilderSqliteTest extends CreateTableBuilderTestAbstract
         $builder = $this->createTableBuilder('users');
         $builder->int('id')->primaryKey();
         $builder->bool('enabled')->nullable()->default(true);
+        $builder->execute();
         $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE "users" ("id" INTEGER NOT NULL PRIMARY KEY, "enabled" BOOLEAN CHECK ("enabled" IN (TRUE, FALSE)) DEFAULT TRUE) WITHOUT ROWID;', $schema);
     }
@@ -74,6 +79,7 @@ class CreateTableBuilderSqliteTest extends CreateTableBuilderTestAbstract
     {
         $builder = $this->createTableBuilder('users');
         $builder->int('id')->primaryKey();
+        $builder->execute();
         $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE "users" ("id" INTEGER NOT NULL PRIMARY KEY) WITHOUT ROWID;', $schema);
     }
@@ -82,6 +88,7 @@ class CreateTableBuilderSqliteTest extends CreateTableBuilderTestAbstract
     {
         $builder = $this->createTableBuilder('users');
         $builder->int('id')->primaryKey()->autoIncrement();
+        $builder->execute();
         $schema = $builder->toDdl();
         $this->assertStringStartsWith(
             'CREATE TABLE "users" ("id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT);' . PHP_EOL .
@@ -93,6 +100,7 @@ class CreateTableBuilderSqliteTest extends CreateTableBuilderTestAbstract
     {
         $builder = $this->createTableBuilder('users');
         $builder->int('id')->nullable()->primaryKey()->default(1);
+        $builder->execute();
         $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE "users" ("id" INTEGER DEFAULT 1 PRIMARY KEY) WITHOUT ROWID;', $schema);
     }
@@ -101,6 +109,7 @@ class CreateTableBuilderSqliteTest extends CreateTableBuilderTestAbstract
     {
         $builder = $this->createTableBuilder('users');
         $builder->bool('id')->nullable()->primaryKey()->default(false);
+        $builder->execute();
         $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE "users" ("id" BOOLEAN CHECK ("id" IN (TRUE, FALSE)) DEFAULT FALSE PRIMARY KEY) WITHOUT ROWID;', $schema);
     }
@@ -117,6 +126,7 @@ class CreateTableBuilderSqliteTest extends CreateTableBuilderTestAbstract
     {
         $builder = $this->createTableBuilder('users');
         $builder->uuid('id')->nullable()->primaryKey()->default('ABC');
+        $builder->execute();
         $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE "users" ("id" TEXT CHECK (length("id") = 36) DEFAULT \'ABC\' PRIMARY KEY) WITHOUT ROWID;', $schema);
     }
@@ -126,6 +136,7 @@ class CreateTableBuilderSqliteTest extends CreateTableBuilderTestAbstract
         $builder = $this->createTableBuilder('users');
         $builder->int('id')->nullable()->primaryKey();
         $builder->timestamp('loginAt')->nullable()->default(new Raw('CURRENT_TIMESTAMP'));
+        $builder->execute();
         $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE "users" ("id" INTEGER PRIMARY KEY, "loginAt" DATETIME CHECK (datetime("loginAt") IS NOT NULL) DEFAULT CURRENT_TIMESTAMP) WITHOUT ROWID;', $schema);
     }
@@ -136,9 +147,9 @@ class CreateTableBuilderSqliteTest extends CreateTableBuilderTestAbstract
         $builder->int('id')->nullable();
         $builder->int('category')->nullable();
         $builder->primaryKey(['id', 'category']);
+        $builder->execute();
         $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE "users" ("id" INTEGER, "category" INTEGER, PRIMARY KEY ("id", "category")) WITHOUT ROWID;', $schema);
-        $builder->execute();
     }
 
     public function test_primaryKey_with_ordering(): void
@@ -147,33 +158,49 @@ class CreateTableBuilderSqliteTest extends CreateTableBuilderTestAbstract
         $builder->int('id')->nullable();
         $builder->int('category')->nullable();
         $builder->primaryKey(['id' => SortOrder::Descending, 'category' => SortOrder::Ascending]);
+        $builder->execute();
         $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE "users" ("id" INTEGER, "category" INTEGER, PRIMARY KEY ("id", "category")) WITHOUT ROWID;', $schema);
     }
 
     public function test_references(): void
     {
+        $builderRoles = $this->createTableBuilder('roles');
+        $builderRoles->int('id')->primaryKey();
+        $builderRoles->execute();
+
         $builder = $this->createTableBuilder('users');
         $builder->int('id')->nullable()->primaryKey();
         $builder->int('roleId')->nullable()->references('roles', 'id');
+        $builder->execute();
         $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE "users" ("id" INTEGER PRIMARY KEY, "roleId" INTEGER REFERENCES "roles" ("id")) WITHOUT ROWID;', $schema);
     }
 
     public function test_references_with_delete_options(): void
     {
+        $builderRoles = $this->createTableBuilder('roles');
+        $builderRoles->int('id')->primaryKey();
+        $builderRoles->execute();
+
         $builder = $this->createTableBuilder('users');
         $builder->int('id')->nullable()->primaryKey();
         $builder->int('roleId')->nullable()->references('roles', 'id', onDelete: ReferenceOption::NoAction);
+        $builder->execute();
         $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE "users" ("id" INTEGER PRIMARY KEY, "roleId" INTEGER REFERENCES "roles" ("id") ON DELETE NO ACTION) WITHOUT ROWID;', $schema);
     }
 
     public function test_references_with_delete_and_update_options(): void
     {
+        $builderRoles = $this->createTableBuilder('roles');
+        $builderRoles->int('id')->primaryKey();
+        $builderRoles->execute();
+
         $builder = $this->createTableBuilder('users');
         $builder->int('id')->nullable()->primaryKey();
         $builder->int('roleId')->nullable()->references('roles', 'id', ReferenceOption::Cascade, ReferenceOption::SetNull);
+        $builder->execute();
         $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE "users" ("id" INTEGER PRIMARY KEY, "roleId" INTEGER REFERENCES "roles" ("id") ON DELETE CASCADE ON UPDATE SET NULL) WITHOUT ROWID;', $schema);
     }

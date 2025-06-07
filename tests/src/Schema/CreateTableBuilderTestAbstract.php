@@ -3,11 +3,22 @@
 namespace Tests\Kirameki\Database\Schema;
 
 use Kirameki\Core\Exceptions\LogicException;
-use Kirameki\Database\Raw;
+use Kirameki\Database\Schema\Statements\Table\CreateTableStatement;
 use stdClass;
 
 abstract class CreateTableBuilderTestAbstract extends SchemaTestCase
 {
+    public function test_execute(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->primaryKey();
+        $result = $builder->execute();
+
+        $this->assertInstanceOf(CreateTableStatement::class, $result->statement);
+        $this->assertCount(1, $result->commands);
+        $this->assertGreaterThan(0, $result->elapsedMs);
+    }
+
     public function test_with_no_column(): void
     {
         $this->expectException(LogicException::class);
@@ -49,7 +60,7 @@ abstract class CreateTableBuilderTestAbstract extends SchemaTestCase
         $this->expectExceptionMessage('Unknown default value type: stdClass');
         $builder = $this->createTableBuilder('users');
         $builder->uuid('id')->nullable()->primaryKey()->default(new stdClass());
-        $builder->toDdl();
+        $builder->execute();
     }
 
     abstract public function test_primaryKey_list_string(): void;
