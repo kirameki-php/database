@@ -2,6 +2,7 @@
 
 namespace Tests\Kirameki\Database\Schema;
 
+use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Query\Statements\SortOrder;
 use Kirameki\Database\Raw;
 use Kirameki\Database\Schema\Statements\ForeignKey\ReferenceOption;
@@ -54,6 +55,51 @@ class CreateTableBuilderSqliteTest extends CreateTableBuilderTestAbstract
         $builder->execute();
         $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE "users" ("id" INTEGER NOT NULL PRIMARY KEY) WITHOUT ROWID;', $schema);
+    }
+
+    public function test_int_column__with_invalid_size(): void
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('"id" has an invalid integer size: 3. Only 1, 2, 4, 8 are supported.');
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id', 3)->primaryKey();
+        $builder->execute();
+    }
+
+    public function test_float_column(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->float('id')->primaryKey();
+        $builder->execute();
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "users" ("id" REAL NOT NULL PRIMARY KEY) WITHOUT ROWID;', $schema);
+    }
+
+    public function test_float32_column(): void
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('"id" has invalid float size: 4. Sqlite only supports 8 (REAL)');
+        $builder = $this->createTableBuilder('users');
+        $builder->float('id', 4)->primaryKey();
+        $builder->execute();
+    }
+
+    public function test_float64_column(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->float('id', 8)->primaryKey();
+        $builder->execute();
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "users" ("id" REAL NOT NULL PRIMARY KEY) WITHOUT ROWID;', $schema);
+    }
+
+    public function test_float_column__with_invalid_size(): void
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('"id" has invalid float size: 2. Sqlite only supports 8 (REAL).');
+        $builder = $this->createTableBuilder('users');
+        $builder->float('id', 2)->primaryKey();
+        $builder->execute();
     }
 
     public function test_bool_column(): void

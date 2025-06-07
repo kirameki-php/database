@@ -2,6 +2,7 @@
 
 namespace Tests\Kirameki\Database\Schema;
 
+use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Query\Statements\SortOrder;
 use Kirameki\Database\Raw;
 use Kirameki\Database\Schema\Statements\ForeignKey\ReferenceOption;
@@ -53,6 +54,52 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $builder->execute();
         $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE "users" ("id" BIGINT NOT NULL PRIMARY KEY);', $schema);
+    }
+
+    public function test_int_column__with_invalid_size(): void
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('"id" has an invalid integer size: 3. MySQL only supports 1 (TINYINT), 2 (SMALLINT), 4 (INT), and 8 (BIGINT).');
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id', 3)->primaryKey();
+        $builder->execute();
+    }
+
+    public function test_float_column(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->float('id')->nullable()->primaryKey();
+        $builder->execute();
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "users" ("id" DOUBLE PRIMARY KEY);', $schema);
+    }
+
+    public function test_float32_column(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->float('id', 4)->nullable()->primaryKey();
+        $builder->execute();
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "users" ("id" FLOAT PRIMARY KEY);', $schema);
+    }
+
+    public function test_float64_column(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->float('id', 8)->nullable()->primaryKey();
+        $builder->execute();
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "users" ("id" DOUBLE PRIMARY KEY);', $schema);
+    }
+
+    public function test_float_column__with_invalid_size(): void
+    {
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('"score" has an invalid float size: 3. MySQL only supports 4 (FLOAT) and 8 (DOUBLE).');
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->primaryKey();
+        $builder->float('score', 3);
+        $builder->execute();
     }
 
     public function test_bool_column(): void
@@ -131,7 +178,7 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $builder->float('id')->nullable()->primaryKey()->default(1.1);
         $builder->execute();
         $schema = $builder->toDdl();
-        $this->assertSame('CREATE TABLE "users" ("id" FLOAT DEFAULT 1.1 PRIMARY KEY);', $schema);
+        $this->assertSame('CREATE TABLE "users" ("id" DOUBLE DEFAULT 1.1 PRIMARY KEY);', $schema);
     }
 
     public function test_defaultValue_string(): void

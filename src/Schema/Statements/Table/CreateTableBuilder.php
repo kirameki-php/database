@@ -58,11 +58,12 @@ class CreateTableBuilder extends SchemaBuilder
 
     /**
      * @param string $column
+     * @param int|null $size
      * @return ColumnBuilder
      */
-    public function float(string $column): ColumnBuilder
+    public function float(string $column, ?int $size = null): ColumnBuilder
     {
-        return $this->column($column, __FUNCTION__);
+        return $this->column($column, __FUNCTION__, $size);
     }
 
     /**

@@ -36,6 +36,16 @@ abstract class CreateTableBuilderTestAbstract extends SchemaTestCase
 
     abstract public function test_int64_column(): void;
 
+    abstract public function test_int_column__with_invalid_size(): void;
+
+    abstract public function test_float_column(): void;
+
+    abstract public function test_float32_column(): void;
+
+    abstract public function test_float64_column(): void;
+
+    abstract public function test_float_column__with_invalid_size(): void;
+
     abstract public function test_bool_column(): void;
 
     abstract public function test_string_column(): void;

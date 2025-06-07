@@ -21,6 +21,8 @@ class MySqlSchemaSyntax extends SchemaSyntax
 
     public const int DEFAULT_INT_SIZE = 8;
 
+    public const int DEFAULT_FLOAT_SIZE = 8;
+
     public const int DEFAULT_STRING_SIZE = 191;
 
     public const int DEFAULT_TIME_PRECISION = 6;
@@ -67,7 +69,17 @@ class MySqlSchemaSyntax extends SchemaSyntax
                 2 => 'SMALLINT',
                 4 => 'INT',
                 8 => 'BIGINT',
-                default => throw new LogicException("Invalid int size: {$size} for {$def->name}", [
+                default => throw new LogicException("\"{$def->name}\" has an invalid integer size: {$size}. MySQL only supports 1 (TINYINT), 2 (SMALLINT), 4 (INT), and 8 (BIGINT).", [
+                    'column' => $def->name,
+                    'size' => $size,
+                ]),
+            };
+        }
+        if ($type === 'float') {
+            return match ($size ?? self::DEFAULT_FLOAT_SIZE) {
+                4 => 'FLOAT',
+                8 => 'DOUBLE',
+                default => throw new LogicException("\"{$def->name}\" has an invalid float size: {$size}. MySQL only supports 4 (FLOAT) and 8 (DOUBLE).", [
                     'column' => $def->name,
                     'size' => $size,
                 ]),

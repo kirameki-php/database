@@ -132,7 +132,7 @@ class SqliteSchemaSyntax extends SchemaSyntax
                 return $ddl;
             }
             if (!in_array($size, [1, 2, 4], true)) {
-                throw new LogicException("Invalid int size for {$name}. Expected: [1, 2, 4, 8]. Got: {$size}.", [
+                throw new LogicException("\"{$name}\" has an invalid integer size: {$size}. Only 1, 2, 4, 8 are supported.", [
                     'definition' => $def,
                 ]);
             }
@@ -143,7 +143,12 @@ class SqliteSchemaSyntax extends SchemaSyntax
             return $ddl;
         }
         if ($type === 'float') {
-            return 'REAL';
+            if ($size === null || $size === 8) {
+                return 'REAL';
+            }
+            throw new LogicException("\"{$name}\" has invalid float size: {$size}. Sqlite only supports 8 (REAL).", [
+                'definition' => $def,
+            ]);
         }
         if ($type === 'decimal') {
             return 'NUMERIC';

@@ -47,14 +47,6 @@ class CreateTableStatement extends SchemaStatement
      */
     public function preprocess(): void
     {
-        foreach ($this->columns as $column) {
-            if ($column->type === 'int' && Arr::doesNotContain([null, 1, 2, 4, 8], $column->size)) {
-                throw new LogicException('Size for integer must be 1, 2, 4, or 8 (bytes). ' . $column->size . ' given.', [
-                    'statement' => $this,
-                ]);
-            }
-        }
-
         if (empty($this->columns)) {
             throw new LogicException('Table requires at least one column to be defined.', [
                 'statement' => $this,
