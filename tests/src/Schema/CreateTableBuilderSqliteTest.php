@@ -11,16 +11,7 @@ class CreateTableBuilderSqliteTest extends CreateTableBuilderTestAbstract
 {
     protected string $connection = 'sqlite';
 
-    public function test_string_column(): void
-    {
-        $builder = $this->createTableBuilder('users');
-        $builder->uuid('id')->primaryKey();
-        $builder->execute();
-        $schema = $builder->toDdl();
-        $this->assertSame('CREATE TABLE "users" ("id" TEXT CHECK (length("id") = 36) NOT NULL PRIMARY KEY) WITHOUT ROWID;', $schema);
-    }
-
-    public function test_default_int_column(): void
+    public function test_int_column(): void
     {
         $builder = $this->createTableBuilder('users');
         $builder->int('id')->primaryKey();
@@ -75,6 +66,15 @@ class CreateTableBuilderSqliteTest extends CreateTableBuilderTestAbstract
         $this->assertSame('CREATE TABLE "users" ("id" INTEGER NOT NULL PRIMARY KEY, "enabled" BOOLEAN CHECK ("enabled" IN (TRUE, FALSE)) DEFAULT TRUE) WITHOUT ROWID;', $schema);
     }
 
+    public function test_string_column(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->uuid('id')->primaryKey();
+        $builder->execute();
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "users" ("id" TEXT CHECK (length("id") = 36) NOT NULL PRIMARY KEY) WITHOUT ROWID;', $schema);
+    }
+
     public function test_notNull(): void
     {
         $builder = $this->createTableBuilder('users');
@@ -94,6 +94,19 @@ class CreateTableBuilderSqliteTest extends CreateTableBuilderTestAbstract
             'CREATE TABLE "users" ("id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT);' . PHP_EOL .
             'UPDATE "sqlite_sequence" SET "seq" = '
             , $schema);
+    }
+
+    public function test_autoIncrement_with_startingValue(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->primaryKey()->autoIncrement(100);
+        $builder->execute();
+        $schema = $builder->toDdl();
+        $this->assertSame(
+            'CREATE TABLE "users" ("id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT);' . PHP_EOL .
+            'UPDATE "sqlite_sequence" SET "seq" = 100 WHERE "name" = \'users\';',
+            $schema
+        );
     }
 
     public function test_defaultValue_int(): void

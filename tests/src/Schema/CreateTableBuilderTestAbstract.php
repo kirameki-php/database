@@ -26,9 +26,7 @@ abstract class CreateTableBuilderTestAbstract extends SchemaTestCase
         $this->createTableBuilder('users')->toDdl();
     }
 
-    abstract public function test_string_column(): void;
-
-    abstract public function test_default_int_column(): void;
+    abstract public function test_int_column(): void;
 
     abstract public function test_int8_column(): void;
 
@@ -40,9 +38,13 @@ abstract class CreateTableBuilderTestAbstract extends SchemaTestCase
 
     abstract public function test_bool_column(): void;
 
+    abstract public function test_string_column(): void;
+
     abstract public function test_notNull(): void;
 
     abstract public function test_autoIncrement(): void;
+
+    abstract public function test_autoIncrement_with_startingValue(): void;
 
     abstract public function test_defaultValue_int(): void;
 

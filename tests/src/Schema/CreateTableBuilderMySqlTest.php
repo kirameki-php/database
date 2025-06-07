@@ -10,16 +10,7 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
 {
     protected string $connection = 'mysql';
 
-    public function test_string_column(): void
-    {
-        $builder = $this->createTableBuilder('users');
-        $builder->uuid('id')->primaryKey();
-        $builder->execute();
-        $schema = $builder->toDdl();
-        $this->assertSame('CREATE TABLE "users" ("id" VARCHAR(36) NOT NULL PRIMARY KEY);', $schema);
-    }
-
-    public function test_default_int_column(): void
+    public function test_int_column(): void
     {
         $builder = $this->createTableBuilder('users');
         $builder->int('id')->primaryKey();
@@ -74,6 +65,15 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $this->assertSame('CREATE TABLE "users" ("id" BIGINT NOT NULL PRIMARY KEY, "enabled" BIT(1) DEFAULT TRUE);', $schema);
     }
 
+    public function test_string_column(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->uuid('id')->primaryKey();
+        $builder->execute();
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "users" ("id" VARCHAR(36) NOT NULL PRIMARY KEY);', $schema);
+    }
+
     public function test_notNull(): void
     {
         $builder = $this->createTableBuilder('users');
@@ -92,6 +92,18 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $this->assertStringStartsWith(
             'CREATE TABLE "users" ("id" BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT);' . PHP_EOL .
             'ALTER TABLE "users" AUTO_INCREMENT = '
+        , $schema);
+    }
+
+    public function test_autoIncrement_with_startingValue(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->primaryKey()->autoIncrement(100);
+        $builder->execute();
+        $schema = $builder->toDdl();
+        $this->assertSame(
+            'CREATE TABLE "users" ("id" BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT);' . PHP_EOL .
+            'ALTER TABLE "users" AUTO_INCREMENT = 100;'
         , $schema);
     }
 
