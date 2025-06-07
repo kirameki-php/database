@@ -80,10 +80,10 @@ abstract class SchemaSyntax extends Syntax
 
         $pkParts = [];
         foreach ($columns as $column => $order) {
-            $pkParts[] = "$column {$order->value}";
+            $pkParts[] = "{$this->asIdentifier($column)} {$order->value}";
         }
         if ($pkParts !== []) {
-            return 'PRIMARY KEY (' . implode(', ', $pkParts) . ')';
+            return 'PRIMARY KEY ' . $this->asEnclosedCsv($pkParts);
         }
         return null;
     }

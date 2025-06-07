@@ -2,6 +2,7 @@
 
 namespace Tests\Kirameki\Database\Schema;
 
+use Kirameki\Database\Query\Statements\SortOrder;
 use Kirameki\Database\Raw;
 use Kirameki\Database\Schema\Statements\ForeignKey\ReferenceOption;
 
@@ -126,6 +127,27 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $this->assertSame('CREATE TABLE "users" ("id" BIGINT PRIMARY KEY, "loginAt" DATETIME(6) DEFAULT CURRENT_TIMESTAMP);', $schema);
     }
 
+    public function test_primaryKey_list_string(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->nullable();
+        $builder->int('category')->nullable();
+        $builder->primaryKey(['id', 'category']);
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "users" ("id" BIGINT, "category" BIGINT, PRIMARY KEY ("id" ASC, "category" ASC));', $schema);
+        $builder->execute();
+    }
+
+    public function test_primaryKey_with_ordering(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->nullable();
+        $builder->int('category')->nullable();
+        $builder->primaryKey(['id' => SortOrder::Descending, 'category' => SortOrder::Ascending]);
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "users" ("id" BIGINT, "category" BIGINT, PRIMARY KEY ("id" DESC, "category" ASC));', $schema);
+    }
+
     public function test_references(): void
     {
         $builder = $this->createTableBuilder('users');
@@ -143,7 +165,7 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $schema = $builder->toDdl();
         $this->assertSame(
             'CREATE TABLE "users" ("id" BIGINT PRIMARY KEY, "roleId" BIGINT REFERENCES "roles" ("id") ON DELETE NO ACTION);',
-            $schema
+            $schema,
         );
     }
 

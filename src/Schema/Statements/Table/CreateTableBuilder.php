@@ -165,8 +165,9 @@ class CreateTableBuilder extends SchemaBuilder
                 $this->statement->primaryKey->columns[$column] = $order;
             } elseif (is_string($order)) {
                 $this->statement->primaryKey->columns[$order] = SortOrder::Ascending;
+            } else {
+                throw new UnreachableException('Invalid primary key column definition.');
             }
-            throw new UnreachableException('Invalid primary key column definition.');
         }
     }
 

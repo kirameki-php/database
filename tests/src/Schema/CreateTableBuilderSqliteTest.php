@@ -2,6 +2,7 @@
 
 namespace Tests\Kirameki\Database\Schema;
 
+use Kirameki\Database\Query\Statements\SortOrder;
 use Kirameki\Database\Raw;
 use Kirameki\Database\Schema\Statements\ForeignKey\ReferenceOption;
 use stdClass;
@@ -127,6 +128,27 @@ class CreateTableBuilderSqliteTest extends CreateTableBuilderTestAbstract
         $builder->timestamp('loginAt')->nullable()->default(new Raw('CURRENT_TIMESTAMP'));
         $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE "users" ("id" INTEGER PRIMARY KEY, "loginAt" DATETIME CHECK (datetime("loginAt") IS NOT NULL) DEFAULT CURRENT_TIMESTAMP) WITHOUT ROWID;', $schema);
+    }
+
+    public function test_primaryKey_list_string(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->nullable();
+        $builder->int('category')->nullable();
+        $builder->primaryKey(['id', 'category']);
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "users" ("id" INTEGER, "category" INTEGER, PRIMARY KEY ("id", "category")) WITHOUT ROWID;', $schema);
+        $builder->execute();
+    }
+
+    public function test_primaryKey_with_ordering(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->nullable();
+        $builder->int('category')->nullable();
+        $builder->primaryKey(['id' => SortOrder::Descending, 'category' => SortOrder::Ascending]);
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "users" ("id" INTEGER, "category" INTEGER, PRIMARY KEY ("id", "category")) WITHOUT ROWID;', $schema);
     }
 
     public function test_references(): void

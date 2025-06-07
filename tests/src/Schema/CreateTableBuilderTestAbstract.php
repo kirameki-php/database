@@ -52,6 +52,10 @@ abstract class CreateTableBuilderTestAbstract extends SchemaTestCase
         $builder->toDdl();
     }
 
+    abstract public function test_primaryKey_list_string(): void;
+
+    abstract public function test_primaryKey_with_ordering(): void;
+
     abstract public function test_references(): void;
 
     abstract public function test_references_with_delete_options(): void;

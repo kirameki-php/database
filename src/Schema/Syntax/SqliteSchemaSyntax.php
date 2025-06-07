@@ -101,7 +101,7 @@ class SqliteSchemaSyntax extends SchemaSyntax
 
         $pkParts = array_keys($statement->primaryKey->columns);
         if ($pkParts !== []) {
-            return 'PRIMARY KEY (' . implode(', ', $pkParts) . ')';
+            return 'PRIMARY KEY ' . $this->asEnclosedCsv($this->asIdentifiers($pkParts));
         }
         return null;
     }
