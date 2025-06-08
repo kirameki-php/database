@@ -14,6 +14,7 @@ use Kirameki\Database\Connection;
 use Kirameki\Database\Schema\Statements\Table\CreateTableBuilder;
 use Kirameki\Event\Event;
 use Kirameki\Event\EventManager;
+use Random\Randomizer;
 use RuntimeException;
 use function array_values;
 use function mt_rand;
@@ -60,15 +61,16 @@ class DatabaseTestCase extends TestCase
      * @template TAdapter of Adapter<covariant TConnectionConfig>
      * @param string $driver
      * @param TAdapter|null $adapter
+     * @param Randomizer|null $randomizer
      * @return Connection
      */
-    public function createTempConnection(string $driver, ?Adapter $adapter = null): Connection
+    public function createTempConnection(string $driver, ?Adapter $adapter = null, ?Randomizer $randomizer = null): Connection
     {
         $adapter ??= $this->resolveAdapter($driver);
         $adapter->createDatabase();
         $this->runAfterTearDown(static fn() => $adapter->dropDatabase());
 
-        return new Connection('temp', $adapter, $this->getEventManager());
+        return new Connection('temp', $adapter, $this->getEventManager(), $randomizer);
     }
 
     /**

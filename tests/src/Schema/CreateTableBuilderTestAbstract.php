@@ -12,8 +12,9 @@ abstract class CreateTableBuilderTestAbstract extends SchemaTestCase
 {
     public function test___construct_with_randomizer(): void
     {
-        $schema = $this->connect()->schema();
-        $schema->randomizer = new Randomizer(new PcgOneseq128XslRr64(1));
+        $randomizer = new Randomizer(new PcgOneseq128XslRr64(1));
+        $connection = $this->createTempConnection($this->connection, randomizer: $randomizer);
+        $schema = $connection->schema();
         $builder = $schema->createTable('users');
         $builder->id();
         $builder->execute();
