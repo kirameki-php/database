@@ -31,6 +31,7 @@ You can change the isolation level by passing `IsolationLevel` to a `transaction
 | MySQL       | Precision can have range 1 to 65. Scale can be set from 0 to 30. Can be specified by user. ([Docs](https://dev.mysql.com/doc/refman/en/precision-math-decimal-characteristics.html))                                      |
 | MariaDB     | *Same as MySQL*                                                                                                                                                                                                           |
 
+In this framework, MySQL and MariaDB will use `DECIMAL(65, 30)` by default, while PostgreSQL will use `NUMERIC` without precision or scale.
 
 ## Session Level Timeout
 
