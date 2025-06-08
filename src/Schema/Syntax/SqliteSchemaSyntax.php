@@ -3,7 +3,6 @@
 namespace Kirameki\Database\Schema\Syntax;
 
 use Kirameki\Core\Exceptions\LogicException;
-use Kirameki\Database\Exceptions\DropProtectionException;
 use Kirameki\Database\Functions\Syntax\SqliteFunctionSyntax;
 use Kirameki\Database\Schema\Statements\Column\ColumnDefinition;
 use Kirameki\Database\Schema\Statements\Index\CreateIndexStatement;
@@ -11,7 +10,6 @@ use Kirameki\Database\Schema\Statements\Table\CreateTableStatement;
 use Kirameki\Database\Schema\Statements\Table\TruncateTableStatement;
 use Override;
 use function array_keys;
-use function implode;
 use function in_array;
 use function is_int;
 use function pow;

@@ -7,7 +7,6 @@ use Kirameki\Core\Exceptions\UnreachableException;
 use Kirameki\Database\Query\Statements\SortOrder;
 use Kirameki\Database\Schema\SchemaHandler;
 use Kirameki\Database\Schema\Statements\Column\ColumnBuilder;
-use Kirameki\Database\Schema\Statements\Column\ColumnBuilderAggregate;
 use Kirameki\Database\Schema\Statements\Column\ColumnDefinition;
 use Kirameki\Database\Schema\Statements\Column\IntColumnBuilder;
 use Kirameki\Database\Schema\Statements\Column\TimestampColumnBuilder;
@@ -140,18 +139,6 @@ class CreateTableBuilder extends SchemaBuilder
     public function uuid(string $column): UuidColumnBuilder
     {
         return new UuidColumnBuilder($this->handler, $this->addDefinition($column, __FUNCTION__));
-    }
-
-    /**
-     * @param int|null $precision
-     * @return ColumnBuilderAggregate
-     */
-    public function timestamps(?int $precision = null): ColumnBuilderAggregate
-    {
-        return new ColumnBuilderAggregate([
-            $this->timestamp('createdAt', $precision)->currentAsDefault(),
-            $this->timestamp('updatedAt', $precision)->currentAsDefault(),
-        ]);
     }
 
     /**

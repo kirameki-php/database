@@ -58,21 +58,27 @@ abstract class CreateTableBuilderTestAbstract extends SchemaTestCase
 
     abstract public function test_decimal_column__with_precision_size(): void;
 
+    abstract public function test_timestamp_column(): void;
+
+    abstract public function test_timestamp_column__with_precision(): void;
+
     abstract public function test_string_column(): void;
 
     abstract public function test_notNull(): void;
 
     abstract public function test_autoIncrement(): void;
 
-    abstract public function test_autoIncrement_with_startingValue(): void;
+    abstract public function test_autoIncrement__with_startFrom(): void;
 
-    abstract public function test_defaultValue_int(): void;
+    abstract public function test_default__int(): void;
 
-    abstract public function test_defaultValue_bool(): void;
+    abstract public function test_default__bool(): void;
 
-    abstract public function test_defaultValue_float(): void;
+    abstract public function test_default__float(): void;
 
-    abstract public function test_defaultValue_string(): void;
+    abstract public function test_default__decimal(): void;
+
+    abstract public function test_default__string(): void;
 
     abstract public function test_defaultValue_using_Raw(): void;
 

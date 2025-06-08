@@ -168,6 +168,24 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $this->assertSame('CREATE TABLE "users" ("id" BIGINT PRIMARY KEY, "price" DECIMAL(10, 2));', $schema);
     }
 
+    public function test_timestamp_column(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->timestamp('id')->nullable()->primaryKey();
+        $builder->execute();
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "users" ("id" DATETIME(6) PRIMARY KEY);', $schema);
+    }
+
+    public function test_timestamp_column__with_precision(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->timestamp('id', 0)->nullable()->primaryKey();
+        $builder->execute();
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "users" ("id" DATETIME(0) PRIMARY KEY);', $schema);
+    }
+
     public function test_string_column(): void
     {
         $builder = $this->createTableBuilder('users');
@@ -198,7 +216,7 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         , $schema);
     }
 
-    public function test_autoIncrement_with_startingValue(): void
+    public function test_autoIncrement__with_startFrom(): void
     {
         $builder = $this->createTableBuilder('users');
         $builder->int('id')->primaryKey()->autoIncrement(100);
@@ -210,7 +228,7 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         , $schema);
     }
 
-    public function test_defaultValue_int(): void
+    public function test_default__int(): void
     {
         $builder = $this->createTableBuilder('users');
         $builder->int('id')->nullable()->primaryKey()->default(1);
@@ -219,7 +237,7 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $this->assertSame('CREATE TABLE "users" ("id" BIGINT DEFAULT 1 PRIMARY KEY);', $schema);
     }
 
-    public function test_defaultValue_bool(): void
+    public function test_default__bool(): void
     {
         $builder = $this->createTableBuilder('users');
         $builder->bool('id')->nullable()->primaryKey()->default(false);
@@ -228,7 +246,7 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $this->assertSame('CREATE TABLE "users" ("id" BIT(1) DEFAULT FALSE PRIMARY KEY);', $schema);
     }
 
-    public function test_defaultValue_float(): void
+    public function test_default__float(): void
     {
         $builder = $this->createTableBuilder('users');
         $builder->float('id')->nullable()->primaryKey()->default(1.1);
@@ -237,13 +255,22 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $this->assertSame('CREATE TABLE "users" ("id" DOUBLE DEFAULT 1.1 PRIMARY KEY);', $schema);
     }
 
-    public function test_defaultValue_string(): void
+    public function test_default__decimal(): void
     {
         $builder = $this->createTableBuilder('users');
-        $builder->uuid('id')->nullable()->primaryKey()->default('ABC');
+        $builder->decimal('id')->nullable()->primaryKey()->default(1.1);
         $builder->execute();
         $schema = $builder->toDdl();
-        $this->assertSame('CREATE TABLE "users" ("id" VARCHAR(36) DEFAULT \'ABC\' PRIMARY KEY);', $schema);
+        $this->assertSame('CREATE TABLE "users" ("id" DECIMAL(65, 30) DEFAULT 1.1 PRIMARY KEY);', $schema);
+    }
+
+    public function test_default__string(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->string('id')->nullable()->primaryKey()->default('ABC');
+        $builder->execute();
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "users" ("id" VARCHAR(191) DEFAULT \'ABC\' PRIMARY KEY);', $schema);
     }
 
     public function test_defaultValue_using_Raw(): void

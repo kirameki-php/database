@@ -10,7 +10,6 @@ return new class extends Migration
         $this->createTable('User', function(CreateTableBuilder $t) {
             $t->uuid('id')->primaryKey()->nullable();
             $t->string('name', 100)->default('Anonymous');
-            $t->timestamps();
             $t->uniqueIndex('name');
         });
     }
