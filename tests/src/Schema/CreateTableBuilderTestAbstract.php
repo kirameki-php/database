@@ -4,10 +4,23 @@ namespace Tests\Kirameki\Database\Schema;
 
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Schema\Statements\Table\CreateTableStatement;
+use Random\Engine\PcgOneseq128XslRr64;
+use Random\Randomizer;
 use stdClass;
 
 abstract class CreateTableBuilderTestAbstract extends SchemaTestCase
 {
+    public function test___construct_with_randomizer(): void
+    {
+        $schema = $this->connect()->schema();
+        $schema->randomizer = new Randomizer(new PcgOneseq128XslRr64(1));
+        $builder = $schema->createTable('users');
+        $builder->id();
+        $builder->execute();
+        $schema = $builder->toDdl();
+        $this->assertStringContainsString('= 9267194', $schema);
+    }
+
     public function test_execute(): void
     {
         $builder = $this->createTableBuilder('users');
