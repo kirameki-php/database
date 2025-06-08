@@ -35,9 +35,9 @@ class AlterTableBuilder extends SchemaBuilder
 
     /**
      * @param string $name
-     * @return ColumnBuilder
+     * @return AlterColumnBuilder
      */
-    public function addColumn(string $name): ColumnBuilder
+    public function addColumn(string $name): AlterColumnBuilder
     {
         $action = new AlterColumnAction(AlterType::Add, $name);
         $this->statement->addAction($action);

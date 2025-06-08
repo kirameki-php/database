@@ -4,18 +4,17 @@ namespace Kirameki\Database\Schema\Statements\Column;
 
 use Kirameki\Database\Schema\SchemaHandler;
 
-class AlterColumnBuilder extends ColumnBuilder
+class AlterColumnBuilder
 {
     /**
      * @param SchemaHandler $handler
      * @param AlterColumnAction $action
      */
     public function __construct(
-        SchemaHandler $handler,
-        protected AlterColumnAction $action,
+        protected readonly SchemaHandler $handler,
+        protected readonly AlterColumnAction $action,
     )
     {
-        parent::__construct($handler, $action->definition);
     }
 
     /**
@@ -24,7 +23,8 @@ class AlterColumnBuilder extends ColumnBuilder
      */
     public function int(?int $size = null): ColumnBuilder
     {
-        return $this->toType(__FUNCTION__, $size);
+        $this->setType(__FUNCTION__, $size);
+        return new IntColumnBuilder($this->handler, $this->action->definition);
     }
 
     /**
@@ -33,7 +33,8 @@ class AlterColumnBuilder extends ColumnBuilder
      */
     public function float(?int $size = null): ColumnBuilder
     {
-        return $this->toType(__FUNCTION__, $size);
+        $this->setType(__FUNCTION__, $size);
+        return new ColumnBuilder($this->handler, $this->action->definition);
     }
 
     /**
@@ -43,7 +44,8 @@ class AlterColumnBuilder extends ColumnBuilder
      */
     public function decimal(?int $precision = null, ?int $scale = null): ColumnBuilder
     {
-        return $this->toType(__FUNCTION__, $precision, $scale);
+        $this->setType(__FUNCTION__, $precision, $scale);
+        return new ColumnBuilder($this->handler, $this->action->definition);
     }
 
     /**
@@ -51,7 +53,8 @@ class AlterColumnBuilder extends ColumnBuilder
      */
     public function bool(): ColumnBuilder
     {
-        return $this->toType(__FUNCTION__);
+        $this->setType(__FUNCTION__);
+        return new ColumnBuilder($this->handler, $this->action->definition);
     }
 
     /**
@@ -60,7 +63,8 @@ class AlterColumnBuilder extends ColumnBuilder
      */
     public function datetime(?int $precision = null): ColumnBuilder
     {
-        return $this->toType(__FUNCTION__, $precision);
+        $this->setType(__FUNCTION__, $precision);
+        return new TimestampColumnBuilder($this->handler, $this->action->definition);
     }
 
     /**
@@ -69,7 +73,8 @@ class AlterColumnBuilder extends ColumnBuilder
      */
     public function string(?int $size = null): ColumnBuilder
     {
-        return $this->toType(__FUNCTION__, $size);
+        $this->setType(__FUNCTION__, $size);
+        return new ColumnBuilder($this->handler, $this->action->definition);
     }
 
     /**
@@ -77,7 +82,8 @@ class AlterColumnBuilder extends ColumnBuilder
      */
     public function text(): ColumnBuilder
     {
-        return $this->toType(__FUNCTION__);
+        $this->setType(__FUNCTION__);
+        return new ColumnBuilder($this->handler, $this->action->definition);
     }
 
     /**
@@ -85,7 +91,8 @@ class AlterColumnBuilder extends ColumnBuilder
      */
     public function json(): ColumnBuilder
     {
-        return $this->toType(__FUNCTION__);
+        $this->setType(__FUNCTION__);
+        return new ColumnBuilder($this->handler, $this->action->definition);
     }
 
     /**
@@ -93,7 +100,8 @@ class AlterColumnBuilder extends ColumnBuilder
      */
     public function binary(): ColumnBuilder
     {
-        return $this->toType(__FUNCTION__);
+        $this->setType(__FUNCTION__);
+        return new ColumnBuilder($this->handler, $this->action->definition);
     }
 
     /**
@@ -101,20 +109,21 @@ class AlterColumnBuilder extends ColumnBuilder
      */
     public function uuid(): ColumnBuilder
     {
-        return $this->toType(__FUNCTION__);
+        $this->setType(__FUNCTION__);
+        return new UuidColumnBuilder($this->handler, $this->action->definition);
     }
 
     /**
      * @param string $type
      * @param int|null $size
      * @param int|null $scale
-     * @return ColumnBuilder
+     * @return void
      */
-    protected function toType(string $type, ?int $size = null, ?int $scale = null): ColumnBuilder
+    protected function setType(string $type, ?int $size = null, ?int $scale = null): void
     {
-        $this->definition->type = $type;
-        $this->definition->size = $size;
-        $this->definition->scale = $scale;
-        return $this;
+        $definition = $this->action->definition;
+        $definition->type = $type;
+        $definition->size = $size;
+        $definition->scale = $scale;
     }
 }
