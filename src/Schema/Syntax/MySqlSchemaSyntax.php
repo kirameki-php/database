@@ -23,6 +23,10 @@ class MySqlSchemaSyntax extends SchemaSyntax
 
     public const int DEFAULT_FLOAT_SIZE = 8;
 
+    public const int DEFAULT_DECIMAL_SIZE = 65;
+
+    public const int DEFAULT_DECIMAL_SCALE = 30;
+
     public const int DEFAULT_STRING_SIZE = 191;
 
     public const int DEFAULT_TIME_PRECISION = 6;
@@ -86,8 +90,10 @@ class MySqlSchemaSyntax extends SchemaSyntax
             };
         }
         if ($type === 'decimal') {
-            $args = array_filter([$size, $def->scale], static fn($arg) => $arg !== null);
-            return 'DECIMAL' . (!empty($args) ? $this->asEnclosedCsv($args) : '');
+            return 'DECIMAL' . ($this->asEnclosedCsv([
+                $size ?? self::DEFAULT_DECIMAL_SIZE,
+                $def->scale ?? self::DEFAULT_DECIMAL_SCALE,
+            ]));
         }
         if ($type === 'bool') {
             return 'BIT(1)';
