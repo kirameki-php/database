@@ -24,15 +24,16 @@ class AlterColumnBuilder extends ColumnBuilder
      */
     public function int(?int $size = null): ColumnBuilder
     {
-        return $this->columnType(__FUNCTION__, $size);
+        return $this->toType(__FUNCTION__, $size);
     }
 
     /**
+     * @param int|null $size
      * @return ColumnBuilder
      */
-    public function float(): ColumnBuilder
+    public function float(?int $size = null): ColumnBuilder
     {
-        return $this->columnType(__FUNCTION__);
+        return $this->toType(__FUNCTION__, $size);
     }
 
     /**
@@ -42,7 +43,7 @@ class AlterColumnBuilder extends ColumnBuilder
      */
     public function decimal(?int $precision = null, ?int $scale = null): ColumnBuilder
     {
-        return $this->columnType(__FUNCTION__, $precision, $scale);
+        return $this->toType(__FUNCTION__, $precision, $scale);
     }
 
     /**
@@ -50,7 +51,7 @@ class AlterColumnBuilder extends ColumnBuilder
      */
     public function bool(): ColumnBuilder
     {
-        return $this->columnType(__FUNCTION__);
+        return $this->toType(__FUNCTION__);
     }
 
     /**
@@ -59,7 +60,7 @@ class AlterColumnBuilder extends ColumnBuilder
      */
     public function datetime(?int $precision = null): ColumnBuilder
     {
-        return $this->columnType(__FUNCTION__, $precision);
+        return $this->toType(__FUNCTION__, $precision);
     }
 
     /**
@@ -68,7 +69,7 @@ class AlterColumnBuilder extends ColumnBuilder
      */
     public function string(?int $size = null): ColumnBuilder
     {
-        return $this->columnType(__FUNCTION__, $size);
+        return $this->toType(__FUNCTION__, $size);
     }
 
     /**
@@ -76,7 +77,7 @@ class AlterColumnBuilder extends ColumnBuilder
      */
     public function text(): ColumnBuilder
     {
-        return $this->columnType(__FUNCTION__);
+        return $this->toType(__FUNCTION__);
     }
 
     /**
@@ -84,7 +85,7 @@ class AlterColumnBuilder extends ColumnBuilder
      */
     public function json(): ColumnBuilder
     {
-        return $this->columnType(__FUNCTION__);
+        return $this->toType(__FUNCTION__);
     }
 
     /**
@@ -92,7 +93,7 @@ class AlterColumnBuilder extends ColumnBuilder
      */
     public function binary(): ColumnBuilder
     {
-        return $this->columnType(__FUNCTION__);
+        return $this->toType(__FUNCTION__);
     }
 
     /**
@@ -100,16 +101,16 @@ class AlterColumnBuilder extends ColumnBuilder
      */
     public function uuid(): ColumnBuilder
     {
-        return $this->columnType(__FUNCTION__);
+        return $this->toType(__FUNCTION__);
     }
 
     /**
      * @param string $type
      * @param int|null $size
      * @param int|null $scale
-     * @return $this
+     * @return ColumnBuilder
      */
-    protected function columnType(string $type, ?int $size = null, ?int $scale = null): static
+    protected function toType(string $type, ?int $size = null, ?int $scale = null): ColumnBuilder
     {
         $this->definition->type = $type;
         $this->definition->size = $size;
