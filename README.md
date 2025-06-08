@@ -24,12 +24,12 @@ You can change the isolation level by passing `IsolationLevel` to a `transaction
 
 ## Numeric (Decimal) Type Handling
 
-| Database    | Description                                                                                                                                                                                 |
-|-------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| SQLite      | Value is converted to INTEGER or REAL. Only the first 15 significant decimal digits of the number are preserved.                                                                            |
-| PostgreSQL  | Up to 131072 digits before the decimal point; Up to 16383 digits after the decimal point. Can be specified by user. ([Docs](https://www.postgresql.org/docs/current/datatype-numeric.html)) |
-| MySQL       | Precision can have range 1 to 65. Scale can be set from 0 to 30. Can be specified by user. ([Docs](https://dev.mysql.com/doc/refman/en/precision-math-decimal-characteristics.html))        |
-| MariaDB     | *Same as MySQL*                                                                                                                                                                             |
+| Database    | Description                                                                                                                                                                                                               |
+|-------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| SQLite      | Value is converted to INTEGER or REAL. Only the first 15 significant decimal digits of the number are preserved. You may lose precision without knowing it. ([Docs](https://www.sqlite.org/datatype3.html#type_affinity)) |
+| PostgreSQL  | Up to 131072 digits before the decimal point; Up to 16383 digits after the decimal point. Can be specified by user. ([Docs](https://www.postgresql.org/docs/current/datatype-numeric.html))                               |
+| MySQL       | Precision can have range 1 to 65. Scale can be set from 0 to 30. Can be specified by user. ([Docs](https://dev.mysql.com/doc/refman/en/precision-math-decimal-characteristics.html))                                      |
+| MariaDB     | *Same as MySQL*                                                                                                                                                                                                           |
 
 
 ## Session Level Timeout
