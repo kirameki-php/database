@@ -116,24 +116,4 @@ class AlterColumnBuilder extends ColumnBuilder
         $this->definition->scale = $scale;
         return $this;
     }
-
-    /**
-     * @return $this
-     */
-    public function first(): static
-    {
-        $this->action->positionType = 'FIRST';
-        return $this;
-    }
-
-    /**
-     * @param string $column
-     * @return $this
-     */
-    public function after(string $column): static
-    {
-        $this->action->positionType = 'AFTER';
-        $this->action->positionColumn = $column;
-        return $this;
-    }
 }

@@ -125,13 +125,11 @@ abstract class SchemaSyntax extends Syntax
      */
     protected function formatAlterColumnAction(AlterColumnAction $action): string
     {
-        $parts = [];
-        $parts[] = $action->type->value;
-        $parts[] = 'COLUMN';
-        $parts[] = $this->formatColumnDefinition($action->definition);
-        $parts[] = $action->positionType;
-        $parts[] = $action->positionColumn;
-        return $this->concat($parts);
+        return $this->concat([
+            $action->type->value,
+            'COLUMN',
+            $this->formatColumnDefinition($action->definition),
+        ]);
     }
 
     /**

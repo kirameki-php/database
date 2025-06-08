@@ -12,16 +12,6 @@ class AlterColumnAction
     public readonly ColumnDefinition $definition;
 
     /**
-     * @var string|null
-     */
-    public ?string $positionType = null;
-
-    /**
-     * @var string|null
-     */
-    public ?string $positionColumn = null;
-
-    /**
      * @param AlterType $type
      * @param string $name
      */
