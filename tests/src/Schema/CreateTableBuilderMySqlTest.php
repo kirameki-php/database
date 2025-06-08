@@ -6,10 +6,46 @@ use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Query\Statements\SortOrder;
 use Kirameki\Database\Raw;
 use Kirameki\Database\Schema\Statements\ForeignKey\ReferenceOption;
+use const PHP_EOL;
 
 class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
 {
     protected string $connection = 'mysql';
+
+    public function test_id_column(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->id();
+        $builder->execute();
+        $schema = $builder->toDdl();
+        $this->assertStringStartsWith(
+            'CREATE TABLE "users" ("id" BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT);' . PHP_EOL .
+            'ALTER TABLE "users" AUTO_INCREMENT = ',
+            $schema,
+        );
+    }
+
+    public function test_id_column__with_changed_column_name(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->id('userId');
+        $builder->execute();
+        $schema = $builder->toDdl();
+        $this->assertStringStartsWith('CREATE TABLE "users" ("userId" BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT);', $schema);
+    }
+
+    public function test_id_column__with_starting_value(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->id(startFrom: 100);
+        $builder->execute();
+        $schema = $builder->toDdl();
+        $this->assertSame(
+            'CREATE TABLE "users" ("id" BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT);' . PHP_EOL .
+            'ALTER TABLE "users" AUTO_INCREMENT = 100;',
+            $schema,
+        );
+    }
 
     public function test_int_column(): void
     {
@@ -112,6 +148,26 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $this->assertSame('CREATE TABLE "users" ("id" BIGINT NOT NULL PRIMARY KEY, "enabled" BIT(1) DEFAULT TRUE);', $schema);
     }
 
+    public function test_decimal_column(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->nullable()->primaryKey();
+        $builder->decimal('price')->nullable();
+        $builder->execute();
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "users" ("id" BIGINT PRIMARY KEY, "price" DECIMAL(65, 30));', $schema);
+    }
+
+    public function test_decimal_column__with_precision_size(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->nullable()->primaryKey();
+        $builder->decimal('price', 10, 2)->nullable();
+        $builder->execute();
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "users" ("id" BIGINT PRIMARY KEY, "price" DECIMAL(10, 2));', $schema);
+    }
+
     public function test_string_column(): void
     {
         $builder = $this->createTableBuilder('users');
@@ -200,7 +256,7 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $this->assertSame('CREATE TABLE "users" ("id" BIGINT PRIMARY KEY, "loginAt" DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6));', $schema);
     }
 
-    public function test_primaryKey_list_string(): void
+    public function test_primaryKey__with_list_string(): void
     {
         $builder = $this->createTableBuilder('users');
         $builder->int('id')->nullable();
@@ -211,7 +267,7 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $this->assertSame('CREATE TABLE "users" ("id" BIGINT, "category" BIGINT, PRIMARY KEY ("id" ASC, "category" ASC));', $schema);
     }
 
-    public function test_primaryKey_with_ordering(): void
+    public function test_primaryKey__with_ordering(): void
     {
         $builder = $this->createTableBuilder('users');
         $builder->int('id')->nullable();
@@ -220,6 +276,16 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $builder->execute();
         $schema = $builder->toDdl();
         $this->assertSame('CREATE TABLE "users" ("id" BIGINT, "category" BIGINT, PRIMARY KEY ("id" DESC, "category" ASC));', $schema);
+    }
+
+    public function test_primaryKey__without_keys(): void
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('Primary key must have at least one column defined.');
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->nullable()->primaryKey();
+        $builder->primaryKey([]);
+        $builder->execute();
     }
 
     public function test_references(): void

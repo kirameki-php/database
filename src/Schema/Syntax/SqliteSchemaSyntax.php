@@ -36,7 +36,7 @@ class SqliteSchemaSyntax extends SchemaSyntax
      * @inheritDoc
      */
     #[Override]
-    public function formatCreateTableStatement(CreateTableStatement $statement): string
+    protected function formatCreateTableStatement(CreateTableStatement $statement): string
     {
         $formatted = parent::formatCreateTableStatement($statement);
 
@@ -75,7 +75,7 @@ class SqliteSchemaSyntax extends SchemaSyntax
      * @inheritDoc
      */
     #[Override]
-    public function formatColumnDefinition(ColumnDefinition $def): string
+    protected function formatColumnDefinition(ColumnDefinition $def): string
     {
         $formatted = parent::formatColumnDefinition($def);
 
@@ -93,7 +93,7 @@ class SqliteSchemaSyntax extends SchemaSyntax
      * @inheritDoc
      */
     #[Override]
-    public function formatCreateTablePrimaryKeyPart(CreateTableStatement $statement): ?string
+    protected function formatCreateTablePrimaryKeyPart(CreateTableStatement $statement): ?string
     {
         if ($statement->primaryKey?->columns === null) {
             return null;
@@ -103,7 +103,10 @@ class SqliteSchemaSyntax extends SchemaSyntax
         if ($pkParts !== []) {
             return 'PRIMARY KEY ' . $this->asEnclosedCsv($this->asIdentifiers($pkParts));
         }
-        return null;
+
+        throw new LogicException('Primary key must have at least one column defined.', [
+            'statement' => $statement,
+        ]);
     }
 
     /**

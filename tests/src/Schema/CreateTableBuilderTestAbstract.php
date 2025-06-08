@@ -26,6 +26,12 @@ abstract class CreateTableBuilderTestAbstract extends SchemaTestCase
         $this->createTableBuilder('users')->toDdl();
     }
 
+    abstract public function test_id_column(): void;
+
+    abstract public function test_id_column__with_changed_column_name(): void;
+
+    abstract public function test_id_column__with_starting_value(): void;
+
     abstract public function test_int_column(): void;
 
     abstract public function test_int8_column(): void;
@@ -47,6 +53,10 @@ abstract class CreateTableBuilderTestAbstract extends SchemaTestCase
     abstract public function test_float_column__with_invalid_size(): void;
 
     abstract public function test_bool_column(): void;
+
+    abstract public function test_decimal_column(): void;
+
+    abstract public function test_decimal_column__with_precision_size(): void;
 
     abstract public function test_string_column(): void;
 
@@ -75,9 +85,11 @@ abstract class CreateTableBuilderTestAbstract extends SchemaTestCase
         $builder->execute();
     }
 
-    abstract public function test_primaryKey_list_string(): void;
+    abstract public function test_primaryKey__with_list_string(): void;
 
-    abstract public function test_primaryKey_with_ordering(): void;
+    abstract public function test_primaryKey__with_ordering(): void;
+
+    abstract public function test_primaryKey__without_keys(): void;
 
     abstract public function test_references(): void;
 

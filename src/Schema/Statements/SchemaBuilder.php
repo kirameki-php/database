@@ -42,14 +42,6 @@ abstract class SchemaBuilder
     }
 
     /**
-     * @return static
-     */
-    protected function copy(): static
-    {
-        return clone $this;
-    }
-
-    /**
      * @return SchemaResult<TSchemaStatement>
      */
     public function execute(): SchemaResult

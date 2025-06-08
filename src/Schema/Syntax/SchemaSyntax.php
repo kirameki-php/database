@@ -85,14 +85,17 @@ abstract class SchemaSyntax extends Syntax
         if ($pkParts !== []) {
             return 'PRIMARY KEY ' . $this->asEnclosedCsv($pkParts);
         }
-        return null;
+
+        throw new LogicException('Primary key must have at least one column defined.', [
+            'statement' => $statement,
+        ]);
     }
 
     /**
      * @param CreateTableStatement $statement
      * @return list<string>
      */
-    public function formatCreateTableForeignKeyParts(CreateTableStatement $statement): array
+    protected function formatCreateTableForeignKeyParts(CreateTableStatement $statement): array
     {
         return array_map($this->formatForeignKeyConstraint(...), $statement->foreignKeys);
     }

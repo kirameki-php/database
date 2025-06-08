@@ -124,7 +124,7 @@ class MySqlSchemaSyntax extends SchemaSyntax
      * @inheritDoc
      */
     #[Override]
-    public function formatColumnDefinition(ColumnDefinition $def): string
+    protected function formatColumnDefinition(ColumnDefinition $def): string
     {
         $parts = [];
         $parts[] = parent::formatColumnDefinition($def);
@@ -140,7 +140,7 @@ class MySqlSchemaSyntax extends SchemaSyntax
      * @inheritDoc
      */
     #[Override]
-    public function formatCreateTableForeignKeyParts(CreateTableStatement $statement): array
+    protected function formatCreateTableForeignKeyParts(CreateTableStatement $statement): array
     {
         return array_map($this->formatForeignKeyConstraint(...), $statement->foreignKeys);
     }
