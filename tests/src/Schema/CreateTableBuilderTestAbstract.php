@@ -22,6 +22,15 @@ abstract class CreateTableBuilderTestAbstract extends SchemaTestCase
         $this->assertStringContainsString('= 9267194', $schema);
     }
 
+    public function test___clone(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->primaryKey();
+        $clone = clone $builder;
+
+        $this->assertNotSame($builder->statement, $clone->statement);
+    }
+
     public function test_execute(): void
     {
         $builder = $this->createTableBuilder('users');
