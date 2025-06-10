@@ -4,12 +4,20 @@ namespace Tests\Kirameki\Database\Schema;
 
 use Kirameki\Database\Config\DatabaseConfig;
 use Kirameki\Database\Exceptions\DropProtectionException;
-use Kirameki\Database\Schema\Statements\RawStatement;
+use Random\Engine\Secure;
+use Random\Randomizer;
 use RuntimeException;
-use function dump;
 
 abstract class SchemaHandlerTestAbstract extends SchemaTestCase
 {
+    public function test_randomizer_property(): void
+    {
+        $connection = $this->connect();
+        $handler = $connection->schema();
+        $this->assertInstanceOf(Randomizer::class, $handler->randomizer);
+        $this->assertInstanceOf(Secure::class, $handler->randomizer->engine);
+    }
+
     public function test_truncate(): void
     {
         $connection = $this->connect();
@@ -56,5 +64,27 @@ abstract class SchemaHandlerTestAbstract extends SchemaTestCase
             $databaseConfig->dropProtection = false;
         }
         $this->assertTrue($errorThrown, "Expected DropProtectionException to be thrown");
+    }
+
+    abstract public function test_createTemporaryTable(): void;
+
+    abstract public function test_alterTable(): void;
+
+    abstract public function test_renameTable(): void;
+
+    abstract public function test_renameTables(): void;
+
+    public function test_dropTable(): void
+    {
+        $handler = $this->connect()->schema();
+
+        $table = $handler->createTable('temp');
+        $table->int('id')->nullable()->primaryKey();
+        $table->execute();
+
+        $drop = $handler->dropTable('temp');
+        $drop->execute();
+
+        $this->assertSame('DROP TABLE "temp";', $drop->toDdl());
     }
 }

@@ -8,7 +8,6 @@ use Kirameki\Database\Schema\Statements\Column\AlterColumnAction;
 use Kirameki\Database\Schema\Statements\Column\AlterColumnBuilder;
 use Kirameki\Database\Schema\Statements\Column\AlterDropColumnAction;
 use Kirameki\Database\Schema\Statements\Column\AlterRenameColumnAction;
-use Kirameki\Database\Schema\Statements\Column\ColumnBuilder;
 use Kirameki\Database\Schema\Statements\ForeignKey\AlterDropForeignKeyAction;
 use Kirameki\Database\Schema\Statements\ForeignKey\ForeignKeyBuilder;
 use Kirameki\Database\Schema\Statements\ForeignKey\ForeignKeyConstraint;

@@ -106,26 +106,27 @@ abstract class SchemaSyntax extends Syntax
      */
     public function compileAlterTable(AlterTableStatement $statement): array
     {
-        $statements = array_map(fn(object $action) => match (true) {
-            $action instanceof AlterColumnAction => $this->formatAlterColumnAction($action),
-            $action instanceof AlterDropColumnAction => $this->formatDropColumnAction($action),
-            $action instanceof AlterRenameColumnAction => $this->formatRenameColumnAction($action),
+        return Arr::flatten(array_map(fn(object $action) => match (true) {
+            $action instanceof AlterColumnAction => $this->formatAlterColumnAction($statement, $action),
+            $action instanceof AlterDropColumnAction => $this->formatDropColumnAction($statement, $action),
+            $action instanceof AlterRenameColumnAction => $this->formatRenameColumnAction($statement, $action),
             $action instanceof CreateIndexStatement => $this->compileCreateIndex($action),
             $action instanceof DropIndexStatement => $this->compileDropIndex($action),
             $action instanceof ForeignKeyConstraint => $this->formatAddForeignKeyAction($action),
             $action instanceof AlterDropForeignKeyAction => $this->formatDropForeignKeyAction($action),
             default => throw new InvalidTypeException('Unsupported action type: ' . $action::class),
-        }, $statement->actions);
-        return Arr::flatten($statements);
+        }, $statement->actions));
     }
 
     /**
+     * @param AlterTableStatement $statement
      * @param AlterColumnAction $action
      * @return string
      */
-    protected function formatAlterColumnAction(AlterColumnAction $action): string
+    protected function formatAlterColumnAction(AlterTableStatement $statement, AlterColumnAction $action): string
     {
         return $this->concat([
+            'ALTER TABLE ' . $this->asIdentifier($statement->table),
             $action->type->value,
             'COLUMN',
             $this->formatColumnDefinition($action->definition),
@@ -133,10 +134,11 @@ abstract class SchemaSyntax extends Syntax
     }
 
     /**
+     * @param AlterTableStatement $statement
      * @param AlterDropColumnAction $action
      * @return string
      */
-    protected function formatDropColumnAction(AlterDropColumnAction $action): string
+    protected function formatDropColumnAction(AlterTableStatement $statement, AlterDropColumnAction $action): string
     {
         if ($this->databaseConfig->dropProtection) {
             $database = $this->connectionConfig->getDatabaseName();
@@ -145,19 +147,21 @@ abstract class SchemaSyntax extends Syntax
             ]);
         }
 
-        $parts = [];
-        $parts[] = 'DROP COLUMN';
-        $parts[] = $this->asIdentifier($action->column);
-        return implode(' ', $parts);
+        return $this->concat([
+            'ALTER TABLE ' . $this->asIdentifier($statement->table),
+            'DROP COLUMN' . $this->asIdentifier($action->column),
+        ]);
     }
 
     /**
+     * @param AlterTableStatement $statement
      * @param AlterRenameColumnAction $action
      * @return string
      */
-    protected function formatRenameColumnAction(AlterRenameColumnAction $action): string
+    protected function formatRenameColumnAction(AlterTableStatement $statement, AlterRenameColumnAction $action): string
     {
         $parts = [];
+        $parts[] = 'ALTER TABLE ' . $this->asIdentifier($statement->table);
         $parts[] = 'RENAME COLUMN';
         $parts[] = $this->asIdentifier($action->from);
         $parts[] = 'TO';
