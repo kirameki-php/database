@@ -78,6 +78,14 @@ abstract class CreateTableBuilderTestAbstract extends SchemaTestCase
 
     abstract public function test_string_column(): void;
 
+    abstract public function test_text_column(): void;
+
+    abstract public function test_json_column(): void;
+
+    abstract public function test_binary_column(): void;
+
+    abstract public function test_uuid_column(): void;
+
     abstract public function test_notNull(): void;
 
     abstract public function test_autoIncrement(): void;

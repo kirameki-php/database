@@ -17,11 +17,10 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $builder = $this->createTableBuilder('users');
         $builder->id();
         $builder->execute();
-        $schema = $builder->toDdl();
         $this->assertStringStartsWith(
             'CREATE TABLE "users" ("id" BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT);' . PHP_EOL .
             'ALTER TABLE "users" AUTO_INCREMENT = ',
-            $schema,
+            $builder->toDdl(),
         );
     }
 
@@ -39,11 +38,10 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $builder = $this->createTableBuilder('users');
         $builder->id(startFrom: 100);
         $builder->execute();
-        $schema = $builder->toDdl();
         $this->assertSame(
             'CREATE TABLE "users" ("id" BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT);' . PHP_EOL .
             'ALTER TABLE "users" AUTO_INCREMENT = 100;',
-            $schema,
+            $builder->toDdl(),
         );
     }
 
@@ -52,8 +50,7 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $builder = $this->createTableBuilder('users');
         $builder->int('id')->primaryKey();
         $builder->execute();
-        $schema = $builder->toDdl();
-        $this->assertSame('CREATE TABLE "users" ("id" BIGINT NOT NULL PRIMARY KEY);', $schema);
+        $this->assertSame('CREATE TABLE "users" ("id" BIGINT NOT NULL PRIMARY KEY);', $builder->toDdl());
     }
 
     public function test_int8_column(): void
@@ -61,8 +58,7 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $builder = $this->createTableBuilder('users');
         $builder->int('id', 1)->primaryKey();
         $builder->execute();
-        $schema = $builder->toDdl();
-        $this->assertSame('CREATE TABLE "users" ("id" TINYINT NOT NULL PRIMARY KEY);', $schema);
+        $this->assertSame('CREATE TABLE "users" ("id" TINYINT NOT NULL PRIMARY KEY);', $builder->toDdl());
     }
 
     public function test_int16_column(): void
@@ -70,8 +66,7 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $builder = $this->createTableBuilder('users');
         $builder->int('id', 2)->primaryKey();
         $builder->execute();
-        $schema = $builder->toDdl();
-        $this->assertSame('CREATE TABLE "users" ("id" SMALLINT NOT NULL PRIMARY KEY);', $schema);
+        $this->assertSame('CREATE TABLE "users" ("id" SMALLINT NOT NULL PRIMARY KEY);', $builder->toDdl());
     }
 
     public function test_int32_column(): void
@@ -79,8 +74,7 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $builder = $this->createTableBuilder('users');
         $builder->int('id', 4)->primaryKey();
         $builder->execute();
-        $schema = $builder->toDdl();
-        $this->assertSame('CREATE TABLE "users" ("id" INT NOT NULL PRIMARY KEY);', $schema);
+        $this->assertSame('CREATE TABLE "users" ("id" INT NOT NULL PRIMARY KEY);', $builder->toDdl());
     }
 
     public function test_int64_column(): void
@@ -88,8 +82,7 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $builder = $this->createTableBuilder('users');
         $builder->int('id', 8)->primaryKey();
         $builder->execute();
-        $schema = $builder->toDdl();
-        $this->assertSame('CREATE TABLE "users" ("id" BIGINT NOT NULL PRIMARY KEY);', $schema);
+        $this->assertSame('CREATE TABLE "users" ("id" BIGINT NOT NULL PRIMARY KEY);', $builder->toDdl());
     }
 
     public function test_int_column__with_invalid_size(): void
@@ -106,8 +99,7 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $builder = $this->createTableBuilder('users');
         $builder->float('id')->nullable()->primaryKey();
         $builder->execute();
-        $schema = $builder->toDdl();
-        $this->assertSame('CREATE TABLE "users" ("id" DOUBLE PRIMARY KEY);', $schema);
+        $this->assertSame('CREATE TABLE "users" ("id" DOUBLE PRIMARY KEY);', $builder->toDdl());
     }
 
     public function test_float32_column(): void
@@ -115,8 +107,7 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $builder = $this->createTableBuilder('users');
         $builder->float('id', 4)->nullable()->primaryKey();
         $builder->execute();
-        $schema = $builder->toDdl();
-        $this->assertSame('CREATE TABLE "users" ("id" FLOAT PRIMARY KEY);', $schema);
+        $this->assertSame('CREATE TABLE "users" ("id" FLOAT PRIMARY KEY);', $builder->toDdl());
     }
 
     public function test_float64_column(): void
@@ -124,8 +115,7 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $builder = $this->createTableBuilder('users');
         $builder->float('id', 8)->nullable()->primaryKey();
         $builder->execute();
-        $schema = $builder->toDdl();
-        $this->assertSame('CREATE TABLE "users" ("id" DOUBLE PRIMARY KEY);', $schema);
+        $this->assertSame('CREATE TABLE "users" ("id" DOUBLE PRIMARY KEY);', $builder->toDdl());
     }
 
     public function test_float_column__with_invalid_size(): void
@@ -155,7 +145,7 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $builder->decimal('price')->nullable();
         $builder->execute();
         $schema = $builder->toDdl();
-        $this->assertSame('CREATE TABLE "users" ("id" BIGINT PRIMARY KEY, "price" DECIMAL(65, 30));', $schema);
+        $this->assertSame('CREATE TABLE "users" ("id" BIGINT PRIMARY KEY, "price" DECIMAL(65, 30));', $builder->toDdl());
     }
 
     public function test_decimal_column__with_precision_size(): void
@@ -164,8 +154,7 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $builder->int('id')->nullable()->primaryKey();
         $builder->decimal('price', 10, 2)->nullable();
         $builder->execute();
-        $schema = $builder->toDdl();
-        $this->assertSame('CREATE TABLE "users" ("id" BIGINT PRIMARY KEY, "price" DECIMAL(10, 2));', $schema);
+        $this->assertSame('CREATE TABLE "users" ("id" BIGINT PRIMARY KEY, "price" DECIMAL(10, 2));', $builder->toDdl());
     }
 
     public function test_timestamp_column(): void
@@ -173,8 +162,7 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $builder = $this->createTableBuilder('users');
         $builder->timestamp('id')->nullable()->primaryKey();
         $builder->execute();
-        $schema = $builder->toDdl();
-        $this->assertSame('CREATE TABLE "users" ("id" DATETIME(6) PRIMARY KEY);', $schema);
+        $this->assertSame('CREATE TABLE "users" ("id" DATETIME(6) PRIMARY KEY);', $builder->toDdl());
     }
 
     public function test_timestamp_column__with_precision(): void
@@ -182,17 +170,50 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $builder = $this->createTableBuilder('users');
         $builder->timestamp('id', 0)->nullable()->primaryKey();
         $builder->execute();
-        $schema = $builder->toDdl();
-        $this->assertSame('CREATE TABLE "users" ("id" DATETIME(0) PRIMARY KEY);', $schema);
+        $this->assertSame('CREATE TABLE "users" ("id" DATETIME(0) PRIMARY KEY);', $builder->toDdl());
     }
 
     public function test_string_column(): void
     {
         $builder = $this->createTableBuilder('users');
-        $builder->uuid('id')->primaryKey();
+        $builder->string('id', 10)->primaryKey();
         $builder->execute();
-        $schema = $builder->toDdl();
-        $this->assertSame('CREATE TABLE "users" ("id" VARCHAR(36) NOT NULL PRIMARY KEY);', $schema);
+        $this->assertSame('CREATE TABLE "users" ("id" VARCHAR(10) NOT NULL PRIMARY KEY);', $builder->toDdl());
+    }
+
+    public function test_text_column(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->nullable()->primaryKey();
+        $builder->text('desc')->nullable();
+        $builder->execute();
+        $this->assertSame('CREATE TABLE "users" ("id" BIGINT PRIMARY KEY, "desc" LONGTEXT);', $builder->toDdl());
+    }
+
+    public function test_json_column(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->nullable()->primaryKey();
+        $builder->json('data')->nullable();
+        $builder->execute();
+        $this->assertSame('CREATE TABLE "users" ("id" BIGINT PRIMARY KEY, "data" JSON);', $builder->toDdl());
+    }
+
+    public function test_binary_column(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->nullable()->primaryKey();
+        $builder->binary('data')->nullable();
+        $builder->execute();
+        $this->assertSame('CREATE TABLE "users" ("id" BIGINT PRIMARY KEY, "data" BINARY);', $builder->toDdl());
+    }
+
+    public function test_uuid_column(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->uuid('id')->nullable()->primaryKey();
+        $builder->execute();
+        $this->assertSame('CREATE TABLE "users" ("id" VARCHAR(36) PRIMARY KEY);', $builder->toDdl());
     }
 
     public function test_notNull(): void
