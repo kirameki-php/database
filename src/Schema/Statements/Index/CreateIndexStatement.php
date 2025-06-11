@@ -11,16 +11,16 @@ use Override;
 class CreateIndexStatement extends SchemaStatement
 {
     /**
+     * @param IndexType $type
      * @param string $table
      * @param string|null $name
      * @param array<array-key, SortOrder> $columns
-     * @param bool|null $unique
      */
     public function __construct(
+        public IndexType $type,
         public readonly string $table,
         public ?string $name = null,
         public array $columns = [],
-        public ?bool $unique = null,
     )
     {
     }

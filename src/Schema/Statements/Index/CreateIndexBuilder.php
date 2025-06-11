@@ -16,16 +16,15 @@ class CreateIndexBuilder extends SchemaBuilder
     /**
      * @param SchemaHandler $handler
      * @param string $table
-     * @param bool $unique
+     * @param IndexType $type
      */
     public function __construct(
         SchemaHandler $handler,
         string $table,
-        bool $unique = false,
+        IndexType $type = IndexType::Undefined,
     )
     {
-        parent::__construct($handler, new CreateIndexStatement($table));
-        $this->statement->unique = $unique;
+        parent::__construct($handler, new CreateIndexStatement($type, $table));
     }
 
     /**

@@ -13,6 +13,7 @@ use Kirameki\Database\Schema\Statements\ForeignKey\ForeignKeyBuilder;
 use Kirameki\Database\Schema\Statements\ForeignKey\ForeignKeyConstraint;
 use Kirameki\Database\Schema\Statements\Index\CreateIndexBuilder;
 use Kirameki\Database\Schema\Statements\Index\DropIndexBuilder;
+use Kirameki\Database\Schema\Statements\Index\IndexType;
 use Kirameki\Database\Schema\Statements\SchemaBuilder;
 
 /**
@@ -77,7 +78,7 @@ class AlterTableBuilder extends SchemaBuilder
      */
     public function createIndex(string ...$column): CreateIndexBuilder
     {
-        return $this->newIndexBuilder($column, false);
+        return $this->newIndexBuilder($column, IndexType::Undefined);
     }
 
     /**
@@ -86,17 +87,17 @@ class AlterTableBuilder extends SchemaBuilder
      */
     public function createUniqueIndex(string ...$column): CreateIndexBuilder
     {
-        return $this->newIndexBuilder($column, true);
+        return $this->newIndexBuilder($column, IndexType::Unique);
     }
 
     /**
      * @param iterable<array-key, string> $columns
-     * @param bool $unique
+     * @param IndexType $type
      * @return CreateIndexBuilder
      */
-    protected function newIndexBuilder(iterable $columns, bool $unique): CreateIndexBuilder
+    protected function newIndexBuilder(iterable $columns, IndexType $type): CreateIndexBuilder
     {
-        $builder = new CreateIndexBuilder($this->handler, $this->statement->table, $unique);
+        $builder = new CreateIndexBuilder($this->handler, $this->statement->table, $type);
         $builder->columns($columns);
         $this->statement->addAction($builder->statement);
         return $builder;
