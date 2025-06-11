@@ -108,15 +108,6 @@ class SqliteSchemaSyntax extends SchemaSyntax
     }
 
     /**
-     * @param CreateIndexStatement $index
-     * @return string
-     */
-    protected function formatCreateIndexColumnsPart(CreateIndexStatement $index): string
-    {
-        return $this->asEnclosedCsv(array_keys($index->columns));
-    }
-
-    /**
      * @inheritDoc
      */
     #[Override]

@@ -220,7 +220,7 @@ abstract class SchemaSyntax extends Syntax
     {
         return $this->concat([
             'CREATE',
-            $statement->unique ? 'UNIQUE' : '',
+            $statement->type->value,
             'INDEX',
             $this->asIdentifier($statement->name ?? $this->generateIndexNameFromColumns($statement)),
             'ON',
@@ -235,7 +235,7 @@ abstract class SchemaSyntax extends Syntax
      */
     protected function generateIndexNameFromColumns(CreateIndexStatement $index): string
     {
-        return implode('_', array_merge([$index->table], array_keys($index->columns)));
+        return implode('_', array_merge(['idx', $index->table], array_keys($index->columns)));
     }
 
     /**
@@ -246,7 +246,7 @@ abstract class SchemaSyntax extends Syntax
     {
         $columnParts = [];
         foreach ($index->columns as $column => $order) {
-            $columnParts[] = "$column {$order->value}";
+            $columnParts[] = "{$this->asIdentifier($column)} {$order->value}";
         }
         return $this->asEnclosedCsv($columnParts);
     }
