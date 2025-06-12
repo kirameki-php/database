@@ -165,7 +165,17 @@ abstract class Migration
      */
     protected function createIndex(string $table, Closure $callback): SchemaResult
     {
-        return $this->apply($this->getSchemaHandler()->createIndex($table), $callback);
+        return $this->apply($this->getSchemaHandler()->createIndex($table, []), $callback);
+    }
+
+    /**
+     * @param string $table
+     * @param Closure(CreateIndexBuilder): void $callback
+     * @return SchemaResult<CreateIndexStatement>
+     */
+    protected function createUniqueIndex(string $table, Closure $callback): SchemaResult
+    {
+        return $this->apply($this->getSchemaHandler()->createUniqueIndex($table, []), $callback);
     }
 
     /**

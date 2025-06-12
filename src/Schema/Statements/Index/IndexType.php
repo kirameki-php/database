@@ -4,6 +4,6 @@ namespace Kirameki\Database\Schema\Statements\Index;
 
 enum IndexType: string
 {
-    case Undefined = '';
+    case Default = '';
     case Unique = 'UNIQUE';
 }

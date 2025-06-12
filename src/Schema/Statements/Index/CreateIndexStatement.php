@@ -19,8 +19,8 @@ class CreateIndexStatement extends SchemaStatement
     public function __construct(
         public IndexType $type,
         public readonly string $table,
-        public ?string $name = null,
         public array $columns = [],
+        public ?string $name = null,
     )
     {
     }

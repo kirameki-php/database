@@ -6,6 +6,7 @@ use Kirameki\Database\Connection;
 use Kirameki\Database\Events\SchemaExecuted;
 use Kirameki\Database\Schema\Statements\Index\CreateIndexBuilder;
 use Kirameki\Database\Schema\Statements\Index\DropIndexBuilder;
+use Kirameki\Database\Schema\Statements\Index\IndexType;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
 use Kirameki\Database\Schema\Statements\Table\AlterTableBuilder;
 use Kirameki\Database\Schema\Statements\Table\CreateTableBuilder;
@@ -102,11 +103,22 @@ class SchemaHandler
 
     /**
      * @param string $table
+     * @param iterable<int, string> $columns
      * @return CreateIndexBuilder
      */
-    public function createIndex(string $table): CreateIndexBuilder
+    public function createIndex(string $table, iterable $columns): CreateIndexBuilder
     {
-        return new CreateIndexBuilder($this, $table);
+        return new CreateIndexBuilder($this, IndexType::Default, $table, $columns);
+    }
+
+    /**
+     * @param string $table
+     * @param iterable<int, string> $columns
+     * @return CreateIndexBuilder
+     */
+    public function createUniqueIndex(string $table, iterable $columns): CreateIndexBuilder
+    {
+        return new CreateIndexBuilder($this, IndexType::Unique, $table, $columns);
     }
 
     /**

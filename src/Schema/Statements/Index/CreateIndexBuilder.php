@@ -7,6 +7,7 @@ use Kirameki\Database\Query\Statements\SortOrder;
 use Kirameki\Database\Schema\SchemaHandler;
 use Kirameki\Database\Schema\Statements\SchemaBuilder;
 use function is_string;
+use function iterator_to_array;
 
 /**
  * @extends SchemaBuilder<CreateIndexStatement>
@@ -15,16 +16,18 @@ class CreateIndexBuilder extends SchemaBuilder
 {
     /**
      * @param SchemaHandler $handler
-     * @param string $table
      * @param IndexType $type
+     * @param string $table
+     * @param iterable<string, SortOrder>|iterable<int, string> $columns
      */
     public function __construct(
         SchemaHandler $handler,
+        IndexType $type,
         string $table,
-        IndexType $type = IndexType::Undefined,
+        iterable $columns,
     )
     {
-        parent::__construct($handler, new CreateIndexStatement($type, $table));
+        parent::__construct($handler, new CreateIndexStatement($type, $table, $this->normalizeColumns($columns)));
     }
 
     /**
@@ -38,31 +41,31 @@ class CreateIndexBuilder extends SchemaBuilder
     }
 
     /**
-     * @param string $column
-     * @param SortOrder|null $order
-     * @return $this
-     */
-    public function column(string $column, ?SortOrder $order = null): static
-    {
-        $this->statement->columns[$column] = $order ?? SortOrder::Ascending;
-        return $this;
-    }
-
-    /**
      * @param iterable<int, string>|iterable<string, SortOrder> $columns
      * @return $this
      */
     public function columns(iterable $columns): static
     {
+        $this->statement->columns = $this->normalizeColumns($columns);
+        return $this;
+    }
+
+    /**
+     * @param iterable<int, string>|iterable<string, SortOrder> $columns
+     * @return array<string, SortOrder>
+     */
+    protected function normalizeColumns(iterable $columns): array
+    {
+        $normalized = [];
         foreach ($columns as $column => $order) {
             if (is_string($column) && $order instanceof SortOrder) {
-                $this->column($column, $order);
+                $normalized[$column] = $order;
             } elseif (is_string($order)) {
-                $this->column($order);
+                $normalized[$order] = SortOrder::Ascending;
             } else {
                 throw new UnreachableException('Invalid primary key column definition.');
             }
         }
-        return $this;
+        return $normalized;
     }
 }
