@@ -6,6 +6,7 @@ use Kirameki\Core\Exceptions\UnreachableException;
 use Kirameki\Database\Query\Statements\SortOrder;
 use Kirameki\Database\Schema\SchemaHandler;
 use Kirameki\Database\Schema\Statements\SchemaBuilder;
+use function is_int;
 use function is_string;
 use function iterator_to_array;
 
@@ -60,10 +61,13 @@ class CreateIndexBuilder extends SchemaBuilder
         foreach ($columns as $column => $order) {
             if (is_string($column) && $order instanceof SortOrder) {
                 $normalized[$column] = $order;
-            } elseif (is_string($order)) {
+            } elseif (is_int($column) && is_string($order)) {
                 $normalized[$order] = SortOrder::Ascending;
             } else {
-                throw new UnreachableException('Invalid primary key column definition.');
+                throw new UnreachableException('Invalid index column definition format.', [
+                    'statement' => $this->statement,
+                    'columns' => $columns,
+                ]);
             }
         }
         return $normalized;

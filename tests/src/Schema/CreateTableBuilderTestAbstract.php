@@ -128,6 +128,16 @@ abstract class CreateTableBuilderTestAbstract extends SchemaTestCase
 
     abstract public function test_primaryKey__without_keys(): void;
 
+    public function test_primaryKey__with_wrong_keys(): void
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('Invalid primary key column definition format.');
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->nullable();
+        $builder->primaryKey(['id' => 'asc']);
+        $builder->execute();
+    }
+
     abstract public function test_references(): void;
 
     abstract public function test_references_with_delete_options(): void;

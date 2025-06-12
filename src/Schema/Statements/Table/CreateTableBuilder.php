@@ -16,6 +16,7 @@ use Kirameki\Database\Schema\Statements\ForeignKey\ForeignKeyConstraint;
 use Kirameki\Database\Schema\Statements\Index\CreateIndexBuilder;
 use Kirameki\Database\Schema\Statements\Index\IndexType;
 use Kirameki\Database\Schema\Statements\SchemaBuilder;
+use function is_int;
 
 /**
  * @extends SchemaBuilder<CreateTableStatement>
@@ -152,10 +153,13 @@ class CreateTableBuilder extends SchemaBuilder
         foreach ($columns as $column => $order) {
             if (is_string($column) && $order instanceof SortOrder) {
                 $this->statement->primaryKey->columns[$column] = $order;
-            } elseif (is_string($order)) {
+            } elseif (is_int($column) && is_string($order)) {
                 $this->statement->primaryKey->columns[$order] = SortOrder::Ascending;
             } else {
-                throw new UnreachableException('Invalid primary key column definition.');
+                throw new UnreachableException('Invalid primary key column definition format.', [
+                    'statement' => $this->statement,
+                    'columns' => $columns,
+                ]);
             }
         }
     }
