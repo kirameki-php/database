@@ -45,7 +45,7 @@ readonly class MigrationRepository
         $builder->int('id')->autoIncrement()->primaryKey();
         $builder->string('name');
         $builder->timestamp('createdAt')->currentAsDefault();
-        $builder->uniqueIndex('name');
+        $builder->uniqueIndex(['name']);
         $builder->execute();
     }
 

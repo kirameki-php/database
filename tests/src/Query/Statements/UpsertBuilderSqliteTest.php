@@ -57,7 +57,7 @@ class UpsertBuilderSqliteTest extends UpsertBuilderTestAbstract
         $table = $conn->schema()->createTable('User');
         $table->id();
         $table->string('name');
-        $table->uniqueIndex('name');
+        $table->uniqueIndex(['name']);
         $table->execute();
 
         $query = $conn->query();

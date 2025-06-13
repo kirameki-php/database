@@ -8,7 +8,6 @@ use Kirameki\Database\Schema\SchemaHandler;
 use Kirameki\Database\Schema\Statements\SchemaBuilder;
 use function is_int;
 use function is_string;
-use function iterator_to_array;
 
 /**
  * @extends SchemaBuilder<CreateIndexStatement>
@@ -38,16 +37,6 @@ class CreateIndexBuilder extends SchemaBuilder
     public function name(?string $name = null): static
     {
         $this->statement->name = $name;
-        return $this;
-    }
-
-    /**
-     * @param iterable<int, string>|iterable<string, SortOrder> $columns
-     * @return $this
-     */
-    public function columns(iterable $columns): static
-    {
-        $this->statement->columns = $this->normalizeColumns($columns);
         return $this;
     }
 
