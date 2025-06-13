@@ -123,11 +123,22 @@ class SchemaHandler
 
     /**
      * @param string $table
+     * @param string $name
      * @return DropIndexBuilder
      */
-    public function dropIndex(string $table): DropIndexBuilder
+    public function dropIndexByName(string $table, string $name): DropIndexBuilder
     {
-        return new DropIndexBuilder($this, $table);
+        return new DropIndexBuilder($this, $table, $name);
+    }
+
+    /**
+     * @param string $table
+     * @param iterable<int, string> $columns
+     * @return DropIndexBuilder
+     */
+    public function dropIndexByColumns(string $table, iterable $columns): DropIndexBuilder
+    {
+        return $this->dropIndexByName($table, DropIndexBuilder::deriveName($table, $columns));
     }
 
     /**

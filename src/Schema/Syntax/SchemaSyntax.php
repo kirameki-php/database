@@ -5,7 +5,6 @@ namespace Kirameki\Database\Schema\Syntax;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\InvalidTypeException;
 use Kirameki\Core\Exceptions\LogicException;
-use Kirameki\Core\Func;
 use Kirameki\Core\Value;
 use Kirameki\Database\Exceptions\DropProtectionException;
 use Kirameki\Database\Expression;
@@ -257,9 +256,8 @@ abstract class SchemaSyntax extends Syntax
      */
     public function compileDropIndex(DropIndexStatement $statement): array
     {
-        $name = $statement->name ?? implode('_', array_merge([$statement->table], $statement->columns));
         return [
-            "DROP INDEX {$this->asIdentifier($name)} ON {$this->asIdentifier($statement->table)}",
+            "DROP INDEX {$this->asIdentifier($statement->name)} ON {$this->asIdentifier($statement->table)}",
         ];
     }
 

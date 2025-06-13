@@ -2,7 +2,6 @@
 
 namespace Kirameki\Database\Schema\Statements\Index;
 
-use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
 use Kirameki\Database\Schema\Syntax\SchemaSyntax;
 use Override;
@@ -11,30 +10,13 @@ class DropIndexStatement extends SchemaStatement
 {
     /**
      * @param string $table
-     * @param string|null $name
-     * @param list<string> $columns
+     * @param string $name
      */
     public function __construct(
         public readonly string $table,
-        public ?string $name = null,
-        public array $columns = [],
+        public readonly string $name,
     )
     {
-    }
-
-    /**
-     * @return void
-     */
-    public function preprocess(): void
-    {
-        $name = $this->name;
-        $columns = $this->columns;
-
-        if ($name === null && empty($columns)) {
-            throw new LogicException('Name or column(s) are required to drop an index.', [
-                'statement' => $this,
-            ]);
-        }
     }
 
     /**
@@ -43,7 +25,6 @@ class DropIndexStatement extends SchemaStatement
     #[Override]
     public function toExecutable(SchemaSyntax $syntax): array
     {
-        $this->preprocess();
         return $syntax->compileDropIndex($this);
     }
 }

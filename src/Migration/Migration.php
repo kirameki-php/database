@@ -180,11 +180,22 @@ abstract class Migration
 
     /**
      * @param string $table
+     * @param string $name
      * @return SchemaResult<DropIndexStatement>
      */
-    protected function dropIndex(string $table): SchemaResult
+    protected function dropIndexByName(string $table, string $name): SchemaResult
     {
-        return $this->apply($this->getSchemaHandler()->dropIndex($table));
+        return $this->apply($this->getSchemaHandler()->dropIndexByName($table, $name));
+    }
+
+    /**
+     * @param string $table
+     * @param iterable<int, string> $columns
+     * @return SchemaResult<DropIndexStatement>
+     */
+    protected function dropIndexByColumns(string $table, iterable $columns): SchemaResult
+    {
+        return $this->apply($this->getSchemaHandler()->dropIndexByColumns($table, $columns));
     }
 
     /**

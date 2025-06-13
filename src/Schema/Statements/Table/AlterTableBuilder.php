@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Schema\Statements\Table;
 
 use Kirameki\Collections\Utils\Arr;
+use Kirameki\Database\Query\Statements\SortOrder;
 use Kirameki\Database\Schema\SchemaHandler;
 use Kirameki\Database\Schema\Statements\Column\AlterColumnAction;
 use Kirameki\Database\Schema\Statements\Column\AlterColumnBuilder;
@@ -73,26 +74,26 @@ class AlterTableBuilder extends SchemaBuilder
     }
 
     /**
-     * @param string ...$column
+     * @param iterable<string, SortOrder>|iterable<int, string> $columns
      * @return CreateIndexBuilder
      */
-    public function createIndex(string ...$column): CreateIndexBuilder
+    public function createIndex(iterable $columns): CreateIndexBuilder
     {
-        return $this->newIndexBuilder(IndexType::Default, array_values($column));
+        return $this->newIndexBuilder(IndexType::Default, $columns);
     }
 
     /**
-     * @param string ...$column
+     * @param iterable<string, SortOrder>|iterable<int, string> $columns
      * @return CreateIndexBuilder
      */
-    public function createUniqueIndex(string ...$column): CreateIndexBuilder
+    public function createUniqueIndex(iterable $columns): CreateIndexBuilder
     {
-        return $this->newIndexBuilder(IndexType::Unique, array_values($column));
+        return $this->newIndexBuilder(IndexType::Unique, $columns);
     }
 
     /**
      * @param IndexType $type
-     * @param iterable<array-key, string> $columns
+     * @param iterable<string, SortOrder>|iterable<int, string> $columns
      * @return CreateIndexBuilder
      */
     protected function newIndexBuilder(IndexType $type, iterable $columns): CreateIndexBuilder
@@ -102,16 +103,20 @@ class AlterTableBuilder extends SchemaBuilder
         return $builder;
     }
 
+    public function dropIndexByName(string $name): DropIndexBuilder
+    {
+        $builder = new DropIndexBuilder($this->handler, $this->statement->table, $name);
+        $this->statement->addAction($builder->statement);
+        return $builder;
+    }
+
     /**
      * @param iterable<int, string> $columns
      * @return DropIndexBuilder
      */
-    public function dropIndex(iterable $columns): DropIndexBuilder
+    public function dropIndexByColumns(iterable $columns): DropIndexBuilder
     {
-        $builder = new DropIndexBuilder($this->handler, $this->statement->table);
-        $builder->columns($columns);
-        $this->statement->addAction($builder->statement);
-        return $builder;
+        return $this->dropIndexByName(DropIndexBuilder::deriveName($this->statement->table, $columns));
     }
 
     /**
