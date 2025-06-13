@@ -87,4 +87,61 @@ abstract class SchemaHandlerTestAbstract extends SchemaTestCase
 
         $this->assertSame('DROP TABLE "temp";', $drop->toDdl());
     }
+
+    public function test_createIndex__with_auto_name(): void
+    {
+        $handler = $this->connect()->schema();
+        $table = $handler->createTable('temp');
+        $table->int('id')->nullable()->primaryKey();
+        $table->string('name');
+        $table->execute();
+
+        $index = $handler->createIndex('temp', ['name']);
+        $index->execute();
+
+        $this->assertSame('CREATE INDEX "idx_temp_name" ON "temp" ("name" ASC);', $index->toDdl());
+    }
+
+    public function test_createIndex__with_name(): void
+    {
+        $handler = $this->connect()->schema();
+        $table = $handler->createTable('temp');
+        $table->int('id')->nullable()->primaryKey();
+        $table->string('name');
+        $table->execute();
+
+        $index = $handler->createIndex('temp', ['name'])->name('idx_t1');
+        $index->execute();
+
+        $this->assertSame('CREATE INDEX "idx_t1" ON "temp" ("name" ASC);', $index->toDdl());
+    }
+
+    public function test_createUniqueIndex__with_auto_name(): void
+    {
+        $handler = $this->connect()->schema();
+        $table = $handler->createTable('temp');
+        $table->int('id')->nullable()->primaryKey();
+        $table->string('name');
+        $table->execute();
+
+        $index = $handler->createUniqueIndex('temp', ['name']);
+        $index->execute();
+
+        $this->assertSame('CREATE UNIQUE INDEX "idx_temp_name" ON "temp" ("name" ASC);', $index->toDdl());
+    }
+
+    public function test_createUniqueIndex__with_name(): void
+    {
+        $handler = $this->connect()->schema();
+        $table = $handler->createTable('temp');
+        $table->int('id')->nullable()->primaryKey();
+        $table->string('name');
+        $table->execute();
+
+        $index = $handler->createUniqueIndex('temp', ['name'])->name('idx_t1');
+        $index->execute();
+
+        $this->assertSame('CREATE UNIQUE INDEX "idx_t1" ON "temp" ("name" ASC);', $index->toDdl());
+    }
+
 }
