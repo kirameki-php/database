@@ -16,6 +16,8 @@ use Kirameki\Database\Schema\Statements\Index\CreateIndexBuilder;
 use Kirameki\Database\Schema\Statements\Index\DropIndexBuilder;
 use Kirameki\Database\Schema\Statements\Index\IndexType;
 use Kirameki\Database\Schema\Statements\SchemaBuilder;
+use function array_values;
+use function iterator_to_array;
 
 /**
  * @extends SchemaBuilder<AlterTableStatement>
@@ -105,7 +107,7 @@ class AlterTableBuilder extends SchemaBuilder
 
     public function dropIndexByName(string $name): DropIndexBuilder
     {
-        $builder = new DropIndexBuilder($this->handler, $this->statement->table, $name);
+        $builder = new DropIndexBuilder($this->handler, $this->statement->table, name: $name);
         $this->statement->addAction($builder->statement);
         return $builder;
     }
@@ -116,7 +118,9 @@ class AlterTableBuilder extends SchemaBuilder
      */
     public function dropIndexByColumns(iterable $columns): DropIndexBuilder
     {
-        return $this->dropIndexByName(DropIndexBuilder::deriveName($this->statement->table, $columns));
+        $builder = new DropIndexBuilder($this->handler, $this->statement->table, iterator_to_array($columns));
+        $this->statement->addAction($builder->statement);
+        return $builder;
     }
 
     /**

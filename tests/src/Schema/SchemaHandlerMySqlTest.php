@@ -74,4 +74,38 @@ class SchemaHandlerMySqlTest extends SchemaHandlerTestAbstract
 
         $this->assertSame('RENAME TABLE "temp1" TO "new_temp1", "temp2" TO "new_temp2";', $builder->toDdl());
     }
+
+    public function test_dropIndexByName(): void
+    {
+        $handler = $this->connect()->schema();
+        $table = $handler->createTable('temp');
+        $table->int('id')->nullable()->primaryKey();
+        $table->string('name');
+        $table->execute();
+
+        $index = $handler->createIndex('temp', ['name'])->name('idx_t1');
+        $index->execute();
+
+        $drop = $handler->dropIndexByName('temp', 'idx_t1');
+        $drop->execute();
+
+        $this->assertSame('DROP INDEX "idx_t1" ON "temp";', $drop->toDdl());
+    }
+
+    public function test_dropIndexByColumns(): void
+    {
+        $handler = $this->connect()->schema();
+        $table = $handler->createTable('temp');
+        $table->int('id')->nullable()->primaryKey();
+        $table->string('name');
+        $table->execute();
+
+        $index = $handler->createIndex('temp', ['name']);
+        $index->execute();
+
+        $drop = $handler->dropIndexByColumns('temp', ['name']);
+        $drop->execute();
+
+        $this->assertSame('DROP INDEX "idx_temp_name" ON "temp";', $drop->toDdl());
+    }
 }

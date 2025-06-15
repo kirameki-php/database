@@ -221,7 +221,7 @@ abstract class SchemaSyntax extends Syntax
             'CREATE',
             $statement->type->value,
             'INDEX',
-            $this->asIdentifier($statement->name ?? $this->generateIndexNameFromColumns($statement)),
+            $this->asIdentifier($statement->name ?? $this->generateIndexNameFromColumns($statement->table, array_keys($statement->columns))),
             'ON',
             $this->asIdentifier($statement->table),
             $this->formatCreateIndexColumnsPart($statement),
@@ -229,12 +229,13 @@ abstract class SchemaSyntax extends Syntax
     }
 
     /**
-     * @param CreateIndexStatement $index
+     * @param string $table
+     * @param array<int, string> $columns
      * @return string
      */
-    protected function generateIndexNameFromColumns(CreateIndexStatement $index): string
+    protected function generateIndexNameFromColumns(string $table, array $columns): string
     {
-        return implode('_', array_merge(['idx', $index->table], array_keys($index->columns)));
+        return implode('_', array_merge(['idx', $table], array_values($columns)));
     }
 
     /**
@@ -256,8 +257,12 @@ abstract class SchemaSyntax extends Syntax
      */
     public function compileDropIndex(DropIndexStatement $statement): array
     {
+        $table = $statement->table;
+        $columns = $statement->columns;
+        $name = $statement->name ?? $this->generateIndexNameFromColumns($table, $columns);
+
         return [
-            "DROP INDEX {$this->asIdentifier($statement->name)} ON {$this->asIdentifier($statement->table)}",
+            "DROP INDEX {$this->asIdentifier($name)} ON {$this->asIdentifier($table)}",
         ];
     }
 

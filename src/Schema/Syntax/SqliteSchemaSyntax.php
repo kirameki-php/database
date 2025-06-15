@@ -6,6 +6,7 @@ use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Functions\Syntax\SqliteFunctionSyntax;
 use Kirameki\Database\Schema\Statements\Column\ColumnDefinition;
 use Kirameki\Database\Schema\Statements\Index\CreateIndexStatement;
+use Kirameki\Database\Schema\Statements\Index\DropIndexStatement;
 use Kirameki\Database\Schema\Statements\Table\CreateTableStatement;
 use Kirameki\Database\Schema\Statements\Table\TruncateTableStatement;
 use Override;
@@ -180,6 +181,21 @@ class SqliteSchemaSyntax extends SchemaSyntax
             'column' => $name,
             'type' => $type,
         ]);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function compileDropIndex(DropIndexStatement $statement): array
+    {
+        $table = $statement->table;
+        $columns = $statement->columns;
+        $name = $statement->name ?? $this->generateIndexNameFromColumns($table, $columns);
+
+        return [
+            "DROP INDEX {$this->asIdentifier($name)}",
+        ];
     }
 
     /**

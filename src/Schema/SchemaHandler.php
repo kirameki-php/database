@@ -15,6 +15,7 @@ use Kirameki\Database\Schema\Statements\Table\RenameTableBuilder;
 use Kirameki\Database\Schema\Statements\Table\TruncateTableStatement;
 use Kirameki\Event\EventEmitter;
 use Random\Randomizer;
+use function iterator_to_array;
 
 class SchemaHandler
 {
@@ -128,7 +129,7 @@ class SchemaHandler
      */
     public function dropIndexByName(string $table, string $name): DropIndexBuilder
     {
-        return new DropIndexBuilder($this, $table, $name);
+        return new DropIndexBuilder($this, $table, [], $name);
     }
 
     /**
@@ -138,7 +139,7 @@ class SchemaHandler
      */
     public function dropIndexByColumns(string $table, iterable $columns): DropIndexBuilder
     {
-        return $this->dropIndexByName($table, DropIndexBuilder::deriveName($table, $columns));
+        return new DropIndexBuilder($this, $table, iterator_to_array($columns));
     }
 
     /**
@@ -148,9 +149,9 @@ class SchemaHandler
      */
     public function execute(SchemaStatement $statement): SchemaResult
     {
-        $this->preProcess($statement);
+        $this->preprocess($statement);
         $result = $this->connection->adapter->runSchema($statement);
-        return $this->postProcess($result);
+        return $this->postprocess($result);
     }
 
     /**
@@ -167,7 +168,7 @@ class SchemaHandler
      * @template TSchemaStatement of SchemaStatement
      * @param TSchemaStatement $statement
      */
-    protected function preProcess(SchemaStatement $statement): void
+    protected function preprocess(SchemaStatement $statement): void
     {
         $this->connection->connectIfNotConnected();
     }
@@ -177,7 +178,7 @@ class SchemaHandler
      * @param SchemaResult<TSchemaStatement> $result
      * @return SchemaResult<TSchemaStatement>
      */
-    protected function postProcess(SchemaResult $result): SchemaResult
+    protected function postprocess(SchemaResult $result): SchemaResult
     {
         $this->events?->emit(new SchemaExecuted($this->connection, $result));
         return $result;

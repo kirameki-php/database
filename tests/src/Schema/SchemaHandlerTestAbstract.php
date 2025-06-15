@@ -144,4 +144,7 @@ abstract class SchemaHandlerTestAbstract extends SchemaTestCase
         $this->assertSame('CREATE UNIQUE INDEX "idx_t1" ON "temp" ("name" ASC);', $index->toDdl());
     }
 
+    abstract public function test_dropIndexByName(): void;
+
+    abstract public function test_dropIndexByColumns(): void;
 }

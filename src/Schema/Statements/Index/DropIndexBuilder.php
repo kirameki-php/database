@@ -5,6 +5,7 @@ namespace Kirameki\Database\Schema\Statements\Index;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Database\Schema\SchemaHandler;
 use Kirameki\Database\Schema\Statements\SchemaBuilder;
+use function array_values;
 
 /**
  * @extends SchemaBuilder<DropIndexStatement>
@@ -12,26 +13,18 @@ use Kirameki\Database\Schema\Statements\SchemaBuilder;
 class DropIndexBuilder extends SchemaBuilder
 {
     /**
-     * @param string $table
-     * @param iterable<int, string> $columns
-     * @return string
-     */
-    public static function deriveName(string $table, iterable $columns): string
-    {
-        return implode('_', Arr::merge([$table], $columns));
-    }
-
-    /**
      * @param SchemaHandler $handler
      * @param string $table
-     * @param string $name
+     * @param array<int, string> $columns
+     * @param string|null $name
      */
     public function __construct(
         SchemaHandler $handler,
         string $table,
-        string $name,
+        array $columns = [],
+        ?string $name = null,
     )
     {
-        parent::__construct($handler, new DropIndexStatement($table, $name));
+        parent::__construct($handler, new DropIndexStatement($table, $columns, $name));
     }
 }
