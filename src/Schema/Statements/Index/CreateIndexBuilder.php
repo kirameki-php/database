@@ -54,7 +54,6 @@ class CreateIndexBuilder extends SchemaBuilder
                 $normalized[$order] = SortOrder::Ascending;
             } else {
                 throw new UnreachableException('Invalid index column definition format.', [
-                    'statement' => $this->statement,
                     'columns' => $columns,
                 ]);
             }
