@@ -109,7 +109,11 @@ abstract class CreateTableBuilderTestAbstract extends SchemaTestCase
 
     abstract public function test_default__decimal(): void;
 
+    abstract public function test_default__timestamp(): void;
+
     abstract public function test_default__string(): void;
+
+    abstract public function test_default__uuid(): void;
 
     abstract public function test_defaultValue_using_Raw(): void;
 

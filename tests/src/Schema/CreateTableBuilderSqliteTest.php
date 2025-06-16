@@ -278,12 +278,32 @@ class CreateTableBuilderSqliteTest extends CreateTableBuilderTestAbstract
         $this->assertSame('CREATE TABLE "users" ("id" NUMERIC DEFAULT 1.1 PRIMARY KEY) WITHOUT ROWID;', $builder->toDdl());
     }
 
+    public function test_default__timestamp(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->timestamp('id')->nullable()->primaryKey()->default('2023-01-01 00:00:00');
+        $builder->execute();
+        $this->assertSame('CREATE TABLE "users" ("id" DATETIME CHECK (datetime("id") IS NOT NULL) DEFAULT \'2023-01-01 00:00:00\' PRIMARY KEY) WITHOUT ROWID;', $builder->toDdl());
+    }
+
     public function test_default__string(): void
     {
         $builder = $this->createTableBuilder('users');
         $builder->string('id')->nullable()->primaryKey()->default('ABC');
         $builder->execute();
         $this->assertSame('CREATE TABLE "users" ("id" TEXT DEFAULT \'ABC\' PRIMARY KEY) WITHOUT ROWID;', $builder->toDdl());
+    }
+
+    public function test_default__uuid(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->uuid('id')->nullable()->primaryKey()->generateDefault();
+        $builder->execute();
+
+        $this->assertSame(
+            'CREATE TABLE "users" ("id" TEXT CHECK (length("id") = 36) DEFAULT (PRINTF(\'%s-%s-%s-%s-%s\', LOWER(HEX(RANDOMBLOB(4))), LOWER(HEX(RANDOMBLOB(2))), LOWER(HEX(RANDOMBLOB(2))), LOWER(HEX(RANDOMBLOB(2))), LOWER(HEX(RANDOMBLOB(6))))) PRIMARY KEY) WITHOUT ROWID;',
+            $builder->toDdl()
+        );
     }
 
     public function test_defaultValue_using_Raw(): void
@@ -293,7 +313,7 @@ class CreateTableBuilderSqliteTest extends CreateTableBuilderTestAbstract
         $builder->timestamp('loginAt')->nullable()->default(new Raw('CURRENT_TIMESTAMP'));
         $builder->execute();
         $schema = $builder->toDdl();
-        $this->assertSame('CREATE TABLE "users" ("id" INTEGER PRIMARY KEY, "loginAt" DATETIME CHECK (datetime("loginAt") IS NOT NULL) DEFAULT CURRENT_TIMESTAMP) WITHOUT ROWID;', $schema);
+        $this->assertSame('CREATE TABLE "users" ("id" INTEGER PRIMARY KEY, "loginAt" DATETIME CHECK (datetime("loginAt") IS NOT NULL) DEFAULT (CURRENT_TIMESTAMP)) WITHOUT ROWID;', $schema);
     }
 
     public function test_primaryKey__with_list_string(): void

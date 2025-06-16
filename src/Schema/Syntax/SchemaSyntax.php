@@ -317,13 +317,22 @@ abstract class SchemaSyntax extends Syntax
         }
 
         if ($value instanceof Expression) {
-            return $value->toValue($this);
+            return $this->formatDefaultExpression($value);
         }
 
         throw new LogicException('Unknown default value type: ' . Value::getType($value), [
             'value' => $value,
             'column' => $def->name,
         ]);
+    }
+
+    /**
+     * @param Expression $expression
+     * @return string
+     */
+    protected function formatDefaultExpression(Expression $expression): string
+    {
+        return '(' . $expression->toValue($this) . ')';
     }
 
     /**

@@ -286,6 +286,15 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $this->assertSame('CREATE TABLE "users" ("id" DECIMAL(65, 30) DEFAULT 1.1 PRIMARY KEY);', $schema);
     }
 
+    public function test_default__timestamp(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->timestamp('id')->nullable()->primaryKey()->default('2023-01-01 00:00:00');
+        $builder->execute();
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "users" ("id" DATETIME(6) DEFAULT \'2023-01-01 00:00:00\' PRIMARY KEY);', $schema);
+    }
+
     public function test_default__string(): void
     {
         $builder = $this->createTableBuilder('users');
@@ -295,6 +304,16 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $this->assertSame('CREATE TABLE "users" ("id" VARCHAR(191) DEFAULT \'ABC\' PRIMARY KEY);', $schema);
     }
 
+    public function test_default__uuid(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->uuid('id')->nullable()->primaryKey()->generateDefault();
+        $builder->execute();
+        $schema = $builder->toDdl();
+
+        $this->assertSame('CREATE TABLE "users" ("id" VARCHAR(36) DEFAULT (UUID()) PRIMARY KEY);', $schema);
+    }
+
     public function test_defaultValue_using_Raw(): void
     {
         $builder = $this->createTableBuilder('users');
@@ -302,7 +321,7 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $builder->timestamp('loginAt')->nullable()->default(new Raw('CURRENT_TIMESTAMP(6)'));
         $builder->execute();
         $schema = $builder->toDdl();
-        $this->assertSame('CREATE TABLE "users" ("id" BIGINT PRIMARY KEY, "loginAt" DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6));', $schema);
+        $this->assertSame('CREATE TABLE "users" ("id" BIGINT PRIMARY KEY, "loginAt" DATETIME(6) DEFAULT (CURRENT_TIMESTAMP(6)));', $schema);
     }
 
     public function test_primaryKey__with_list_string(): void
