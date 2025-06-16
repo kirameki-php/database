@@ -352,11 +352,19 @@ abstract class SchemaSyntax extends Syntax
         return implode(' ', $parts);
     }
 
+    /**
+     * @param ForeignKeyConstraint $action
+     * @return string
+     */
     protected function formatAddForeignKeyAction(ForeignKeyConstraint $action): string
     {
         return 'ADD ' . $this->formatForeignKeyConstraint($action);
     }
 
+    /**
+     * @param AlterDropForeignKeyAction $action
+     * @return string
+     */
     protected function formatDropForeignKeyAction(AlterDropForeignKeyAction $action): string
     {
         return $this->concat([
