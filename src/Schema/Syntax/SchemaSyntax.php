@@ -350,10 +350,10 @@ abstract class SchemaSyntax extends Syntax
 
     protected function formatDropForeignKeyAction(AlterDropForeignKeyAction $action): string
     {
-        $parts = [];
-        $parts[] = 'DROP FOREIGN KEY';
-        $parts[] = $this->asIdentifier($action->name);
-        return implode(' ', $parts);
+        return $this->concat([
+            'DROP FOREIGN KEY',
+            $this->asIdentifier($action->name),
+        ]);
     }
 
     /**
