@@ -6,6 +6,7 @@ use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Query\Statements\SortOrder;
 use Kirameki\Database\Raw;
 use Kirameki\Database\Schema\Statements\ForeignKey\ReferenceOption;
+use function implode;
 use const PHP_EOL;
 
 class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
@@ -334,6 +335,100 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $builder->int('id')->nullable()->primaryKey();
         $builder->primaryKey([]);
         $builder->execute();
+    }
+
+    public function test_index__with_columns_as_list(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->nullable()->primaryKey();
+        $builder->string('name1', 10)->nullable();
+        $builder->string('name2', 10)->nullable();
+        $builder->index(['name1', 'name2']);
+        $builder->execute();
+        $schema = $builder->toDdl();
+        $this->assertSame(implode("\n", [
+            'CREATE TABLE "users" ("id" BIGINT PRIMARY KEY, "name1" VARCHAR(10), "name2" VARCHAR(10));',
+            'CREATE INDEX "idx_users_name1_name2" ON "users" ("name1" ASC, "name2" ASC);',
+        ]), $schema);
+    }
+
+    public function test_index__with_columns_as_map(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->nullable()->primaryKey();
+        $builder->string('name1', 10)->nullable();
+        $builder->string('name2', 10)->nullable();
+        $builder->index(['name1' => SortOrder::Descending, 'name2' => SortOrder::Ascending]);
+        $builder->execute();
+        $schema = $builder->toDdl();
+        $this->assertSame(implode("\n", [
+            'CREATE TABLE "users" ("id" BIGINT PRIMARY KEY, "name1" VARCHAR(10), "name2" VARCHAR(10));',
+            'CREATE INDEX "idx_users_name1_name2" ON "users" ("name1" DESC, "name2" ASC);',
+        ]), $schema);
+    }
+
+    public function test_uniqueIndex__with_columns_as_list(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->nullable()->primaryKey();
+        $builder->string('name1', 10)->nullable();
+        $builder->string('name2', 10)->nullable();
+        $builder->uniqueIndex(['name1', 'name2']);
+        $builder->execute();
+        $schema = $builder->toDdl();
+        $this->assertSame(implode("\n", [
+            'CREATE TABLE "users" ("id" BIGINT PRIMARY KEY, "name1" VARCHAR(10), "name2" VARCHAR(10));',
+            'CREATE UNIQUE INDEX "idx_users_name1_name2" ON "users" ("name1" ASC, "name2" ASC);',
+        ]), $schema);
+    }
+
+    public function test_uniqueIndex__with_columns_as_map(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->nullable()->primaryKey();
+        $builder->string('name1', 10)->nullable();
+        $builder->string('name2', 10)->nullable();
+        $builder->uniqueIndex(['name1' => SortOrder::Descending, 'name2' => SortOrder::Ascending]);
+        $builder->execute();
+        $schema = $builder->toDdl();
+        $this->assertSame(implode("\n", [
+            'CREATE TABLE "users" ("id" BIGINT PRIMARY KEY, "name1" VARCHAR(10), "name2" VARCHAR(10));',
+            'CREATE UNIQUE INDEX "idx_users_name1_name2" ON "users" ("name1" DESC, "name2" ASC);',
+        ]), $schema);
+    }
+
+    public function test_foreignKey__with_single_column(): void
+    {
+        $builder = $this->createTableBuilder('t1');
+        $builder->int('id')->nullable()->primaryKey();
+        $builder->execute();
+
+        $builder = $this->createTableBuilder('t2');
+        $builder->int('id')->nullable()->primaryKey();
+        $builder->int('t1Id')->nullable();
+        $builder->foreignKey(['t1Id'], 't1', ['id']);
+        $builder->execute();
+
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "t2" ("id" BIGINT PRIMARY KEY, "t1Id" BIGINT, FOREIGN KEY ("t1Id") REFERENCES "t1" ("id"));', $schema);
+    }
+
+    public function test_foreignKey__with_multiple_columns(): void
+    {
+        $builder = $this->createTableBuilder('t1');
+        $builder->int('id')->nullable()->primaryKey();
+        $builder->int('categoryId')->nullable();
+        $builder->uniqueIndex(['id', 'categoryId']);
+        $builder->execute();
+
+        $builder = $this->createTableBuilder('t2');
+        $builder->int('id')->nullable()->primaryKey();
+        $builder->int('t1Id')->nullable();
+        $builder->int('t1CategoryId')->nullable();
+        $builder->foreignKey(['t1Id', 't1CategoryId'], 't1', ['id', 'categoryId']);
+        $builder->execute();
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "t2" ("id" BIGINT PRIMARY KEY, "t1Id" BIGINT, "t1CategoryId" BIGINT, FOREIGN KEY ("t1Id", "t1CategoryId") REFERENCES "t1" ("id", "categoryId"));', $schema);
     }
 
     public function test_references(): void

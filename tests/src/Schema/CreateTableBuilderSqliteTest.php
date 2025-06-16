@@ -6,6 +6,7 @@ use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Query\Statements\SortOrder;
 use Kirameki\Database\Raw;
 use Kirameki\Database\Schema\Statements\ForeignKey\ReferenceOption;
+use function implode;
 use const PHP_EOL;
 
 class CreateTableBuilderSqliteTest extends CreateTableBuilderTestAbstract
@@ -325,6 +326,99 @@ class CreateTableBuilderSqliteTest extends CreateTableBuilderTestAbstract
         $builder->int('id')->nullable()->primaryKey();
         $builder->primaryKey([]);
         $builder->execute();
+    }
+
+    public function test_index__with_columns_as_list(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->nullable()->primaryKey();
+        $builder->string('name1', 10)->nullable();
+        $builder->string('name2', 10)->nullable();
+        $builder->index(['name1', 'name2']);
+        $builder->execute();
+        $schema = $builder->toDdl();
+        $this->assertSame(implode("\n", [
+            'CREATE TABLE "users" ("id" INTEGER PRIMARY KEY, "name1" TEXT CHECK (length("name1") <= 10), "name2" TEXT CHECK (length("name2") <= 10)) WITHOUT ROWID;',
+            'CREATE INDEX "idx_users_name1_name2" ON "users" ("name1" ASC, "name2" ASC);',
+        ]), $schema);
+    }
+
+    public function test_index__with_columns_as_map(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->nullable()->primaryKey();
+        $builder->string('name1', 10)->nullable();
+        $builder->string('name2', 10)->nullable();
+        $builder->index(['name1' => SortOrder::Descending, 'name2' => SortOrder::Ascending]);
+        $builder->execute();
+        $schema = $builder->toDdl();
+        $this->assertSame(implode("\n", [
+            'CREATE TABLE "users" ("id" INTEGER PRIMARY KEY, "name1" TEXT CHECK (length("name1") <= 10), "name2" TEXT CHECK (length("name2") <= 10)) WITHOUT ROWID;',
+            'CREATE INDEX "idx_users_name1_name2" ON "users" ("name1" DESC, "name2" ASC);',
+        ]), $schema);
+    }
+
+    public function test_uniqueIndex__with_columns_as_list(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->nullable()->primaryKey();
+        $builder->string('name1', 10)->nullable();
+        $builder->string('name2', 10)->nullable();
+        $builder->uniqueIndex(['name1', 'name2']);
+        $builder->execute();
+        $schema = $builder->toDdl();
+        $this->assertSame(implode("\n", [
+            'CREATE TABLE "users" ("id" INTEGER PRIMARY KEY, "name1" TEXT CHECK (length("name1") <= 10), "name2" TEXT CHECK (length("name2") <= 10)) WITHOUT ROWID;',
+            'CREATE UNIQUE INDEX "idx_users_name1_name2" ON "users" ("name1" ASC, "name2" ASC);',
+        ]), $schema);
+    }
+
+    public function test_uniqueIndex__with_columns_as_map(): void
+    {
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->nullable()->primaryKey();
+        $builder->string('name1', 10)->nullable();
+        $builder->string('name2', 10)->nullable();
+        $builder->uniqueIndex(['name1' => SortOrder::Descending, 'name2' => SortOrder::Ascending]);
+        $builder->execute();
+        $schema = $builder->toDdl();
+        $this->assertSame(implode("\n", [
+            'CREATE TABLE "users" ("id" INTEGER PRIMARY KEY, "name1" TEXT CHECK (length("name1") <= 10), "name2" TEXT CHECK (length("name2") <= 10)) WITHOUT ROWID;',
+            'CREATE UNIQUE INDEX "idx_users_name1_name2" ON "users" ("name1" DESC, "name2" ASC);',
+        ]), $schema);
+    }
+
+    public function test_foreignKey__with_single_column(): void
+    {
+        $builder = $this->createTableBuilder('t1');
+        $builder->int('id')->nullable()->primaryKey();
+        $builder->execute();
+
+        $builder = $this->createTableBuilder('t2');
+        $builder->int('id')->nullable()->primaryKey();
+        $builder->int('t1Id')->nullable();
+        $builder->foreignKey(['t1Id'], 't1', ['id']);
+        $builder->execute();
+
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "t2" ("id" INTEGER PRIMARY KEY, "t1Id" INTEGER, FOREIGN KEY ("t1Id") REFERENCES "t1" ("id")) WITHOUT ROWID;', $schema);
+    }
+
+    public function test_foreignKey__with_multiple_columns(): void
+    {
+        $builder = $this->createTableBuilder('t1');
+        $builder->int('id')->nullable()->primaryKey();
+        $builder->int('categoryId')->nullable();
+        $builder->execute();
+
+        $builder = $this->createTableBuilder('t2');
+        $builder->int('id')->nullable()->primaryKey();
+        $builder->int('t1Id')->nullable();
+        $builder->int('t1CategoryId')->nullable();
+        $builder->foreignKey(['t1Id', 't1CategoryId'], 't1', ['id', 'categoryId']);
+        $builder->execute();
+        $schema = $builder->toDdl();
+        $this->assertSame('CREATE TABLE "t2" ("id" INTEGER PRIMARY KEY, "t1Id" INTEGER, "t1CategoryId" INTEGER, FOREIGN KEY ("t1Id", "t1CategoryId") REFERENCES "t1" ("id", "categoryId")) WITHOUT ROWID;', $schema);
     }
 
     public function test_references(): void

@@ -138,6 +138,18 @@ abstract class CreateTableBuilderTestAbstract extends SchemaTestCase
         $builder->execute();
     }
 
+    abstract public function test_index__with_columns_as_list(): void;
+
+    abstract public function test_index__with_columns_as_map(): void;
+
+    abstract public function test_uniqueIndex__with_columns_as_list(): void;
+
+    abstract public function test_uniqueIndex__with_columns_as_map(): void;
+
+    abstract public function test_foreignKey__with_single_column(): void;
+
+    abstract public function test_foreignKey__with_multiple_columns(): void;
+
     abstract public function test_references(): void;
 
     abstract public function test_references_with_delete_options(): void;
