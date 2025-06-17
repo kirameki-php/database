@@ -16,7 +16,6 @@ use Kirameki\Database\Schema\Statements\Index\CreateIndexBuilder;
 use Kirameki\Database\Schema\Statements\Index\DropIndexBuilder;
 use Kirameki\Database\Schema\Statements\Index\IndexType;
 use Kirameki\Database\Schema\Statements\SchemaBuilder;
-use function array_values;
 use function iterator_to_array;
 
 /**

@@ -275,7 +275,7 @@ abstract class SchemaSyntax extends Syntax
         $parts = [];
         $parts[] = $this->asIdentifier($def->name);
         $parts[] = $this->formatColumnType($def);
-        if ($def->nullable === false) {
+        if ($def->nullable !== true) {
             $parts[] = 'NOT NULL';
         }
         if ($def->default !== null) {

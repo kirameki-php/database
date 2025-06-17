@@ -38,7 +38,7 @@ class SchemaHandlerMySqlTest extends SchemaHandlerTestAbstract
         $table->addColumn('name')->string(10);
         $table->execute();
 
-        $this->assertSame('ALTER TABLE "temp" ADD COLUMN "name" VARCHAR(10);', $table->toDdl());
+        $this->assertSame('ALTER TABLE "temp" ADD COLUMN "name" VARCHAR(10) NOT NULL;', $table->toDdl());
     }
 
     public function test_renameTable(): void
