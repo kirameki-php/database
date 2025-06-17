@@ -57,7 +57,7 @@ class AlterColumnBuilder
      * @param int|null $precision
      * @return ColumnBuilder
      */
-    public function datetime(?int $precision = null): ColumnBuilder
+    public function timestamp(?int $precision = null): ColumnBuilder
     {
         return new TimestampColumnBuilder($this->handler, $this->setType(__FUNCTION__, $precision));
     }
