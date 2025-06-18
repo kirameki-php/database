@@ -156,4 +156,50 @@ abstract class AlterTableBuilderTestAbstract extends SchemaTestCase
         $this->assertFalse($info->nullable);
         $this->assertSame(2, $info->position);
     }
+
+    abstract public function test_modifyColumn(): void;
+
+    public function test_renameColumn(): void
+    {
+        $table = 'tmp_' . random_int(1000, 9999);
+        $connection = $this->connect();
+        $schema = $connection->schema();
+        $create = $schema->createTable($table);
+        $create->id();
+        $create->execute();
+        $alter = $schema->alterTable($table);
+        $alter->renameColumn('id', 'new_id');
+        $alter->execute();
+
+        $info = $connection->info()->getTableInfo($table)->columns->get('new_id');
+        $this->assertSame(ColumnType::Int, $info->type);
+        $this->assertSame('new_id', $info->name);
+        $this->assertFalse($info->nullable);
+        $this->assertSame(1, $info->position);
+        $this->assertSame(
+            "ALTER TABLE \"{$table}\" RENAME COLUMN \"id\" TO \"new_id\";",
+            $alter->toDdl(),
+        );
+    }
+
+    public function test_dropColumn(): void
+    {
+        $table = 'tmp_' . random_int(1000, 9999);
+        $connection = $this->connect();
+        $schema = $connection->schema();
+        $create = $schema->createTable($table);
+        $create->id();
+        $create->string('name');
+        $create->execute();
+        $alter = $schema->alterTable($table);
+        $alter->dropColumn('name');
+        $alter->execute();
+
+        $info = $connection->info()->getTableInfo($table)->columns->getOrNull('name');
+        $this->assertNull($info);
+        $this->assertSame(
+            "ALTER TABLE \"{$table}\" DROP COLUMN \"name\";",
+            $alter->toDdl(),
+        );
+    }
 }

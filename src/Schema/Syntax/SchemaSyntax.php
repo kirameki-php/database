@@ -148,7 +148,7 @@ abstract class SchemaSyntax extends Syntax
 
         return $this->concat([
             'ALTER TABLE ' . $this->asIdentifier($statement->table),
-            'DROP COLUMN' . $this->asIdentifier($action->column),
+            'DROP COLUMN ' . $this->asIdentifier($action->column),
         ]);
     }
 

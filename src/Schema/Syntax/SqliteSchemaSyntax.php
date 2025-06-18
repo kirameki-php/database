@@ -5,9 +5,12 @@ namespace Kirameki\Database\Schema\Syntax;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Exceptions\NotSupportedException;
 use Kirameki\Database\Functions\Syntax\SqliteFunctionSyntax;
+use Kirameki\Database\Schema\Statements\Column\AlterColumnAction;
 use Kirameki\Database\Schema\Statements\Column\ColumnDefinition;
 use Kirameki\Database\Schema\Statements\Index\CreateIndexStatement;
 use Kirameki\Database\Schema\Statements\Index\DropIndexStatement;
+use Kirameki\Database\Schema\Statements\Table\AlterTableStatement;
+use Kirameki\Database\Schema\Statements\Table\AlterType;
 use Kirameki\Database\Schema\Statements\Table\CreateTableStatement;
 use Kirameki\Database\Schema\Statements\Table\TruncateTableStatement;
 use Override;
@@ -106,6 +109,22 @@ class SqliteSchemaSyntax extends SchemaSyntax
 
         throw new LogicException('Primary key must have at least one column defined.', [
             'statement' => $statement,
+        ]);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    protected function formatAlterColumnAction(AlterTableStatement $statement, AlterColumnAction $action): string
+    {
+        if ($action->type === AlterType::Add) {
+            return parent::formatAlterColumnAction($statement, $action);
+        }
+
+        throw new NotSupportedException('SQLite does not support modifying of columns. Creating a new table and copying data instead.', [
+            'statement' => $statement,
+            'action' => $action,
         ]);
     }
 

@@ -118,4 +118,27 @@ class AlterTableBuilderMySqlTest extends AlterTableBuilderTestAbstract
         $alter->addColumn('f')->float(2);
         $alter->execute();
     }
+
+    public function test_modifyColumn(): void
+    {
+        $table = 'tmp_' . random_int(1000, 9999);
+        $connection = $this->connect();
+        $schema = $connection->schema();
+        $create = $schema->createTable($table);
+        $create->id();
+        $create->execute();
+        $alter = $schema->alterTable($table);
+        $alter->modifyColumn('id')->int(4);
+        $alter->execute();
+
+        $info = $connection->info()->getTableInfo($table)->columns->get('id');
+        $this->assertSame(ColumnType::Int, $info->type);
+        $this->assertSame('id', $info->name);
+        $this->assertFalse($info->nullable);
+        $this->assertSame(1, $info->position);
+        $this->assertSame(
+            "ALTER TABLE \"{$table}\" MODIFY COLUMN \"id\" INT NOT NULL;",
+            $alter->toDdl(),
+        );
+    }
 }

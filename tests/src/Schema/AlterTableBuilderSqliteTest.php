@@ -118,4 +118,20 @@ class AlterTableBuilderSqliteTest extends AlterTableBuilderTestAbstract
         $alter->addColumn('f')->float(4);
         $alter->execute();
     }
+
+    public function test_modifyColumn(): void
+    {
+        $this->expectException(NotSupportedException::class);
+        $this->expectExceptionMessage('SQLite does not support modifying of columns. Creating a new table and copying data instead.');
+
+        $table = 'tmp_' . random_int(1000, 9999);
+        $connection = $this->connect();
+        $schema = $connection->schema();
+        $create = $schema->createTable($table);
+        $create->id();
+        $create->execute();
+        $alter = $schema->alterTable($table);
+        $alter->modifyColumn('id')->int(4);
+        $alter->execute();
+    }
 }
