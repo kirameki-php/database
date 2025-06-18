@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Schema\Syntax;
 
 use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Core\Exceptions\NotSupportedException;
 use Kirameki\Database\Functions\Syntax\SqliteFunctionSyntax;
 use Kirameki\Database\Schema\Statements\Column\ColumnDefinition;
 use Kirameki\Database\Schema\Statements\Index\CreateIndexStatement;
@@ -125,7 +126,7 @@ class SqliteSchemaSyntax extends SchemaSyntax
                 return $ddl;
             }
             if (!in_array($size, [1, 2, 4], true)) {
-                throw new LogicException("\"{$name}\" has an invalid integer size: {$size}. Only 1, 2, 4, 8 are supported.", [
+                throw new NotSupportedException("\"{$name}\" has an invalid integer size: {$size}. Only 1, 2, 4, 8 are supported.", [
                     'definition' => $def,
                 ]);
             }
@@ -139,7 +140,7 @@ class SqliteSchemaSyntax extends SchemaSyntax
             if ($size === null || $size === 8) {
                 return 'REAL';
             }
-            throw new LogicException("\"{$name}\" has invalid float size: {$size}. Sqlite only supports 8 (REAL).", [
+            throw new NotSupportedException("\"{$name}\" has invalid float size: {$size}. Sqlite only supports 8 (REAL).", [
                 'definition' => $def,
             ]);
         }

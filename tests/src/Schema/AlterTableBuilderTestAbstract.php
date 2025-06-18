@@ -35,24 +35,9 @@ abstract class AlterTableBuilderTestAbstract extends SchemaTestCase
         $this->assertGreaterThan(0, $result->elapsedMs);
     }
 
-    public function test_addColumn__int(): void
-    {
-        $table = 'tmp_' . random_int(1000, 9999);
-        $connection = $this->connect();
-        $schema = $connection->schema();
-        $create = $schema->createTable($table);
-        $create->id();
-        $create->execute();
-        $alter = $schema->alterTable($table);
-        $alter->addColumn('i')->int();
-        $alter->execute();
+    abstract public function test_addColumn__int(): void;
 
-        $info = $connection->info()->getTableInfo($table)->columns->get('i');
-        $this->assertSame(ColumnType::Int, $info->type);
-        $this->assertSame('i', $info->name);
-        $this->assertFalse($info->nullable);
-        $this->assertSame(2, $info->position);
-    }
+    abstract public function test_addColumn__int_with_size(): void;
 
     public function test_addColumn__float(): void
     {
@@ -72,6 +57,10 @@ abstract class AlterTableBuilderTestAbstract extends SchemaTestCase
         $this->assertFalse($info->nullable);
         $this->assertSame(2, $info->position);
     }
+
+    abstract public function test_addColumn__float_with_valid_size(): void;
+
+    abstract public function test_addColumn__float_with_invalid_size(): void;
 
     public function test_addColumn__bool(): void
     {

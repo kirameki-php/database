@@ -3,6 +3,7 @@
 namespace Kirameki\Database\Schema\Syntax;
 
 use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Core\Exceptions\NotSupportedException;
 use Kirameki\Database\Expression;
 use Kirameki\Database\Functions\Syntax\MySqlFunctionSyntax;
 use Kirameki\Database\Schema\Statements\Column\ColumnDefinition;
@@ -74,7 +75,7 @@ class MySqlSchemaSyntax extends SchemaSyntax
                 2 => 'SMALLINT',
                 4 => 'INT',
                 8 => 'BIGINT',
-                default => throw new LogicException("\"{$def->name}\" has an invalid integer size: {$size}. MySQL only supports 1 (TINYINT), 2 (SMALLINT), 4 (INT), and 8 (BIGINT).", [
+                default => throw new NotSupportedException("\"{$def->name}\" has an invalid integer size: {$size}. MySQL only supports 1 (TINYINT), 2 (SMALLINT), 4 (INT), and 8 (BIGINT).", [
                     'column' => $def->name,
                     'size' => $size,
                 ]),
@@ -84,7 +85,7 @@ class MySqlSchemaSyntax extends SchemaSyntax
             return match ($size ?? self::DEFAULT_FLOAT_SIZE) {
                 4 => 'FLOAT',
                 8 => 'DOUBLE',
-                default => throw new LogicException("\"{$def->name}\" has an invalid float size: {$size}. MySQL only supports 4 (FLOAT) and 8 (DOUBLE).", [
+                default => throw new NotSupportedException("\"{$def->name}\" has an invalid float size: {$size}. MySQL only supports 4 (FLOAT) and 8 (DOUBLE).", [
                     'column' => $def->name,
                     'size' => $size,
                 ]),
