@@ -49,18 +49,6 @@ class InfoHandler
      */
     public function getTableInfo(string $name): TableInfo
     {
-        $handler = $this->connection->query();
-
-        $columns = $handler->execute(new ListColumnsStatement($name))
-            ->map(static fn(stdClass $r) => new ColumnInfo($r->name, $r->type, $r->nullable, $r->position))
-            ->keyBy(static fn(ColumnInfo $c) => $c->name);
-
-        $indexes = $handler->execute(new ListIndexesStatement($name))
-            ->map(static fn(stdClass $r) => new IndexInfo($r->name, $r->columns, $r->type));
-
-        $foreignKeys = $handler->execute(new ListForeignKeysStatement($name))
-            ->map(static fn(stdClass $r) => new ForeignKeyInfo($r->name, $r->columns, $r->referencedTable, $r->referencedColumns));
-
-        return new TableInfo($name, $columns, $indexes, $foreignKeys);
+        return new TableInfo($this->connection, $name);
     }
 }
