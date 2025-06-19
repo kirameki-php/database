@@ -3,10 +3,8 @@
 namespace Tests\Kirameki\Database\Query\Statements;
 
 use Kirameki\Database\Adapters\MySqlAdapter;
-use Kirameki\Database\Adapters\SqliteAdapter;
 use Kirameki\Database\Config\DatabaseConfig;
 use Kirameki\Database\Config\MySqlConfig;
-use Kirameki\Database\Config\SqliteConfig;
 use Kirameki\Database\Connection;
 use Kirameki\Database\Exceptions\DropProtectionException;
 use Kirameki\Database\Query\Statements\DeleteBuilder;

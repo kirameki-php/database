@@ -122,7 +122,6 @@ class SqliteQuerySyntax extends QuerySyntax
             'UUID_TEXT', 'TEXT' => ColumnType::String,
             'DATETIME' => ColumnType::Timestamp,
             'JSON_TEXT' => ColumnType::Json,
-            'BLOB' => ColumnType::Blob,
             // @codeCoverageIgnoreStart
             default => throw new LogicException('Unsupported column type: ' . $row->type, [
                 'type' => $row->type,

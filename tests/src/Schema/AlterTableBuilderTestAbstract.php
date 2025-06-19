@@ -2,9 +2,11 @@
 
 namespace Tests\Kirameki\Database\Schema;
 
+use Kirameki\Database\Config\DatabaseConfig;
+use Kirameki\Database\Exceptions\DropProtectionException;
 use Kirameki\Database\Info\Statements\ColumnType;
 use Kirameki\Database\Schema\Statements\Table\AlterTableStatement;
-use function dump;
+use RuntimeException;
 use function random_int;
 
 abstract class AlterTableBuilderTestAbstract extends SchemaTestCase
@@ -195,6 +197,22 @@ abstract class AlterTableBuilderTestAbstract extends SchemaTestCase
         $this->assertSame(2, $info->position);
     }
 
+    public function test_addColumn__without_type(): void
+    {
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('Definition type cannot be set to null.');
+
+        $table = 'tmp_' . random_int(1000, 9999);
+        $connection = $this->connect();
+        $schema = $connection->schema();
+        $create = $schema->createTable($table);
+        $create->id();
+        $create->execute();
+        $alter = $schema->alterTable($table);
+        $alter->addColumn('c'); // No type specified
+        $alter->execute();
+    }
+
     abstract public function test_modifyColumn(): void;
 
     public function test_renameColumn(): void
@@ -239,6 +257,28 @@ abstract class AlterTableBuilderTestAbstract extends SchemaTestCase
             "ALTER TABLE \"{$table}\" DROP COLUMN \"name\";",
             $alter->toDdl(),
         );
+    }
+
+    public function test_dropColumn__with_drop_protection_enabled(): void
+    {
+        $this->expectException(DropProtectionException::class);
+        $this->expectExceptionMessage('Dropping columns is prohibited in database ');
+
+        $databaseConfig = new DatabaseConfig([]);
+        $databaseConfig->dropProtection = true;
+        $adapter = match ($this->connection) {
+            'mysql' => $this->createMySqlAdapter(null, $databaseConfig),
+            'sqlite' => $this->createSqliteAdapter($databaseConfig),
+            default => throw new RuntimeException("Unsupported driver"),
+        };
+        $conn = $this->createTempConnection($this->connection, $adapter);
+        $builder = $conn->schema()->alterTable('users');
+        $builder->dropColumn('name');
+        try {
+            $builder->execute();
+        } finally {
+            $databaseConfig->dropProtection = false; // Reset drop protection for other tests
+        }
     }
 
     abstract public function test_addForeignKey(): void;

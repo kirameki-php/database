@@ -113,7 +113,7 @@ class MySqlSchemaSyntax extends SchemaSyntax
             return 'VARCHAR(36)';
         }
         if ($type === null) {
-            throw new LogicException('Definition type cannot be set to null', [
+            throw new LogicException('Definition type cannot be set to null.', [
                 'definition' => $def,
             ]);
         }
@@ -132,6 +132,11 @@ class MySqlSchemaSyntax extends SchemaSyntax
         $parts[] = parent::formatColumnDefinition($def);
 
         if ($def->autoIncrement !== null) {
+            if (!$def->primaryKey) {
+                throw new NotSupportedException('Auto-increment must be defined on primary key columns.', [
+                    'definition' => $def,
+                ]);
+            }
             $parts[] = 'AUTO_INCREMENT';
         }
 

@@ -3,6 +3,7 @@
 namespace Tests\Kirameki\Database\Schema;
 
 use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Core\Exceptions\NotSupportedException;
 use Kirameki\Database\Schema\Statements\Table\CreateTableStatement;
 use Random\Engine\PcgOneseq128XslRr64;
 use Random\Randomizer;
@@ -98,6 +99,17 @@ abstract class CreateTableBuilderTestAbstract extends SchemaTestCase
     abstract public function test_autoIncrement(): void;
 
     abstract public function test_autoIncrement__with_startFrom(): void;
+
+    public function test_autoIncrement__without_primaryKey(): void
+    {
+        $this->expectException(NotSupportedException::class);
+        $this->expectExceptionMessage('Auto-increment must be defined on primary key columns.');
+
+        $builder = $this->createTableBuilder('users');
+        $builder->int('id')->primaryKey();
+        $builder->int('num')->autoIncrement();
+        $builder->execute();
+    }
 
     abstract public function test_default__int(): void;
 

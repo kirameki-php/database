@@ -85,7 +85,9 @@ class SqliteSchemaSyntax extends SchemaSyntax
 
         if ($def->autoIncrement !== null) {
             if (!$def->primaryKey) {
-                throw new LogicException('Auto increment column must be the primary key.');
+                throw new NotSupportedException('Auto-increment must be defined on primary key columns.', [
+                    'definition' => $def,
+                ]);
             }
             $formatted .= ' AUTOINCREMENT';
         }
@@ -190,15 +192,16 @@ class SqliteSchemaSyntax extends SchemaSyntax
             return 'DATETIME CHECK (datetime(' . $this->asIdentifier($name) . ') IS NOT NULL)';
         }
         if ($type === null) {
-            throw new LogicException('Definition type cannot be set to null', [
+            throw new LogicException('Definition type cannot be set to null.', [
                 'definition' => $def,
             ]);
         }
-
+        // @codeCoverageIgnoreStart
         throw new LogicException("Unknown column type: {$type} for {$name}", [
             'column' => $name,
             'type' => $type,
         ]);
+        // @codeCoverageIgnoreEnd
     }
 
     /**

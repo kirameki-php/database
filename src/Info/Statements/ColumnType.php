@@ -11,5 +11,4 @@ enum ColumnType: string
     case Bool = 'bool';
     case Timestamp = 'timestamp';
     case Json = 'json';
-    case Blob = 'blob';
 }

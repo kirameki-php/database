@@ -2,7 +2,6 @@
 
 namespace Tests\Kirameki\Database\Schema;
 
-use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Core\Exceptions\NotSupportedException;
 use Kirameki\Database\Info\Statements\ColumnType;
 use function random_int;

@@ -4,6 +4,9 @@ namespace Kirameki\Database\Schema\Statements\Column;
 
 use Kirameki\Database\Schema\SchemaHandler;
 
+/**
+ * TODO add column with foreign key
+ */
 class AlterColumnBuilder
 {
     /**
