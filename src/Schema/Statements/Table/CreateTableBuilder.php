@@ -127,15 +127,6 @@ class CreateTableBuilder extends SchemaBuilder
 
     /**
      * @param string $column
-     * @return ColumnBuilder
-     */
-    public function binary(string $column): ColumnBuilder
-    {
-        return $this->column($column, __FUNCTION__);
-    }
-
-    /**
-     * @param string $column
      * @return UuidColumnBuilder
      */
     public function uuid(string $column): UuidColumnBuilder

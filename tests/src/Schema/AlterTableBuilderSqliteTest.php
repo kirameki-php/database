@@ -134,4 +134,31 @@ class AlterTableBuilderSqliteTest extends AlterTableBuilderTestAbstract
         $alter->modifyColumn('id')->int(4);
         $alter->execute();
     }
+
+    public function test_addForeignKey(): void
+    {
+        $this->expectException(NotSupportedException::class);
+        $this->expectExceptionMessage('SQLite does not support adding foreign keys to existing tables. Create a new table with the foreign key and copy data instead.');
+
+        $table1 = 'tmp1_' . random_int(1000, 9999);
+        $table2 = 'tmp2_' . random_int(1000, 9999);
+        $connection = $this->connect();
+        $schema = $connection->schema();
+        $alter = $schema->alterTable($table1);
+        $alter->addForeignKey(['id'], $table2, ['otherId']);
+        $alter->execute();
+    }
+
+    public function test_dropForeignKey(): void
+    {
+        $this->expectException(NotSupportedException::class);
+        $this->expectExceptionMessage('SQLite does not support dropping foreign keys from existing tables. Create a new table without the foreign key and copy data instead.');
+
+        $table = 'tmp_' . random_int(1000, 9999);
+        $connection = $this->connect();
+        $schema = $connection->schema();
+        $alter = $schema->alterTable($table);
+        $alter->dropForeignKey('fk_otherId');
+        $alter->execute();
+    }
 }

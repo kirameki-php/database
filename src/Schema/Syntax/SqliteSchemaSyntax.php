@@ -7,7 +7,8 @@ use Kirameki\Core\Exceptions\NotSupportedException;
 use Kirameki\Database\Functions\Syntax\SqliteFunctionSyntax;
 use Kirameki\Database\Schema\Statements\Column\AlterColumnAction;
 use Kirameki\Database\Schema\Statements\Column\ColumnDefinition;
-use Kirameki\Database\Schema\Statements\Index\CreateIndexStatement;
+use Kirameki\Database\Schema\Statements\ForeignKey\AlterDropForeignKeyAction;
+use Kirameki\Database\Schema\Statements\ForeignKey\ForeignKeyConstraint;
 use Kirameki\Database\Schema\Statements\Index\DropIndexStatement;
 use Kirameki\Database\Schema\Statements\Table\AlterTableStatement;
 use Kirameki\Database\Schema\Statements\Table\AlterType;
@@ -188,9 +189,6 @@ class SqliteSchemaSyntax extends SchemaSyntax
         if ($type === 'timestamp') {
             return 'DATETIME CHECK (datetime(' . $this->asIdentifier($name) . ') IS NOT NULL)';
         }
-        if ($type === 'binary') {
-            return 'BLOB';
-        }
         if ($type === null) {
             throw new LogicException('Definition type cannot be set to null', [
                 'definition' => $def,
@@ -216,6 +214,30 @@ class SqliteSchemaSyntax extends SchemaSyntax
         return [
             "DROP INDEX {$this->asIdentifier($name)}",
         ];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    protected function formatAddForeignKeyAction(AlterTableStatement $statement, ForeignKeyConstraint $action): string
+    {
+        throw new NotSupportedException('SQLite does not support adding foreign keys to existing tables. Create a new table with the foreign key and copy data instead.', [
+            'statement' => $statement,
+            'action' => $action,
+        ]);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    protected function formatDropForeignKeyAction(AlterTableStatement $statement, AlterDropForeignKeyAction $action): string
+    {
+        throw new NotSupportedException('SQLite does not support dropping foreign keys from existing tables. Create a new table without the foreign key and copy data instead.', [
+            'statement' => $statement,
+            'action' => $action,
+        ]);
     }
 
     /**

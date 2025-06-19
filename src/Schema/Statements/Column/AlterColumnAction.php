@@ -22,20 +22,4 @@ class AlterColumnAction
     {
         $this->definition = new ColumnDefinition($name);
     }
-
-    /**
-     * @return bool
-     */
-    public function isAdd(): bool
-    {
-        return $this->type === AlterType::Add;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isModify(): bool
-    {
-        return $this->type === AlterType::Modify;
-    }
 }

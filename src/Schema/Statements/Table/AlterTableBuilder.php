@@ -75,54 +75,6 @@ class AlterTableBuilder extends SchemaBuilder
     }
 
     /**
-     * @param iterable<string, SortOrder>|iterable<int, string> $columns
-     * @return CreateIndexBuilder
-     */
-    public function createIndex(iterable $columns): CreateIndexBuilder
-    {
-        return $this->newIndexBuilder(IndexType::Default, $columns);
-    }
-
-    /**
-     * @param iterable<string, SortOrder>|iterable<int, string> $columns
-     * @return CreateIndexBuilder
-     */
-    public function createUniqueIndex(iterable $columns): CreateIndexBuilder
-    {
-        return $this->newIndexBuilder(IndexType::Unique, $columns);
-    }
-
-    /**
-     * @param IndexType $type
-     * @param iterable<string, SortOrder>|iterable<int, string> $columns
-     * @return CreateIndexBuilder
-     */
-    protected function newIndexBuilder(IndexType $type, iterable $columns): CreateIndexBuilder
-    {
-        $builder = new CreateIndexBuilder($this->handler, $type, $this->statement->table, $columns);
-        $this->statement->addAction($builder->statement);
-        return $builder;
-    }
-
-    public function dropIndexByName(string $name): DropIndexBuilder
-    {
-        $builder = new DropIndexBuilder($this->handler, $this->statement->table, name: $name);
-        $this->statement->addAction($builder->statement);
-        return $builder;
-    }
-
-    /**
-     * @param iterable<int, string> $columns
-     * @return DropIndexBuilder
-     */
-    public function dropIndexByColumns(iterable $columns): DropIndexBuilder
-    {
-        $builder = new DropIndexBuilder($this->handler, $this->statement->table, iterator_to_array($columns));
-        $this->statement->addAction($builder->statement);
-        return $builder;
-    }
-
-    /**
      * @param iterable<int, string> $columns
      * @param string $referencedTable
      * @param iterable<int, string> $referencedColumns

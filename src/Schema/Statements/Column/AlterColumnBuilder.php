@@ -90,14 +90,6 @@ class AlterColumnBuilder
     /**
      * @return ColumnBuilder
      */
-    public function binary(): ColumnBuilder
-    {
-        return new ColumnBuilder($this->handler, $this->setType(__FUNCTION__));
-    }
-
-    /**
-     * @return ColumnBuilder
-     */
     public function uuid(): ColumnBuilder
     {
         ;

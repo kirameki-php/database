@@ -200,15 +200,6 @@ class CreateTableBuilderMySqlTest extends CreateTableBuilderTestAbstract
         $this->assertSame('CREATE TABLE "users" ("id" BIGINT PRIMARY KEY, "data" JSON);', $builder->toDdl());
     }
 
-    public function test_binary_column(): void
-    {
-        $builder = $this->createTableBuilder('users');
-        $builder->int('id')->nullable()->primaryKey();
-        $builder->binary('data')->nullable();
-        $builder->execute();
-        $this->assertSame('CREATE TABLE "users" ("id" BIGINT PRIMARY KEY, "data" BINARY);', $builder->toDdl());
-    }
-
     public function test_uuid_column(): void
     {
         $builder = $this->createTableBuilder('users');

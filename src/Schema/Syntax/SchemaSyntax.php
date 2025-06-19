@@ -111,8 +111,8 @@ abstract class SchemaSyntax extends Syntax
             $action instanceof AlterRenameColumnAction => $this->formatRenameColumnAction($statement, $action),
             $action instanceof CreateIndexStatement => $this->compileCreateIndex($action),
             $action instanceof DropIndexStatement => $this->compileDropIndex($action),
-            $action instanceof ForeignKeyConstraint => $this->formatAddForeignKeyAction($action),
-            $action instanceof AlterDropForeignKeyAction => $this->formatDropForeignKeyAction($action),
+            $action instanceof ForeignKeyConstraint => $this->formatAddForeignKeyAction($statement, $action),
+            $action instanceof AlterDropForeignKeyAction => $this->formatDropForeignKeyAction($statement, $action),
             default => throw new InvalidTypeException('Unsupported action type: ' . $action::class),
         }, $statement->actions));
     }
@@ -353,21 +353,30 @@ abstract class SchemaSyntax extends Syntax
     }
 
     /**
+     * @param AlterTableStatement $statement
      * @param ForeignKeyConstraint $action
      * @return string
      */
-    protected function formatAddForeignKeyAction(ForeignKeyConstraint $action): string
+    protected function formatAddForeignKeyAction(AlterTableStatement $statement, ForeignKeyConstraint $action): string
     {
-        return 'ADD ' . $this->formatForeignKeyConstraint($action);
+        return $this->concat([
+            'ALTER TABLE',
+            $this->asIdentifier($statement->table),
+            'ADD',
+            $this->formatForeignKeyConstraint($action),
+        ]);
     }
 
     /**
+     * @param AlterTableStatement $statement
      * @param AlterDropForeignKeyAction $action
      * @return string
      */
-    protected function formatDropForeignKeyAction(AlterDropForeignKeyAction $action): string
+    protected function formatDropForeignKeyAction(AlterTableStatement $statement, AlterDropForeignKeyAction $action): string
     {
         return $this->concat([
+            'ALTER TABLE',
+            $this->asIdentifier($statement->table),
             'DROP FOREIGN KEY',
             $this->asIdentifier($action->name),
         ]);

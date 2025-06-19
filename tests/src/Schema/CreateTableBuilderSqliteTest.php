@@ -199,15 +199,6 @@ class CreateTableBuilderSqliteTest extends CreateTableBuilderTestAbstract
         $this->assertSame('CREATE TABLE "users" ("id" INTEGER PRIMARY KEY, "data" JSON_TEXT CHECK (json_valid("data"))) WITHOUT ROWID;', $builder->toDdl());
     }
 
-    public function test_binary_column(): void
-    {
-        $builder = $this->createTableBuilder('users');
-        $builder->int('id')->nullable()->primaryKey();
-        $builder->binary('data')->nullable();
-        $builder->execute();
-        $this->assertSame('CREATE TABLE "users" ("id" INTEGER PRIMARY KEY, "data" BLOB) WITHOUT ROWID;', $builder->toDdl());
-    }
-
     public function test_uuid_column(): void
     {
         $builder = $this->createTableBuilder('users');

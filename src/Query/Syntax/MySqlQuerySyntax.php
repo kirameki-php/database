@@ -164,14 +164,14 @@ class MySqlQuerySyntax extends QuerySyntax
         if ($type === 'varchar') {
             return ColumnType::String;
         }
+        if ($type === 'longtext') {
+            return ColumnType::String;
+        }
         if ($type === 'datetime') {
             return ColumnType::Timestamp;
         }
         if ($type === 'json') {
             return ColumnType::Json;
-        }
-        if ($type === 'binary') {
-            return ColumnType::Blob;
         }
         // @codeCoverageIgnoreStart
         throw new LogicException('Unsupported column type: ' . $row->type, [

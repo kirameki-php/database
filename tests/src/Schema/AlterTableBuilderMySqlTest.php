@@ -141,4 +141,56 @@ class AlterTableBuilderMySqlTest extends AlterTableBuilderTestAbstract
             $alter->toDdl(),
         );
     }
+
+    public function test_addForeignKey(): void
+    {
+        $table1 = 'tmp1_' . random_int(1000, 9999);
+        $table2 = 'tmp2_' . random_int(1000, 9999);
+        $connection = $this->connect();
+        $schema = $connection->schema();
+        $create = $schema->createTable($table1);
+        $create->id();
+        $create->execute();
+
+        $create = $schema->createTable($table2);
+        $create->id();
+        $create->int('otherId')->nullable();
+        $create->uniqueIndex(['otherId']);
+        $create->execute();
+
+        $alter = $schema->alterTable($table1);
+        $alter->addForeignKey(['id'], $table2, ['otherId']);
+        $alter->execute();
+
+        $keys = $connection->info()->getTableInfo($table1)->foreignKeys;
+        $this->assertSame("{$table1}_ibfk_1", $keys[0]->name);
+    }
+
+    public function test_dropForeignKey(): void
+    {
+        $table1 = 'tmp1_' . random_int(1000, 9999);
+        $table2 = 'tmp2_' . random_int(1000, 9999);
+        $connection = $this->connect();
+        $schema = $connection->schema();
+        $create = $schema->createTable($table1);
+        $create->id();
+        $create->execute();
+
+        $create = $schema->createTable($table2);
+        $create->id();
+        $create->int('otherId')->nullable();
+        $create->uniqueIndex(['otherId']);
+        $create->execute();
+
+        $alter = $schema->alterTable($table1);
+        $alter->addForeignKey(['id'], $table2, ['otherId']);
+        $alter->execute();
+
+        $fk = $connection->info()->getTableInfo($table1)->foreignKeys[0]->name;
+        $drop = $schema->alterTable($table1);
+        $drop->dropForeignKey($fk);
+        $drop->execute();
+
+        $this->assertCount(0, $connection->info()->getTableInfo($table1)->foreignKeys);
+    }
 }

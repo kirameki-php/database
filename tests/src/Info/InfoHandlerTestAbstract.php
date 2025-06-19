@@ -155,17 +155,4 @@ class InfoHandlerTestAbstract extends QueryTestCase
         $this->assertSame('t', $column->name);
         $this->assertSame(ColumnType::Json, $column->type);
     }
-
-    public function test_getTableColumns_type_binary(): void
-    {
-        $connection = $this->getConnection();
-        $connection->schema()->createTable('Test')->run(static function (CreateTableBuilder $t) {
-            $t->int('i')->primaryKey();
-            $t->binary('t');
-        });
-
-        $column = $connection->info()->getTableInfo('Test')->columns->get('t');
-        $this->assertSame('t', $column->name);
-        $this->assertSame(ColumnType::Blob, $column->type);
-    }
 }

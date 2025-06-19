@@ -62,6 +62,25 @@ abstract class AlterTableBuilderTestAbstract extends SchemaTestCase
 
     abstract public function test_addColumn__float_with_invalid_size(): void;
 
+    public function test_addColumn__decimal(): void
+    {
+        $table = 'tmp_' . random_int(1000, 9999);
+        $connection = $this->connect();
+        $schema = $connection->schema();
+        $create = $schema->createTable($table);
+        $create->id();
+        $create->execute();
+        $alter = $schema->alterTable($table);
+        $alter->addColumn('d')->decimal(10, 2);
+        $alter->execute();
+
+        $info = $connection->info()->getTableInfo($table)->columns->get('d');
+        $this->assertSame(ColumnType::Decimal, $info->type);
+        $this->assertSame('d', $info->name);
+        $this->assertFalse($info->nullable);
+        $this->assertSame(2, $info->position);
+    }
+
     public function test_addColumn__bool(): void
     {
         $table = 'tmp_' . random_int(1000, 9999);
@@ -115,6 +134,25 @@ abstract class AlterTableBuilderTestAbstract extends SchemaTestCase
         $info = $connection->info()->getTableInfo($table)->columns->get('s');
         $this->assertSame(ColumnType::String, $info->type);
         $this->assertSame('s', $info->name);
+        $this->assertFalse($info->nullable);
+        $this->assertSame(2, $info->position);
+    }
+
+    public function test_addColumn__text(): void
+    {
+        $table = 'tmp_' . random_int(1000, 9999);
+        $connection = $this->connect();
+        $schema = $connection->schema();
+        $create = $schema->createTable($table);
+        $create->id();
+        $create->execute();
+        $alter = $schema->alterTable($table);
+        $alter->addColumn('t')->text();
+        $alter->execute();
+
+        $info = $connection->info()->getTableInfo($table)->columns->get('t');
+        $this->assertSame(ColumnType::String, $info->type);
+        $this->assertSame('t', $info->name);
         $this->assertFalse($info->nullable);
         $this->assertSame(2, $info->position);
     }
@@ -202,4 +240,8 @@ abstract class AlterTableBuilderTestAbstract extends SchemaTestCase
             $alter->toDdl(),
         );
     }
+
+    abstract public function test_addForeignKey(): void;
+
+    abstract public function test_dropForeignKey(): void;
 }
