@@ -2,6 +2,7 @@ services:
   app:
     image: toyama4649/kirameki-php-cli:latest
     environment:
+      PHP_ZEND_ASSERTIONS: "-1"
       TZ: "Asia/Tokyo"
     volumes:
       - type: bind
