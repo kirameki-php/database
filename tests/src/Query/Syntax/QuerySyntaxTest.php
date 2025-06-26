@@ -417,14 +417,14 @@ class QuerySyntaxTest extends QueryTestCase
         $this->assertSame('/* a */', $syntax->asBlockComment('a'));
     }
 
-    public function test_stringifyParameters(): void
+    public function test_normalizeParameters(): void
     {
         $syntax = $this->sqliteConnection()->adapter->querySyntax;
-        $this->assertSame([1, 'a'], $syntax->stringifyParameters([1, 'a']));
-        $this->assertSame([1, 2], $syntax->stringifyParameters(['a' => 1, 'b' => 2]));
+        $this->assertSame([1, 'a'], $syntax->normalizeParameters([1, 'a']));
+        $this->assertSame([1, 2], $syntax->normalizeParameters(['a' => 1, 'b' => 2]));
     }
 
-    public function test_stringifyParameter(): void
+    public function test_normalizeParameter(): void
     {
         $syntax = $this->sqliteConnection()->adapter->querySyntax;
         $excepted = [
@@ -448,7 +448,7 @@ class QuerySyntaxTest extends QueryTestCase
         ];
 
         foreach ($actual as $i => $value) {
-            $this->assertSame($excepted[$i], $syntax->stringifyParameter($value));
+            $this->assertSame($excepted[$i], $syntax->normalizeParameter($value));
         }
     }
 }

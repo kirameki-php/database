@@ -197,19 +197,23 @@ abstract class Syntax
      * @param iterable<array-key, mixed> $values
      * @return list<mixed>
      */
-    public function stringifyParameters(iterable $values): array
+    public function normalizeParameters(iterable $values): array
     {
-        return array_map($this->stringifyParameter(...), Arr::values($values));
+        $normalized = [];
+        foreach ($values as $value) {
+            $normalized[] = $this->normalizeParameter($value);
+        }
+        return $normalized;
     }
 
     /**
      * @param mixed $value
      * @return mixed
      */
-    public function stringifyParameter(mixed $value): mixed
+    public function normalizeParameter(mixed $value): mixed
     {
         if (is_iterable($value)) {
-            return $this->stringifyParameters($value);
+            return $this->normalizeParameters($value);
         }
 
         if ($value instanceof DateTimeInterface) {

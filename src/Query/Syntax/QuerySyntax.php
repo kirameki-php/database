@@ -78,7 +78,7 @@ abstract class QuerySyntax extends Syntax
      */
     public function interpolate(string $template, array $parameters): string
     {
-        $parameters = $this->stringifyParameters($parameters);
+        $parameters = $this->normalizeParameters($parameters);
         $parameters = Arr::flatten($parameters);
 
         // null values will be turned into IS [NOT] NULL and will be part of the template so
@@ -146,7 +146,7 @@ abstract class QuerySyntax extends Syntax
     {
         $parameters = [];
         $this->addParametersForSelect($parameters, $statement);
-        return $this->stringifyParameters($parameters);
+        return $this->normalizeParameters($parameters);
     }
 
     /**
@@ -192,7 +192,7 @@ abstract class QuerySyntax extends Syntax
     {
         $parameters = [];
         $this->addParametersForInsert($parameters, $statement);
-        return $this->stringifyParameters($parameters);
+        return $this->normalizeParameters($parameters);
     }
 
     /**
@@ -234,7 +234,7 @@ abstract class QuerySyntax extends Syntax
         $parameters = [];
         $this->addParametersForCte($parameters, $statement);
         $this->addParametersForUpsert($parameters, $statement);
-        return $this->stringifyParameters($parameters);
+        return $this->normalizeParameters($parameters);
     }
 
     /**
@@ -272,7 +272,7 @@ abstract class QuerySyntax extends Syntax
     {
         $parameters = [];
         $this->addParametersForUpdate($parameters, $statement);
-        return $this->stringifyParameters($parameters);
+        return $this->normalizeParameters($parameters);
     }
 
     /**
@@ -315,7 +315,7 @@ abstract class QuerySyntax extends Syntax
     {
         $parameters = [];
         $this->addParametersForDelete($parameters, $statement);
-        return $this->stringifyParameters($parameters);
+        return $this->normalizeParameters($parameters);
     }
 
     /**
@@ -348,7 +348,7 @@ abstract class QuerySyntax extends Syntax
     {
         $parameters = [];
         $this->addParametersForRaw($parameters, $statement);
-        return $this->stringifyParameters($parameters);
+        return $this->normalizeParameters($parameters);
     }
 
     /**
