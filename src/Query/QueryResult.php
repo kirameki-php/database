@@ -6,7 +6,7 @@ use Kirameki\Collections\Vec;
 use Kirameki\Core\Exceptions\InvalidArgumentException;
 use Kirameki\Core\Exceptions\LogicException;
 use Kirameki\Database\Exceptions\QueryException;
-use Kirameki\Database\Query\Statements\QueryStatement as QueryStatement;
+use Kirameki\Database\Query\Statements\QueryStatement;
 use function property_exists;
 
 /**

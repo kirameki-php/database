@@ -7,7 +7,6 @@ use Kirameki\Collections\Utils\Arr;
 use Kirameki\Core\Exceptions\InvalidArgumentException;
 use Kirameki\Database\Expression;
 use Kirameki\Database\Query\QueryHandler;
-use Kirameki\Database\Query\Statements\QueryBuilder as TQueryBuilder;
 use function iterator_to_array;
 
 abstract class CteBuilder
