@@ -41,7 +41,7 @@ final class Tags implements IteratorAggregate, Countable
      * @param scalar $value
      * @return $this
      */
-    public function set(string $key, mixed $value): static
+    public function set(string $key, mixed $value): self
     {
         $this->pairs[$key] = $value;
         return $this;
@@ -51,9 +51,17 @@ final class Tags implements IteratorAggregate, Countable
      * @param Tags $merge
      * @return $this
      */
-    public function merge(Tags $merge): static
+    public function merge(Tags $merge): self
     {
         $this->pairs = array_merge($this->pairs, $merge->pairs);
         return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isEmpty(): bool
+    {
+        return $this->count() === 0;
     }
 }

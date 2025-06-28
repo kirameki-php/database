@@ -52,6 +52,9 @@ class Connection
         get => $this->tags ??= new Tags();
     }
 
+    /**
+     * @var TransactionInfo|null
+     */
     public ?TransactionInfo $transactionInfo {
         get => $this->transactionContext;
     }
