@@ -12,13 +12,13 @@ abstract class QueryStatement
      * @param CteAggregate|null $with
      * @param array<string, string>|null $casts
      * @param Tags|null $tags
-     * @param list<Closure(QueryResult<static, mixed>): mixed>|null $callback
+     * @param list<Closure(QueryResult<static, mixed>): mixed>|null $afterQuery
      */
     public function __construct(
         public ?CteAggregate $with = null,
         public ?array $casts = null,
         public ?Tags $tags = null,
-        public ?array $callback = null,
+        public ?array $afterQuery = null,
     )
     {
     }

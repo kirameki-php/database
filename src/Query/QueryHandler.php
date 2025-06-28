@@ -176,7 +176,7 @@ class QueryHandler
      */
     protected function postProcess(QueryStatement $statement, QueryResult $result): QueryResult
     {
-        $this->runCallback($statement, $result);
+        $this->runAfterQueryCallbacks($statement, $result);
         $this->events?->emit(new QueryExecuted($this->connection, $result));
         return $result;
     }
@@ -188,10 +188,10 @@ class QueryHandler
      * @param QueryResult<TQueryStatement, TRow> $result
      * @return void
      */
-    protected function runCallback(QueryStatement $statement, QueryResult $result): void
+    protected function runAfterQueryCallbacks(QueryStatement $statement, QueryResult $result): void
     {
-        if ($statement->callback !== null) {
-            array_walk($statement->callback, $result->pipe(...));
+        if ($statement->afterQuery !== null) {
+            array_walk($statement->afterQuery, $result->pipe(...));
         }
     }
 

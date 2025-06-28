@@ -46,8 +46,8 @@ abstract class QueryBuilder
      */
     public function afterQuery(Closure $callback): static
     {
-        $this->statement->callback ??= [];
-        $this->statement->callback[] = $callback;
+        $this->statement->afterQuery ??= [];
+        $this->statement->afterQuery[] = $callback;
         return $this;
     }
 
