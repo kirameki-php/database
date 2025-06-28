@@ -25,7 +25,7 @@ class QueryHandlerTest extends QueryTestCase
     {
         $this->getEventManager()->on(
             QueryExecuted::class,
-            fn (QueryExecuted $e) => $this->eventTriggers[] = $e
+            fn (QueryExecuted $e) => $this->eventTriggers[] = $e,
         );
     }
 
@@ -170,6 +170,24 @@ class QueryHandlerTest extends QueryTestCase
         $this->assertSame('SELECT * FROM users /* b=2,a=1 */', $result->template);
         $this->assertSame(['id' => 1], (array) $result->first());
         $this->assertCount(1, $this->eventTriggers);
+    }
+
+    public function test_execute__without_tags(): void
+    {
+        $connection = $this->sqliteConnection();
+        $table = $connection->schema()->createTable('users');
+        $table->id();
+        $table->execute();
+
+        $connection->query()->insertInto('users')
+            ->value(['id' => 1])
+            ->execute();
+
+        $statement = new RawStatement('SELECT * FROM users');
+        $handler = $connection->query();
+        $result = $handler->execute($statement);
+        $this->assertSame('SELECT * FROM users', $result->template);
+        $this->assertSame(null, $result->statement->tags);
     }
 
     public function test_cursor(): void

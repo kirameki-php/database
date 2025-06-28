@@ -201,13 +201,15 @@ class QueryHandler
      */
     protected function mergeConnectionTags(QueryStatement $statement): void
     {
-        if ($this->connection->tags->isEmpty()) {
+        $tags = $this->connection->tags;
+
+        if ($tags->isEmpty()) {
             return;
         }
 
         $statement->tags !== null
-            ? $statement->tags->merge($this->connection->tags)
-            : $statement->tags = $this->connection->tags;
+            ? $statement->tags->merge($tags)
+            : $statement->tags = $tags;
     }
 
     protected function checkForDropProtection(QueryStatement $statement): void
