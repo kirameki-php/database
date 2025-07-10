@@ -603,6 +603,7 @@ class SelectBuilder extends WhereBuilder
         $keyName = $statement->groupBy[0];
         $aggregated = [];
         foreach ($results as $result) {
+            /** @var object{ total: string } $result */
             $groupKey = $result->$keyName;
             $groupTotal = (int) $result->total;
             $aggregated[$groupKey] = $groupTotal;

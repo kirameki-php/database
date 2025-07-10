@@ -8,6 +8,7 @@ use Kirameki\Database\Query\QueryResult;
 
 /**
  * @template TQueryStatement of QueryStatement = QueryStatement
+ * @template TRow of object = object
  */
 abstract class QueryBuilder
 {
@@ -41,7 +42,7 @@ abstract class QueryBuilder
     }
 
     /**
-     * @param Closure(QueryResult<TQueryStatement, mixed>): mixed $callback
+     * @param Closure(QueryResult<TQueryStatement, TRow>): mixed $callback
      * @return $this
      */
     public function afterQuery(Closure $callback): static
@@ -52,7 +53,7 @@ abstract class QueryBuilder
     }
 
     /**
-     * @return QueryResult<TQueryStatement, mixed>
+     * @return QueryResult<TQueryStatement, TRow>
      */
     public function execute(): QueryResult
     {
@@ -60,7 +61,7 @@ abstract class QueryBuilder
     }
 
     /**
-     * @return QueryResult<TQueryStatement, mixed>
+     * @return QueryResult<TQueryStatement, TRow>
      */
     public function cursor(): QueryResult
     {
@@ -68,7 +69,7 @@ abstract class QueryBuilder
     }
 
     /**
-     * @return QueryResult<TQueryStatement, mixed>
+     * @return QueryResult<TQueryStatement, TRow>
      */
     public function explain(): QueryResult
     {
