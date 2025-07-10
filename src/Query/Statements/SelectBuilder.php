@@ -657,7 +657,7 @@ class SelectBuilder extends WhereBuilder
 
     /**
      * @param int $size
-     * @return Generator<CursorPaginator<TRow>>
+     * @return Generator<int, CursorPaginator<TRow>>
      */
     public function batch(int $size = 1_000): Generator
     {
@@ -687,7 +687,7 @@ class SelectBuilder extends WhereBuilder
     }
 
     /**
-     * @return Generator<TRow>
+     * @return Generator<int, TRow>
      */
     public function flatBatch(int $chunkSize = 1_000): Generator
     {
