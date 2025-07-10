@@ -4,10 +4,13 @@ namespace Kirameki\Database\Query\Statements;
 
 use Kirameki\Collections\Vec;
 
+/**
+ * @template TRow of mixed
+ */
 trait ResultHelpers
 {
     /**
-     * @return mixed
+     * @return TRow
      */
     public function first(): mixed
     {
@@ -15,7 +18,7 @@ trait ResultHelpers
     }
 
     /**
-     * @return mixed
+     * @return TRow|null
      */
     public function firstOrNull(): mixed
     {
@@ -23,7 +26,7 @@ trait ResultHelpers
     }
 
     /**
-     * @return mixed
+     * @return TRow
      */
     public function single(): mixed
     {

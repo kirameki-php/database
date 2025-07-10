@@ -8,7 +8,7 @@ use Kirameki\Database\Query\QueryResult;
 
 /**
  * @template TQueryStatement of QueryStatement = QueryStatement
- * @template TRow of object = object
+ * @template TRow of mixed = mixed
  */
 abstract class QueryBuilder
 {

@@ -25,10 +25,14 @@ use function is_array;
 use function min;
 
 /**
- * @extends WhereBuilder<SelectStatement>
+ * @template TRow of mixed = mixed
+ * @extends WhereBuilder<SelectStatement, TRow>
  */
 class SelectBuilder extends WhereBuilder
 {
+    /**
+     * @use ResultHelpers<TRow>
+     */
     use ResultHelpers;
 
     /**
@@ -481,7 +485,7 @@ class SelectBuilder extends WhereBuilder
 
     /**
      * @param int $size
-     * @return QueryResult<SelectStatement, mixed>
+     * @return QueryResult<SelectStatement, TRow>
      */
     public function exactly(int $size): QueryResult
     {
@@ -491,7 +495,7 @@ class SelectBuilder extends WhereBuilder
     /**
      * @param int $page
      * @param int $size
-     * @return OffsetPaginator<object>
+     * @return OffsetPaginator<TRow>
      */
     public function offsetPaginate(int $page, int $size = Paginator::DEFAULT_PER_PAGE): OffsetPaginator
     {
@@ -519,7 +523,7 @@ class SelectBuilder extends WhereBuilder
     /**
      * @param int $size
      * @param Cursor|null $cursor
-     * @return CursorPaginator<object>
+     * @return CursorPaginator<TRow>
      */
     public function cursorPaginate(int $size = Paginator::DEFAULT_PER_PAGE, ?Cursor $cursor = null): CursorPaginator
     {
@@ -653,7 +657,7 @@ class SelectBuilder extends WhereBuilder
 
     /**
      * @param int $size
-     * @return Generator<CursorPaginator<object>>
+     * @return Generator<CursorPaginator<TRow>>
      */
     public function batch(int $size = 1_000): Generator
     {
@@ -683,7 +687,7 @@ class SelectBuilder extends WhereBuilder
     }
 
     /**
-     * @return Generator<mixed>
+     * @return Generator<TRow>
      */
     public function flatBatch(int $chunkSize = 1_000): Generator
     {

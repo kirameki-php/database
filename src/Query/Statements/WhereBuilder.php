@@ -7,7 +7,8 @@ use function array_key_last;
 
 /**
  * @template TConditionStatement of ConditionStatement
- * @extends QueryBuilder<TConditionStatement>
+ * @template TRow of mixed = mixed
+ * @extends QueryBuilder<TConditionStatement, TRow>
  */
 abstract class WhereBuilder extends QueryBuilder
 {

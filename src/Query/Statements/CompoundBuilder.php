@@ -5,10 +5,14 @@ namespace Kirameki\Database\Query\Statements;
 use Kirameki\Database\Query\QueryHandler;
 
 /**
- * @extends QueryBuilder<SelectStatement>
+ * @template TRow of mixed = mixed
+ * @extends QueryBuilder<SelectStatement, TRow>
  */
 class CompoundBuilder extends QueryBuilder
 {
+    /**
+     * @use ResultHelpers<TRow>
+     */
     use ResultHelpers;
 
     /**

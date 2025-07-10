@@ -7,7 +7,7 @@ use Kirameki\Database\Query\Statements\SelectStatement;
 use Override;
 
 /**
- * @template TRow of object
+ * @template TRow of mixed
  * @extends Paginator<TRow>
  */
 class CursorPaginator extends Paginator
