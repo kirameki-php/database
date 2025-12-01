@@ -3,8 +3,8 @@
 namespace Kirameki\Database\Query;
 
 use Kirameki\Collections\Vec;
-use Kirameki\Core\Exceptions\InvalidArgumentException;
-use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Exceptions\InvalidArgumentException;
+use Kirameki\Exceptions\LogicException;
 use Kirameki\Database\Exceptions\QueryException;
 use Kirameki\Database\Query\Statements\QueryStatement;
 use function property_exists;

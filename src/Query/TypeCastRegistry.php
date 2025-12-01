@@ -3,7 +3,7 @@
 namespace Kirameki\Database\Query;
 
 use BackedEnum;
-use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Exceptions\LogicException;
 use Kirameki\Database\Query\Casters\DynamicEnumCaster;
 use Kirameki\Database\Query\Casters\StringToTime;
 use Kirameki\Database\Query\Casters\TypeCaster;

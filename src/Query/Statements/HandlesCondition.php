@@ -3,8 +3,8 @@
 namespace Kirameki\Database\Query\Statements;
 
 use Closure;
-use Kirameki\Core\Exceptions\InvalidArgumentException;
-use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Exceptions\InvalidArgumentException;
+use Kirameki\Exceptions\LogicException;
 use Kirameki\Core\Value;
 use Kirameki\Database\Expression;
 use function array_key_exists;

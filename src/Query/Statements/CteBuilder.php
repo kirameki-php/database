@@ -4,7 +4,7 @@ namespace Kirameki\Database\Query\Statements;
 
 use Closure;
 use Kirameki\Collections\Utils\Arr;
-use Kirameki\Core\Exceptions\InvalidArgumentException;
+use Kirameki\Exceptions\InvalidArgumentException;
 use Kirameki\Database\Expression;
 use Kirameki\Database\Query\QueryHandler;
 use function iterator_to_array;

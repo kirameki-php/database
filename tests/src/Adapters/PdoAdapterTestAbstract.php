@@ -2,7 +2,7 @@
 
 namespace Tests\Kirameki\Database\Adapters;
 
-use Kirameki\Core\Exceptions\NotSupportedException;
+use Kirameki\Exceptions\NotSupportedException;
 use Kirameki\Database\Adapters\PdoAdapter;
 use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;

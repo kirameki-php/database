@@ -3,7 +3,7 @@
 namespace Tests\Kirameki\Database\Query;
 
 use Kirameki\Collections\Utils\Arr;
-use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Exceptions\LogicException;
 use Kirameki\Database\Query\Casters\DynamicEnumCaster;
 use Kirameki\Database\Query\Casters\JsonToVec;
 use Kirameki\Database\Query\Casters\StringToTime;

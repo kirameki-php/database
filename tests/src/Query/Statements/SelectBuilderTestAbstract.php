@@ -4,8 +4,8 @@ namespace Tests\Kirameki\Database\Query\Statements;
 
 use Kirameki\Collections\Exceptions\CountMismatchException;
 use Kirameki\Collections\Exceptions\EmptyNotAllowedException;
-use Kirameki\Core\Exceptions\InvalidArgumentException;
-use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Exceptions\InvalidArgumentException;
+use Kirameki\Exceptions\LogicException;
 use Kirameki\Database\Events\QueryExecuted;
 use Kirameki\Database\Query\Pagination\CursorPaginator;
 use Kirameki\Database\Query\Pagination\OffsetPaginator;

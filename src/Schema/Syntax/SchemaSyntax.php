@@ -3,8 +3,8 @@
 namespace Kirameki\Database\Schema\Syntax;
 
 use Kirameki\Collections\Utils\Arr;
-use Kirameki\Core\Exceptions\InvalidTypeException;
-use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Exceptions\InvalidTypeException;
+use Kirameki\Exceptions\LogicException;
 use Kirameki\Core\Value;
 use Kirameki\Database\Exceptions\DropProtectionException;
 use Kirameki\Database\Expression;

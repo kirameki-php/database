@@ -3,9 +3,9 @@
 namespace Tests\Kirameki\Database\Query\Syntax;
 
 use DateTime;
-use Kirameki\Core\Exceptions\InvalidArgumentException;
-use Kirameki\Core\Exceptions\LogicException;
-use Kirameki\Core\Exceptions\NotSupportedException;
+use Kirameki\Exceptions\InvalidArgumentException;
+use Kirameki\Exceptions\LogicException;
+use Kirameki\Exceptions\NotSupportedException;
 use Kirameki\Database\Adapters\SqliteAdapter;
 use Kirameki\Database\Config\DatabaseConfig;
 use Kirameki\Database\Config\SqliteConfig;

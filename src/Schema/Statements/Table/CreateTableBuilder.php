@@ -3,7 +3,7 @@
 namespace Kirameki\Database\Schema\Statements\Table;
 
 use Kirameki\Collections\Utils\Arr;
-use Kirameki\Core\Exceptions\UnreachableException;
+use Kirameki\Exceptions\UnreachableException;
 use Kirameki\Database\Query\Statements\SortOrder;
 use Kirameki\Database\Schema\SchemaHandler;
 use Kirameki\Database\Schema\Statements\Column\ColumnBuilder;

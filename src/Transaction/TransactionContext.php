@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Transaction;
 
-use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Exceptions\LogicException;
 use Kirameki\Database\Connection;
 use Kirameki\Database\Events\TransactionCommitted;
 use Kirameki\Database\Events\TransactionCommitting;

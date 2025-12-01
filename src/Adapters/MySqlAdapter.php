@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Adapters;
 
-use Kirameki\Core\Exceptions\InvalidConfigException;
+use Kirameki\Exceptions\InvalidConfigException;
 use Kirameki\Database\Config\MySqlConfig;
 use Kirameki\Database\Exceptions\DatabaseExistsException;
 use Kirameki\Database\Exceptions\DatabaseNotFoundException;

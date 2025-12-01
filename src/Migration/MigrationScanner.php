@@ -3,7 +3,7 @@
 namespace Kirameki\Database\Migration;
 
 use Iterator;
-use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Exceptions\LogicException;
 use Kirameki\Database\DatabaseManager;
 use Kirameki\Database\Query\Statements\SortOrder;
 use function assert;

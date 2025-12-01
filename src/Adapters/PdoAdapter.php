@@ -5,7 +5,7 @@ namespace Kirameki\Database\Adapters;
 use Closure;
 use Iterator;
 use Kirameki\Collections\LazyIterator;
-use Kirameki\Core\Exceptions\UnreachableException;
+use Kirameki\Exceptions\UnreachableException;
 use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
 use Kirameki\Database\Exceptions\ConnectionException;

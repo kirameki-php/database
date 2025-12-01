@@ -3,7 +3,7 @@
 namespace Kirameki\Database;
 
 use Closure;
-use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Exceptions\LogicException;
 use Kirameki\Database\Adapters\Adapter;
 use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Events\ConnectionEstablished;

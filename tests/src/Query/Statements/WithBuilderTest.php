@@ -2,7 +2,7 @@
 
 namespace Tests\Kirameki\Database\Query\Statements;
 
-use Kirameki\Core\Exceptions\InvalidArgumentException;
+use Kirameki\Exceptions\InvalidArgumentException;
 use Kirameki\Database\Query\Statements\InsertStatement;
 use Kirameki\Database\Query\Statements\SelectBuilder;
 use Kirameki\Database\Raw;

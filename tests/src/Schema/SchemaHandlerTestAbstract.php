@@ -2,8 +2,8 @@
 
 namespace Tests\Kirameki\Database\Schema;
 
-use Kirameki\Core\Exceptions\LogicException;
-use Kirameki\Core\Exceptions\UnreachableException;
+use Kirameki\Exceptions\LogicException;
+use Kirameki\Exceptions\UnreachableException;
 use Kirameki\Database\Config\DatabaseConfig;
 use Kirameki\Database\Exceptions\DropProtectionException;
 use Random\Engine\Secure;

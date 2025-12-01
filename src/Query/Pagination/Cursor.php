@@ -3,7 +3,7 @@
 namespace Kirameki\Database\Query\Pagination;
 
 use Kirameki\Collections\Utils\Arr;
-use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Exceptions\LogicException;
 use Kirameki\Database\Query\Statements\Operator;
 use Kirameki\Database\Query\Statements\SelectBuilder;
 use Kirameki\Database\Query\Statements\SelectStatement;

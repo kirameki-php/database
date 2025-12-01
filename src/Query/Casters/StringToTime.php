@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Query\Casters;
 
-use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Exceptions\LogicException;
 use Kirameki\Time\Time;
 use Override;
 use function is_null;

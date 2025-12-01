@@ -2,8 +2,8 @@
 
 namespace Kirameki\Database\Schema\Syntax;
 
-use Kirameki\Core\Exceptions\LogicException;
-use Kirameki\Core\Exceptions\NotSupportedException;
+use Kirameki\Exceptions\LogicException;
+use Kirameki\Exceptions\NotSupportedException;
 use Kirameki\Database\Functions\Syntax\SqliteFunctionSyntax;
 use Kirameki\Database\Schema\Statements\Column\AlterColumnAction;
 use Kirameki\Database\Schema\Statements\Column\ColumnDefinition;

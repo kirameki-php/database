@@ -2,9 +2,9 @@
 
 namespace Tests\Kirameki\Database\Query\Statements;
 
-use Kirameki\Core\Exceptions\InvalidArgumentException;
-use Kirameki\Core\Exceptions\LogicException;
-use Kirameki\Core\Exceptions\NotSupportedException;
+use Kirameki\Exceptions\InvalidArgumentException;
+use Kirameki\Exceptions\LogicException;
+use Kirameki\Exceptions\NotSupportedException;
 use Kirameki\Database\Query\Statements\Bounds;
 use Kirameki\Database\Query\Statements\CheckingCondition;
 use Kirameki\Database\Query\Statements\ConditionBuilder;

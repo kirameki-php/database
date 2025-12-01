@@ -3,10 +3,10 @@
 namespace Kirameki\Database\Query\Syntax;
 
 use Kirameki\Collections\Utils\Arr;
-use Kirameki\Core\Exceptions\InvalidArgumentException;
-use Kirameki\Core\Exceptions\LogicException;
-use Kirameki\Core\Exceptions\NotSupportedException;
-use Kirameki\Core\Exceptions\UnreachableException;
+use Kirameki\Exceptions\InvalidArgumentException;
+use Kirameki\Exceptions\LogicException;
+use Kirameki\Exceptions\NotSupportedException;
+use Kirameki\Exceptions\UnreachableException;
 use Kirameki\Core\Func;
 use Kirameki\Core\Value;
 use Kirameki\Database\Expression;

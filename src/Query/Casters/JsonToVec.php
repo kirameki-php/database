@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Kirameki\Database\Query\Casters;
 
 use Kirameki\Collections\Vec;
-use Kirameki\Core\Exceptions\TypeConversionException;
+use Kirameki\Exceptions\TypeConversionException;
 use Kirameki\Core\Json;
 use function array_is_list;
 use function is_array;

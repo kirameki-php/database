@@ -2,7 +2,7 @@
 
 namespace Tests\Kirameki\Database\Query\Statements;
 
-use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Exceptions\LogicException;
 use Kirameki\Database\Query\Statements\LockOption;
 use function dump;
 

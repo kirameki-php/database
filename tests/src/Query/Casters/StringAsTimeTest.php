@@ -2,7 +2,7 @@
 
 namespace Tests\Kirameki\Database\Query\Casters;
 
-use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Exceptions\LogicException;
 use Kirameki\Database\Query\Casters\StringToTime;
 use Kirameki\Time\Time;
 use Tests\Kirameki\Database\Query\QueryTestCase;

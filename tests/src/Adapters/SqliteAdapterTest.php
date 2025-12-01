@@ -2,7 +2,7 @@
 
 namespace Tests\Kirameki\Database\Adapters;
 
-use Kirameki\Core\Exceptions\NotSupportedException;
+use Kirameki\Exceptions\NotSupportedException;
 use Kirameki\Database\Config\SqliteConfig;
 use Kirameki\Database\Exceptions\ConnectionException;
 use Kirameki\Database\Exceptions\QueryException;

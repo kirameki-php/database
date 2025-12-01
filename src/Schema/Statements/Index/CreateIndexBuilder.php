@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Schema\Statements\Index;
 
-use Kirameki\Core\Exceptions\UnreachableException;
+use Kirameki\Exceptions\UnreachableException;
 use Kirameki\Database\Query\Statements\SortOrder;
 use Kirameki\Database\Schema\SchemaHandler;
 use Kirameki\Database\Schema\Statements\SchemaBuilder;

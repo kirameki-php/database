@@ -2,7 +2,7 @@
 
 namespace Tests\Kirameki\Database\Schema;
 
-use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Exceptions\LogicException;
 use Kirameki\Database\Query\Statements\SortOrder;
 use Kirameki\Database\Raw;
 use Kirameki\Database\Schema\Statements\ForeignKey\ReferenceOption;

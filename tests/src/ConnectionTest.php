@@ -3,7 +3,7 @@
 namespace Tests\Kirameki\Database;
 
 use Exception;
-use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Exceptions\LogicException;
 use Kirameki\Database\Adapters\SqliteAdapter;
 use Kirameki\Database\Config\MySqlConfig;
 use Kirameki\Database\Events\ConnectionEstablished;

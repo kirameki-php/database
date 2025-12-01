@@ -6,7 +6,7 @@ use BackedEnum;
 use Closure;
 use DateTimeInterface;
 use Kirameki\Collections\Utils\Arr;
-use Kirameki\Core\Exceptions\InvalidArgumentException;
+use Kirameki\Exceptions\InvalidArgumentException;
 use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
 use Kirameki\Database\Query\Statements\Tuple;

@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Query\Syntax;
 
-use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Exceptions\LogicException;
 use Kirameki\Database\Functions\Syntax\SqliteFunctionSyntax;
 use Kirameki\Database\Info\Statements\ColumnType;
 use Kirameki\Database\Info\Statements\ListColumnsStatement;

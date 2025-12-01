@@ -2,7 +2,7 @@
 
 namespace Tests\Kirameki\Database\Adapters;
 
-use Kirameki\Core\Exceptions\InvalidConfigException;
+use Kirameki\Exceptions\InvalidConfigException;
 use Kirameki\Database\Adapters\MySqlAdapter;
 use Kirameki\Database\Config\DatabaseConfig;
 use Kirameki\Database\Config\MySqlConfig;

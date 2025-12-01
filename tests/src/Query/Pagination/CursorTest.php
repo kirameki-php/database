@@ -2,7 +2,7 @@
 
 namespace Tests\Kirameki\Database\Query\Pagination;
 
-use Kirameki\Core\Exceptions\LogicException;
+use Kirameki\Exceptions\LogicException;
 use Kirameki\Database\Query\Pagination\Cursor;
 
 class CursorTest extends PaginatorTestCase

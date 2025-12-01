@@ -2,7 +2,7 @@
 
 namespace Tests\Kirameki\Database\Query\Casters;
 
-use Kirameki\Core\Exceptions\TypeConversionException;
+use Kirameki\Exceptions\TypeConversionException;
 use Kirameki\Database\Query\Casters\JsonToVec;
 use Tests\Kirameki\Database\Query\QueryTestCase;
 

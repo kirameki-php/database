@@ -2,8 +2,8 @@
 
 namespace Tests\Kirameki\Database\Schema;
 
-use Kirameki\Core\Exceptions\LogicException;
-use Kirameki\Core\Exceptions\NotSupportedException;
+use Kirameki\Exceptions\LogicException;
+use Kirameki\Exceptions\NotSupportedException;
 use Kirameki\Database\Schema\Statements\Table\CreateTableStatement;
 use Random\Engine\PcgOneseq128XslRr64;
 use Random\Randomizer;
