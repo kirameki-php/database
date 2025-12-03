@@ -5,5 +5,8 @@
 # PHPUnit
 /coverage
 
+# IDEs
+.idea/copilot.*.xml
+
 # OS related files
 .DS_Store
