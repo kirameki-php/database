@@ -4,9 +4,6 @@ namespace Kirameki\Database\Info;
 
 use Kirameki\Collections\Vec;
 use Kirameki\Database\Connection;
-use Kirameki\Database\Info\Statements\ListColumnsStatement;
-use Kirameki\Database\Info\Statements\ListForeignKeysStatement;
-use Kirameki\Database\Info\Statements\ListIndexesStatement;
 use Kirameki\Database\Info\Statements\ListTablesStatement;
 use Kirameki\Database\Info\Statements\TableExistsStatement;
 use stdClass;

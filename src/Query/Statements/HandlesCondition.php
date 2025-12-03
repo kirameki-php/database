@@ -5,11 +5,11 @@ namespace Kirameki\Database\Query\Statements;
 use Closure;
 use Kirameki\Exceptions\InvalidArgumentException;
 use Kirameki\Exceptions\LogicException;
-use Kirameki\Core\Value;
 use Kirameki\Database\Expression;
 use function array_key_exists;
 use function assert;
 use function count;
+use function get_debug_type;
 use function is_iterable;
 use function is_string;
 use function key;
@@ -62,7 +62,7 @@ trait HandlesCondition
             $value instanceof Condition => clone $value,
             $value instanceof ConditionBuilder => $this->createConditionFromBuilder($value),
             $value instanceof Closure => $this->createConditionFromClosure($value),
-            default => throw new InvalidArgumentException('Expected: Condition|ConditionBuilder|Closure. Got: ' . Value::getType($value) . '.', [
+            default => throw new InvalidArgumentException('Expected: Condition|ConditionBuilder|Closure. Got: ' . get_debug_type($value) . '.', [
                 'args' => $args,
             ]),
         };

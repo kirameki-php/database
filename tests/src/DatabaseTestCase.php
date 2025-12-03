@@ -2,7 +2,7 @@
 
 namespace Tests\Kirameki\Database;
 
-use Kirameki\Core\Testing\TestCase;
+use Kirameki\Testing\TestCase;
 use Kirameki\Database\Adapters\Adapter;
 use Kirameki\Database\Adapters\MySqlAdapter;
 use Kirameki\Database\Adapters\SqliteAdapter;
@@ -13,7 +13,7 @@ use Kirameki\Database\Config\SqliteConfig;
 use Kirameki\Database\Connection;
 use Kirameki\Database\Schema\Statements\Table\CreateTableBuilder;
 use Kirameki\Event\Event;
-use Kirameki\Event\EventManager;
+use Kirameki\Event\EventDispatcher;
 use Random\Randomizer;
 use RuntimeException;
 use function array_values;
@@ -26,7 +26,7 @@ class DatabaseTestCase extends TestCase
      */
     protected array $connections = [];
 
-    protected ?EventManager $eventManager = null;
+    protected ?EventDispatcher $eventDispatcher = null;
 
     /**
      * @var list<Event>
@@ -70,7 +70,7 @@ class DatabaseTestCase extends TestCase
         $adapter->createDatabase();
         $this->runAfterTearDown(static fn() => $adapter->dropDatabase());
 
-        return new Connection('temp', $adapter, $this->getEventManager(), $randomizer);
+        return new Connection('temp', $adapter, $this->getEventDispatcher(), $randomizer);
     }
 
     /**
@@ -108,9 +108,9 @@ class DatabaseTestCase extends TestCase
         return new SqliteAdapter($config, $connectionConfig);
     }
 
-    protected function getEventManager(): EventManager
+    protected function getEventDispatcher(): EventDispatcher
     {
-        return $this->eventManager ??= new EventManager();
+        return $this->eventDispatcher ??= new EventDispatcher();
     }
 
     /**
@@ -119,7 +119,7 @@ class DatabaseTestCase extends TestCase
      */
     protected function captureEvents(string $event): void
     {
-        $this->getEventManager()->on($event, fn ($e) => $this->capturedEvents[] = $e);
+        $this->getEventDispatcher()->on($event, fn ($e) => $this->capturedEvents[] = $e);
     }
 
     /**

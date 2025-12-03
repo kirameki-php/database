@@ -6,14 +6,9 @@
   "require": {
     "php": ">=8.4",
     "ext-pdo": "*",
-    "kirameki/cli": "dev-main",
-    "kirameki/collections": "dev-main",
-    "kirameki/core": "dev-main",
-    "kirameki/event": "dev-main",
-    "kirameki/time": "dev-main"
+    "kirameki/utils": "dev-main"
   },
   "require-dev": {
-    "kirameki/dumper": "dev-main",
     "phpstan/phpstan": "~2",
     "phpunit/phpunit": "~12"
   },

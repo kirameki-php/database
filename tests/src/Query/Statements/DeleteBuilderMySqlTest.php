@@ -22,7 +22,7 @@ class DeleteBuilderMySqlTest extends DeleteBuilderTestAbstract
             new DatabaseConfig([], dropProtection: true),
             new MySqlConfig('mysql'),
         );
-        $conn = new Connection('temp', $adapter, $this->getEventManager());
+        $conn = new Connection('temp', $adapter, $this->getEventDispatcher());
         $builder = new DeleteBuilder($conn->query(), 'User');
         $builder->execute();
     }

@@ -8,7 +8,6 @@ use Kirameki\Exceptions\LogicException;
 use Kirameki\Exceptions\NotSupportedException;
 use Kirameki\Exceptions\UnreachableException;
 use Kirameki\Core\Func;
-use Kirameki\Core\Value;
 use Kirameki\Database\Expression;
 use Kirameki\Database\Info\Statements\ListColumnsStatement;
 use Kirameki\Database\Info\Statements\ListForeignKeysStatement;
@@ -54,6 +53,7 @@ use function array_push;
 use function count;
 use function current;
 use function explode;
+use function get_debug_type;
 use function implode;
 use function is_bool;
 use function is_countable;
@@ -701,7 +701,7 @@ abstract class QuerySyntax extends Syntax
         }
 
         $message = 'Value for WHERE ' . $operator . '. ';
-        $message .= 'Expected: SelectStatement. Got: ' . Value::getType($value) . '.';
+        $message .= 'Expected: SelectStatement. Got: ' . get_debug_type($value) . '.';
         throw new NotSupportedException($message, [
             'definition' => $def,
         ]);
@@ -754,7 +754,7 @@ abstract class QuerySyntax extends Syntax
         }
 
         $message = 'Value for WHERE ' . $operator . '. ';
-        $message .= 'Expected: iterable|SelectStatement. Got: ' . Value::getType($value) . '.';
+        $message .= 'Expected: iterable|SelectStatement. Got: ' . get_debug_type($value) . '.';
         throw new NotSupportedException($message, [
             'definition' => $def,
         ]);
@@ -804,7 +804,7 @@ abstract class QuerySyntax extends Syntax
         }
 
         $message = 'Value for WHERE with range. ';
-        $message .= 'Expected: Bounds. Got: ' . Value::getType($value) . '.';
+        $message .= 'Expected: Bounds. Got: ' . get_debug_type($value) . '.';
         throw new NotSupportedException($message, [
             'definition' => $def,
         ]);
@@ -1185,11 +1185,10 @@ abstract class QuerySyntax extends Syntax
             foreach ($columns as $column) {
                 if (array_key_exists($column, $data)) {
                     $value = $data[$column];
-                    if ($value instanceof Expression) {
-                        // expression is already evaluated to string
-                    } else {
+                    if (!$value instanceof Expression) {
                         $parameters[] = $value;
                     }
+                    // expression is already evaluated to string
                 }
             }
         }

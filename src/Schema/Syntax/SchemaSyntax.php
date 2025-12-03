@@ -5,7 +5,6 @@ namespace Kirameki\Database\Schema\Syntax;
 use Kirameki\Collections\Utils\Arr;
 use Kirameki\Exceptions\InvalidTypeException;
 use Kirameki\Exceptions\LogicException;
-use Kirameki\Core\Value;
 use Kirameki\Database\Exceptions\DropProtectionException;
 use Kirameki\Database\Expression;
 use Kirameki\Database\Schema\Statements\Column\AlterColumnAction;
@@ -26,6 +25,7 @@ use function array_filter;
 use function array_keys;
 use function array_map;
 use function array_merge;
+use function get_debug_type;
 use function implode;
 use function is_bool;
 use function is_float;
@@ -320,7 +320,7 @@ abstract class SchemaSyntax extends Syntax
             return $this->formatDefaultExpression($value);
         }
 
-        throw new LogicException('Unknown default value type: ' . Value::getType($value), [
+        throw new LogicException('Unknown default value type: ' . get_debug_type($value), [
             'value' => $value,
             'column' => $def->name,
         ]);

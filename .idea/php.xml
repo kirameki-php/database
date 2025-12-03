@@ -24,7 +24,6 @@
     <include_path>
       <path value="$PROJECT_DIR$/vendor/composer" />
       <path value="$PROJECT_DIR$/vendor/theseer/tokenizer" />
-      <path value="$PROJECT_DIR$/vendor/south-pointe/ansi" />
       <path value="$PROJECT_DIR$/vendor/sebastian/type" />
       <path value="$PROJECT_DIR$/vendor/sebastian/version" />
       <path value="$PROJECT_DIR$/vendor/sebastian/object-reflector" />
@@ -49,19 +48,10 @@
       <path value="$PROJECT_DIR$/vendor/phar-io/version" />
       <path value="$PROJECT_DIR$/vendor/nikic/php-parser" />
       <path value="$PROJECT_DIR$/vendor/myclabs/deep-copy" />
-      <path value="$PROJECT_DIR$/vendor/kirameki/dumper" />
-      <path value="$PROJECT_DIR$/vendor/kirameki/core" />
-      <path value="$PROJECT_DIR$/vendor/kirameki/process" />
-      <path value="$PROJECT_DIR$/vendor/kirameki/stream" />
-      <path value="$PROJECT_DIR$/vendor/kirameki/collections" />
-      <path value="$PROJECT_DIR$/vendor/kirameki/event" />
-      <path value="$PROJECT_DIR$/vendor/psr/container" />
-      <path value="$PROJECT_DIR$/vendor/kirameki/container" />
-      <path value="$PROJECT_DIR$/vendor/kirameki/cli" />
-      <path value="$PROJECT_DIR$/vendor/psr/log" />
-      <path value="$PROJECT_DIR$/vendor/kirameki/time" />
-      <path value="$PROJECT_DIR$/vendor/psr/clock" />
       <path value="$PROJECT_DIR$/vendor/staabm/side-effects-detector" />
+      <path value="$PROJECT_DIR$/vendor/psr/clock" />
+      <path value="$PROJECT_DIR$/vendor/south-pointe/ansi" />
+      <path value="$PROJECT_DIR$/vendor/kirameki/utils" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.4" />

@@ -2,6 +2,7 @@
 
 namespace Kirameki\Database\Transaction;
 
+use Kirameki\Event\EventDispatcher;
 use Kirameki\Exceptions\LogicException;
 use Kirameki\Database\Connection;
 use Kirameki\Database\Events\TransactionCommitted;
@@ -9,12 +10,9 @@ use Kirameki\Database\Events\TransactionCommitting;
 use Kirameki\Database\Events\TransactionEvent;
 use Kirameki\Database\Events\TransactionRolledBack;
 use Kirameki\Event\EventHandler;
-use Kirameki\Event\HandlesEvents;
 
 class TransactionContext implements TransactionInfo
 {
-    use HandlesEvents;
-
     /**
      * @var int
      */
@@ -24,21 +22,21 @@ class TransactionContext implements TransactionInfo
      * @var EventHandler<TransactionCommitting>
      */
     public EventHandler $beforeCommit {
-        get => $this->resolveEventHandler(TransactionCommitting::class);
+        get => $this->events->get(TransactionCommitting::class);
     }
 
     /**
      * @var EventHandler<TransactionCommitted>
      */
     public EventHandler $afterCommit {
-        get => $this->resolveEventHandler(TransactionCommitted::class);
+        get => $this->events->get(TransactionCommitted::class);
     }
 
     /**
      * @var EventHandler<TransactionRolledBack>
      */
     public EventHandler $afterRollback {
-        get => $this->resolveEventHandler(TransactionRolledBack::class);
+        get => $this->events->get(TransactionRolledBack::class);
     }
 
     /**
@@ -48,6 +46,7 @@ class TransactionContext implements TransactionInfo
     public function __construct(
         public protected(set) Connection $connection,
         public protected(set) ?TransactionOptions $options = null,
+        protected readonly EventDispatcher $events = new EventDispatcher(),
     )
     {
     }
@@ -77,7 +76,7 @@ class TransactionContext implements TransactionInfo
      */
     public function emitTransactionEvent(TransactionEvent $event): void
     {
-        $this->emitEvent($event);
+        $this->events->emit($event);
     }
 
     /**

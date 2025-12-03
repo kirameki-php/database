@@ -7,7 +7,7 @@ use Kirameki\Database\Config\DatabaseConfig;
 use Kirameki\Database\Config\MySqlConfig;
 use Kirameki\Database\Connection;
 use Kirameki\Database\Query\TypeCastRegistry;
-use Kirameki\Event\EventManager;
+use Kirameki\Event\EventDispatcher;
 use PHPUnit\Framework\Attributes\After;
 use PHPUnit\Framework\Attributes\Before;
 use Tests\Kirameki\Database\DatabaseTestCase;
@@ -29,7 +29,7 @@ class MySql_MigrationTestCase extends DatabaseTestCase
 
     protected function migrationConnection(): Connection
     {
-        $events = new EventManager();
+        $events = new EventDispatcher();
         $dbConfig = new DatabaseConfig([]);
         $casters = new TypeCastRegistry();
         $adapter = new MySqlAdapter($dbConfig, new MySqlConfig('mysql'), $casters);

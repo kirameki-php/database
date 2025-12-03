@@ -23,7 +23,7 @@ class QueryHandlerTest extends QueryTestCase
 
     protected function listenToQueryExecuted(): void
     {
-        $this->getEventManager()->on(
+        $this->getEventDispatcher()->on(
             QueryExecuted::class,
             fn (QueryExecuted $e) => $this->eventTriggers[] = $e,
         );
