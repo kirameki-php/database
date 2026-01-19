@@ -7,12 +7,13 @@ use function array_is_list;
 use function array_values;
 
 /**
- * @extends WhereBuilder<DeleteStatement>
+ * @template TRow of mixed = mixed
+ * @extends WhereBuilder<DeleteStatement, TRow>
  */
 class DeleteBuilder extends WhereBuilder
 {
     /**
-     * @param QueryHandler $handler
+     * @param QueryHandler<TRow> $handler
      * @param string $table
      */
     public function __construct(QueryHandler $handler, string $table)

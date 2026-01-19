@@ -4,6 +4,7 @@ namespace Kirameki\Database\Query\Statements;
 
 use Kirameki\Database\Query\Expressions\Column;
 use function array_key_last;
+use function assert;
 
 /**
  * @template TConditionStatement of ConditionStatement
@@ -70,6 +71,7 @@ abstract class WhereBuilder extends QueryBuilder
     public function whereColumn(string $column, string ...$args): static
     {
         $key = array_key_last($args);
+        assert($key !== null);
         $args[$key] = new Column($args[$key]);
         return $this->where($column, ...$args);
     }

@@ -8,12 +8,13 @@ use function array_values;
 use function iterator_to_array;
 
 /**
- * @extends WhereBuilder<UpdateStatement>
+ * @template TRow of mixed = mixed
+ * @extends WhereBuilder<UpdateStatement, TRow>
  */
 class UpdateBuilder extends WhereBuilder
 {
     /**
-     * @param QueryHandler $handler
+     * @param QueryHandler<TRow> $handler
      * @param string $table
      */
     public function __construct(QueryHandler $handler, string $table)

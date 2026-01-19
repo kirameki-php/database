@@ -7,12 +7,13 @@ use function array_is_list;
 use function array_values;
 
 /**
- * @extends QueryBuilder<UpsertStatement>
+ * @template TRow of mixed = mixed
+ * @extends QueryBuilder<UpsertStatement, TRow>
  */
 class UpsertBuilder extends QueryBuilder
 {
     /**
-     * @param QueryHandler $handler
+     * @param QueryHandler<TRow> $handler
      * @param string $table
      */
     public function __construct(QueryHandler $handler, string $table)
