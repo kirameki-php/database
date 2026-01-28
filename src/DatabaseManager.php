@@ -39,17 +39,15 @@ class DatabaseManager
         get => $this->default ??= $this->resolveDefaultConnectionName();
     }
 
-    protected TypeCastRegistry $casters {
-        get => $this->casters ??= new TypeCastRegistry();
-    }
-
     /**
      * @param DatabaseConfig $config
      * @param EventEmitter|null $events
+     * @param TypeCastRegistry|null $casters
      */
     public function __construct(
         public readonly DatabaseConfig $config,
         protected readonly ?EventEmitter $events = null,
+        protected readonly ?TypeCastRegistry $casters = null,
     )
     {
         if ($config->connections === []) {
@@ -104,7 +102,7 @@ class DatabaseManager
      */
     public function purgeAll(): Map
     {
-        $connections = $this->resolvedConnections();
+        $connections = $this->getResolvedConnections();
         $connections->keys()->each($this->purge(...));
         return $connections;
     }
@@ -167,7 +165,7 @@ class DatabaseManager
     /**
      * @return Map<string, Connection>
      */
-    public function resolvedConnections(): Map
+    public function getResolvedConnections(): Map
     {
         return new Map($this->connections);
     }

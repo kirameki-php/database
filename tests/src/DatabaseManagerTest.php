@@ -88,7 +88,7 @@ class DatabaseManagerTest extends QueryTestCase
         $db = new DatabaseManager($config);
         $db->use('_');
         $this->assertTrue($db->purge('_'));
-        $this->assertCount(0, $db->resolvedConnections());
+        $this->assertCount(0, $db->getResolvedConnections());
     }
 
     public function test_purge__connection_not_exist(): void
@@ -105,7 +105,7 @@ class DatabaseManagerTest extends QueryTestCase
         $config = new DatabaseConfig(['_' => new SqliteConfig(':memory:')]);
         $db = new DatabaseManager($config);
         $this->assertFalse($db->purge('_'));
-        $this->assertCount(0, $db->resolvedConnections());
+        $this->assertCount(0, $db->getResolvedConnections());
     }
 
     public function test_purgeAll__empty(): void
@@ -124,10 +124,10 @@ class DatabaseManagerTest extends QueryTestCase
         $db = new DatabaseManager($config);
         $db->use('a');
         $db->use('b');
-        $this->assertCount(2, $db->resolvedConnections());
+        $this->assertCount(2, $db->getResolvedConnections());
         $result = $db->purgeAll();
         $this->assertSame(['a', 'b'], $result->keys()->all());
-        $this->assertCount(0, $db->resolvedConnections());
+        $this->assertCount(0, $db->getResolvedConnections());
     }
 
     public function test_setConnectionConfig(): void
@@ -135,9 +135,9 @@ class DatabaseManagerTest extends QueryTestCase
         $config = new DatabaseConfig(['_' => new SqliteConfig(':memory:')]);
         $db = new DatabaseManager($config);
         $db->setConnectionConfig('a', new SqliteConfig(':memory:'));
-        $this->assertCount(0, $db->resolvedConnections());
+        $this->assertCount(0, $db->getResolvedConnections());
         $this->assertInstanceOf(Connection::class, $db->use('a'));
-        $this->assertCount(1, $db->resolvedConnections());
+        $this->assertCount(1, $db->getResolvedConnections());
     }
 
     public function test_getConfig__valid(): void

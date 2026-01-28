@@ -13,7 +13,7 @@ use function array_values;
 class InsertBuilder extends QueryBuilder
 {
     /**
-     * @param QueryHandler<TRow> $handler
+     * @param QueryHandler $handler
      * @param string $table
      */
     public function __construct(QueryHandler $handler, string $table)

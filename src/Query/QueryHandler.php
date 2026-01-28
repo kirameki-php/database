@@ -21,9 +21,6 @@ use Kirameki\Database\Query\Statements\WithRecursiveBuilder;
 use Kirameki\Event\EventEmitter;
 use function array_walk;
 
-/**
- * @template TRow of mixed = mixed
- */
 class QueryHandler
 {
     /**
@@ -39,7 +36,7 @@ class QueryHandler
 
     /**
      * @param string|Expression ...$columns
-     * @return SelectBuilder<TRow>
+     * @return SelectBuilder
      */
     public function select(string|Expression ...$columns): SelectBuilder
     {
@@ -48,7 +45,7 @@ class QueryHandler
 
     /**
      * @param string $table
-     * @return InsertBuilder<TRow>
+     * @return InsertBuilder
      */
     public function insertInto(string $table): InsertBuilder
     {
@@ -57,7 +54,7 @@ class QueryHandler
 
     /**
      * @param string $table
-     * @return UpdateBuilder<TRow>
+     * @return UpdateBuilder
      */
     public function update(string $table): UpdateBuilder
     {
@@ -66,7 +63,7 @@ class QueryHandler
 
     /**
      * @param string $table
-     * @return UpsertBuilder<TRow>
+     * @return UpsertBuilder
      */
     public function upsertInto(string $table): UpsertBuilder
     {
@@ -75,7 +72,7 @@ class QueryHandler
 
     /**
      * @param string $table
-     * @return DeleteBuilder<TRow>
+     * @return DeleteBuilder
      */
     public function deleteFrom(string $table): DeleteBuilder
     {
@@ -117,7 +114,7 @@ class QueryHandler
     /**
      * @template TQueryStatement of QueryStatement
      * @param TQueryStatement $statement
-     * @return QueryResult<TQueryStatement, TRow>
+     * @return QueryResult<TQueryStatement>
      */
     public function execute(QueryStatement $statement): QueryResult
     {
@@ -129,7 +126,7 @@ class QueryHandler
     /**
      * @template TQueryStatement of QueryStatement
      * @param TQueryStatement $statement
-     * @return QueryResult<TQueryStatement, TRow>
+     * @return QueryResult<TQueryStatement>
      */
     public function cursor(QueryStatement $statement): QueryResult
     {
@@ -141,7 +138,7 @@ class QueryHandler
     /**
      * @template TQueryStatement of QueryStatement
      * @param TQueryStatement $statement
-     * @return QueryResult<TQueryStatement, TRow>
+     * @return QueryResult<TQueryStatement>
      */
     public function explain(QueryStatement $statement): QueryResult
     {
@@ -172,6 +169,7 @@ class QueryHandler
 
     /**
      * @template TQueryStatement of QueryStatement
+     * @template TRow of mixed
      * @param TQueryStatement $statement
      * @param QueryResult<TQueryStatement, TRow> $result
      * @return QueryResult<TQueryStatement, TRow>
@@ -185,6 +183,7 @@ class QueryHandler
 
     /**
      * @template TQueryStatement of QueryStatement
+     * @template TRow of mixed
      * @param TQueryStatement $statement
      * @param QueryResult<TQueryStatement, TRow> $result
      * @return void

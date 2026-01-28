@@ -69,7 +69,6 @@ class QueryResult extends Vec
         return $this;
     }
 
-
     /**
      * @param string $column
      * @return mixed

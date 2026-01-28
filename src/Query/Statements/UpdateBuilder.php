@@ -14,7 +14,7 @@ use function iterator_to_array;
 class UpdateBuilder extends WhereBuilder
 {
     /**
-     * @param QueryHandler<TRow> $handler
+     * @param QueryHandler $handler
      * @param string $table
      */
     public function __construct(QueryHandler $handler, string $table)

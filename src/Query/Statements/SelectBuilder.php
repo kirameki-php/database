@@ -41,7 +41,7 @@ class SelectBuilder extends WhereBuilder
     protected ?ConditionContext $havingContext = null;
 
     /**
-     * @param QueryHandler<TRow> $handler
+     * @param QueryHandler $handler
      */
     public function __construct(QueryHandler $handler)
     {

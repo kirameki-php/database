@@ -13,7 +13,6 @@ use Kirameki\Database\Query\QueryResult;
 abstract class QueryBuilder
 {
     /**
-     * @param QueryHandler<TRow> $handler
      * @param TQueryStatement $statement
      */
     public function __construct(
