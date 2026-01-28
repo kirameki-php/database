@@ -2,19 +2,19 @@
 
 namespace Tests\Kirameki\Database\Functions;
 
-use Kirameki\Database\Connection;
+use Kirameki\Database\DatabaseConnection;
 use Tests\Kirameki\Database\Query\QueryTestCase;
 
 abstract class JsonExtractTestAbstract extends QueryTestCase
 {
     protected string $useConnection;
 
-    protected function getConnection(): Connection
+    protected function getConnection(): DatabaseConnection
     {
         return $this->createTempConnection($this->useConnection);
     }
 
-    protected function createJsonTestTable(Connection $connection): void
+    protected function createJsonTestTable(DatabaseConnection $connection): void
     {
         $table = $connection->schema()->createTable('test');
         $table->id();

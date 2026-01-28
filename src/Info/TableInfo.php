@@ -4,7 +4,7 @@ namespace Kirameki\Database\Info;
 
 use Kirameki\Collections\Map;
 use Kirameki\Collections\Vec;
-use Kirameki\Database\Connection;
+use Kirameki\Database\DatabaseConnection;
 use Kirameki\Database\Info\Statements\ListColumnsStatement;
 use Kirameki\Database\Info\Statements\ListForeignKeysStatement;
 use Kirameki\Database\Info\Statements\ListIndexesStatement;
@@ -34,11 +34,11 @@ class TableInfo
     }
 
     /**
-     * @param Connection $connection
+     * @param DatabaseConnection $connection
      * @param string $table
      */
     public function __construct(
-        protected readonly Connection $connection,
+        protected readonly DatabaseConnection $connection,
         public readonly string $table,
     )
     {

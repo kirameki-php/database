@@ -5,7 +5,7 @@ namespace Tests\Kirameki\Database\Migration;
 use Kirameki\Database\Adapters\MySqlAdapter;
 use Kirameki\Database\Config\DatabaseConfig;
 use Kirameki\Database\Config\MySqlConfig;
-use Kirameki\Database\Connection;
+use Kirameki\Database\DatabaseConnection;
 use Kirameki\Database\Query\TypeCastRegistry;
 use Kirameki\Event\EventDispatcher;
 use PHPUnit\Framework\Attributes\After;
@@ -27,12 +27,12 @@ class MySql_MigrationTestCase extends DatabaseTestCase
         $this->migrationConnection()->adapter->dropDatabase();
     }
 
-    protected function migrationConnection(): Connection
+    protected function migrationConnection(): DatabaseConnection
     {
         $events = new EventDispatcher();
         $dbConfig = new DatabaseConfig([]);
         $casters = new TypeCastRegistry();
         $adapter = new MySqlAdapter($dbConfig, new MySqlConfig('mysql'), $casters);
-        return new Connection('migration_test', $adapter, $events);
+        return new DatabaseConnection('migration_test', $adapter, $events);
     }
 }

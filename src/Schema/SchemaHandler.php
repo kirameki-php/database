@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Schema;
 
-use Kirameki\Database\Connection;
+use Kirameki\Database\DatabaseConnection;
 use Kirameki\Database\Events\SchemaExecuted;
 use Kirameki\Database\Schema\Statements\Index\CreateIndexBuilder;
 use Kirameki\Database\Schema\Statements\Index\DropIndexBuilder;
@@ -25,12 +25,12 @@ class SchemaHandler
     }
 
     /**
-     * @param Connection $connection
+     * @param DatabaseConnection $connection
      * @param EventEmitter|null $events
      * @param Randomizer|null $randomizer
      */
     public function __construct(
-        public readonly Connection $connection,
+        public readonly DatabaseConnection $connection,
         protected readonly ?EventEmitter $events = null,
         ?Randomizer $randomizer = null,
     )

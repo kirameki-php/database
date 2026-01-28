@@ -5,7 +5,7 @@ namespace Tests\Kirameki\Database\Query\Statements;
 use Kirameki\Database\Adapters\MySqlAdapter;
 use Kirameki\Database\Config\DatabaseConfig;
 use Kirameki\Database\Config\MySqlConfig;
-use Kirameki\Database\Connection;
+use Kirameki\Database\DatabaseConnection;
 use Kirameki\Database\Exceptions\DropProtectionException;
 use Kirameki\Database\Query\Statements\DeleteBuilder;
 
@@ -22,7 +22,7 @@ class DeleteBuilderMySqlTest extends DeleteBuilderTestAbstract
             new DatabaseConfig([], dropProtection: true),
             new MySqlConfig('mysql'),
         );
-        $conn = new Connection('temp', $adapter, $this->getEventDispatcher());
+        $conn = new DatabaseConnection('temp', $adapter, $this->getEventDispatcher());
         $builder = new DeleteBuilder($conn->query(), 'User');
         $builder->execute();
     }

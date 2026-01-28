@@ -2,7 +2,7 @@
 
 namespace Kirameki\Database\Events;
 
-use Kirameki\Database\Connection;
+use Kirameki\Database\DatabaseConnection;
 use Kirameki\Database\Schema\SchemaResult;
 use Kirameki\Database\Schema\Statements\SchemaStatement;
 
@@ -10,11 +10,11 @@ class SchemaExecuted extends DatabaseEvent
 {
     /**
      * @template TSchemaStatement of SchemaStatement
-     * @param Connection $connection
+     * @param DatabaseConnection $connection
      * @param SchemaResult<TSchemaStatement> $result
      */
     public function __construct(
-        Connection $connection,
+        DatabaseConnection $connection,
         public readonly SchemaResult $result,
     )
     {

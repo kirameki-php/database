@@ -2,7 +2,7 @@
 
 namespace Tests\Kirameki\Database\Query;
 
-use Kirameki\Database\Connection;
+use Kirameki\Database\DatabaseConnection;
 use Kirameki\Database\Query\Statements\DeleteBuilder;
 use Kirameki\Database\Query\Statements\InsertBuilder;
 use Kirameki\Database\Query\Statements\QueryBuilder;
@@ -15,7 +15,7 @@ class QueryTestCase extends DatabaseTestCase
 {
     protected string $useConnection;
 
-    protected function connect(): Connection
+    protected function connect(): DatabaseConnection
     {
         return $this->createTempConnection($this->useConnection);
     }

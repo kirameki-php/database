@@ -3,7 +3,7 @@
 namespace Kirameki\Database\Query;
 
 use Closure;
-use Kirameki\Database\Connection;
+use Kirameki\Database\DatabaseConnection;
 use Kirameki\Database\Events\QueryExecuted;
 use Kirameki\Database\Exceptions\DropProtectionException;
 use Kirameki\Database\Expression;
@@ -24,11 +24,11 @@ use function array_walk;
 class QueryHandler
 {
     /**
-     * @param Connection $connection
+     * @param DatabaseConnection $connection
      * @param EventEmitter|null $events
      */
     public function __construct(
-        protected readonly Connection $connection,
+        protected readonly DatabaseConnection $connection,
         protected readonly ?EventEmitter $events = null,
     )
     {

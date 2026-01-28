@@ -2,7 +2,7 @@
 
 namespace Tests\Kirameki\Database\Info;
 
-use Kirameki\Database\Connection;
+use Kirameki\Database\DatabaseConnection;
 use Kirameki\Database\Info\Statements\ColumnType;
 use Kirameki\Database\Schema\Statements\Table\CreateTableBuilder;
 use Tests\Kirameki\Database\Query\QueryTestCase;
@@ -11,7 +11,7 @@ class InfoHandlerTestAbstract extends QueryTestCase
 {
     protected string $useConnection;
 
-    protected function getConnection(): Connection
+    protected function getConnection(): DatabaseConnection
     {
         return $this->createTempConnection($this->useConnection);
     }

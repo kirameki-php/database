@@ -2,7 +2,7 @@
 
 namespace Tests\Kirameki\Database\Query\Pagination;
 
-use Kirameki\Database\Connection;
+use Kirameki\Database\DatabaseConnection;
 use Kirameki\Database\Query\QueryResult;
 use Kirameki\Database\Query\Statements\SelectStatement;
 use stdClass;
@@ -10,9 +10,9 @@ use Tests\Kirameki\Database\Query\QueryTestCase;
 
 class PaginatorTestCase extends QueryTestCase
 {
-    protected ?Connection $connection = null;
+    protected ?DatabaseConnection $connection = null;
 
-    protected function getCachedConnection(): Connection
+    protected function getCachedConnection(): DatabaseConnection
     {
         if ($this->connection === null) {
             $this->connection = $this->sqliteConnection();

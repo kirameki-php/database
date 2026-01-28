@@ -3,7 +3,7 @@
 namespace Kirameki\Database\Migration;
 
 use Closure;
-use Kirameki\Database\Connection;
+use Kirameki\Database\DatabaseConnection;
 use Kirameki\Database\DatabaseManager;
 use Kirameki\Database\Schema\SchemaHandler;
 use Kirameki\Database\Schema\SchemaResult;
@@ -85,9 +85,9 @@ abstract class Migration
     }
 
     /**
-     * @return Connection
+     * @return DatabaseConnection
      */
-    protected function getConnection(): Connection
+    protected function getConnection(): DatabaseConnection
     {
         return $this->db->use($this->connection ?? $this->db->default);
     }
@@ -233,10 +233,10 @@ abstract class Migration
     }
 
     /**
-     * @param Connection $connection
+     * @param DatabaseConnection $connection
      * @return bool
      */
-    protected function supportsDdlTransaction(Connection $connection): bool
+    protected function supportsDdlTransaction(DatabaseConnection $connection): bool
     {
         return $connection->adapter->schemaSyntax->supportsDdlTransaction();
     }

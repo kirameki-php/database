@@ -23,7 +23,7 @@ use function count;
 class DatabaseManager
 {
     /**
-     * @var array<string, Connection>
+     * @var array<string, DatabaseConnection>
      */
     protected array $connections = [];
 
@@ -59,17 +59,17 @@ class DatabaseManager
 
     /**
      * @param string $name
-     * @return Connection
+     * @return DatabaseConnection
      */
-    public function use(string $name): Connection
+    public function use(string $name): DatabaseConnection
     {
         return $this->connections[$name] ??= $this->createConnection($name);
     }
 
     /**
-     * @return Connection
+     * @return DatabaseConnection
      */
-    public function useDefault(): Connection
+    public function useDefault(): DatabaseConnection
     {
         return $this->use($this->default);
     }
@@ -98,7 +98,7 @@ class DatabaseManager
     }
 
     /**
-     * @return Map<string, Connection>
+     * @return Map<string, DatabaseConnection>
      */
     public function purgeAll(): Map
     {
@@ -109,13 +109,13 @@ class DatabaseManager
 
     /**
      * @param string $name
-     * @return Connection
+     * @return DatabaseConnection
      */
-    protected function createConnection(string $name): Connection
+    protected function createConnection(string $name): DatabaseConnection
     {
         $config = $this->getConfig($name);
         $resolver = $this->getAdapterResolver($config->getAdapterName());
-        return new Connection($name, $resolver($config), $this->events);
+        return new DatabaseConnection($name, $resolver($config), $this->events);
     }
 
     /**
@@ -163,7 +163,7 @@ class DatabaseManager
     }
 
     /**
-     * @return Map<string, Connection>
+     * @return Map<string, DatabaseConnection>
      */
     public function getResolvedConnections(): Map
     {

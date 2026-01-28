@@ -2,15 +2,15 @@
 
 namespace Kirameki\Database\Events;
 
-use Kirameki\Database\Connection;
+use Kirameki\Database\DatabaseConnection;
 
 class ConnectionEstablished extends DatabaseEvent
 {
     /**
-     * @param Connection $connection
+     * @param DatabaseConnection $connection
      */
     public function __construct(
-        Connection $connection,
+        DatabaseConnection $connection,
     )
     {
         parent::__construct($connection);

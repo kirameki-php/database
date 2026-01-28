@@ -21,7 +21,7 @@ use function iterator_to_array;
 use function mt_rand;
 use const INF;
 
-class ConnectionTest extends QueryTestCase
+class DatabaseConnectionTest extends QueryTestCase
 {
     public function test_properties(): void
     {

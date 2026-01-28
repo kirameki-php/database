@@ -2,16 +2,16 @@
 
 namespace Kirameki\Database\Events;
 
-use Kirameki\Database\Connection;
+use Kirameki\Database\DatabaseConnection;
 use Kirameki\Event\Event;
 
 abstract class DatabaseEvent extends Event
 {
     /**
-     * @param Connection $connection
+     * @param DatabaseConnection $connection
      */
     public function __construct(
-        public readonly Connection $connection,
+        public readonly DatabaseConnection $connection,
     )
     {
     }

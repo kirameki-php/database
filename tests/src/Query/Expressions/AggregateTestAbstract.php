@@ -2,14 +2,14 @@
 
 namespace Tests\Kirameki\Database\Query\Expressions;
 
-use Kirameki\Database\Connection;
+use Kirameki\Database\DatabaseConnection;
 use Tests\Kirameki\Database\Query\QueryTestCase;
 
 abstract class AggregateTestAbstract extends QueryTestCase
 {
     protected string $useConnection;
 
-    protected function connect(): Connection
+    protected function connect(): DatabaseConnection
     {
         return $this->createTempConnection($this->useConnection);
     }

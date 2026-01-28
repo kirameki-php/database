@@ -6,7 +6,7 @@ use Kirameki\Exceptions\NotSupportedException;
 use Kirameki\Database\Adapters\PdoAdapter;
 use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
-use Kirameki\Database\Connection;
+use Kirameki\Database\DatabaseConnection;
 use Kirameki\Database\Exceptions\ConnectionException;
 use Kirameki\Database\Exceptions\DatabaseExistsException;
 use Kirameki\Database\Exceptions\DatabaseNotFoundException;
@@ -43,7 +43,7 @@ abstract class PdoAdapterTestAbstract extends DatabaseTestCase
         };
     }
 
-    protected function connect(): Connection
+    protected function connect(): DatabaseConnection
     {
         return $this->createTempConnection($this->useConnection);
     }

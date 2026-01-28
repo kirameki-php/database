@@ -2,7 +2,7 @@
 
 namespace Tests\Kirameki\Database\Query\Expressions;
 
-use Kirameki\Database\Connection;
+use Kirameki\Database\DatabaseConnection;
 use Kirameki\Database\Query\Expressions\RowNumber;
 use Kirameki\Database\Query\Expressions\Sum;
 use Kirameki\Database\Query\Statements\SortOrder;
@@ -12,7 +12,7 @@ abstract class WindowBuilderTestAbstract extends QueryTestCase
 {
     protected string $useConnection;
 
-    protected function connect(): Connection
+    protected function connect(): DatabaseConnection
     {
         return $this->createTempConnection($this->useConnection);
     }

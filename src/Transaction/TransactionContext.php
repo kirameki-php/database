@@ -4,7 +4,7 @@ namespace Kirameki\Database\Transaction;
 
 use Kirameki\Event\EventDispatcher;
 use Kirameki\Exceptions\LogicException;
-use Kirameki\Database\Connection;
+use Kirameki\Database\DatabaseConnection;
 use Kirameki\Database\Events\TransactionCommitted;
 use Kirameki\Database\Events\TransactionCommitting;
 use Kirameki\Database\Events\TransactionEvent;
@@ -40,11 +40,11 @@ class TransactionContext implements TransactionInfo
     }
 
     /**
-     * @param Connection $connection
+     * @param DatabaseConnection $connection
      * @param TransactionOptions|null $options
      */
     public function __construct(
-        public protected(set) Connection $connection,
+        public protected(set) DatabaseConnection $connection,
         public protected(set) ?TransactionOptions $options = null,
         protected readonly EventDispatcher $events = new EventDispatcher(),
     )

@@ -23,7 +23,7 @@ use Kirameki\Event\EventEmitter;
 use Random\Randomizer;
 use Throwable;
 
-class Connection
+class DatabaseConnection
 {
     /**
      * @var QueryHandler|null

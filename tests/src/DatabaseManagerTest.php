@@ -8,7 +8,7 @@ use Kirameki\Database\Adapters\SqliteAdapter;
 use Kirameki\Database\Config\DatabaseConfig;
 use Kirameki\Database\Config\MySqlConfig;
 use Kirameki\Database\Config\SqliteConfig;
-use Kirameki\Database\Connection;
+use Kirameki\Database\DatabaseConnection;
 use Kirameki\Database\DatabaseManager;
 use Tests\Kirameki\Database\Query\QueryTestCase;
 
@@ -28,7 +28,7 @@ class DatabaseManagerTest extends QueryTestCase
         $config = new DatabaseConfig(['_' => new SqliteConfig(':memory:')]);
         $db = new DatabaseManager($config);
         $connection = $db->useDefault();
-        $this->assertInstanceOf(Connection::class, $connection);
+        $this->assertInstanceOf(DatabaseConnection::class, $connection);
         $this->assertSame('_', $connection->name);
     }
 
@@ -63,14 +63,14 @@ class DatabaseManagerTest extends QueryTestCase
     {
         $config = new DatabaseConfig(['_' => new SqliteConfig(':memory:')]);
         $db = new DatabaseManager($config);
-        $this->assertInstanceOf(Connection::class, $db->use('_'));
+        $this->assertInstanceOf(DatabaseConnection::class, $db->use('_'));
     }
 
     public function test_use_mysql_connection(): void
     {
         $config = new DatabaseConfig(['_' => new MySqlConfig()]);
         $db = new DatabaseManager($config);
-        $this->assertInstanceOf(Connection::class, $db->use('_'));
+        $this->assertInstanceOf(DatabaseConnection::class, $db->use('_'));
     }
 
     public function test_useDefault(): void
@@ -78,7 +78,7 @@ class DatabaseManagerTest extends QueryTestCase
         $config = new DatabaseConfig(['_' => new SqliteConfig(':memory:')], '_');
         $db = new DatabaseManager($config);
         $connection = $db->useDefault();
-        $this->assertInstanceOf(Connection::class, $connection);
+        $this->assertInstanceOf(DatabaseConnection::class, $connection);
         $this->assertSame('_', $connection->name);
     }
 
@@ -136,7 +136,7 @@ class DatabaseManagerTest extends QueryTestCase
         $db = new DatabaseManager($config);
         $db->setConnectionConfig('a', new SqliteConfig(':memory:'));
         $this->assertCount(0, $db->getResolvedConnections());
-        $this->assertInstanceOf(Connection::class, $db->use('a'));
+        $this->assertInstanceOf(DatabaseConnection::class, $db->use('a'));
         $this->assertCount(1, $db->getResolvedConnections());
     }
 
@@ -166,7 +166,7 @@ class DatabaseManagerTest extends QueryTestCase
         $adapter = new SqliteAdapter($config, $connectionConfig);
         $db->addAdapter('custom', fn(): SqliteAdapter => $adapter);
         $connection = $db->use('_');
-        $this->assertInstanceOf(Connection::class, $connection);
+        $this->assertInstanceOf(DatabaseConnection::class, $connection);
         $this->assertSame($adapter, $connection->adapter);
     }
 

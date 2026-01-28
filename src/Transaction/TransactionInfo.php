@@ -2,14 +2,14 @@
 
 namespace Kirameki\Database\Transaction;
 
-use Kirameki\Database\Connection;
+use Kirameki\Database\DatabaseConnection;
 
 interface TransactionInfo
 {
     /**
-     * @var Connection
+     * @var DatabaseConnection
      */
-    public Connection $connection {
+    public DatabaseConnection $connection {
         get;
     }
 

@@ -2,14 +2,14 @@
 
 namespace Tests\Kirameki\Database\Functions;
 
-use Kirameki\Database\Connection;
+use Kirameki\Database\DatabaseConnection;
 use Tests\Kirameki\Database\Query\QueryTestCase;
 
 abstract class CurrentTimestampTestAbstract extends QueryTestCase
 {
     protected string $useConnection;
 
-    protected function getConnection(): Connection
+    protected function getConnection(): DatabaseConnection
     {
         return $this->createTempConnection($this->useConnection);
     }

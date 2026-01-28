@@ -4,7 +4,7 @@ namespace Kirameki\Database\Migration;
 
 use Closure;
 use Kirameki\Database\Config\MigrationConfig;
-use Kirameki\Database\Connection;
+use Kirameki\Database\DatabaseConnection;
 use Kirameki\Database\DatabaseManager;
 
 readonly class MigrationRepository
@@ -21,9 +21,9 @@ readonly class MigrationRepository
     }
 
     /**
-     * @return Connection
+     * @return DatabaseConnection
      */
-    protected function getConnection(): Connection
+    protected function getConnection(): DatabaseConnection
     {
         return $this->db->use($this->config->connection ?? $this->db->default);
     }

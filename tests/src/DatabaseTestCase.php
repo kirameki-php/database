@@ -10,7 +10,7 @@ use Kirameki\Database\Config\ConnectionConfig;
 use Kirameki\Database\Config\DatabaseConfig;
 use Kirameki\Database\Config\MySqlConfig;
 use Kirameki\Database\Config\SqliteConfig;
-use Kirameki\Database\Connection;
+use Kirameki\Database\DatabaseConnection;
 use Kirameki\Database\Schema\Statements\Table\CreateTableBuilder;
 use Kirameki\Event\Event;
 use Kirameki\Event\EventDispatcher;
@@ -22,7 +22,7 @@ use function mt_rand;
 class DatabaseTestCase extends TestCase
 {
     /**
-     * @var array<Connection>
+     * @var array<DatabaseConnection>
      */
     protected array $connections = [];
 
@@ -33,17 +33,17 @@ class DatabaseTestCase extends TestCase
      */
     protected array $capturedEvents = [];
 
-    public function connection(string $driver): Connection
+    public function connection(string $driver): DatabaseConnection
     {
         return $this->connections[$driver] ??= $this->createTempConnection($driver);
     }
 
-    public function mysqlConnection(): Connection
+    public function mysqlConnection(): DatabaseConnection
     {
         return $this->connections['mysql'] ??= $this->createTempConnection('mysql');
     }
 
-    public function sqliteConnection(): Connection
+    public function sqliteConnection(): DatabaseConnection
     {
         return $this->connections['sqlite'] ??= $this->createTempConnection('sqlite');
     }
@@ -62,15 +62,15 @@ class DatabaseTestCase extends TestCase
      * @param string $driver
      * @param TAdapter|null $adapter
      * @param Randomizer|null $randomizer
-     * @return Connection
+     * @return DatabaseConnection
      */
-    public function createTempConnection(string $driver, ?Adapter $adapter = null, ?Randomizer $randomizer = null): Connection
+    public function createTempConnection(string $driver, ?Adapter $adapter = null, ?Randomizer $randomizer = null): DatabaseConnection
     {
         $adapter ??= $this->resolveAdapter($driver);
         $adapter->createDatabase();
         $this->runAfterTearDown(static fn() => $adapter->dropDatabase());
 
-        return new Connection('temp', $adapter, $this->getEventDispatcher(), $randomizer);
+        return new DatabaseConnection('temp', $adapter, $this->getEventDispatcher(), $randomizer);
     }
 
     /**

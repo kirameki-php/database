@@ -3,7 +3,7 @@
 namespace Kirameki\Database\Info;
 
 use Kirameki\Collections\Vec;
-use Kirameki\Database\Connection;
+use Kirameki\Database\DatabaseConnection;
 use Kirameki\Database\Info\Statements\ListTablesStatement;
 use Kirameki\Database\Info\Statements\TableExistsStatement;
 use stdClass;
@@ -11,10 +11,10 @@ use stdClass;
 class InfoHandler
 {
     /**
-     * @param Connection $connection
+     * @param DatabaseConnection $connection
      */
     public function __construct(
-        protected readonly Connection $connection,
+        protected readonly DatabaseConnection $connection,
     )
     {
     }

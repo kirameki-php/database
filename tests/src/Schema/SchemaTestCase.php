@@ -2,7 +2,7 @@
 
 namespace Tests\Kirameki\Database\Schema;
 
-use Kirameki\Database\Connection;
+use Kirameki\Database\DatabaseConnection;
 use Kirameki\Database\Schema\Statements\Table\CreateTableBuilder;
 use Tests\Kirameki\Database\DatabaseTestCase;
 
@@ -11,9 +11,9 @@ class SchemaTestCase extends DatabaseTestCase
     protected string $connection;
 
     /**
-     * @return Connection
+     * @return DatabaseConnection
      */
-    protected function connect(): Connection
+    protected function connect(): DatabaseConnection
     {
         return $this->connection($this->connection);
     }
