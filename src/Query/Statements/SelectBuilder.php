@@ -42,10 +42,14 @@ class SelectBuilder extends WhereBuilder
 
     /**
      * @param QueryHandler $handler
+     * @param SelectStatement $statement
      */
-    public function __construct(QueryHandler $handler)
+    public function __construct(
+        QueryHandler $handler,
+        SelectStatement $statement = new SelectStatement(),
+    )
     {
-        parent::__construct($handler, new SelectStatement());
+        parent::__construct($handler, $statement);
     }
 
     public function __clone()
